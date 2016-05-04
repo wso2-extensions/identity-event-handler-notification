@@ -30,8 +30,8 @@ import org.wso2.carbon.event.output.adapter.email.EmailEventAdapterFactory;
 import org.wso2.carbon.identity.event.EventMgtException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
-import org.wso2.carbon.identity.event.handler.email.constants.EmailMgtConstants;
-import org.wso2.carbon.identity.event.handler.email.exception.EmailMgtServiceException;
+import org.wso2.carbon.identity.event.handler.email.constants.EmailEventConstants;
+import org.wso2.carbon.identity.event.handler.email.exception.EmailEventServiceException;
 import org.wso2.carbon.identity.event.handler.email.util.EmailEventUtil;
 import org.wso2.carbon.identity.event.handler.email.util.EmailInfoDTO;
 import org.wso2.carbon.identity.event.handler.email.util.Notification;
@@ -43,11 +43,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EmailSendingHandler extends AbstractEventHandler {
+public class EmailEventHandler extends AbstractEventHandler {
 
     private static final String EMAIL_NOTIFICATION_TYPE = "EMAIL";
 
-    private static final Log log = LogFactory.getLog(EmailSendingHandler.class);
+    private static final Log log = LogFactory.getLog(EmailEventHandler.class);
 
     @Override
     public boolean handleEvent(Event event) throws EventMgtException {
@@ -60,35 +60,35 @@ public class EmailSendingHandler extends AbstractEventHandler {
         String sendTo = null;
 
         Map<String, Object> eventProperties = event.getEventProperties();
-        int tenantId = Integer.valueOf((String) eventProperties.get(EmailMgtConstants.EventProperty.TENANT_ID));
-        String template_type = (String) eventProperties.get(EmailMgtConstants.EventProperty.EMAIL_TEMPLATE_TYPE);
-        String username = (String) eventProperties.get(EmailMgtConstants.EventProperty.USERNAME);
+        int tenantId = Integer.valueOf((String) eventProperties.get(EmailEventConstants.EventProperty.TENANT_ID));
+        String template_type = (String) eventProperties.get(EmailEventConstants.EventProperty.EMAIL_TEMPLATE_TYPE);
+        String username = (String) eventProperties.get(EmailEventConstants.EventProperty.USERNAME);
 
         try {
             userClaimMap = EmailEventUtil.getClaimFromUserStoreManager(username, tenantId);
-        } catch (EmailMgtServiceException e) {
+        } catch (EmailEventServiceException e) {
             throw new EventMgtException("Could not load user claims", e);
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
-            if (userClaimMap.containsKey(EmailMgtConstants.CLAIM_URI_LOCALE)) {
-                locale = userClaimMap.get(EmailMgtConstants.CLAIM_URI_LOCALE);
+            if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_LOCALE)) {
+                locale = userClaimMap.get(EmailEventConstants.CLAIM_URI_LOCALE);
             }
-            if (userClaimMap.containsKey(EmailMgtConstants.CLAIM_URI_EMAIL)) {
-                sendTo = userClaimMap.get(EmailMgtConstants.CLAIM_URI_EMAIL);
+            if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_EMAIL)) {
+                sendTo = userClaimMap.get(EmailEventConstants.CLAIM_URI_EMAIL);
             }
         }
 
         if (locale == null) {
-            locale = EmailMgtConstants.LOCALE_DEFAULT;
+            locale = EmailEventConstants.LOCALE_DEFAULT;
         }
 
         StringBuilder resourcePath = new StringBuilder();
-        resourcePath.append(EmailMgtConstants.EMAIL_TEMPLATE_PATH).append(template_type).append("/").append(template_type).append(".").append(locale);
+        resourcePath.append(EmailEventConstants.EMAIL_TEMPLATE_PATH).append(template_type).append("/").append(template_type).append(".").append(locale);
 
         try {
             emailInfoDTO = EmailEventUtil.loadEmailTemplate(tenantId, resourcePath.toString());
-        } catch (EmailMgtServiceException e) {
+        } catch (EmailEventServiceException e) {
             throw new EventMgtException(
                     "Could not load the email template configuration for user ", e);
         }
@@ -132,19 +132,19 @@ public class EmailSendingHandler extends AbstractEventHandler {
             //get dynamic properties
             Map<String, String> dynamicProperties = new HashMap<String, String>();
             String emailSubject = emailNotification.getSubject();
-            dynamicProperties.put(EmailMgtConstants.EmailProperty.EMAIL_SUBJECT, emailSubject);
+            dynamicProperties.put(EmailEventConstants.EmailProperty.EMAIL_SUBJECT, emailSubject);
             emailContentType = emailNotification.getContentType();
             if (emailContentType == null) {
-                emailContentType = EmailMgtConstants.TEMPLATE_CONTENT_TYPE_DEFAULT;
+                emailContentType = EmailEventConstants.TEMPLATE_CONTENT_TYPE_DEFAULT;
             }
-            dynamicProperties.put(EmailMgtConstants.EmailProperty.EMAIL_CONTENT_TYPE, emailContentType);
+            dynamicProperties.put(EmailEventConstants.EmailProperty.EMAIL_CONTENT_TYPE, emailContentType);
             String emailAdd = emailNotification.getSendTo();
-            dynamicProperties.put(EmailMgtConstants.EmailProperty.EMAIL_ADDRESS, emailAdd);
+            dynamicProperties.put(EmailEventConstants.EmailProperty.EMAIL_ADDRESS, emailAdd);
 
             StringBuilder contents = new StringBuilder();
             contents.append(emailNotification.getBody())
-                    .append(System.getProperty(EmailMgtConstants.EmailProperty.EMAIL_CONTENT_LINE_SEPARATOR))
-                    .append(System.getProperty(EmailMgtConstants.EmailProperty.EMAIL_CONTENT_LINE_SEPARATOR))
+                    .append(System.getProperty(EmailEventConstants.EmailProperty.EMAIL_CONTENT_LINE_SEPARATOR))
+                    .append(System.getProperty(EmailEventConstants.EmailProperty.EMAIL_CONTENT_LINE_SEPARATOR))
                     .append(emailNotification.getFooter());
             String emailBody = contents.toString();
 

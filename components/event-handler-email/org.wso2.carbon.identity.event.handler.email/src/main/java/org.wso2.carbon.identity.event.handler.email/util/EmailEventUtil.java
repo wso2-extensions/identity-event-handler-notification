@@ -20,14 +20,15 @@ package org.wso2.carbon.identity.event.handler.email.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.event.handler.email.exception.EmailMgtServiceException;
-import org.wso2.carbon.identity.event.handler.email.internal.IdentityEmailSendingServiceComponent;
+import org.wso2.carbon.identity.event.handler.email.exception.EmailEventServiceException;
+import org.wso2.carbon.identity.event.handler.email.internal.EmailEventServiceComponent;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.nio.charset.Charset;
@@ -47,16 +48,16 @@ public class EmailEventUtil {
      *
      * @param tenantId     - The tenant Id of the tenant that specific email template needs to be add.
      * @param resourcePath - Path to get the specific email template.
-     * @throws EmailMgtServiceException
+     * @throws EmailEventServiceException
      */
-    public static EmailInfoDTO loadEmailTemplate(int tenantId, String resourcePath) throws EmailMgtServiceException {
+    public static EmailInfoDTO loadEmailTemplate(int tenantId, String resourcePath) throws EmailEventServiceException {
 
         if (log.isDebugEnabled()) {
             log.debug("Reading email templates from registry path : " + resourcePath);
         }
 
         Resource resourceValue = null;
-        RegistryService registry = IdentityEmailSendingServiceComponent.getRegistryService();
+        RegistryService registry = EmailEventServiceComponent.getRegistryService();
         EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
 
         try {
@@ -67,10 +68,10 @@ public class EmailEventUtil {
                 String emailContentType = resourceValue.getMediaType();
                 String emailTemplateLocaleContent = new String(emailTemplateContentArray, Charset.forName("UTF-8"));
 
-                // Retrieves the content of each org.wso2.carbon.identity.email.org.wso2.carbon.identity.event.handler.email template.
+                // Retrieves the content of each email template.
                 String[] emailTemplateContent = emailTemplateLocaleContent.split("\\|");
                 if (emailTemplateContent.length > 3) {
-                    throw new EmailMgtServiceException("Cannot have | character in the template");
+                    throw new EmailEventServiceException("Cannot have | character in the template");
                 }
 
                 emailInfoDTO.setSubject(emailTemplateContent[0]);
@@ -90,7 +91,7 @@ public class EmailEventUtil {
             }
         } catch (RegistryException e) {
             throw new
-                    EmailMgtServiceException("Error occurred while reading email templates from path : " + resourcePath);
+                    EmailEventServiceException("Error occurred while reading email templates from path : " + resourcePath);
         }
         return emailInfoDTO;
     }
@@ -101,13 +102,13 @@ public class EmailEventUtil {
      * @param userName user name
      * @param tenantId tenantId
      * @return claim value
-     * @throws EmailMgtServiceException if fails
+     * @throws EmailEventServiceException if fails
      */
     public static Map<String, String> getClaimFromUserStoreManager(String userName, int tenantId)
-            throws EmailMgtServiceException {
+            throws EmailEventServiceException {
 
         org.wso2.carbon.user.core.UserStoreManager userStoreManager = null;
-        RealmService realmService = IdentityEmailSendingServiceComponent.getRealmService();
+        RealmService realmService = EmailEventServiceComponent.getRealmService();
 
         try {
             if (realmService.getTenantUserRealm(tenantId) != null) {
@@ -118,19 +119,22 @@ public class EmailEventUtil {
         } catch (Exception e) {
             String msg = "Error retrieving the user store manager for tenant id : " + tenantId;
             log.error(msg, e);
-            throw new EmailMgtServiceException(msg, e);
+            throw new EmailEventServiceException(msg, e);
         }
         try {
             Map<String, String> claimsMap = null;
             if (userStoreManager != null) {
-                claimsMap = userStoreManager
-                        .getUserClaimValues(userName, new String[]{claim}, UserCoreConstants.DEFAULT_PROFILE);
+                Claim[] userClaimValues = userStoreManager
+                        .getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
+                for(int i=0; i< userClaimValues.length; i++) {
+                    claimsMap.put(userClaimValues[i].getClaimUri(), userClaimValues[i].getValue());
+                }
             }
             return claimsMap;
         } catch (Exception e) {
             String msg = "Unable to retrieve the claim for user : " + userName;
             log.error(msg, e);
-            throw new EmailMgtServiceException(msg, e);
+            throw new EmailEventServiceException(msg, e);
         }
     }
 

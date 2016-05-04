@@ -22,12 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.event.handler.EventHandler;
-import org.wso2.carbon.identity.event.handler.email.handler.EmailSendingHandler;
+import org.wso2.carbon.identity.event.handler.email.handler.EmailEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
- * @scr.component name="org.wso2.carbon.identity.event.handler.email.internal.IdentityEmailSendingServiceComponent"
+ * @scr.component name="org.wso2.carbon.identity.event.handler.email.internal.EmailEventServiceComponent"
  * immediate="true
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
@@ -36,15 +36,15 @@ import org.wso2.carbon.user.core.service.RealmService;
  * interface="org.wso2.carbon.user.core.service.RealmService"cardinality="1..1"
  * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
-public class IdentityEmailSendingServiceComponent {
+public class EmailEventServiceComponent {
 
-    private static Log log = LogFactory.getLog(org.wso2.carbon.identity.event.handler.email.internal.IdentityEmailSendingServiceComponent.class);
+    private static Log log = LogFactory.getLog(EmailEventServiceComponent.class);
     private static RegistryService registryService;
     private static RealmService realmService;
 
     protected void activate(ComponentContext context) {
         context.getBundleContext().registerService(EventHandler.class.getName(),
-                new EmailSendingHandler(), null);
+                new EmailEventHandler(), null);
         if (log.isDebugEnabled()) {
             log.debug("Identity Management Listener is enabled");
         }
@@ -64,14 +64,14 @@ public class IdentityEmailSendingServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Setting the Registry Service");
         }
-        IdentityEmailSendingServiceComponent.registryService = registryService;
+        EmailEventServiceComponent.registryService = registryService;
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("UnSetting the Registry Service");
         }
-        IdentityEmailSendingServiceComponent.registryService = null;
+        EmailEventServiceComponent.registryService = null;
     }
 
     public static RealmService getRealmService() {
@@ -82,13 +82,13 @@ public class IdentityEmailSendingServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Setting the Realm Service");
         }
-        IdentityEmailSendingServiceComponent.realmService = realmService;
+        EmailEventServiceComponent.realmService = realmService;
     }
 
     protected void unsetRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("UnSetting the Realm Service");
         }
-        IdentityEmailSendingServiceComponent.realmService = null;
+        EmailEventServiceComponent.realmService = null;
     }
 }

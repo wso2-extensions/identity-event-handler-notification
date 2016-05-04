@@ -18,8 +18,7 @@
 
 package org.wso2.carbon.identity.event.handler.email.util;
 
-import org.wso2.carbon.identity.event.handler.email.exception.EmailMgtServiceException;
-
+import org.wso2.carbon.identity.event.handler.email.exception.EmailEventServiceException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class NotificationBuilder {
     }
 
     public static Notification createNotification(String notificationType, EmailInfoDTO emailInfoFTO, NotificationData data)
-            throws EmailMgtServiceException {
+            throws EmailEventServiceException {
 
         String subject = null;
         String body = null;
@@ -51,7 +50,7 @@ public class NotificationBuilder {
                 body = replaceTags(tagsData, body);
                 footer = replaceTags(tagsData, footer);
             } catch (UnsupportedEncodingException e) {
-                throw new EmailMgtServiceException("Unsupported encoding while creating notification", e);
+                throw new EmailEventServiceException("Unsupported encoding while creating notification", e);
             }
             notification = new EmailNotification();
             notification.setSubject(subject);

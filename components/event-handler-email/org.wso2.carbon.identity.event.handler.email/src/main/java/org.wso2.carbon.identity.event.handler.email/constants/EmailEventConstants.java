@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.identity.event.handler.email.constants;
 
-public class EmailMgtConstants {
+public class EmailEventConstants {
 
-    private EmailMgtConstants() {
+    private EmailEventConstants() {
     }
 
     public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
