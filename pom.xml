@@ -92,7 +92,8 @@
     </pluginRepositories>
 
     <modules>
-        <!--<module>components/email-mgt</module>-->
+        <module>service-stubs/identity</module>
+        <module>components/email-mgt</module>
         <module>components/event-handler-email</module>
     </modules>
 
