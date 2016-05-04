@@ -27,7 +27,10 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.event.output.adapter.email.EmailEventAdapter;
 import org.wso2.carbon.event.output.adapter.email.EmailEventAdapterFactory;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.handler.InitConfig;
 import org.wso2.carbon.identity.event.EventMgtException;
+import org.wso2.carbon.identity.event.bean.ModuleConfiguration;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.email.constants.EmailEventConstants;
@@ -164,11 +167,11 @@ public class EmailEventHandler extends AbstractEventHandler {
     }
 
     @Override
-    public void init() throws EventMgtException {
+    public void init(InitConfig configuration) throws IdentityRuntimeException {
     }
 
     @Override
-    public String getModuleName() {
+    public String getName() {
         return "emailSend";
     }
 }
