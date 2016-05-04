@@ -123,7 +123,9 @@
 
                             org.wso2.carbon.user.api; version="${carbon.user.api.imp.pkg.version.range}",
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
-                            org.wso2.carbon.identity.base; version="${carbon.identity.package.import.version.range}"
+                            org.wso2.carbon.identity.base; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.event.*,
+                            org.wso2.carbon.event.output.adapter.core.*
                         </Import-Package>
                     </instructions>
                 </configuration>
