@@ -130,6 +130,7 @@
                                         <option>Temporary Password</option>
                                         <option>One Time Password</option>
                                         <option>Ask Password</option>
+                                        <option>Account Lock</option>
                                         <option>Account UnLock</option>
                                         <option>Account Enable</option>
                                         <option>Account Disable</option>
