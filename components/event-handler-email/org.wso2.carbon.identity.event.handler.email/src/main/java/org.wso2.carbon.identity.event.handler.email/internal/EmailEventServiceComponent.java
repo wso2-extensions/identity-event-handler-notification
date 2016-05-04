@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.event.handler.email.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.identity.event.handler.EventHandler;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.email.handler.EmailEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -43,7 +43,7 @@ public class EmailEventServiceComponent {
     private static RealmService realmService;
 
     protected void activate(ComponentContext context) {
-        context.getBundleContext().registerService(EventHandler.class.getName(),
+        context.getBundleContext().registerService(AbstractEventHandler.class.getName(),
                 new EmailEventHandler(), null);
         if (log.isDebugEnabled()) {
             log.debug("Identity Management Listener is enabled");
