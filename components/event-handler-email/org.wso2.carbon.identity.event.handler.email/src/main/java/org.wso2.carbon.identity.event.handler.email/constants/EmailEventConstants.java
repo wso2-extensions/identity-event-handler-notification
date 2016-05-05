@@ -28,11 +28,15 @@ public class EmailEventConstants {
     public static final String TEMPLATE_CONTENT_TYPE_DEFAULT = "text/text";
     public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
     public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/emailaddress";
+    public static final String CLAIM_URI_FIRST_NAME = "http://wso2.org/claims/givenname";
+    public static final String CLAIM_URI_USER_NAME = "http://wso2.org/claims/username";
 
     public class EventProperty {
-        public static final String TENANT_ID = "tenantId";
+        public static final String TENANT_DOMAIN = "tenantDomain";
         public static final String EMAIL_TEMPLATE_TYPE = "template_type";
-        public static final String USERNAME  = "username";
+        public static final String USERNAME  = "userName";
+        public static final String OPERATION_TYPE = "OPERATION_TYPE";
+        public static final String ACCOUNT_LOCKED = "ACCOUNT_LOCKED";
     }
 
     public class EmailProperty {
