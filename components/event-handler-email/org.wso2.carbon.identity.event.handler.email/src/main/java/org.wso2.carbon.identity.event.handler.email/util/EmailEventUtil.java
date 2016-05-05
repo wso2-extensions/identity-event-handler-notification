@@ -127,10 +127,9 @@ public class EmailEventUtil {
             if (userStoreManager != null) {
                 Claim[] userClaimValues = userStoreManager
                         .getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
-                for(int i=0; i< userClaimValues.length; i++) {
-//                    if(StringUtils.isNotBlank(userClaimValues[i].getValue())){
-                        claimsMap.put(userClaimValues[i].getClaimUri(), userClaimValues[i].getValue());
-                    //}
+                for (int i = 0; i < userClaimValues.length; i++) {
+                    claimsMap.put(userClaimValues[i].getClaimUri(), userClaimValues[i].getValue());
+
                 }
             }
             return claimsMap;
