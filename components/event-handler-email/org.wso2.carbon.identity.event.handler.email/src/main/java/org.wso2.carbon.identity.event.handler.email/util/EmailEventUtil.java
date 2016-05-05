@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.event.handler.email.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.event.handler.email.exception.EmailEventServiceException;
@@ -122,12 +123,14 @@ public class EmailEventUtil {
             throw new EmailEventServiceException(msg, e);
         }
         try {
-            Map<String, String> claimsMap = null;
+            Map<String, String> claimsMap = new HashMap<String, String>();
             if (userStoreManager != null) {
                 Claim[] userClaimValues = userStoreManager
                         .getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
                 for(int i=0; i< userClaimValues.length; i++) {
-                    claimsMap.put(userClaimValues[i].getClaimUri(), userClaimValues[i].getValue());
+//                    if(StringUtils.isNotBlank(userClaimValues[i].getValue())){
+                        claimsMap.put(userClaimValues[i].getClaimUri(), userClaimValues[i].getValue());
+                    //}
                 }
             }
             return claimsMap;
@@ -152,18 +155,19 @@ public class EmailEventUtil {
         return placeHolders;
     }
 
-    public static Map<String, String> getTagData(List<String> placeHolders, Map<String, String> userClaimMap, Map<String, Object> eventProperties) {
+    public static Map<String, String> getTagData(List<String> placeHolders, Map<String, String> userClaimMap,
+                                                 Map<String,String> placeHolderMapProperties) {
 
         Map<String, String> tagDataMap = new HashMap<>();
         List<String> userClaimUris = new ArrayList<>();
         for (String placeholder : placeHolders) {
-            if (eventProperties.containsKey(placeholder)) {
-                tagDataMap.put(placeholder, (String) eventProperties.get(placeholder));
+            if (placeHolderMapProperties.containsKey(placeholder)) {
+                tagDataMap.put(placeholder, (String) placeHolderMapProperties.get(placeholder));
             }
             //Need to add a check for claimURIs
-            /*else if () {
+            else {
                 userClaimUris.add(placeholder);
-            }*/
+            }
         }
 
         //retrieve user claims

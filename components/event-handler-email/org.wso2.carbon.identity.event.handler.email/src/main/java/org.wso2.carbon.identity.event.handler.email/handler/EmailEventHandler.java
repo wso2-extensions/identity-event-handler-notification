@@ -29,6 +29,7 @@ import org.wso2.carbon.event.output.adapter.email.EmailEventAdapter;
 import org.wso2.carbon.event.output.adapter.email.EmailEventAdapterFactory;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.handler.InitConfig;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.event.EventMgtException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
@@ -55,21 +56,42 @@ public class EmailEventHandler extends AbstractEventHandler {
     public boolean handleEvent(Event event) throws EventMgtException {
 
         Map<String, String> userClaimMap = new HashMap<>();
+        Map<String, String> placeHolderMap = new HashMap<>();
         String emailContentType = null;
         EmailInfoDTO emailInfoDTO = null;
         NotificationData emailNotificationData = null;
+        String template_type =null;
         String locale = null;
         String sendTo = null;
+        String firstName = null;
+        String userName = null;
 
         Map<String, Object> eventProperties = event.getEventProperties();
-        int tenantId = Integer.valueOf((String) eventProperties.get(EmailEventConstants.EventProperty.TENANT_ID));
-        String template_type = (String) eventProperties.get(EmailEventConstants.EventProperty.EMAIL_TEMPLATE_TYPE);
+        String tenantDomain = (String) eventProperties.get(EmailEventConstants.EventProperty.TENANT_DOMAIN);
+        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+        String operation_type = (String) eventProperties.get(EmailEventConstants.EventProperty.OPERATION_TYPE);
+
         String username = (String) eventProperties.get(EmailEventConstants.EventProperty.USERNAME);
 
         try {
             userClaimMap = EmailEventUtil.getClaimFromUserStoreManager(username, tenantId);
         } catch (EmailEventServiceException e) {
             throw new EventMgtException("Could not load user claims", e);
+        }
+
+        if (operation_type.equals(EmailEventConstants.EventProperty.ACCOUNT_LOCKED)) {
+            template_type = "accountlock";
+            if (userClaimMap != null && !userClaimMap.isEmpty()) {
+                if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_FIRST_NAME)) {
+                    firstName = userClaimMap.get(EmailEventConstants.CLAIM_URI_FIRST_NAME);
+                    placeHolderMap.put("first-name", firstName);
+                }
+                if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_USER_NAME)) {
+                    userName = userClaimMap.get(EmailEventConstants.CLAIM_URI_USER_NAME);
+                    placeHolderMap.put("user-name", userName);
+                }
+            }
+
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
@@ -99,7 +121,7 @@ public class EmailEventHandler extends AbstractEventHandler {
         placeHolders.addAll(EmailEventUtil.extractPlaceHolders(emailInfoDTO.getSubject()));
         placeHolders.addAll(EmailEventUtil.extractPlaceHolders(emailInfoDTO.getFooter()));
 
-        Map<String, String> tagData = EmailEventUtil.getTagData(placeHolders, userClaimMap, eventProperties);
+        Map<String, String> tagData = EmailEventUtil.getTagData(placeHolders, userClaimMap, placeHolderMap);
         emailNotificationData = new NotificationData(tagData);
         emailNotificationData.setSendTo(sendTo);
 
