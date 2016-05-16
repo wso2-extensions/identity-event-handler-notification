@@ -14,7 +14,7 @@
     <groupId>org.wso2.carbon.identity</groupId>
     <artifactId>identity-event-handler-email</artifactId>
     <packaging>pom</packaging>
-    <version>5.1.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
 
     <repositories>
@@ -91,10 +91,47 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.email.mgt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.email.mgt.server.feature</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.email.mgt.ui.feature</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.email.mgt.ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.email.mgt.stub</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <module>components/email-mgt</module>
-        <module>service-stubs/identity</module>
         <module>components/event-handler-email</module>
+        <module>service-stubs/identity</module>
 
         <module>features/org.wso2.carbon.email.mgt.server.feature</module>
         <module>features/org.wso2.carbon.email.mgt.ui.feature</module>

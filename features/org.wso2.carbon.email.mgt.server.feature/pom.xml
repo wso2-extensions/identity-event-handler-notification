@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity</groupId>
         <artifactId>identity-event-handler-email</artifactId>
-        <version>5.1.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -37,7 +37,6 @@
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.email.mgt</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
