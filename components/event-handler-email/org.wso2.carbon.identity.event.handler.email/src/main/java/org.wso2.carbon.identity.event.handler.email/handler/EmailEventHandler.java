@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.event.handler.email.handler;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
@@ -30,6 +31,7 @@ import org.wso2.carbon.event.output.adapter.email.EmailEventAdapterFactory;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.handler.InitConfig;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.event.EventMgtConstants;
 import org.wso2.carbon.identity.event.EventMgtException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
@@ -60,18 +62,24 @@ public class EmailEventHandler extends AbstractEventHandler {
         String emailContentType = null;
         EmailInfoDTO emailInfoDTO = null;
         NotificationData emailNotificationData = null;
-        String template_type =null;
+        String templateType = null;
         String locale = null;
         String sendTo = null;
-        String firstName = null;
-        String userName = null;
 
         Map<String, Object> eventProperties = event.getEventProperties();
-        String tenantDomain = (String) eventProperties.get(EmailEventConstants.EventProperty.TENANT_DOMAIN);
-        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-        String operation_type = (String) eventProperties.get(EmailEventConstants.EventProperty.OPERATION_TYPE);
 
-        String username = (String) eventProperties.get(EmailEventConstants.EventProperty.USERNAME);
+        for (Map.Entry<String, Object> entry : eventProperties.entrySet()) {
+            if (!entry.getKey().equals(EmailEventConstants.EventProperty.OPERATION_TYPE)) {
+                placeHolderMap.put(entry.getKey(), (String) entry.getValue());
+            }
+        }
+
+        String username = placeHolderMap.get(EventMgtConstants.EventProperty.USER_NAME);
+        String tenantDomain = placeHolderMap.get(EventMgtConstants.EventProperty.TENANT_DOMAIN);
+
+        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+
+        String operationType = (String) eventProperties.get(EmailEventConstants.EventProperty.OPERATION_TYPE);
 
         try {
             userClaimMap = EmailEventUtil.getClaimFromUserStoreManager(username, tenantId);
@@ -79,19 +87,8 @@ public class EmailEventHandler extends AbstractEventHandler {
             throw new EventMgtException("Could not load user claims", e);
         }
 
-        if (operation_type.equals(EmailEventConstants.EventProperty.ACCOUNT_LOCKED)) {
-            template_type = "accountlock";
-            if (userClaimMap != null && !userClaimMap.isEmpty()) {
-                if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_FIRST_NAME)) {
-                    firstName = userClaimMap.get(EmailEventConstants.CLAIM_URI_FIRST_NAME);
-                    placeHolderMap.put("first-name", firstName);
-                }
-                if (userClaimMap.containsKey(EmailEventConstants.CLAIM_URI_USER_NAME)) {
-                    userName = userClaimMap.get(EmailEventConstants.CLAIM_URI_USER_NAME);
-                    placeHolderMap.put("user-name", userName);
-                }
-            }
-
+        if (operationType.equals(EmailEventConstants.EventProperty.ACCOUNT_LOCKED)) {
+            templateType = EmailEventConstants.EventProperty.OPERATION_ACCOUNT_LOCKED;
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
@@ -108,7 +105,8 @@ public class EmailEventHandler extends AbstractEventHandler {
         }
 
         StringBuilder resourcePath = new StringBuilder();
-        resourcePath.append(EmailEventConstants.EMAIL_TEMPLATE_PATH).append(template_type).append("/").append(template_type).append(".").append(locale);
+        resourcePath.append(EmailEventConstants.EMAIL_TEMPLATE_PATH).append(templateType).append("/").
+                append(templateType).append(".").append(locale);
 
         try {
             emailInfoDTO = EmailEventUtil.loadEmailTemplate(tenantId, resourcePath.toString());

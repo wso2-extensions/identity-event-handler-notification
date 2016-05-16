@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity</groupId>
         <artifactId>email-mgt</artifactId>
-        <version>5.0.9-SNAPSHOT</version>
+        <version>5.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.provider</artifactId>
+            <artifactId>org.wso2.carbon.identity.base</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
@@ -101,9 +101,7 @@
                         <Import-Package>
                             javax.cache,
                             javax.xml.namespace,
-                            javax.xml.stream; version="${equinox.osgi.stax-api.imp.pkg.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
-                            org.apache.neethi; version="${neethi.osgi.version.range}",
                             org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
 
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
