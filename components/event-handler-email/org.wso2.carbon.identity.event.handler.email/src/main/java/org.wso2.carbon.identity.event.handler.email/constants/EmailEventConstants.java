@@ -30,13 +30,15 @@ public class EmailEventConstants {
     public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/emailaddress";
     public static final String CLAIM_URI_FIRST_NAME = "http://wso2.org/claims/givenname";
     public static final String CLAIM_URI_USER_NAME = "http://wso2.org/claims/username";
+    public static final String DEFAULT_CLAIM_URI = "http://wso2.org/claims/";
+    public static final String DEFAULT_IDENTITY_PREFIX = "identity/";
+
+    public static final String CARBON_DOMAIN = "carbon.super";
 
     public class EventProperty {
-        public static final String TENANT_DOMAIN = "tenantDomain";
-        public static final String EMAIL_TEMPLATE_TYPE = "template_type";
-        public static final String USERNAME  = "userName";
         public static final String OPERATION_TYPE = "OPERATION_TYPE";
         public static final String ACCOUNT_LOCKED = "ACCOUNT_LOCKED";
+        public static final String OPERATION_ACCOUNT_LOCKED = "accountlock";
     }
 
     public class EmailProperty {

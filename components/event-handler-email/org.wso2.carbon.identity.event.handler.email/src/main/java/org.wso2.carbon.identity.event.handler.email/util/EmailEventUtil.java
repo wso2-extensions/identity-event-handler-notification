@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.event.handler.email.util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.event.handler.email.constants.EmailEventConstants;
 import org.wso2.carbon.identity.event.handler.email.exception.EmailEventServiceException;
 import org.wso2.carbon.identity.event.handler.email.internal.EmailEventServiceComponent;
 import org.wso2.carbon.registry.core.Resource;
@@ -164,8 +165,13 @@ public class EmailEventUtil {
                 tagDataMap.put(placeholder, (String) placeHolderMapProperties.get(placeholder));
             }
             //Need to add a check for claimURIs
-            else {
-                userClaimUris.add(placeholder);
+            else if (placeholder.contains("identity")) {
+                String identityClaimUri = EmailEventConstants.DEFAULT_CLAIM_URI +
+                        EmailEventConstants.DEFAULT_IDENTITY_PREFIX + placeholder;
+                userClaimUris.add(identityClaimUri);
+            } else {
+                String claimUri = EmailEventConstants.DEFAULT_CLAIM_URI + placeholder;
+                userClaimUris.add(claimUri);
             }
         }
 
