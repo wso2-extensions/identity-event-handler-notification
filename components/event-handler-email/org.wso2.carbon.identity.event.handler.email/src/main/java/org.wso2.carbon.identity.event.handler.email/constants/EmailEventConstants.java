@@ -35,12 +35,12 @@ public class EmailEventConstants {
 
     public static final String CARBON_DOMAIN = "carbon.super";
 
+    public static enum templateTypes {
+        accountlock, accountunlock
+    }
+
     public class EventProperty {
-        public static final String OPERATION_TYPE = "OPERATION_TYPE";
-        public static final String ACCOUNT_LOCKED = "ACCOUNT_LOCKED";
-        public static final String ACCOUNT_UNLOCKED = "ACCOUNT_UNLOCKED";
-        public static final String OPERATION_ACCOUNT_LOCKED = "accountlock";
-        public static final String OPERATION_ACCOUNT_UNLOCKED = "accountunlock";
+        public static final String TEMPLATE_TYPE = "TEMPLATE_TYPE";
     }
 
     public class EmailProperty {
