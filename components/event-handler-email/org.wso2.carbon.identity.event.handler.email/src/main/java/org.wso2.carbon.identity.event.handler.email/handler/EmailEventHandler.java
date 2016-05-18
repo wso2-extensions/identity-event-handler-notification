@@ -20,7 +20,6 @@ package org.wso2.carbon.identity.event.handler.email.handler;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
@@ -44,6 +43,7 @@ import org.wso2.carbon.identity.event.handler.email.util.NotificationBuilder;
 import org.wso2.carbon.identity.event.handler.email.util.NotificationData;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class EmailEventHandler extends AbstractEventHandler {
         Map<String, Object> eventProperties = event.getEventProperties();
 
         for (Map.Entry<String, Object> entry : eventProperties.entrySet()) {
-            if (!entry.getKey().equals(EmailEventConstants.EventProperty.OPERATION_TYPE)) {
+            if (!entry.getKey().equals(EmailEventConstants.EventProperty.TEMPLATE_TYPE)) {
                 placeHolderMap.put(entry.getKey(), (String) entry.getValue());
             }
         }
@@ -79,18 +79,17 @@ public class EmailEventHandler extends AbstractEventHandler {
 
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
 
-        String operationType = (String) eventProperties.get(EmailEventConstants.EventProperty.OPERATION_TYPE);
+        templateType = (String) eventProperties.get(EmailEventConstants.EventProperty.TEMPLATE_TYPE);
+
+        if(!EnumSet.allOf(EmailEventConstants.templateTypes.class)
+                .contains(Enum.valueOf(EmailEventConstants.templateTypes.class, templateType))) {
+            throw new EventMgtException("Provided template type is not supported.");
+        }
 
         try {
             userClaimMap = EmailEventUtil.getClaimFromUserStoreManager(username, tenantId);
         } catch (EmailEventServiceException e) {
             throw new EventMgtException("Could not load user claims", e);
-        }
-
-        if (operationType.equals(EmailEventConstants.EventProperty.ACCOUNT_LOCKED)) {
-            templateType = EmailEventConstants.EventProperty.OPERATION_ACCOUNT_LOCKED;
-        } else if (operationType.equals(EmailEventConstants.EventProperty.ACCOUNT_UNLOCKED)) {
-            templateType = EmailEventConstants.EventProperty.OPERATION_ACCOUNT_UNLOCKED;
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
