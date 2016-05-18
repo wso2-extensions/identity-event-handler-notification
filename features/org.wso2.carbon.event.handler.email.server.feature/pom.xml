@@ -54,7 +54,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.event.handler.email.server.feature</id>
+                            <id>org.wso2.carbon.event.handler.email.server</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -70,7 +70,6 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.core.server:compatible:${identity.framework.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.provider.server:compatible:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.event.output.adapter.server:${carbon.analytics.common.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.event.output.adapter.email.server:${carbon.analytics.common.version}</importFeatureDef>
                             </importFeatures>

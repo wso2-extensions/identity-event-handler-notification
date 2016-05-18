@@ -156,10 +156,11 @@ public class EmailEventUtil {
     }
 
     public static Map<String, String> getTagData(List<String> placeHolders, Map<String, String> userClaimMap,
-                                                 Map<String,String> placeHolderMapProperties) {
+                                                 Map<String, String> placeHolderMapProperties) {
 
         Map<String, String> tagDataMap = new HashMap<>();
         List<String> userClaimUris = new ArrayList<>();
+        String tagKey = null;
         for (String placeholder : placeHolders) {
             if (placeHolderMapProperties.containsKey(placeholder)) {
                 tagDataMap.put(placeholder, (String) placeHolderMapProperties.get(placeholder));
@@ -179,7 +180,8 @@ public class EmailEventUtil {
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
             for (String claimUri : userClaimUris) {
                 if (userClaimMap.containsKey(claimUri)) {
-                    tagDataMap.put(claimUri, userClaimMap.get(claimUri));
+                    tagKey = claimUri.substring(claimUri.lastIndexOf("/") + 1);
+                    tagDataMap.put(tagKey, userClaimMap.get(claimUri));
                 }
             }
         }

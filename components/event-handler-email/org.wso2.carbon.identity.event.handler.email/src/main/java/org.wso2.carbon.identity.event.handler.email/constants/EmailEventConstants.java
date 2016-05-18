@@ -38,7 +38,9 @@ public class EmailEventConstants {
     public class EventProperty {
         public static final String OPERATION_TYPE = "OPERATION_TYPE";
         public static final String ACCOUNT_LOCKED = "ACCOUNT_LOCKED";
+        public static final String ACCOUNT_UNLOCKED = "ACCOUNT_UNLOCKED";
         public static final String OPERATION_ACCOUNT_LOCKED = "accountlock";
+        public static final String OPERATION_ACCOUNT_UNLOCKED = "accountunlock";
     }
 
     public class EmailProperty {
