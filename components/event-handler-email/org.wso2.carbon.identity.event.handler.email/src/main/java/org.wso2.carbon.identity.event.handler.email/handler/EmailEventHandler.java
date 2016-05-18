@@ -89,6 +89,8 @@ public class EmailEventHandler extends AbstractEventHandler {
 
         if (operationType.equals(EmailEventConstants.EventProperty.ACCOUNT_LOCKED)) {
             templateType = EmailEventConstants.EventProperty.OPERATION_ACCOUNT_LOCKED;
+        } else if (operationType.equals(EmailEventConstants.EventProperty.ACCOUNT_UNLOCKED)) {
+            templateType = EmailEventConstants.EventProperty.OPERATION_ACCOUNT_UNLOCKED;
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
