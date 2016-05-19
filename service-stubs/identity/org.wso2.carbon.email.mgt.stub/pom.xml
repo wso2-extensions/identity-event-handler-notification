@@ -89,16 +89,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.email.mgt.dto.xsd;version="${carbon.identity.package.export.version}",
-                            org.wso2.carbon.email.mgt.exceptions.xsd;version="${carbon.identity.package.export.version}",
-                            org.wso2.carbon.email.mgt.stub;version="${carbon.identity.package.export.version}",
+                            org.wso2.carbon.email.mgt.dto.xsd;version="${identity.event.handler.email.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.exceptions.xsd;version="${identity.event.handler.email.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.stub;version="${identity.event.handler.email.exp.pkg.version}",
                         </Export-Package>
                     </instructions>
                 </configuration>

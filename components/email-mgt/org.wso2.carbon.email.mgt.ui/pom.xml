@@ -68,7 +68,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -76,15 +75,15 @@
                             ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Export-Package>
-                            org.wso2.carbon.email.mgt.ui.*,
+                            org.wso2.carbon.email.mgt.ui.*;version="${identity.event.handler.email.exp.pkg.version}",
                         </Export-Package>
                         <Import-Package>
-                            org.apache.axis2;version="${axis2.osgi.version.range}",
-                            org.apache.axis2.client;version="${axis2.osgi.version.range}",
-                            org.apache.axis2.context;version="${axis2.osgi.version.range}",
-                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
-                            org.wso2.carbon.email.mgt.dto.xsd.*;version="${carbon.identity.package.import.version.range}",
-                            org.wso2.carbon.email.mgt.stub.*;version="${carbon.identity.package.import.version.range}",
+                            org.apache.axis2;version="${axis2.wso2.imp.pkg.version.range}",
+                            org.apache.axis2.client;version="${axis2.wso2.imp.pkg.version.range}",
+                            org.apache.axis2.context;version="${axis2.wso2.imp.pkg.version.range}",
+                            org.apache.commons.logging;version="${commons.logging.imp.pkg.version.range}",
+                            org.wso2.carbon.email.mgt.dto.xsd.*;version="${identity.event.handler.email.imp.pkg.version.range}",
+                            org.wso2.carbon.email.mgt.stub.*;version="${identity.event.handler.email.imp.pkg.version.range}",
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>
