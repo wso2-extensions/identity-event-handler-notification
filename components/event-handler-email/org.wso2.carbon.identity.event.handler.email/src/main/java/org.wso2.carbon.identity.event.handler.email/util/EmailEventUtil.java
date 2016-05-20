@@ -159,6 +159,7 @@ public class EmailEventUtil {
                                                  Map<String, String> placeHolderMapProperties) {
 
         Map<String, String> tagDataMap = new HashMap<>();
+        List<String> userClaims = new ArrayList<>();
         List<String> userClaimUris = new ArrayList<>();
         String tagKey = null;
         for (String placeholder : placeHolders) {
@@ -166,13 +167,11 @@ public class EmailEventUtil {
                 tagDataMap.put(placeholder, (String) placeHolderMapProperties.get(placeholder));
             }
             //Need to add a check for claimURIs
-            else if (placeholder.contains("identity")) {
-                String identityClaimUri = EmailEventConstants.DEFAULT_CLAIM_URI +
-                        EmailEventConstants.DEFAULT_IDENTITY_PREFIX + placeholder;
-                userClaimUris.add(identityClaimUri);
+            else if (placeholder.contains(EmailEventConstants.DEFAULT_CLAIM_URI)) {
+                userClaimUris.add(placeholder);
             } else {
                 String claimUri = EmailEventConstants.DEFAULT_CLAIM_URI + placeholder;
-                userClaimUris.add(claimUri);
+                userClaims.add(claimUri);
             }
         }
 
@@ -180,8 +179,14 @@ public class EmailEventUtil {
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
             for (String claimUri : userClaimUris) {
                 if (userClaimMap.containsKey(claimUri)) {
-                    tagKey = claimUri.substring(claimUri.lastIndexOf("/") + 1);
-                    tagDataMap.put(tagKey, userClaimMap.get(claimUri));
+                    tagDataMap.put(claimUri, userClaimMap.get(claimUri));
+                }
+            }
+
+            for (String claim : userClaims) {
+                if (userClaimMap.containsKey(claim)) {
+                    tagKey = claim.substring(claim.lastIndexOf("/") + 1);
+                    tagDataMap.put(tagKey, userClaimMap.get(claim));
                 }
             }
         }
