@@ -35,10 +35,6 @@ public class EmailEventConstants {
 
     public static final String CARBON_DOMAIN = "carbon.super";
 
-    public static enum templateTypes {
-        accountlock, accountunlock
-    }
-
     public class EventProperty {
         public static final String TEMPLATE_TYPE = "TEMPLATE_TYPE";
     }

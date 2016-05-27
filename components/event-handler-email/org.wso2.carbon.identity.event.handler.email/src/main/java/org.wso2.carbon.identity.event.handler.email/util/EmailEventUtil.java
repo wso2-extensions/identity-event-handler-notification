@@ -64,6 +64,9 @@ public class EmailEventUtil {
 
         try {
             UserRegistry userReg = registry.getConfigSystemRegistry(tenantId);
+            if(!userReg.resourceExists(resourcePath)) {
+                throw new EmailEventServiceException("Provided template type is not supported");
+            }
             resourceValue = userReg.get(resourcePath);
             if (resourceValue != null) {
                 byte[] emailTemplateContentArray = (byte[]) resourceValue.getContent();
