@@ -81,9 +81,8 @@ public class EmailEventHandler extends AbstractEventHandler {
 
         templateType = (String) eventProperties.get(EmailEventConstants.EventProperty.TEMPLATE_TYPE);
 
-        if(!EnumSet.allOf(EmailEventConstants.templateTypes.class)
-                .contains(Enum.valueOf(EmailEventConstants.templateTypes.class, templateType))) {
-            throw new EventMgtException("Provided template type is not supported.");
+        if(templateType == null) {
+            throw new EventMgtException("Email template type is not specified.");
         }
 
         try {
