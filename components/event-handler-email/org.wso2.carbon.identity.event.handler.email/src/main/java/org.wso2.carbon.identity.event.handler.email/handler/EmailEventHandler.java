@@ -30,8 +30,8 @@ import org.wso2.carbon.event.output.adapter.email.EmailEventAdapterFactory;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.handler.InitConfig;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.event.EventMgtConstants;
-import org.wso2.carbon.identity.event.EventMgtException;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.email.constants.EmailEventConstants;
@@ -55,7 +55,7 @@ public class EmailEventHandler extends AbstractEventHandler {
     private static final Log log = LogFactory.getLog(EmailEventHandler.class);
 
     @Override
-    public boolean handleEvent(Event event) throws EventMgtException {
+    public void handleEvent(Event event) throws IdentityEventException {
 
         Map<String, String> userClaimMap = new HashMap<>();
         Map<String, String> placeHolderMap = new HashMap<>();
@@ -74,21 +74,21 @@ public class EmailEventHandler extends AbstractEventHandler {
             }
         }
 
-        String username = placeHolderMap.get(EventMgtConstants.EventProperty.USER_NAME);
-        String tenantDomain = placeHolderMap.get(EventMgtConstants.EventProperty.TENANT_DOMAIN);
+        String username = placeHolderMap.get(IdentityEventConstants.EventProperty.USER_NAME);
+        String tenantDomain = placeHolderMap.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
 
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
 
         templateType = (String) eventProperties.get(EmailEventConstants.EventProperty.TEMPLATE_TYPE);
 
         if(templateType == null) {
-            throw new EventMgtException("Email template type is not specified.");
+            throw new IdentityEventException("Email template type is not specified.");
         }
 
         try {
             userClaimMap = EmailEventUtil.getClaimFromUserStoreManager(username, tenantId);
         } catch (EmailEventServiceException e) {
-            throw new EventMgtException("Could not load user claims", e);
+            throw new IdentityEventException("Could not load user claims", e);
         }
 
         if (userClaimMap != null && !userClaimMap.isEmpty()) {
@@ -111,7 +111,7 @@ public class EmailEventHandler extends AbstractEventHandler {
         try {
             emailInfoDTO = EmailEventUtil.loadEmailTemplate(tenantId, resourcePath.toString());
         } catch (EmailEventServiceException e) {
-            throw new EventMgtException(
+            throw new IdentityEventException(
                     "Could not load the email template configuration for user ", e);
         }
 
@@ -130,7 +130,7 @@ public class EmailEventHandler extends AbstractEventHandler {
                         NotificationBuilder.createNotification(EMAIL_NOTIFICATION_TYPE, emailInfoDTO,
                                 emailNotificationData);
             } catch (Exception e) {
-                throw new EventMgtException(
+                throw new IdentityEventException(
                         "Could not create the email notification for template" + e);
             }
             if (emailNotification == null) {
@@ -180,9 +180,8 @@ public class EmailEventHandler extends AbstractEventHandler {
             log.info("Mail has been sent to " + emailNotification.getSendTo());
         } catch (OutputEventAdapterException e) {
             log.error("Failed Sending Email");
-            throw new EventMgtException("Failed Sending Email", e);
+            throw new IdentityEventException("Failed Sending Email", e);
         }
-        return true;
     }
 
     @Override
