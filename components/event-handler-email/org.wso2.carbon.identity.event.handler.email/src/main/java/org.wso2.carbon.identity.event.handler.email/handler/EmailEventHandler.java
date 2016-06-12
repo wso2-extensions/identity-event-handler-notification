@@ -43,7 +43,6 @@ import org.wso2.carbon.identity.event.handler.email.util.NotificationBuilder;
 import org.wso2.carbon.identity.event.handler.email.util.NotificationData;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +80,7 @@ public class EmailEventHandler extends AbstractEventHandler {
 
         templateType = (String) eventProperties.get(EmailEventConstants.EventProperty.TEMPLATE_TYPE);
 
-        if(templateType == null) {
+        if (templateType == null) {
             throw new EventMgtException("Email template type is not specified.");
         }
 
@@ -142,14 +141,23 @@ public class EmailEventHandler extends AbstractEventHandler {
             AxisConfiguration axisConfiguration =
                     CarbonConfigurationContextFactory.getConfigurationContext()
                             .getAxisConfiguration();
-            ArrayList<Parameter> axis_mailParams = axisConfiguration.getTransportOut("mailto").getParameters();
             Map<String, String> globalProperties = new HashMap<String, String>();
-            for (Parameter parameter : axis_mailParams) {
-                globalProperties.put(parameter.getName(), (String) parameter.getValue());
+            if (axisConfiguration != null && axisConfiguration.getTransportOut("mailto") != null) {
+                ArrayList<Parameter> axis_mailParams = axisConfiguration.getTransportOut("mailto").getParameters();
+                if (axis_mailParams != null & !axis_mailParams.isEmpty()) {
+                    for (Parameter parameter : axis_mailParams) {
+                        globalProperties.put(parameter.getName(), (String) parameter.getValue());
+                    }
+                } else {
+                    throw new EventMgtException("Could not find the mail transport configurations.");
+                }
+            } else {
+                throw new EventMgtException("Could not find the mail transport configurations.");
             }
 
             EmailEventAdapterFactory emailEventAdapterFactory = new EmailEventAdapterFactory();
-            OutputEventAdapter emailEventAdapter = (EmailEventAdapter) emailEventAdapterFactory.createEventAdapter(null, globalProperties);
+            OutputEventAdapter emailEventAdapter = (EmailEventAdapter) emailEventAdapterFactory
+                    .createEventAdapter(null, globalProperties);
 
             //get dynamic properties
             Map<String, String> dynamicProperties = new HashMap<String, String>();
