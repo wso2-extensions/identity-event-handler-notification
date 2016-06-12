@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.event.handler.email.handler;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
@@ -99,8 +100,13 @@ public class EmailEventHandler extends AbstractEventHandler {
             }
         }
 
-        if (locale == null) {
+        if (StringUtils.isEmpty(locale)) {
             locale = EmailEventConstants.LOCALE_DEFAULT;
+        }
+
+        if(StringUtils.isEmpty(sendTo)) {
+            throw new EventMgtException(
+                    "Email notification sending failed. Sending email address is not configured for the user.");
         }
 
         StringBuilder resourcePath = new StringBuilder();

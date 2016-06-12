@@ -243,6 +243,11 @@
                 <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-lang.wso2</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.wso2.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -325,6 +330,8 @@
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
 
         <commons.logging.imp.pkg.version.range>[1.2,2.0)</commons.logging.imp.pkg.version.range>
+        <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
+        <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
 
         <!--Carbon Kernel Version-->
         <carbon.kernel.version>4.4.5</carbon.kernel.version>

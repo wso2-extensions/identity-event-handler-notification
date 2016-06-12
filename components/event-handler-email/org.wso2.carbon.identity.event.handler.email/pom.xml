@@ -114,6 +114,7 @@
 
                             org.apache.axiom.*; version="${axiom.wso2.imp.pkg.version.range}",
                             org.apache.commons.logging; version="${commons.logging.imp.pkg.version.range}",
+                            org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
 
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
                             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
