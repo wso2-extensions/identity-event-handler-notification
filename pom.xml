@@ -340,15 +340,11 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
-            </plugin>
         </plugins>
     </build>
 
     <properties>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <!--Identity Event Handler Email Version-->
         <identity.event.handler.email.exp.pkg.version>1.0.0-SNAPSHOT</identity.event.handler.email.exp.pkg.version>
         <identity.event.handler.email.imp.pkg.version.range>[1.0.0, 2.0.0)
