@@ -32,33 +32,38 @@
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
-
 <%
-    String emailType = request.getParameter("emailType");
-    String emailContentType = request.getParameter("emailContentType");
-    String emailLocale = request.getParameter("emailLocale");
+    String httpMethod = request.getMethod();
+    if (!"post".equalsIgnoreCase(httpMethod)) {
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        return;
+    }
+
     String emailSubject = request.getParameter("emailSubject");
     String emailBody = request.getParameter("emailBody");
     String emailFooter = request.getParameter("emailFooter");
+    String templateName = request.getParameter("templateName");
+    String emailContentType =request.getParameter("emailContentType");
 
-    String templateName = emailType + "." + emailLocale + "." + emailContentType;
+    String templateFinalName = templateName + "." + emailContentType;
+
     EmailConfigDTO emailConfig = null;
-    EmailTemplateDTO templateAdded = new EmailTemplateDTO();
+    EmailTemplateDTO templateChanged = new EmailTemplateDTO();
 
     if (StringUtils.isNotBlank(emailSubject)) {
-        templateAdded.setSubject(emailSubject);
+        templateChanged.setSubject(emailSubject);
     }
     if (StringUtils.isNotBlank(emailBody)) {
-        templateAdded.setBody(emailBody);
+        templateChanged.setBody(emailBody);
     }
     if (StringUtils.isNotBlank(emailFooter)) {
-        templateAdded.setFooter(emailFooter);
+        templateChanged.setFooter(emailFooter);
+    }
+    if (StringUtils.isNotBlank(templateFinalName)) {
+        templateChanged.setName(templateFinalName);
     }
     if (StringUtils.isNotBlank(emailContentType)) {
-        templateAdded.setEmailContentType(emailContentType);
-    }
-    if (StringUtils.isNotBlank(templateName)) {
-        templateAdded.setName(templateName);
+        templateChanged.setEmailContentType(emailContentType);
     }
 
     try {
@@ -71,22 +76,22 @@
                 .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         I18nEmailMgtConfigServiceClient configClient =
                 new I18nEmailMgtConfigServiceClient(cookie, backendServerURL, configContext);
-        configClient.addEmailConfig(templateAdded);
-        CarbonUIMessage.sendCarbonUIMessage("Email Template successfully Added", CarbonUIMessage.INFO, request);
-
+        configClient.saveEmailConfig(templateChanged);
 %>
-
 <script type="text/javascript">
-    location.href = "email-template-add.jsp";
+    location.href = "email-template-config.jsp";
 </script>
 <%
 } catch (Exception e) {
-    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
+    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
+            request);
 %>
 <script type="text/javascript">
-    location.href = "email-template-add.jsp";
+    location.href = "email-template-config.jsp";
 </script>
 <%
         return;
     }
 %>
+
+
