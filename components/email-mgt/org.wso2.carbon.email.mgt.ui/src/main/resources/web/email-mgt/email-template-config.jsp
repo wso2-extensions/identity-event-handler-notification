@@ -146,7 +146,7 @@
         </h2>
 
         <div id="workArea">
-            <form action="email-template-config-finish.jsp?userName=<%=username%>" method="post">
+            <form action="email-template-config-finish-ajaxprocessor.jsp?userName=<%=username%>" method="post">
                 <div class="sectionSeperator">
                     <fmt:message key="email.template.set"/>
                 </div>
