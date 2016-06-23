@@ -35,8 +35,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 
 /**
- * @scr.component name="I18nMgtServiceComponent"
- * immediate="true"
+ * @scr.component name="I18nMgtServiceComponent" immediate="true"
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
  * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"

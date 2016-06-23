@@ -103,7 +103,7 @@
 
             </script>
 
-            <form name="addemailtemplate" action="add-email-template-submit.jsp" method="post">
+            <form name="addemailtemplate" action="email-template-add-finish-ajaxprocessor.jsp" method="post">
                 <table style="width: 100%" class="styledLeft">
                     <thead>
                     <tr>

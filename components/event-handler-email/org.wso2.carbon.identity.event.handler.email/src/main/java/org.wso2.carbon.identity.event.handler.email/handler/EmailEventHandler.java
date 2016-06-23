@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.event.handler.email.handler;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
@@ -43,7 +44,6 @@ import org.wso2.carbon.identity.event.handler.email.util.NotificationBuilder;
 import org.wso2.carbon.identity.event.handler.email.util.NotificationData;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,8 +100,13 @@ public class EmailEventHandler extends AbstractEventHandler {
             }
         }
 
-        if (locale == null) {
+        if (StringUtils.isEmpty(locale)) {
             locale = EmailEventConstants.LOCALE_DEFAULT;
+        }
+
+        if(StringUtils.isEmpty(sendTo)) {
+            throw new IdentityEventException(
+                    "Email notification sending failed. Sending email address is not configured for the user.");
         }
 
         StringBuilder resourcePath = new StringBuilder();
@@ -142,14 +147,23 @@ public class EmailEventHandler extends AbstractEventHandler {
             AxisConfiguration axisConfiguration =
                     CarbonConfigurationContextFactory.getConfigurationContext()
                             .getAxisConfiguration();
-            ArrayList<Parameter> axis_mailParams = axisConfiguration.getTransportOut("mailto").getParameters();
             Map<String, String> globalProperties = new HashMap<String, String>();
-            for (Parameter parameter : axis_mailParams) {
-                globalProperties.put(parameter.getName(), (String) parameter.getValue());
+            if (axisConfiguration != null && axisConfiguration.getTransportOut("mailto") != null) {
+                ArrayList<Parameter> axis_mailParams = axisConfiguration.getTransportOut("mailto").getParameters();
+                if (axis_mailParams != null & !axis_mailParams.isEmpty()) {
+                    for (Parameter parameter : axis_mailParams) {
+                        globalProperties.put(parameter.getName(), (String) parameter.getValue());
+                    }
+                } else {
+                    throw new IdentityEventException("Could not find the mail transport configurations.");
+                }
+            } else {
+                throw new IdentityEventException("Could not find the mail transport configurations.");
             }
 
             EmailEventAdapterFactory emailEventAdapterFactory = new EmailEventAdapterFactory();
-            OutputEventAdapter emailEventAdapter = (EmailEventAdapter) emailEventAdapterFactory.createEventAdapter(null, globalProperties);
+            OutputEventAdapter emailEventAdapter = (EmailEventAdapter) emailEventAdapterFactory
+                    .createEventAdapter(null, globalProperties);
 
             //get dynamic properties
             Map<String, String> dynamicProperties = new HashMap<String, String>();
