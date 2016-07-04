@@ -1,0 +1,2 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.email.mgt.server_${feature.version}/email-admin-config.xml,target:${installFolder}/../../conf/email/email-admin-config.xml,overwrite:true);\

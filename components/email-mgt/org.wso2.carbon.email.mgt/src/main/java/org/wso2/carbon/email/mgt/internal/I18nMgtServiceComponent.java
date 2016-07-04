@@ -24,14 +24,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.config.ConfigBuilder;
-import org.wso2.carbon.email.mgt.config.ConfigType;
-import org.wso2.carbon.email.mgt.config.StorageType;
-import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
+import org.wso2.carbon.email.mgt.config.EmailTemplateManager;
+import org.wso2.carbon.email.mgt.config.EmailTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.ConfigurationContextService;
 
 
 /**
@@ -40,54 +39,19 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
  * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
  * @scr.reference name="realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"cardinality="1..1"
+ * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
  * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="RegistryResourceMgtService"
+ * interface="org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService" cardinality="1..1"
+ * policy="dynamic" bind="setRegistryResourceMgtService" unbind="unsetRegistryResourceMgtService"
+ *
  */
 
 public class I18nMgtServiceComponent {
 
     private static Log log = LogFactory.getLog(I18nMgtServiceComponent.class);
 
-    private static RealmService realmService;
-
-    private static RegistryService registryService;
-
-    private static ConfigurationContextService configurationContextService;
-    private ServiceRegistration serviceRegistration = null;
-
-    public static RealmService getRealmService() {
-        return realmService;
-    }
-
-    protected void setRealmService(RealmService realmService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the Realm Service");
-        }
-        I18nMgtServiceComponent.realmService = realmService;
-    }
-
-    public static RegistryService getRegistryService() {
-        return registryService;
-    }
-
-    protected void setRegistryService(RegistryService registryService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the Registry Service");
-        }
-        I18nMgtServiceComponent.registryService = registryService;
-    }
-
-    public static ConfigurationContextService getConfigurationContextService() {
-        return configurationContextService;
-    }
-
-    protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the ConfigurationContext Service");
-        }
-        I18nMgtServiceComponent.configurationContextService = configurationContextService;
-
-    }
+    private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
 
     protected void activate(ComponentContext context) {
         try {
@@ -109,11 +73,11 @@ public class I18nMgtServiceComponent {
 
     private void loadEmailConfigurations() {
         //Load email template configuration on server startup.
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        ConfigBuilder configBuilder = ConfigBuilder.getInstance();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
         try {
-            configBuilder.loadDefaultConfiguration(ConfigType.EMAIL, StorageType.REGISTRY, tenantId);
-        } catch (I18nMgtEmailConfigException e) {
+            emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
+        } catch (I18nEmailMgtException e) {
             log.error("Error occurred while loading default email templates", e);
         }
     }
@@ -124,25 +88,46 @@ public class I18nMgtServiceComponent {
         }
     }
 
+    protected void setRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Realm Service");
+        }
+        dataHolder.setRealmService(realmService);
+    }
+
+    protected void setRegistryService(RegistryService registryService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Registry Service");
+        }
+        dataHolder.setRegistryService(registryService);
+    }
+
+    protected void setRegistryResourceMgtService(RegistryResourceMgtService registryResourceMgtService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Registry Resource Mgt Service.");
+        }
+        dataHolder.setRegistryResourceMgtService(registryResourceMgtService);
+    }
+
     protected void unsetRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("UnSetting the Registry Service");
         }
-        I18nMgtServiceComponent.registryService = null;
+        dataHolder.setRegistryService(null);
     }
 
     protected void unsetRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("UnSetting the Realm Service");
         }
-        I18nMgtServiceComponent.realmService = null;
+        dataHolder.setRealmService(null);
     }
 
-    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService) {
+    protected void unsetRegistryResourceMgtService(RegistryResourceMgtService registryResourceMgtService) {
         if (log.isDebugEnabled()) {
-            log.debug("UnSetting the  ConfigurationContext Service");
+            log.debug("UnSetting Registry Resource Mgt Service.");
         }
-        I18nMgtServiceComponent.configurationContextService = null;
+        dataHolder.setRegistryResourceMgtService(null);
     }
 
 }

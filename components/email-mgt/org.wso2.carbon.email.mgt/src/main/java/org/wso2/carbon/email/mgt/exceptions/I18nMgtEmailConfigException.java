@@ -22,7 +22,7 @@ package org.wso2.carbon.email.mgt.exceptions;
  * Exception class
  */
 
-public class I18nMgtEmailConfigException extends Exception {
+public class I18nMgtEmailConfigException extends I18nEmailMgtClientException {
 
     public I18nMgtEmailConfigException(String message) {
         super(message);
@@ -31,5 +31,4 @@ public class I18nMgtEmailConfigException extends Exception {
     public I18nMgtEmailConfigException(String message, Throwable e) {
         super(message, e);
     }
-
 }

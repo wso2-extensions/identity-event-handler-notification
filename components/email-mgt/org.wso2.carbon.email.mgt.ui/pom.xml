@@ -82,7 +82,7 @@
                             org.apache.axis2.client;version="${axis2.wso2.imp.pkg.version.range}",
                             org.apache.axis2.context;version="${axis2.wso2.imp.pkg.version.range}",
                             org.apache.commons.logging;version="${commons.logging.imp.pkg.version.range}",
-                            org.wso2.carbon.email.mgt.dto.xsd.*;version="${identity.event.handler.email.imp.pkg.version.range}",
+                            org.wso2.carbon.email.mgt.model.xsd.*;version="${identity.event.handler.email.imp.pkg.version.range}",
                             org.wso2.carbon.email.mgt.stub.*;version="${identity.event.handler.email.imp.pkg.version.range}",
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
@@ -91,15 +91,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.email.mgt.stub</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>

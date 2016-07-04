@@ -150,7 +150,7 @@ public class EmailEventHandler extends AbstractEventHandler {
             Map<String, String> globalProperties = new HashMap<String, String>();
             if (axisConfiguration != null && axisConfiguration.getTransportOut("mailto") != null) {
                 ArrayList<Parameter> axis_mailParams = axisConfiguration.getTransportOut("mailto").getParameters();
-                if (axis_mailParams != null & !axis_mailParams.isEmpty()) {
+                if (axis_mailParams != null && !axis_mailParams.isEmpty()) {
                     for (Parameter parameter : axis_mailParams) {
                         globalProperties.put(parameter.getName(), (String) parameter.getValue());
                     }
