@@ -20,23 +20,24 @@
 
     <parent>
         <groupId>org.wso2.carbon.identity</groupId>
-        <artifactId>identity-event-handler-email</artifactId>
+        <artifactId>identity-event-handler-notification</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.event.handler.email.server.feature</artifactId>
+    <artifactId>org.wso2.carbon.event.handler.notification.server.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Email Event management server feature</name>
+    <name>Notification Event management server feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the core bundles required for Back-end functionality of Email-Event-Handling
+    <description>This feature contains the core bundles required for Back-end functionality of Notification-Event-Handling
         management</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
+            <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -65,7 +66,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.event.handler.email</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.event.handler.notification</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>

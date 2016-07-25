@@ -19,17 +19,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.identity</groupId>
-        <artifactId>event-handler-email</artifactId>
+        <artifactId>event-handler-notification</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
+    <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
 
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Email Event Handling Management</name>
+    <name>WSO2 Carbon - Notification Event Handling Management</name>
     <description>A custom wso2 products or solution</description>
 
     <dependencies>
@@ -69,14 +69,30 @@
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.event</artifactId>
         </dependency>
-        <!--dependencies for cep email notification support -->
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+        </dependency>
+        <!--dependencies for cep org.wso2.carbon.identity.event.handler.notification notification support -->
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
+            <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
         </dependency>
     </dependencies>
 
@@ -133,6 +149,9 @@
                             org.wso2.carbon.identity.event.*,
                             org.wso2.carbon.event.output.adapter.core.*,
                             org.wso2.carbon.event.output.adapter.email.*,
+                            org.wso2.carbon.event.stream.core.*,
+                            org.wso2.carbon.event.publisher.core.*,
+                            org.wso2.carbon.databridge.commons.*;
                         </Import-Package>
                     </instructions>
                 </configuration>
