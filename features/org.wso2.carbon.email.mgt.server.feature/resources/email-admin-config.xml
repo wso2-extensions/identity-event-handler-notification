@@ -26,17 +26,17 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Password Reset</subject>
         <body>
-            Hi {givenname}
+            Hi {{user.claim.givenname}}
 
             We received a request to change the password on the {user-name} account associated with this e-mail address.
             If you made this request, please click the link below to securely change your password:
 
-            https://localhost:9443/accountrecoveryendpoint/confirmrecovery.do?confirmation={confirmation-code}&amp;userstoredomain={userstore-domain}&amp;username={url:user-name}&amp;tenantdomain={tenant-domain}
+            https://localhost:9443/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
 
             If clicking the link doesn't seem to work, you can copy and paste the link into your browser's address
             window.
 
-            If you did not request to have your {user-name} password reset, simply disregard this email and no changes
+            If you did not request to have your {{user-name}} password reset, simply disregard this email and no changes
             to your account will be made.
         </body>
         <footer>
@@ -50,10 +50,10 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Account Recovery</subject>
         <body>
-            Hi {givenname}
+            Hi {{user.claim.givenname}}
 
             We received a request to recover your account user name. The account associated with us indicates that the
-            user name is : {user-name}
+            user name is : {{user-name}}
         </body>
         <footer>
             Best Regards,
@@ -66,7 +66,7 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Account Confirmation</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
             You have created an account with following user name
 
@@ -76,7 +76,7 @@
             the
             link into your browser's address window.
 
-            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={confirmation-code}&amp;userstoredomain={userstore-domain}&amp;username={url:user-name}&amp;tenantdomain={tenant-domain}
+            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
         </body>
         <footer>
             Best Regards,
@@ -89,12 +89,12 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Temporary Password</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
             Please find your temporary password below.
 
-            User Name: {user-name}
-            Temporary Password: {temporary-password}
+            User Name: {{user-name}}
+            Temporary Password: {{temporary-password}}
         </body>
         <footer>
             Best Regards,
@@ -107,9 +107,9 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - One Time Password Reset</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
-            Please use the password {otp-password} as the new password for your next login.
+            Please use the password {{otp-password}} as the new password for your next login.
         </body>
         <footer>
             Best Regards,
@@ -122,12 +122,12 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Password Change for New Account</subject>
         <body>
-            Hi {givenname}
+            Hi {{user.claim.givenname}}
 
-            Please change your password for the newly created account : {user-name}. Please click the link below to
+            Please change your password for the newly created account : {{user-name}}. Please click the link below to
             create the password.
 
-            https://localhost:8443/InfoRecoverySample/infoRecover/verify?confirmation={confirmation-code}&amp;userstoredomain={userstore-domain}&amp;username={url:user-name}&amp;tenantdomain={tenant-domain}
+            https://localhost:8443/InfoRecoverySample/infoRecover/verify?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
 
             If clicking the link doesn't seem to work, you can copy and paste the
             link into your browser's address window.
@@ -143,9 +143,9 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account unlocked</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
-            Please note that the account registered with us with the user name : {user-name} has been unlocked.
+            Please note that the account registered with us with the user name : {{user-name}} has been unlocked.
         </body>
         <footer>
             Best Regards,
@@ -158,9 +158,9 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account Locked</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
-            Please note that the account registered with us with the user name : {user-name} has been locked.
+            Please note that the account registered with us with the user name : {{user-name}} has been locked.
         </body>
         <footer>
             Best Regards,
@@ -173,9 +173,9 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account enabled</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
-            Please note that the account registered with us with the user name : {user-name} has been enabled.
+            Please note that the account registered with us with the user name : {{user-name}} has been enabled.
         </body>
         <footer>
             Best Regards,
@@ -188,9 +188,9 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account disabled</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
-            Please note that the account registered with us with the user name : {user-name} has been disabled.
+            Please note that the account registered with us with the user name : {{user-name}} has been disabled.
         </body>
         <footer>
             Best Regards,
@@ -203,7 +203,7 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your Password Reset successfully</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
             Please note that your password reset operation is successfully completed.
         </body>
@@ -218,7 +218,7 @@
         <targetEpr></targetEpr>
         <subject>WSO2 Carbon - You started to reset password</subject>
         <body>
-            Hi {givenname},
+            Hi {{user.claim.givenname}},
 
             This is to notify that you have initiate to reset your password using security questions.
         </body>
