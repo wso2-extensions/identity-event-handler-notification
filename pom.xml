@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>org.wso2.carbon.identity</groupId>
-    <artifactId>identity-event-handler-email</artifactId>
+    <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
@@ -41,13 +41,13 @@
 
     <modules>
         <module>components/email-mgt</module>
-        <module>components/event-handler-email</module>
+        <module>components/event-handler-notification</module>
         <module>service-stubs/identity</module>
 
         <module>features/org.wso2.carbon.email.mgt.server.feature</module>
         <module>features/org.wso2.carbon.email.mgt.ui.feature</module>
         <module>features/org.wso2.carbon.email.mgt.feature</module>
-        <module>features/org.wso2.carbon.event.handler.email.server.feature</module>
+        <module>features/org.wso2.carbon.event.handler.notification.server.feature</module>
 
     </modules>
 
@@ -210,6 +210,11 @@
                 <artifactId>org.wso2.carbon.identity.event</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
 
             <!--Carbon Analytics Common Dependencies-->
             <dependency>
@@ -219,7 +224,22 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
+                <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
 
@@ -367,7 +387,7 @@
         <identity.governance.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
-        <carbon.analytics.common.version>5.0.6</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.1.1-SNAPSHOT</carbon.analytics.common.version>
 
         <!--Maven Plugin Version-->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
