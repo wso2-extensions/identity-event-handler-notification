@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.email.mgt.config;
+package org.wso2.carbon.email.mgt;
 
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;

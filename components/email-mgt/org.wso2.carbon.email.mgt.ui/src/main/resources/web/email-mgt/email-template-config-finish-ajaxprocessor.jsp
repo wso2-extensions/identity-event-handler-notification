@@ -95,7 +95,7 @@
                         " email template successfully deleted.", CarbonUIMessage.INFO, request);
             }
         } else {
-            configClient.saveEmailConfig(templateChanged);
+            configClient.saveEmailTemplate(templateChanged);
             CarbonUIMessage.sendCarbonUIMessage("Email Template successfully Saved.", CarbonUIMessage.INFO, request);
         }
 %>

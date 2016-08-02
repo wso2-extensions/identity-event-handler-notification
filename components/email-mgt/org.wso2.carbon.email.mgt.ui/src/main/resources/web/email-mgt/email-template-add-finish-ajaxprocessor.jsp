@@ -68,7 +68,7 @@
                 .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         I18nEmailMgtConfigServiceClient configClient =
                 new I18nEmailMgtConfigServiceClient(cookie, backendServerURL, configContext);
-        configClient.addEmailConfig(templateAdded);
+        configClient.addEmailTemplate(templateAdded);
         CarbonUIMessage.sendCarbonUIMessage("Email Template successfully Added", CarbonUIMessage.INFO, request);
 
 %>
