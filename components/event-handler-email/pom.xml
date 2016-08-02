@@ -28,7 +28,7 @@
 
     <artifactId>event-handler-email</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Email Event Handler Aggregator Module</name>
+    <name>WSO2 Carbon - Notification Event Handler Aggregator Module</name>
     <description>
         This is a Carbon bundle that represent the Email Event Handler Aggregator Module.
     </description>

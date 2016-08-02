@@ -16,58 +16,53 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.util;
+package org.wso2.carbon.identity.event.handler.email.email.model;
 
 import java.io.Serializable;
 
-public class EmailInfoDTO implements Serializable {
+public class EmailTemplate implements Serializable {
 
     private static final long serialVersionUID = -8854592668563155088L;
+
+    private String notificationEvent;
     private String subject;
     private String body;
     private String footer;
     private String locale;
-    private String emailContentType;
+    private String contentType;
 
+    public EmailTemplate(String notificationEvent, String subject, String body, String footer, String locale,
+                         String contentType) {
+        this.notificationEvent = notificationEvent;
+        this.subject = subject;
+        this.body = body;
+        this.footer = footer;
+        this.locale = locale;
+        this.contentType = contentType;
+    }
+
+    public String getNotificationEvent() {
+        return this.notificationEvent;
+    }
 
     public String getSubject() {
         return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
-
     public String getFooter() {
         return footer;
-    }
-
-    public void setFooter(String footer) {
-        this.footer = footer;
     }
 
     public String getLocale() {
         return locale;
     }
 
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
-    public String getEmailContentType() {
-        return emailContentType;
-    }
-
-    public void setEmailContentType(String emailContentType) {
-        this.emailContentType = emailContentType;
+    public String getContentType() {
+        return contentType;
     }
 
 }

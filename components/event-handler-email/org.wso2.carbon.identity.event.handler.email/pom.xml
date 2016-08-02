@@ -29,7 +29,7 @@
 
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Email Event Handling Management</name>
+    <name>WSO2 Carbon - Notification Event Handling Management</name>
     <description>A custom wso2 products or solution</description>
 
     <dependencies>
@@ -69,14 +69,26 @@
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.event</artifactId>
         </dependency>
-        <!--dependencies for cep email notification support -->
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+        </dependency>
+        <!--dependencies for cep notification support -->
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
+            <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
         </dependency>
     </dependencies>
 
@@ -130,9 +142,11 @@
                             org.wso2.carbon.user.api; version="${carbon.user.api.imp.pkg.version.range}",
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.identity.base; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.event.*,
-                            org.wso2.carbon.event.output.adapter.core.*,
-                            org.wso2.carbon.event.output.adapter.email.*,
+                            org.wso2.carbon.identity.event.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.event.output.adapter.core.*; version="${carbon.analytics.common.version.range}",
+                            org.wso2.carbon.event.stream.core.*; version="${carbon.analytics.common.version.range}",
+                            org.wso2.carbon.event.publisher.core.*; version="${carbon.analytics.common.version.range}",
+                            org.wso2.carbon.databridge.commons.*; version="${carbon.analytics.common.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>

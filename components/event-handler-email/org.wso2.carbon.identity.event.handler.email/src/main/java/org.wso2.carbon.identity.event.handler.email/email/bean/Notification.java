@@ -16,31 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.util;
+package org.wso2.carbon.identity.event.handler.email.email.bean;
 
-public interface Notification {
-
-    public String getSendTo();
-
-    public void setSendTo(String sendTo);
-
-    public String getSendFrom();
-
-    public void setSendFrom(String sendFrom);
-
-    public String getSubject();
-
-    public void setSubject(String subject);
-
-    public String getBody();
-
-    public void setBody(String body);
-
-    public String getFooter();
-
-    public void setFooter(String footer);
-
-    public String getContentType();
-
-    public void setContentType(String type);
+public class Notification {
 }
