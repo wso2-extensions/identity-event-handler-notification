@@ -227,9 +227,6 @@ public class I18nEmailUtil {
                 if (templateContentElements.length > 3) {
                     String errorMsg = "Template %s:%s contains '|' character which is invalid.";
                     throw new I18nMgtEmailConfigException(String.format(errorMsg, templateDisplayName, locale));
-                } else if (templateContentElements.length < 3) {
-                    String errorMsg = "Template %s:%s contains empty body content.";
-                    throw new I18nMgtEmailConfigException(String.format(errorMsg, templateDisplayName, locale));
                 }
 
                 templateDTO.setSubject(templateContentElements[0]);
@@ -241,7 +238,7 @@ public class I18nEmailUtil {
                 log.error(error);
             }
         } catch (RegistryException e) {
-            String error = "Error when creating template object from registry resource";
+            String error = "Error retrieving a template object from the registry resource";
             throw new I18nEmailMgtServerException(error, e);
         }
         return templateDTO;

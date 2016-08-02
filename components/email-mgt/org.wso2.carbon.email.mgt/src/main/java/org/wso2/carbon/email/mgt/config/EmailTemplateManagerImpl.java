@@ -80,10 +80,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
             Collection collection = I18nEmailUtil.createTemplateType(normalizedTemplateName, emailTemplateDisplayName);
             resourceMgtService.putIdentityResource(collection, path, tenantDomain);
         } catch (IdentityRuntimeException ex) {
-            String errorMsg = String.format("Error adding template type %s to %s tenant.", emailTemplateDisplayName,
-                    tenantDomain);
-            log.error(errorMsg);
-            throw new I18nEmailMgtServerException(errorMsg, ex);
+            String errorMsg = "Error adding template type %s to %s tenant.";
+            throw new I18nEmailMgtServerException(String.format(errorMsg, emailTemplateDisplayName, tenantDomain), ex);
         }
     }
 
@@ -252,32 +250,31 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
         // before loading templates we check whether they already exist.
         try {
-            if (resourceMgtService.isResourceExists(TEMPLATE_BASE_PATH, tenantDomain)) {
+            if (!resourceMgtService.isResourceExists(TEMPLATE_BASE_PATH, tenantDomain)) {
+                // load DTOs from the I18nEmailUtil class
+                List<EmailTemplate> defaultTemplates = I18nEmailUtil.getDefaultEmailTemplates();
+                // iterate through the list and write to registry!
+                for (EmailTemplate emailTemplateDTO : defaultTemplates) {
+                    addEmailTemplate(emailTemplateDTO, tenantDomain);
+                    if (log.isDebugEnabled()) {
+                        String msg = "Default template added to %s tenant registry : %n%s";
+                        log.debug(String.format(msg, tenantDomain, emailTemplateDTO.toString()));
+                    }
+                }
+
+                if (log.isDebugEnabled()) {
+                    String msg = "Added %d default email templates to %s tenant registry";
+                    log.debug(String.format(msg, defaultTemplates.size(), tenantDomain));
+                }
+            } else {
                 if (log.isDebugEnabled()) {
                     String msg = "Default email templates already exist in %s tenant domain.";
                     log.debug(String.format(msg, tenantDomain));
                 }
-                return;
             }
         } catch (IdentityRuntimeException ex) {
             String error = "Error when tried to check for default email templates in %s tenant registry";
             log.error(String.format(error, tenantDomain), ex);
-        }
-
-        // load DTOs from the I18nEmailUtil class
-        List<EmailTemplate> defaultTemplates = I18nEmailUtil.getDefaultEmailTemplates();
-        // iterate through the list and write to registry!
-        for (EmailTemplate emailTemplateDTO : defaultTemplates) {
-            addEmailTemplate(emailTemplateDTO, tenantDomain);
-            if (log.isDebugEnabled()) {
-                String msg = "Default template added to %s tenant registry : %n%s";
-                log.debug(String.format(msg, tenantDomain, emailTemplateDTO.toString()));
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            String msg = "Added %d default email templates to %s tenant registry";
-            log.debug(String.format(msg, defaultTemplates.size(), tenantDomain));
         }
     }
 
