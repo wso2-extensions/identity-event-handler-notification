@@ -21,7 +21,6 @@ package org.wso2.carbon.email.mgt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.config.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
@@ -101,7 +100,7 @@ public class I18nEmailMgtConfigService {
      * @param emailTemplate - Email templates to be saved.
      * @throws I18nEmailMgtServerException
      */
-    public void saveEmailConfig(EmailTemplate emailTemplate) throws I18nEmailMgtServerException {
+    public void saveEmailTemplate(EmailTemplate emailTemplate) throws I18nEmailMgtServerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
@@ -118,7 +117,7 @@ public class I18nEmailMgtConfigService {
      * @param emailTemplate - Email templates to be saved.
      * @throws I18nEmailMgtServerException
      */
-    public void addEmailConfig(EmailTemplate emailTemplate) throws I18nEmailMgtServerException {
+    public void addEmailTemplate(EmailTemplate emailTemplate) throws I18nEmailMgtServerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
@@ -152,7 +151,7 @@ public class I18nEmailMgtConfigService {
      * @return an Array of templates.
      * @throws I18nEmailMgtServerException
      */
-    public EmailTemplate[] getEmailConfig() throws I18nEmailMgtServerException {
+    public EmailTemplate[] getAllTemplatesForTenant() throws I18nEmailMgtServerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         EmailTemplate[] templates = null;
