@@ -24,8 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.config.EmailTemplateManager;
-import org.wso2.carbon.email.mgt.config.EmailTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.EmailTemplateManager;
+import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -44,7 +44,6 @@ import org.wso2.carbon.user.core.service.RealmService;
  * @scr.reference name="RegistryResourceMgtService"
  * interface="org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService" cardinality="1..1"
  * policy="dynamic" bind="setRegistryResourceMgtService" unbind="unsetRegistryResourceMgtService"
- *
  */
 
 public class I18nMgtServiceComponent {
@@ -56,15 +55,33 @@ public class I18nMgtServiceComponent {
     protected void activate(ComponentContext context) {
         try {
             BundleContext bundleCtx = context.getBundleContext();
-            TenantManagementListener idPMgtTenantMgtListener = new TenantManagementListener();
+
+            // Register Email Mgt Service as an OSGi service
+            ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
+                    new EmailTemplateManagerImpl(), null);
+
+            if (emailTemplateSR != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Email Template Mgt Service registered.");
+                }
+            } else {
+                log.error("Error registering Email Template Mgt Service.");
+            }
+
+            TenantManagementListener emailMgtTenantListener = new TenantManagementListener();
             ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(
-                    TenantMgtListener.class.getName(), idPMgtTenantMgtListener, null);
+                    TenantMgtListener.class.getName(), emailMgtTenantListener, null);
             if (tenantMgtListenerSR != null) {
-                log.debug("I18n Management - TenantMgtListener registered");
+                if (log.isDebugEnabled()) {
+                    log.debug("I18n Management - TenantMgtListener registered");
+                }
             } else {
                 log.error("I18n Management - TenantMgtListener could not be registered");
             }
+
+            // load default email templates
             loadEmailConfigurations();
+
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
             log.error("Error while activating I18n Management bundle", e);
