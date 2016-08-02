@@ -15,61 +15,50 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
-           prefix="carbon" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
+<%@page import="org.apache.commons.lang.ArrayUtils" %>
+<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.owasp.encoder.Encode" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
-<%@page import="java.lang.Exception" %>
-<%@page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<script type="text/javascript" src="extensions/js/vui.js"></script>
-<script type="text/javascript" src="../extensions/core/js/vui.js"></script>
-<script type="text/javascript" src="../admin/js/main.js"></script>
+
+<%@ page import="org.wso2.carbon.email.mgt.model.xsd.EmailTemplate" %>
+<%@ page import="org.wso2.carbon.email.mgt.ui.I18nEmailMgtConfigServiceClient" %>
+<%@ page import="org.wso2.carbon.email.mgt.ui.Util" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@page import="java.util.ArrayList" %>
+
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ResourceBundle" %>
 
 <jsp:include page="../dialog/display_messages.jsp"/>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@ page import="java.util.*" %>
-<%@ page import="java.lang.reflect.Array" %>
-<%@ page import="org.owasp.encoder.Encode" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.wso2.carbon.email.mgt.ui.I18nEmailMgtConfigServiceClient" %>
-<%@ page import="org.wso2.carbon.email.mgt.ui.EmailConfigDTO" %>
-<%@ page import="org.wso2.carbon.email.mgt.dto.xsd.EmailTemplateDTO" %>
+
 
 <%
-    String localeParam = request.getParameter("locale");
-
-    if (localeParam == null) {
-        localeParam = "English (United States)";
-    }
+    request.setCharacterEncoding("UTF-8");
+    String templateType = request.getParameter("templateType");
 
     String username = request.getParameter("username");
     String forwardTo = null;
     I18nEmailMgtConfigServiceClient client = null;
 
-    EmailConfigDTO emailConfig = null;
-    String emailSubject = null;
-    String emailBody = null;
-    String emailFooter = null;
-    String templateName = null;
-    String emailSubject0 = null;
-    String emailBody0 = null;
-    String emailFooter0 = null;
-    String templateName0 = null;
-    String displayLanguage = null;
-    String displayLanguage0 = null;
+    EmailTemplate[] emailTemplates = null;
+    String emailSubject = "";
+    String emailBody = "";
+    String emailFooter = "";
+    String templateName = "";
+    String emailSubject0 = "";
+    String emailBody0 = "";
+    String emailFooter0 = "";
+    String templateName0 = "";
     String emailContentType = null;
     String emailContentType0 = null;
     String[] emailContentTypeArr = {"text/html", "text/plain"};
 
-
-    if (username == null) {
-        username = (String) request.getSession().getAttribute("logged-user");
-    }
     String BUNDLE = "org.wso2.carbon.email.mgt.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
@@ -83,7 +72,12 @@
                         CarbonConstants.CONFIGURATION_CONTEXT);
         client = new I18nEmailMgtConfigServiceClient(cookie,
                 backendServerURL, configContext);
-        emailConfig = client.loadEmailConfig();
+
+        // get template types
+        emailTemplates = client.loadEmailTemplates();
+        if (emailTemplates == null) {
+            emailTemplates = new EmailTemplate[0];
+        }
 
     } catch (Exception e) {
         String message = resourceBundle
@@ -94,6 +88,30 @@
 %>
 <script type="text/javascript">
 
+    function validate() {
+        var value = document.getElementsByName("emailSubject")[0].value;
+        if (value == '') {
+            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.required"/>');
+            return false;
+        } else if (value.length > 50) {
+            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.too.long"/>');
+            return false;
+        }
+
+        var value = document.getElementsByName("emailBody")[0].value;
+        if (value == '') {
+            CARBON.showWarningDialog('<fmt:message key="email.template.body.is.required"/>');
+            return false;
+        }
+
+        var value = document.getElementsByName("emailFooter")[0].value;
+        if (value == '') {
+            CARBON.showWarningDialog('<fmt:message key="email.template.footer.is.required"/>');
+            return false;
+        }
+        document.templateForm.submit();
+    }
+
     function updateFields(elm) {
         var $selectedOption = jQuery(elm).find(":selected");
         jQuery('#emailSubject').val($selectedOption.attr('data-subject'));
@@ -103,14 +121,64 @@
         jQuery('#emailContentType').val($selectedOption.attr('data-emailContentType'));
     }
 
+
     function updateLocale(elm) {
         var $selectedOption = jQuery(elm).find(":selected").text().trim();
         jQuery('<form>', {
-            "id": "getLocale",
-            "html": '<input type="text" name="locale" value="' + $selectedOption + '" />',
+            "id": "getTemplateType",
+            "html": '<input type="text" name="templateType" value="' + $selectedOption + '" />',
             "action": window.location.href
         }).appendTo(document.body).submit();
     }
+
+    function deleteTemplate() {
+        var templateName = document.getElementsByName("emailTypes")[0].value;
+        var locale = document.getElementsByName("emailLanguage")[0].value;
+
+        var deleteFunc = function doDelete() {
+            $.ajax({
+                type: 'POST',
+                url: 'email-template-config-finish-ajaxprocessor.jsp',
+                headers: {
+                    Accept: "text/html"
+                },
+                data: {'delete': true, 'templateName': templateName, 'locale': locale},
+                async: false,
+                success: function (responseText, status) {
+                    if (status == "success") {
+                        location.assign("email-template-config.jsp");
+                    }
+                }
+            });
+        }
+        var msg = "This will delete {0}:{1} email template. Are you sure you want to continue?";
+        msg = msg.replace("{0}", templateName).replace("{1}", locale);
+        CARBON.showConfirmationDialog(msg, deleteFunc, null, null);
+    }
+
+
+    function deleteTemplateType() {
+        var templateName = document.getElementsByName("emailTypes")[0].value;
+        var deleteFunc = function doDelete() {
+            $.ajax({
+                type: 'POST',
+                url: 'email-template-config-finish-ajaxprocessor.jsp',
+                headers: {
+                    Accept: "text/html"
+                },
+                data: {'delete': true, 'templateName': templateName, 'locale': "ALL"},
+                async: false,
+                success: function (responseText, status) {
+                    if (status == "success") {
+                        location.assign("email-template-config.jsp");
+                    }
+                }
+            });
+        }
+        var msg = "This will delete all email templates of type {0}. Are you sure you want to continue?";
+        CARBON.showConfirmationDialog(msg.replace("{0}", templateName), deleteFunc, null);
+    }
+
 </script>
 <%
     if (forwardTo != null) {
@@ -129,12 +197,6 @@
     }
 %>
 
-<script type="text/javascript" src="extensions/js/vui.js"></script>
-<script type="text/javascript" src="../extensions/core/js/vui.js"></script>
-<script type="text/javascript" src="../admin/js/main.js"></script>
-<script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
-<script type="text/javascript" src="../carbon/admin/js/cookies.js"></script>
-
 <fmt:bundle basename="org.wso2.carbon.email.mgt.ui.i18n.Resources">
     <carbon:breadcrumb label="email.template"
                        resourceBundle="org.wso2.carbon.identity.user.profile.ui.i18n.Resources"
@@ -146,107 +208,103 @@
         </h2>
 
         <div id="workArea">
-            <form action="email-template-config-finish-ajaxprocessor.jsp?userName=<%=username%>" method="post">
+            <% if (ArrayUtils.isNotEmpty(emailTemplates)) {%>
+
+            <form name="templateForm" action="email-template-config-finish-ajaxprocessor.jsp" method="post"
+                  accept-charset="utf-8">
                 <div class="sectionSeperator">
                     <fmt:message key="email.template.set"/>
                 </div>
                 <div class=”sectionSub”>
                     <table class="carbonFormTable">
                         <tr>
-                            <td class="leftCol-med labelField"><fmt:message key="email.language"/></td>
-                            <td><select id="emailLanguage" name="emailLanguage" class="leftCol-med"
-                                        onchange="updateLocale(this)">
+                            <td class="leftCol-med labelField"><fmt:message key="email.types"/></td>
+                            <td><select id="emailTypes" name="emailTypes" class="leftCol-med"
+                                        onchange="updateLocale(this);">
                                 <%
-                                    EmailTemplateDTO[] templates = emailConfig.getTemplates();
+                                    HashSet<String> emailTypeNames = new HashSet<String>();
+                                    for (EmailTemplate emailTemplate : emailTemplates) {
+                                        String templateDisplayName = emailTemplate.getTemplateDisplayName();
+                                        String selected = StringUtils.equalsIgnoreCase(templateType, templateDisplayName) ? "selected" : "";
 
-                                    Set<String> localeList = new HashSet<String>();
-                                    for (int i = 0; i < templates.length; i++) {
-                                        EmailTemplateDTO template = templates[i];
-                                        localeList.add(template.getLocale());
-                                    }
-
-                                    for (String localeStr : localeList) {
-                                        String str = "";
-                                        if (StringUtils.equals(localeParam, localeStr)) {
-                                            str = "selected";
-                                        }
+                                        if (!emailTypeNames.contains(templateDisplayName)) {
                                 %>
-                                <option value="<%=Encode.forHtmlAttribute(localeStr)%>"
-                                        <%=str%>>
-                                    <%=Encode.forHtmlContent(localeStr)%>
+                                <option value="<%=templateDisplayName%>" <%=selected%>>
+                                    <%=Encode.forHtmlContent(templateDisplayName)%>
                                 </option>
                                 <%
+                                            emailTypeNames.add(templateDisplayName);
+                                        }
+                                    }
+
+                                    if (StringUtils.isBlank(templateType)) {
+                                        if (ArrayUtils.isNotEmpty(emailTemplates)) {
+                                            templateType = emailTemplates[0].getTemplateDisplayName();
+                                        }
                                     }
                                 %>
+
                             </select></td>
                         </tr>
                         <tr>
-                            <td class="leftCol-med labelField"><fmt:message key="email.types"/></td>
-                            <td><select id="emailTypes" name="emailTypes" class="leftCol-med"
-                                        onchange="updateFields(this);">
+                            <td class="leftCol-med labelField"><fmt:message key="email.language"/></td>
+                            <td><select id="emailLanguage" name="emailLanguage" class="leftCol-med"
+                                        onchange="updateFields(this)">
                                 <%
-
-                                    EmailTemplateDTO[] templates1 = emailConfig.getTemplates();
-
-                                    List<EmailTemplateDTO> templatesList = new ArrayList<EmailTemplateDTO>();
-                                    for (int i = 0; i < templates.length; i++) {
-                                        EmailTemplateDTO template = templates[i];
-                                        if (templates[i].getLocale().equalsIgnoreCase(localeParam)) {
+                                    List<EmailTemplate> templatesList = new ArrayList<EmailTemplate>();
+                                    for (EmailTemplate template : emailTemplates) {
+                                        if (StringUtils.equalsIgnoreCase(template.getTemplateDisplayName(), templateType)) {
                                             templatesList.add(template);
                                         }
                                     }
 
                                     for (int i = 0; i < templatesList.size(); i++) {
-
-                                        EmailTemplateDTO template = templatesList.get(i);
-
+                                        EmailTemplate template = templatesList.get(i);
                                         if (i == 0) {
                                             emailSubject0 = template.getSubject();
                                             emailBody0 = template.getBody();
                                             emailFooter0 = template.getFooter();
-                                            templateName0 = template.getName();
+                                            templateName0 = template.getTemplateType();
                                             emailContentType0 = template.getEmailContentType();
                                         }
 
                                         emailSubject = template.getSubject();
                                         emailBody = template.getBody();
                                         emailFooter = template.getFooter();
-                                        templateName = template.getName();
+                                        templateName = template.getTemplateType();
                                         emailContentType = template.getEmailContentType();
+
+                                        String localeCode = template.getLocale();
+                                        String localeDisplayName = Util.getLocaleDisplayName(localeCode);
 
                                 %>
                                 <option
-                                        value="<%=i%>"
+                                        value="<%=Encode.forHtmlAttribute(localeCode)%>"
                                         data-subject="<%=Encode.forHtmlAttribute(emailSubject)%>"
                                         data-body="<%=Encode.forHtmlAttribute(emailBody)%>"
                                         data-footer="<%=Encode.forHtmlAttribute(emailFooter)%>"
                                         data-templateName="<%=Encode.forHtmlAttribute(templateName)%>"
                                         data-emailContentType="<%=Encode.forHtmlAttribute(emailContentType)%>">
-                                    <%=
-                                    Encode.forHtmlContent(template.getDisplayName())%>
+                                    <%=Encode.forHtmlContent(localeDisplayName)%>
                                 </option>
                                 <%
                                     }
                                 %>
                             </select></td>
                         </tr>
-                        <%--<tr>--%>
-                            <%--<td><fmt:message key="emailContentType"/></td>--%>
-                            <%--<td><input type="text" name="emailContentType" id="emailContentType" style="width : 500px;"--%>
-                                       <%--value="<%=Encode.forHtmlAttribute(emailContentType0)%>"/></td>--%>
-                        <%--</tr>--%>
                         <tr>
                             <td class="leftCol-med labelField"><fmt:message key="email.template.content"/></td>
 
                             <td><select id="emailContentType" name="emailContentType" class="leftCol-med">
                                 <%
-                                    for(String currentType : emailContentTypeArr){
+                                    for (String currentType : emailContentTypeArr) {
                                         String currentSelectedAttr = "";
-                                        if(currentType.equals(emailContentType0)){
+                                        if (currentType.equals(emailContentType0)) {
                                             currentSelectedAttr = "selected=\"selected\"";
                                         }
                                 %>
-                                    <option <%=Encode.forHtmlAttribute(currentSelectedAttr)%>><%=Encode.forHtmlContent(currentType)%></option>
+                                <option <%=Encode.forHtmlAttribute(currentSelectedAttr)%>><%=Encode.forHtmlContent(currentType)%>
+                                </option>
                                 <%
                                     }
                                 %>
@@ -272,16 +330,24 @@
                             </textarea></td>
                         </tr>
                         <tr>
-                            <td></td>
                             <td><input type="hidden" name="templateName" id="templateName"
                                        value="<%=Encode.forHtmlAttribute(templateName0)%>"/></td>
                         </tr>
                     </table>
                 </div>
                 <div class="buttonRow">
-                    <input type="submit" class="button" value="Save"/>
+                    <input type="button" class="button" value="Save" onclick="validate()"/>
+                    <input type="button" class="button" style="margin-left: 10px;" value="Delete Template"
+                           onclick="deleteTemplate()"/>
+                    <input type="button" class="button" style="margin-left: 10px;" value="Delete Template Type"
+                           onclick="deleteTemplateType()"/>
                 </div>
             </form>
+            <%} else {%>
+            <div class="buttonRow">
+                <fmt:message key="email.templates.empty"/>
+            </div>
+            <%}%>
         </div>
     </div>
 </fmt:bundle>

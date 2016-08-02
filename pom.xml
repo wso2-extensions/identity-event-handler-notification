@@ -42,6 +42,7 @@
     <modules>
         <module>components/email-mgt</module>
         <module>components/event-handler-email</module>
+
         <module>service-stubs/identity</module>
 
         <module>features/org.wso2.carbon.email.mgt.server.feature</module>
@@ -210,6 +211,11 @@
                 <artifactId>org.wso2.carbon.identity.event</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.core</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
 
             <!--Carbon Analytics Common Dependencies-->
             <dependency>
@@ -327,10 +333,10 @@
     </build>
 
     <properties>
+
         <!--Identity Event Handler Email Version-->
         <identity.event.handler.email.exp.pkg.version>1.0.0-SNAPSHOT</identity.event.handler.email.exp.pkg.version>
-        <identity.event.handler.email.imp.pkg.version.range>[1.0.0, 2.0.0)
-        </identity.event.handler.email.imp.pkg.version.range>
+        <identity.event.handler.email.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.event.handler.email.imp.pkg.version.range>
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
@@ -348,20 +354,19 @@
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.4.5</carbon.kernel.version>
+        <carbon.kernel.version>4.4.7</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version.range>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.5.2</carbon.commons.version>
+        <carbon.commons.version>4.5.4</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
         <carbon.identity.framework.version>5.5.0-SNAPSHOT</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.0.0, 6.0.0)
-        </carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.imp.pkg.version.range>[5.0.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!--Identity Governance Version-->
         <identity.governance.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.governance.imp.pkg.version.range>

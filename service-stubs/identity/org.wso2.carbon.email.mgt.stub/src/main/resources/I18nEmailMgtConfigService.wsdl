@@ -1,29 +1,47 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                  xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://mgt.email.carbon.wso2.org"
-                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
-                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-                  xmlns:ax2112="http://dto.mgt.email.carbon.wso2.org/xsd"
-                  xmlns:ax2110="http://exceptions.mgt.email.carbon.wso2.org/xsd"
-                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.email.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://mgt.email.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2110="http://exceptions.mgt.email.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ax2112="http://model.mgt.email.carbon.wso2.org/xsd" targetNamespace="http://mgt.email.carbon.wso2.org">
     <wsdl:documentation>I18nEmailMgtConfigService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ax2113="http://dto.mgt.email.carbon.wso2.org/xsd" xmlns:ax2111="http://exceptions.mgt.email.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.email.carbon.wso2.org">
+        <xs:schema xmlns:ax2113="http://model.mgt.email.carbon.wso2.org/xsd" xmlns:ax2111="http://exceptions.mgt.email.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.email.carbon.wso2.org">
             <xs:import namespace="http://exceptions.mgt.email.carbon.wso2.org/xsd"/>
-            <xs:import namespace="http://dto.mgt.email.carbon.wso2.org/xsd"/>
-            <xs:element name="I18nEmailMgtConfigServiceI18nMgtServiceException">
+            <xs:import namespace="http://model.mgt.email.carbon.wso2.org/xsd"/>
+            <xs:element name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="I18nMgtServiceException" nillable="true" type="ax2111:I18nMgtServiceException"/>
+                        <xs:element minOccurs="0" name="I18nEmailMgtServerException" nillable="true" type="ax2110:I18nEmailMgtServerException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="saveEmailConfig">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="emailTemplate" nillable="true" type="ax2113:EmailTemplate"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEmailTemplateTypes">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEmailTemplateTypesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="addEmailConfig">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="emailTemplate" nillable="true" type="ax2113:EmailTemplateDTO"/>
+                        <xs:element minOccurs="0" name="emailTemplate" nillable="true" type="ax2113:EmailTemplate"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deleteEmailTemplate">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="emailTemplateDisplayName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="locale" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -35,45 +53,68 @@
             <xs:element name="getEmailConfigResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2113:EmailTemplateDTO"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2113:EmailTemplate"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="saveEmailConfig">
+            <xs:element name="addEmailTemplateType">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="emailTemplate" nillable="true" type="ax2113:EmailTemplateDTO"/>
+                        <xs:element minOccurs="0" name="emailTemplateDisplayName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deleteEmailTemplateType">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="emailTemplateDisplayName" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
         </xs:schema>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.mgt.email.carbon.wso2.org/xsd">
-            <xs:complexType name="EmailTemplateDTO">
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.mgt.email.carbon.wso2.org/xsd">
+            <xs:complexType name="EmailTemplate">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="body" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="emailContentType" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="footer" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="locale" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="subject" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="templateDisplayName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="templateType" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://exceptions.mgt.email.carbon.wso2.org/xsd">
-            <xs:complexType name="I18nMgtServiceException">
+            <xs:complexType name="I18nEmailMgtException">
                 <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="I18nEmailMgtServerException">
+                <xs:complexContent>
+                    <xs:extension base="ax2110:I18nEmailMgtException">
+                        <xs:sequence/>
+                    </xs:extension>
+                </xs:complexContent>
             </xs:complexType>
         </xs:schema>
     </wsdl:types>
-    <wsdl:message name="saveEmailConfigRequest">
-        <wsdl:part name="parameters" element="ns:saveEmailConfig"/>
+    <wsdl:message name="deleteEmailTemplateRequest">
+        <wsdl:part name="parameters" element="ns:deleteEmailTemplate"/>
     </wsdl:message>
-    <wsdl:message name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-        <wsdl:part name="parameters" element="ns:I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+    <wsdl:message name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+        <wsdl:part name="parameters" element="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+    </wsdl:message>
+    <wsdl:message name="getEmailTemplateTypesRequest">
+        <wsdl:part name="parameters" element="ns:getEmailTemplateTypes"/>
+    </wsdl:message>
+    <wsdl:message name="getEmailTemplateTypesResponse">
+        <wsdl:part name="parameters" element="ns:getEmailTemplateTypesResponse"/>
     </wsdl:message>
     <wsdl:message name="addEmailConfigRequest">
         <wsdl:part name="parameters" element="ns:addEmailConfig"/>
+    </wsdl:message>
+    <wsdl:message name="saveEmailConfigRequest">
+        <wsdl:part name="parameters" element="ns:saveEmailConfig"/>
     </wsdl:message>
     <wsdl:message name="getEmailConfigRequest">
         <wsdl:part name="parameters" element="ns:getEmailConfig"/>
@@ -81,30 +122,65 @@
     <wsdl:message name="getEmailConfigResponse">
         <wsdl:part name="parameters" element="ns:getEmailConfigResponse"/>
     </wsdl:message>
+    <wsdl:message name="addEmailTemplateTypeRequest">
+        <wsdl:part name="parameters" element="ns:addEmailTemplateType"/>
+    </wsdl:message>
+    <wsdl:message name="deleteEmailTemplateTypeRequest">
+        <wsdl:part name="parameters" element="ns:deleteEmailTemplateType"/>
+    </wsdl:message>
     <wsdl:portType name="I18nEmailMgtConfigServicePortType">
-        <wsdl:operation name="saveEmailConfig">
-            <wsdl:input message="ns:saveEmailConfigRequest" wsaw:Action="urn:saveEmailConfig"/>
-            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nMgtServiceException" name="I18nEmailMgtConfigServiceI18nMgtServiceException" wsaw:Action="urn:saveEmailConfigI18nEmailMgtConfigServiceI18nMgtServiceException"/>
+        <wsdl:operation name="deleteEmailTemplate">
+            <wsdl:input message="ns:deleteEmailTemplateRequest" wsaw:Action="urn:deleteEmailTemplate"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:deleteEmailTemplateI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getEmailTemplateTypes">
+            <wsdl:input message="ns:getEmailTemplateTypesRequest" wsaw:Action="urn:getEmailTemplateTypes"/>
+            <wsdl:output message="ns:getEmailTemplateTypesResponse" wsaw:Action="urn:getEmailTemplateTypesResponse"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:getEmailTemplateTypesI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
         </wsdl:operation>
         <wsdl:operation name="addEmailConfig">
             <wsdl:input message="ns:addEmailConfigRequest" wsaw:Action="urn:addEmailConfig"/>
-            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nMgtServiceException" name="I18nEmailMgtConfigServiceI18nMgtServiceException" wsaw:Action="urn:addEmailConfigI18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:addEmailConfigI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="saveEmailConfig">
+            <wsdl:input message="ns:saveEmailConfigRequest" wsaw:Action="urn:saveEmailConfig"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:saveEmailConfigI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
         </wsdl:operation>
         <wsdl:operation name="getEmailConfig">
             <wsdl:input message="ns:getEmailConfigRequest" wsaw:Action="urn:getEmailConfig"/>
             <wsdl:output message="ns:getEmailConfigResponse" wsaw:Action="urn:getEmailConfigResponse"/>
-            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nMgtServiceException" name="I18nEmailMgtConfigServiceI18nMgtServiceException" wsaw:Action="urn:getEmailConfigI18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:getEmailConfigI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="addEmailTemplateType">
+            <wsdl:input message="ns:addEmailTemplateTypeRequest" wsaw:Action="urn:addEmailTemplateType"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:addEmailTemplateTypeI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="deleteEmailTemplateType">
+            <wsdl:input message="ns:deleteEmailTemplateTypeRequest" wsaw:Action="urn:deleteEmailTemplateType"/>
+            <wsdl:fault message="ns:I18nEmailMgtConfigServiceI18nEmailMgtServerException" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException" wsaw:Action="urn:deleteEmailTemplateTypeI18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="I18nEmailMgtConfigServiceSoap11Binding" type="ns:I18nEmailMgtConfigServicePortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="saveEmailConfig">
-            <soap:operation soapAction="urn:saveEmailConfig" style="document"/>
+        <wsdl:operation name="deleteEmailTemplate">
+            <soap:operation soapAction="urn:deleteEmailTemplate" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEmailTemplateTypes">
+            <soap:operation soapAction="urn:getEmailTemplateTypes" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="addEmailConfig">
@@ -112,8 +188,17 @@
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="saveEmailConfig">
+            <soap:operation soapAction="urn:saveEmailConfig" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getEmailConfig">
@@ -124,20 +209,50 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addEmailTemplateType">
+            <soap:operation soapAction="urn:addEmailTemplateType" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteEmailTemplateType">
+            <soap:operation soapAction="urn:deleteEmailTemplateType" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="I18nEmailMgtConfigServiceSoap12Binding" type="ns:I18nEmailMgtConfigServicePortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="saveEmailConfig">
-            <soap12:operation soapAction="urn:saveEmailConfig" style="document"/>
+        <wsdl:operation name="deleteEmailTemplate">
+            <soap12:operation soapAction="urn:deleteEmailTemplate" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEmailTemplateTypes">
+            <soap12:operation soapAction="urn:getEmailTemplateTypes" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="addEmailConfig">
@@ -145,8 +260,17 @@
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="saveEmailConfig">
+            <soap12:operation soapAction="urn:saveEmailConfig" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getEmailConfig">
@@ -157,21 +281,54 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="I18nEmailMgtConfigServiceI18nMgtServiceException">
-                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nMgtServiceException"/>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addEmailTemplateType">
+            <soap12:operation soapAction="urn:addEmailTemplateType" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteEmailTemplateType">
+            <soap12:operation soapAction="urn:deleteEmailTemplateType" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="I18nEmailMgtConfigServiceI18nEmailMgtServerException">
+                <soap12:fault use="literal" name="I18nEmailMgtConfigServiceI18nEmailMgtServerException"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="I18nEmailMgtConfigServiceHttpBinding" type="ns:I18nEmailMgtConfigServicePortType">
         <http:binding verb="POST"/>
-        <wsdl:operation name="saveEmailConfig">
-            <http:operation location="saveEmailConfig"/>
+        <wsdl:operation name="deleteEmailTemplate">
+            <http:operation location="deleteEmailTemplate"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="getEmailTemplateTypes">
+            <http:operation location="getEmailTemplateTypes"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="addEmailConfig">
             <http:operation location="addEmailConfig"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="saveEmailConfig">
+            <http:operation location="saveEmailConfig"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -184,6 +341,18 @@
             <wsdl:output>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addEmailTemplateType">
+            <http:operation location="addEmailTemplateType"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="deleteEmailTemplateType">
+            <http:operation location="deleteEmailTemplateType"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="I18nEmailMgtConfigService">

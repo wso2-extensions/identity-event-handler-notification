@@ -58,7 +58,7 @@
                                     <arg line="-uri src/main/resources/I18nEmailMgtConfigService.wsdl
                                     -u -uw -o target/generated-code -p org.wso2.carbon.email.mgt.stub
                                     -ns2p http://mgt.email.carbon.wso2.org=org.wso2.carbon.email.mgt.stub,
-                                    http://dto.mgt.email.carbon.wso2.org/xsd=org.wso2.carbon.email.mgt.stub.dto"/>
+                                    http://model.mgt.email.carbon.wso2.org/xsd=org.wso2.carbon.email.mgt.stub.model"/>
                                     <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
@@ -95,7 +95,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.email.mgt.dto.xsd;version="${identity.event.handler.email.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.model.xsd;version="${identity.event.handler.email.exp.pkg.version}",
                             org.wso2.carbon.email.mgt.exceptions.xsd;version="${identity.event.handler.email.exp.pkg.version}",
                             org.wso2.carbon.email.mgt.stub;version="${identity.event.handler.email.exp.pkg.version}",
                         </Export-Package>

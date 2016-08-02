@@ -16,32 +16,20 @@
  * under the License.
  */
 
-package org.wso2.carbon.email.mgt.ui;
+package org.wso2.carbon.email.mgt.exceptions;
 
+/**
+ * Exception class
+ */
+public class I18nEmailMgtServerException extends I18nEmailMgtException {
+    
+    private static final long serialVersionUID = -7830262138811733190L;
 
-import org.wso2.carbon.email.mgt.dto.xsd.EmailTemplateDTO;
+    public I18nEmailMgtServerException(String message) {
+		super(message);
+	}
 
-import java.util.Map;
-
-public class EmailConfigDTO {
-
-    private Map<String, String> emailTypes;
-    private EmailTemplateDTO[] templates;
-
-    public Map<String, String> getEmailTypes() {
-        return emailTypes;
-    }
-
-    public void setEmailTypes(Map<String, String> emailTypes) {
-        this.emailTypes = emailTypes;
-    }
-
-    public EmailTemplateDTO[] getTemplates() {
-        return templates;
-    }
-
-    public void setTemplates(EmailTemplateDTO[] templates) {
-        this.templates = templates;
-    }
-
+	public I18nEmailMgtServerException(String message, Throwable e) {
+		super(message, e);
+	}
 }

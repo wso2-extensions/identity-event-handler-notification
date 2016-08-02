@@ -25,10 +25,10 @@
             <id>identity_emailtemplate_menu</id>
             <i18n-key>identity_emailtemplate</i18n-key>
             <i18n-bundle>org.wso2.carbon.email.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>configure_menu</parent-menu>
+            <parent-menu>manage_menu</parent-menu>
             <link>#</link>
             <region>region1</region>
-            <order>15</order>
+            <order>3</order>
             <style-class>manage</style-class>
             <icon>../email-mgt/images/i18nemail-template.png</icon>
             <require-permission>/permission/admin/configure/security</require-permission>
@@ -38,7 +38,7 @@
             <i18n-key>identity_add_emailtemplate</i18n-key>
             <i18n-bundle>org.wso2.carbon.email.mgt.ui.i18n.Resources</i18n-bundle>
             <parent-menu>identity_emailtemplate_menu</parent-menu>
-            <link>../email-mgt/email-template-add.jsp</link>
+            <link>../email-mgt/email-template-mgt.jsp</link>
             <region>region1</region>
             <order>1</order>
             <style-class>manage</style-class>

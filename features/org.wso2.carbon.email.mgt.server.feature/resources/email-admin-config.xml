@@ -23,7 +23,6 @@
 
 <configurations>
     <configuration type="passwordReset" display="PasswordReset" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Password Reset</subject>
         <body>
             Hi {givenname}
@@ -44,10 +43,8 @@
             WSO2 Carbon Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountIdRecovery" display="AccountIdRecovery" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Account Recovery</subject>
         <body>
             Hi {givenname}
@@ -60,10 +57,8 @@
             WSO2 Carbon Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountConfirmation" display="AccountConfirmation" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Account Confirmation</subject>
         <body>
             Hi {givenname},
@@ -83,10 +78,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="temporaryPassword" display="TemporaryPassword" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Temporary Password</subject>
         <body>
             Hi {givenname},
@@ -101,10 +94,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="otp" display="OneTimePassword" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - One Time Password Reset</subject>
         <body>
             Hi {givenname},
@@ -116,10 +107,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="askPassword" display="AskPassword" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Password Change for New Account</subject>
         <body>
             Hi {givenname}
@@ -137,10 +126,8 @@
             WSO2 Carbon Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountUnLock" display="AccountUnLock" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account unlocked</subject>
         <body>
             Hi {givenname},
@@ -152,10 +139,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountLock" display="AccountLock" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account Locked</subject>
         <body>
             Hi {givenname},
@@ -167,10 +152,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountEnable" display="AccountEnable" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account enabled</subject>
         <body>
             Hi {givenname},
@@ -182,10 +165,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="accountDisable" display="AccountDisable" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your account disabled</subject>
         <body>
             Hi {givenname},
@@ -197,10 +178,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="passwordResetSucess" display="passwordResetSucess" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - Your Password Reset successfully</subject>
         <body>
             Hi {givenname},
@@ -212,10 +191,8 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
     <configuration type="initiateRecovery" display="initiateRecovery" locale="en_US" emailContentType="text/plain">
-        <targetEpr></targetEpr>
         <subject>WSO2 Carbon - You started to reset password</subject>
         <body>
             Hi {givenname},
@@ -227,6 +204,5 @@
             WSO2 Identity Server Team
             http://www.wso2.com
         </footer>
-        <redirectPath></redirectPath>
     </configuration>
 </configurations>

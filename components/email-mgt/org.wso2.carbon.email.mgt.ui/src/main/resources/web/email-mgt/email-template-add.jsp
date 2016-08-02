@@ -16,47 +16,75 @@
 ~ under the License.
 -->
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
-           prefix="carbon" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
-<%@page import="org.wso2.carbon.CarbonConstants" %>
-<%@page import="java.lang.Exception" %>
-<%@page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<script type="text/javascript" src="extensions/js/vui.js"></script>
-<script type="text/javascript" src="../extensions/core/js/vui.js"></script>
-<script type="text/javascript" src="../admin/js/main.js"></script>
+<%@page import="org.apache.commons.lang.ArrayUtils" %>
+<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.owasp.encoder.Encode" %>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.email.mgt.ui.I18nEmailMgtConfigServiceClient" %>
+<%@ page import="org.wso2.carbon.email.mgt.ui.Util" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.util.Locale" %>
+<%@ page import="java.util.ResourceBundle" %>
 
 <jsp:include page="../dialog/display_messages.jsp"/>
 
+
 <%
+    String emailTemplateType = request.getParameter("templateType");
     String username = request.getParameter("username");
     Locale[] availableLocale = Locale.getAvailableLocales();
 
-    if (username == null) {
-        username = (String) request.getSession().getAttribute("logged-user");
+    String forwardTo = null;
+    String BUNDLE = "org.wso2.carbon.email.mgt.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+
+    I18nEmailMgtConfigServiceClient client;
+    String[] emailTemplateTypes = null;
+    try {
+        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+        String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+        ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
+                getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+        client = new I18nEmailMgtConfigServiceClient(cookie, backendServerURL, configContext);
+
+        // get template types
+        emailTemplateTypes = client.getEmailTemplateTypes();
+        if (emailTemplateTypes == null) {
+            emailTemplateTypes = new String[0];
+        }
+
+    } catch (Exception e) {
+        String message = resourceBundle.getString("error.while.loading.email.template.data");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        forwardTo = "../admin/error.jsp";
+    }
+
+    if (forwardTo != null) {
+%>
+
+<script type="text/javascript">
+    function forward() {
+        location.href = "<%=Encode.forJavaScriptBlock(forwardTo)%>";
+    }
+
+    forward();
+</script>
+
+<%
+        return;
     }
 %>
 
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants" %>
-<%@ page import="java.util.Locale" %>
-<%@ page import="org.owasp.encoder.Encode" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <fmt:bundle
         basename="org.wso2.carbon.email.mgt.ui.i18n.Resources">
     <carbon:breadcrumb label="email.add"
                        resourceBundle="org.wso2.carbon.identity.user.profile.ui.i18n.Resources"
                        topPage="true" request="<%=request%>"/>
-
-
-    <script type="text/javascript" src="extensions/js/vui.js"></script>
-    <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
-    <script type="text/javascript" src="../admin/js/main.js"></script>
-    <script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
-    <script type="text/javascript" src="../carbon/admin/js/cookies.js"></script>
-
 
     <div id="middle">
         <h2><fmt:message key='email.template.management'/></h2>
@@ -72,10 +100,14 @@
                     if (value == '') {
                         CARBON.showWarningDialog('<fmt:message key="email.template.type.is.required"/>');
                         return false;
-                    } else if (value.length > 50) {
-                        CARBON.showWarningDialog('<fmt:message key="email.template.type.is.too.long"/>');
+                    }
+
+                    var emailLocaleIndex = document.getElementsByName("emailLocale")[0].selectedIndex;
+                    if (emailLocaleIndex == 0) {
+                        CARBON.showWarningDialog('<fmt:message key="email.template.locale.is.required"/>');
                         return false;
                     }
+
 
                     var value = document.getElementsByName("emailSubject")[0].value;
                     if (value == '') {
@@ -88,6 +120,7 @@
 
 
                     var value = document.getElementsByName("emailBody")[0].value;
+                    console.log(value);
                     if (value == '') {
                         CARBON.showWarningDialog('<fmt:message key="email.template.body.is.required"/>');
                         return false;
@@ -114,29 +147,42 @@
                     <tr>
                         <td class="formRow">
                             <table class="normal" cellspacing="0">
-                                    <%--<tr>--%>
-                                    <%--<td class="leftCol-small"><fmt:message key='email.template.type'/><font color="red">*</font>--%>
-                                    <%--</td>--%>
-                                    <%--<td class="leftCol-big"><input type="text" name="emailType" id="emailType"--%>
-                                    <%--class="text-box-big"/></td>--%>
-                                    <%--</tr>--%>
                                 <tr>
                                     <td class="leftCol-med labelField"><fmt:message
                                             key="email.template.type"/></td>
-                                    <td><select id="" name="emailType" class="leftCol-med">
-                                        <option>Password Reset</option>
-                                        <option>AccountId Recovery</option>
-                                        <option>Account Confirmation</option>
-                                        <option>Temporary Password</option>
-                                        <option>One Time Password</option>
-                                        <option>Ask Password</option>
-                                        <option>Account Lock</option>
-                                        <option>Account UnLock</option>
-                                        <option>Account Enable</option>
-                                        <option>Account Disable</option>
+                                    <td><select id="emailType" name="emailType" class="leftCol-med">
+                                        <%
+                                            if (ArrayUtils.isNotEmpty(emailTemplateTypes)) {
+                                                for (String templateDisplayName : emailTemplateTypes) {
+                                                    String selected = StringUtils.equalsIgnoreCase(templateDisplayName, emailTemplateType) ? "selected" : "";
+                                                    if (StringUtils.isNotBlank(templateDisplayName)) {
+                                        %>
+                                        <option value="<%=templateDisplayName%>" <%=selected%>><%=templateDisplayName%>
+                                        </option>
+                                        <%
+                                                    }
+                                                }
+                                            }
+                                        %>
                                     </select></td>
                                 </tr>
 
+                                <tr>
+                                    <td class="leftCol-med labelField"><fmt:message
+                                            key="email.template.locale"/></td>
+                                    <td><select id="emailLocale" name="emailLocale" class="leftCol-med">
+                                        <%
+                                            for (Locale aLocale : availableLocale) {
+                                                String localeCode = Util.getLocaleCode(aLocale);
+                                        %>
+                                        <option value="<%=Encode.forHtmlAttribute(localeCode)%>">
+                                            <%=Encode.forHtmlContent(aLocale.getDisplayName())%>
+                                        </option>
+                                        <%
+                                            }
+                                        %>
+                                    </select></td>
+                                </tr>
                                 <tr>
                                     <td class="leftCol-med labelField"><fmt:message
                                             key="email.template.contentType"/></td>
@@ -145,42 +191,11 @@
                                         <option>text/plain</option>
                                     </select></td>
                                 </tr>
-                                <%--<tr>--%>
-                                    <%--<td class="leftCol-med labelField"><fmt:message--%>
-                                            <%--key="email.template.locale"/></td>--%>
-                                    <%--<td><select id="emailLocale" name="emailLocale" class="leftCol-med">--%>
-                                        <%--<option value="en">English</option>--%>
-                                        <%--<option value="es">Spanish</option>--%>
-                                        <%--<option value="ja">Japanese</option>--%>
-                                        <%--<option value="fr">French</option>--%>
-                                    <%--</select></td>--%>
-                                <%--</tr>--%>
-                                        <tr>
-                                            <td class="leftCol-med labelField"><fmt:message
-                                                    key="email.template.locale"/></td>
-                                            <td><select id="emailLocale" name="emailLocale" class="leftCol-med">
-                                                <%
-                                                    for (Locale aLocale : availableLocale) {
-                                                        String languageCode = aLocale.getLanguage();
-                                                        String countryCode = aLocale.getCountry();
-                                                        if (StringUtils.isBlank(countryCode)) {
-                                                            countryCode = languageCode;
-                                                        }
-                                                        String localecode = languageCode + "_" + countryCode;
-                                                %>
-                                                <option value="<%=Encode.forHtmlAttribute(localecode)%>">
-                                                    <%=Encode.forHtmlContent(aLocale.getDisplayName())%>
-                                                </option>
-                                                <%
-                                                    }
-                                                %>
-                                            </select></td>
-                                        </tr>
                                 <tr>
                                     <td class="leftCol-small"><fmt:message key='email.template.subject'/><font
                                             color="red">*</font></td>
                                     <td><input type="text" name="emailSubject" id="emailSubject" class="text-box-big"
-                                               style="width:500px" ;/></td>
+                                               style="width:500px"/></td>
                                 </tr>
                                 <tr>
                                     <td class="leftCol-small"><fmt:message key='email.template.body'/><font color="red">*</font>
