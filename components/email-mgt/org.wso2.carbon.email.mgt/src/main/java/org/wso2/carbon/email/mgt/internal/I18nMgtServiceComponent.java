@@ -80,7 +80,7 @@ public class I18nMgtServiceComponent {
             }
 
             // load default email templates
-            loadEmailConfigurations();
+            loadDefaultEmailTemplates();
 
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
@@ -88,8 +88,8 @@ public class I18nMgtServiceComponent {
         }
     }
 
-    private void loadEmailConfigurations() {
-        //Load email template configuration on server startup.
+    private void loadDefaultEmailTemplates() {
+        //Load email template configuration on server startup if they don't already exist.
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
         try {

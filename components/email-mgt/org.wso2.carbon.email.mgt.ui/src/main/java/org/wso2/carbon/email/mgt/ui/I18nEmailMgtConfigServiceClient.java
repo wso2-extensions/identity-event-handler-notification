@@ -102,9 +102,9 @@ public class I18nEmailMgtConfigServiceClient {
      * @param emailTemplate <code>Email Template</code> new Email Template information
      * @throws Exception Error when saving the Email Template.
      */
-    public void saveEmailConfig(EmailTemplate emailTemplate) throws AxisFault {
+    public void saveEmailTemplate(EmailTemplate emailTemplate) throws AxisFault {
         try {
-            stub.saveEmailConfig(emailTemplate);
+            stub.saveEmailTemplate(emailTemplate);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -116,9 +116,9 @@ public class I18nEmailMgtConfigServiceClient {
      * @param emailTemplate <code>Email Template</code> new Email Template information
      * @throws Exception Error when adding new Email Template information
      */
-    public void addEmailConfig(EmailTemplate emailTemplate) throws AxisFault {
+    public void addEmailTemplate(EmailTemplate emailTemplate) throws AxisFault {
         try {
-            stub.addEmailConfig(emailTemplate);
+            stub.addEmailTemplate(emailTemplate);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -131,7 +131,7 @@ public class I18nEmailMgtConfigServiceClient {
      */
     public EmailTemplate[] loadEmailTemplates() throws AxisFault {
         try {
-            return stub.getEmailConfig();
+            return stub.getAllTemplatesForTenant();
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
