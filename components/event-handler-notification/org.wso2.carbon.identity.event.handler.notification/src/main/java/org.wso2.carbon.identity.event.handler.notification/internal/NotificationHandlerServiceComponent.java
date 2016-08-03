@@ -55,9 +55,13 @@ public class NotificationHandlerServiceComponent {
     private static Log log = LogFactory.getLog(NotificationHandlerServiceComponent.class);
 
     protected void activate(ComponentContext context) {
-        context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new NotificationHandler(), null);
-        context.getBundleContext().registerService(TenantMgtListener.class.getName(),
-                new NotificationEventTenantListener(), null);
+        try {
+            context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new NotificationHandler(), null);
+            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+                    new NotificationEventTenantListener(), null);
+        } catch (Throwable e) {
+            log.error("Error occurred while activating Notification Handler Service Component", e);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Notification Handler bundle is activated");
         }

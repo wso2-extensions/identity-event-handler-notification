@@ -41,6 +41,7 @@ import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.claim.dao.ClaimDAO;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
@@ -64,9 +65,8 @@ public class NotificationUtil {
         try {
             userClaims = userStoreManager.getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
             if (userClaims != null) {
-                for (int i = 0; i < userClaims.length; i++) {
-                    claimsMap.put(userClaims[i].getClaimUri(), userClaims[i].getValue());
-
+                for(Claim userClaim : userClaims) {
+                    claimsMap.put(userClaim.getClaimUri(), userClaim.getValue());
                 }
             }
         } catch (UserStoreException e) {

@@ -28,11 +28,11 @@ import org.wso2.carbon.email.mgt.EmailTemplateManager;
 public class NotificationHandlerDataHolder {
 
     private static volatile NotificationHandlerDataHolder instance = new NotificationHandlerDataHolder();
-    RealmService realmService = null;
-    RegistryService registryService = null;
-    EventStreamService eventStreamService = null;
-    EventPublisherService eventPublisherService = null;
-    EmailTemplateManager emailTemplateManager = null;
+    private RealmService realmService = null;
+    private RegistryService registryService = null;
+    private EventStreamService eventStreamService = null;
+    private EventPublisherService eventPublisherService = null;
+    private EmailTemplateManager emailTemplateManager = null;
 
     private NotificationHandlerDataHolder() {
 
