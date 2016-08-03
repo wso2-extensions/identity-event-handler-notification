@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.email.mgt.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +28,6 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -54,7 +55,6 @@ import javax.xml.stream.XMLStreamReader;
 
 public class I18nEmailUtil {
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
-
 
 
     private I18nEmailUtil() {
@@ -159,21 +159,21 @@ public class I18nEmailUtil {
 
 
     /**
-     * @param emailTemplateDTO
+     * @param emailTemplate
      * @return
      * @throws I18nEmailMgtException
      */
-    public static Resource createTemplateResource(EmailTemplate emailTemplateDTO) throws I18nEmailMgtException {
+    public static Resource createTemplateResource(EmailTemplate emailTemplate) throws I18nEmailMgtException {
         Resource templateResource = new ResourceImpl();
 
-        String templateDisplayName = emailTemplateDTO.getTemplateDisplayName();
+        String templateDisplayName = emailTemplate.getTemplateDisplayName();
         String templateType = I18nEmailUtil.getNormalizedName(templateDisplayName);
-        String locale = emailTemplateDTO.getLocale();
-        String contentType = emailTemplateDTO.getEmailContentType();
+        String locale = emailTemplate.getLocale();
+        String contentType = emailTemplate.getEmailContentType();
 
-        String subject = emailTemplateDTO.getSubject();
-        String body = emailTemplateDTO.getBody();
-        String footer = emailTemplateDTO.getFooter();
+        String subject = emailTemplate.getSubject();
+        String body = emailTemplate.getBody();
+        String footer = emailTemplate.getFooter();
 
         // set template properties
         templateResource.setProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME, templateDisplayName);
@@ -184,7 +184,7 @@ public class I18nEmailUtil {
         templateResource.setMediaType(RegistryConstants.TAG_MEDIA_TYPE);
 
         String contentArray[] = {subject, body, footer};
-        String content = StringUtils.join(contentArray, "|");
+        String content = new Gson().toJson(contentArray);
 
         try {
             byte[] contentByteArray = content.getBytes("UTF-8");
@@ -203,7 +203,7 @@ public class I18nEmailUtil {
      * @throws I18nEmailMgtException
      */
     public static EmailTemplate getEmailTemplate(Resource templateResource) throws I18nEmailMgtException {
-        EmailTemplate templateDTO = new EmailTemplate();
+        EmailTemplate emailTemplate = new EmailTemplate();
         try {
             // process email template meta-data properties
             String templateDisplayName = templateResource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME);
@@ -211,27 +211,33 @@ public class I18nEmailUtil {
             String contentType = templateResource.getProperty(I18nMgtConstants.TEMPLATE_CONTENT_TYPE);
             String locale = templateResource.getProperty(I18nMgtConstants.TEMPLATE_LOCALE);
 
-            templateDTO.setTemplateDisplayName(templateDisplayName);
-            templateDTO.setTemplateType(templateType);
-            templateDTO.setEmailContentType(contentType);
-            templateDTO.setLocale(locale);
+            emailTemplate.setTemplateDisplayName(templateDisplayName);
+            emailTemplate.setTemplateType(templateType);
+            emailTemplate.setEmailContentType(contentType);
+            emailTemplate.setLocale(locale);
 
             // process email template content
             Object content = templateResource.getContent();
             if (content != null) {
                 byte templateContentArray[] = (byte[]) content;
                 String templateContent = new String(templateContentArray, Charset.forName("UTF-8"));
-                String[] templateContentElements = StringUtils.split(templateContent, "|");
 
-                // TODO should find a better way to maintain sections of email template.
-                if (templateContentElements.length > 3) {
-                    String errorMsg = "Template %s:%s contains '|' character which is invalid.";
+                String[] templateContentElements;
+                try {
+                    templateContentElements = new Gson().fromJson(templateContent, String[].class);
+                } catch (JsonSyntaxException ex) {
+                    String error = "Error deserializing '%s:%s' template from tenant registry.";
+                    throw new I18nEmailMgtServerException(String.format(error, templateDisplayName, locale), ex);
+                }
+
+                if (templateContentElements.length != 3) {
+                    String errorMsg = "Template %s:%s body is in invalid format. Missing subject,body or footer.";
                     throw new I18nMgtEmailConfigException(String.format(errorMsg, templateDisplayName, locale));
                 }
 
-                templateDTO.setSubject(templateContentElements[0]);
-                templateDTO.setBody(templateContentElements[1]);
-                templateDTO.setFooter(templateContentElements[2]);
+                emailTemplate.setSubject(templateContentElements[0]);
+                emailTemplate.setBody(templateContentElements[1]);
+                emailTemplate.setFooter(templateContentElements[2]);
             } else {
                 String error = String.format("Unable to find any content in %s:%s email template.",
                         templateDisplayName, locale);
@@ -241,7 +247,7 @@ public class I18nEmailUtil {
             String error = "Error retrieving a template object from the registry resource";
             throw new I18nEmailMgtServerException(error, e);
         }
-        return templateDTO;
+        return emailTemplate;
     }
 
     /**

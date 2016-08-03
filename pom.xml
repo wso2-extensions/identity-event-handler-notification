@@ -287,6 +287,12 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${com.google.code.gson.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -394,6 +400,10 @@
         <!--Carbon Analytics Common Version-->
         <carbon.analytics.common.version>5.1.2-SNAPSHOT</carbon.analytics.common.version>
         <carbon.analytics.common.version.range>[5.0.7,6.0.0)</carbon.analytics.common.version.range>
+
+        <!-- GSON version -->
+        <com.google.code.gson.version>2.3.1</com.google.code.gson.version>
+        <com.google.code.gson.osgi.version.range>[2.3.1,3.0.0)</com.google.code.gson.osgi.version.range>
 
         <!--Maven Plugin Version-->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
