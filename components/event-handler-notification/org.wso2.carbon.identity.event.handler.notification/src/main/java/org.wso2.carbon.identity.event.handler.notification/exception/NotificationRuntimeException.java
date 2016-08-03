@@ -16,26 +16,26 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.exception;
+package org.wso2.carbon.identity.event.handler.notification.exception;
 
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 
-public class NotificationEventRuntimeException extends IdentityRuntimeException {
+public class NotificationRuntimeException extends IdentityRuntimeException {
 
-    protected NotificationEventRuntimeException(String errorDescription) {
+    protected NotificationRuntimeException(String errorDescription) {
         super(errorDescription);
     }
 
-    protected NotificationEventRuntimeException(String errorDescription, Throwable cause) {
+    protected NotificationRuntimeException(String errorDescription, Throwable cause) {
         super(errorDescription, cause);
     }
 
-    public static NotificationEventRuntimeException error(String errorDescription) {
-        return new NotificationEventRuntimeException(errorDescription);
+    public static NotificationRuntimeException error(String errorDescription) {
+        return new NotificationRuntimeException(errorDescription);
     }
 
-    public static NotificationEventRuntimeException error(String errorDescription, Throwable cause) {
-        return new NotificationEventRuntimeException(errorDescription, cause);
+    public static NotificationRuntimeException error(String errorDescription, Throwable cause) {
+        return new NotificationRuntimeException(errorDescription, cause);
     }
 
 }

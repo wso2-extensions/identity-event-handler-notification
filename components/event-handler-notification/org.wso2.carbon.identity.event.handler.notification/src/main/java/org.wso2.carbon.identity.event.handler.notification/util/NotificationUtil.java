@@ -16,17 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.util;
+package org.wso2.carbon.identity.event.handler.notification.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
-import org.wso2.carbon.event.publisher.core.config.mapping.TextOutputMapping;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
@@ -35,25 +33,19 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
-import org.wso2.carbon.identity.event.handler.email.NotificationConstants;
-import org.wso2.carbon.identity.event.handler.email.email.bean.EmailNotification;
-import org.wso2.carbon.identity.event.handler.email.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.email.email.model.EmailTemplate;
-import org.wso2.carbon.identity.event.handler.email.exception.NotificationEventRuntimeException;
-import org.wso2.carbon.identity.event.handler.email.internal.NotificationHandlerDataHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
+import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,50 +56,6 @@ import java.util.regex.Pattern;
 public class NotificationUtil {
 
     private static Log log = LogFactory.getLog(NotificationUtil.class);
-
-    public static EmailTemplate loadEmailTemplate(String notificationType, String locale, String tenantDomain)
-            throws NotificationEventRuntimeException {
-        StringBuilder resourcePath = new StringBuilder(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_PATH)
-                .append(notificationType).append("/")
-                .append(notificationType).append(".").append(locale);
-        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-        RegistryService registry = NotificationHandlerDataHolder.getInstance().getRegistryService();
-        Resource resourceValue = null;
-        try {
-            UserRegistry userReg = registry.getConfigSystemRegistry(tenantId);
-            resourceValue = userReg.get(resourcePath.toString());
-            if (resourceValue != null) {
-                byte[] emailTemplateContentArray = (byte[]) resourceValue.getContent();
-                String emailContentType = resourceValue.getMediaType();
-                if (StringUtils.isBlank(emailContentType)) {
-                    emailContentType = NotificationConstants.EmailNotification.TEMPLATE_CONTENT_TYPE_DEFAULT;
-                }
-                String emailTemplateContentString = new String(emailTemplateContentArray, Charset.forName("UTF-8"));
-                if (log.isDebugEnabled()) {
-                    String message = "Successfully read the email template:\n" + emailTemplateContentString +
-                            "\nin resource path : " + resourcePath + " for tenant " + tenantDomain;
-                    log.debug(message);
-                }
-                String[] emailTemplateContent = emailTemplateContentString.split("\\|");
-                if (emailTemplateContent.length <= 3) {
-                    EmailTemplate template = new EmailTemplate(notificationType, emailTemplateContent[0],
-                            emailTemplateContent[1],
-                            emailTemplateContent[2], locale, emailContentType);
-                    return template;
-                } else {
-                    log.error("Cannot have \"|\" character in the template");
-                }
-            }
-        } catch (ResourceNotFoundException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Email template not found at path " + resourcePath + " for tenant " + tenantDomain, e);
-            }
-        } catch (RegistryException e) {
-            log.error("Error occurred while reading email templates from path: " + resourcePath +
-                    " for tenant " + tenantDomain, e);
-        }
-        return null;
-    }
 
     public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
 
@@ -219,35 +167,35 @@ public class NotificationUtil {
         try {
             return IdentityTenantUtil.getTenantDomain(userStoreManager.getTenantId());
         } catch (UserStoreException e) {
-            throw NotificationEventRuntimeException.error("Error when getting the tenant domain.", e);
+            throw NotificationRuntimeException.error("Error when getting the tenant domain.", e);
         }
     }
 
     public static void deployStream(String streamName, String streamVersion, String streamId)
-            throws NotificationEventRuntimeException {
+            throws NotificationRuntimeException {
         try {
             EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
             StreamDefinition streamDefinition = new StreamDefinition(streamName, streamVersion, streamId);
             service.addEventStreamDefinition(streamDefinition);
         } catch (MalformedStreamDefinitionException e) {
-            throw NotificationEventRuntimeException.error("Error in deploying a stream.", e);
+            throw NotificationRuntimeException.error("Error in deploying a stream.", e);
         } catch (EventStreamConfigurationException e) {
-            throw NotificationEventRuntimeException.error("Error in deploying a stream.", e);
+            throw NotificationRuntimeException.error("Error in deploying a stream.", e);
         }
     }
 
 
-    public static void deployPublisher(EventPublisherConfiguration eventPublisherConfiguration) throws NotificationEventRuntimeException {
+    public static void deployPublisher(EventPublisherConfiguration eventPublisherConfiguration) throws NotificationRuntimeException {
         EventPublisherService eventPublisherService = NotificationHandlerDataHolder.getInstance().getEventPublisherService();
         try {
             eventPublisherService.deployEventPublisherConfiguration(eventPublisherConfiguration);
         } catch (EventPublisherConfigurationException e) {
-            throw NotificationEventRuntimeException.error("Error in deploying a publisher.", e);
+            throw NotificationRuntimeException.error("Error in deploying a publisher.", e);
         }
     }
 
     public static Notification getNotification(Event event, Map<String, String> placeHolderData)
-            throws IdentityEventException, NotificationEventRuntimeException {
+            throws IdentityEventException, NotificationRuntimeException {
         String sendTo = null;
         Map<String, String> userClaims = new HashMap<>();
         String notificationEvent = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
@@ -274,51 +222,27 @@ public class NotificationUtil {
             sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
         }
         if (StringUtils.isEmpty(sendTo)) {
-            throw NotificationEventRuntimeException.error(
+            throw NotificationRuntimeException.error(
                     "Email notification sending failed. Sending email address is not configured for the user.");
         }
 
-        EmailTemplate emailTemplate = NotificationUtil.loadEmailTemplate(notificationEvent, locale, tenantDomain);
+        EmailTemplate emailTemplate;
+        try {
+            emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain);
+        } catch (I18nEmailMgtException e) {
+            String message = "Error when retrieving template from tenant registry.";
+            throw NotificationRuntimeException.error(message, e);
+        }
 
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
 
-        EmailNotification.EmailNotificationBuilder builder =
-                new EmailNotification.EmailNotificationBuilder(sendTo);
+        Notification.EmailNotificationBuilder builder =
+                new Notification.EmailNotificationBuilder(sendTo);
         builder.setSendFrom(sendFrom);
         builder.setTemplate(emailTemplate);
         builder.setPlaceHolderData(placeHolderData);
-        EmailNotification emailNotification = builder.build();
+        Notification emailNotification = builder.build();
         return emailNotification;
-    }
-
-    public static EventPublisherConfiguration getEventPublisherConfig() {
-        EventPublisherConfiguration eventPublisherConfiguration = new EventPublisherConfiguration();
-        eventPublisherConfiguration.setEventPublisherName(NotificationConstants.EmailNotification.EVENT_PUBLISHER_NAME);
-        eventPublisherConfiguration.setFromStreamName(NotificationConstants.EmailNotification.STREAM_NAME);
-        eventPublisherConfiguration.setFromStreamVersion(NotificationConstants.EmailNotification.STREAM_VERSION);
-
-        OutputEventAdapterConfiguration outputEventAdapterConfiguration = new OutputEventAdapterConfiguration();
-        outputEventAdapterConfiguration.setName(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_NAME);
-        outputEventAdapterConfiguration.setMessageFormat(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_MESSAGE_FORMAT);
-        outputEventAdapterConfiguration.setType(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_TYPE);
-
-        eventPublisherConfiguration.setToAdapterConfiguration(outputEventAdapterConfiguration);
-        TextOutputMapping textOutputMapping = new TextOutputMapping();
-        textOutputMapping.setCustomMappingEnabled(true);
-        textOutputMapping.setRegistryResource(false);
-        textOutputMapping.setMappingText(NotificationConstants.EmailNotification.OUTPUT_MAPPING_TEXT);
-        textOutputMapping.setCacheTimeoutDuration(0);
-
-        eventPublisherConfiguration.setOutputMapping(textOutputMapping);
-        Map<String, String> adapterDynamicProperties = new HashMap<>();
-        adapterDynamicProperties.put(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_ADD_PROPERTY,
-                NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_ADD_VALUE);
-        adapterDynamicProperties.put(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_TYPE_PROPERTY,
-                NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_TYPE_VALUE);
-        adapterDynamicProperties.put(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_SUBJECT_PROPERTY,
-                NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_DYNAMIC_EMAIL_SUBJECT_VALUE);
-        eventPublisherConfiguration.setToAdapterDynamicProperties(adapterDynamicProperties);
-        return eventPublisherConfiguration;
     }
 }
 

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email;
+package org.wso2.carbon.identity.event.handler.notification;
 
 public class NotificationConstants {
 

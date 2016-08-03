@@ -100,7 +100,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.email.mgt.internal,
-                            org.wso2.carbon.email.mgt.*;version="${identity.event.handler.email.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.*;version="${identity.event.handler.notification.exp.pkg.version}",
                         </Export-Package>
                         <Import-Package>
                             javax.cache,

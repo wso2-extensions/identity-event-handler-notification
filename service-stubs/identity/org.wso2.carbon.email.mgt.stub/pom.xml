@@ -95,9 +95,9 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.email.mgt.model.xsd;version="${identity.event.handler.email.exp.pkg.version}",
-                            org.wso2.carbon.email.mgt.exceptions.xsd;version="${identity.event.handler.email.exp.pkg.version}",
-                            org.wso2.carbon.email.mgt.stub;version="${identity.event.handler.email.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.model.xsd;version="${identity.event.handler.notification.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.exceptions.xsd;version="${identity.event.handler.notification.exp.pkg.version}",
+                            org.wso2.carbon.email.mgt.stub;version="${identity.event.handler.notification.exp.pkg.version}",
                         </Export-Package>
                     </instructions>
                 </configuration>

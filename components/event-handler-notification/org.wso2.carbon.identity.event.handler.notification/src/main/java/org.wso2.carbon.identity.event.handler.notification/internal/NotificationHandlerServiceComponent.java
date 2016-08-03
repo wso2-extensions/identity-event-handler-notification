@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.internal;
+package org.wso2.carbon.identity.event.handler.notification.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,14 +24,15 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
-import org.wso2.carbon.identity.event.handler.email.NotificationHandler;
-import org.wso2.carbon.identity.event.handler.email.listener.TenantCreationEventListener;
+import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
+import org.wso2.carbon.identity.event.handler.notification.listener.TenantCreationEventListener;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.email.mgt.EmailTemplateManager;
 
 /**
- * @scr.component name="identity.event.handler.org.wso2.carbon.identity.event.handler.email" immediate="true
+ * @scr.component name="identity.event.handler.notification" immediate="true
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
  * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
@@ -44,6 +45,9 @@ import org.wso2.carbon.user.core.service.RealmService;
  * @scr.reference name="eventPublisherService.service"
  * interface="org.wso2.carbon.event.publisher.core.EventPublisherService" cardinality="1..1"
  * policy="dynamic" bind="setEventPublisherService" unbind="unsetEventPublisherService"
+ * @scr.reference name="emailTemplateManager.service"
+ * interface="org.wso2.carbon.email.mgt.EmailTemplateManager" cardinality="1..1"
+ * policy="dynamic" bind="setEmailTemplateManager" unbind="unsetEmailTemplateManager"
  */
 
 public class NotificationHandlerServiceComponent {
@@ -119,5 +123,19 @@ public class NotificationHandlerServiceComponent {
             log.debug("UnSetting the Event Publisher Service");
         }
         NotificationHandlerDataHolder.getInstance().setEventPublisherService(null);
+    }
+
+    protected void setEmailTemplateManager(EmailTemplateManager emailTemplateManager) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Email Template Manager");
+        }
+        NotificationHandlerDataHolder.getInstance().setEmailTemplateManager(emailTemplateManager);
+    }
+
+    protected void unsetEmailTemplateManager(EmailTemplateManager emailTemplateManager) {
+        if (log.isDebugEnabled()) {
+            log.debug("UnSetting the Email Template Manager");
+        }
+        NotificationHandlerDataHolder.getInstance().setEmailTemplateManager(null);
     }
 }

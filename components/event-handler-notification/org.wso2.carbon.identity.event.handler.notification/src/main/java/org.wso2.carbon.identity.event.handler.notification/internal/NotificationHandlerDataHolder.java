@@ -16,13 +16,14 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.internal;
+package org.wso2.carbon.identity.event.handler.notification.internal;
 
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.email.mgt.EmailTemplateManager;
 
 public class NotificationHandlerDataHolder {
 
@@ -31,6 +32,7 @@ public class NotificationHandlerDataHolder {
     RegistryService registryService = null;
     EventStreamService eventStreamService = null;
     EventPublisherService eventPublisherService = null;
+    EmailTemplateManager emailTemplateManager = null;
 
     private NotificationHandlerDataHolder() {
 
@@ -72,4 +74,11 @@ public class NotificationHandlerDataHolder {
         return eventPublisherService;
     }
 
+    public void setEmailTemplateManager(EmailTemplateManager emailTemplateManager) {
+        this.emailTemplateManager = emailTemplateManager;
+    }
+
+    public EmailTemplateManager getEmailTemplateManager() {
+        return emailTemplateManager;
+    }
 }

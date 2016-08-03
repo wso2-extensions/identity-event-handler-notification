@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>org.wso2.carbon.identity</groupId>
-    <artifactId>identity-event-handler-email</artifactId>
+    <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
@@ -33,22 +33,22 @@
     </parent>
 
     <scm>
-        <url>https://github.com/wso2-extensions/identity-event-handler-email.git</url>
-        <developerConnection>scm:git:https://github.com/wso2-extensions/identity-event-handler-email.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2-extensions/identity-event-handler-email.git</connection>
+        <url>https://github.com/wso2-extensions/identity-event-handler-notification.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</connection>
         <tag>HEAD</tag>
     </scm>
 
     <modules>
         <module>components/email-mgt</module>
-        <module>components/event-handler-email</module>
+        <module>components/event-handler-notification</module>
 
         <module>service-stubs/identity</module>
 
         <module>features/org.wso2.carbon.email.mgt.server.feature</module>
         <module>features/org.wso2.carbon.email.mgt.ui.feature</module>
         <module>features/org.wso2.carbon.email.mgt.feature</module>
-        <module>features/org.wso2.carbon.event.handler.email.server.feature</module>
+        <module>features/org.wso2.carbon.event.handler.notification.server.feature</module>
 
     </modules>
 
@@ -279,7 +279,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
+                <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -355,8 +355,8 @@
     <properties>
 
         <!--Identity Event Handler Email Version-->
-        <identity.event.handler.email.exp.pkg.version>1.0.0-SNAPSHOT</identity.event.handler.email.exp.pkg.version>
-        <identity.event.handler.email.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.event.handler.email.imp.pkg.version.range>
+        <identity.event.handler.notification.exp.pkg.version>1.0.0-SNAPSHOT</identity.event.handler.notification.exp.pkg.version>
+        <identity.event.handler.notification.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.event.handler.notification.imp.pkg.version.range>
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>

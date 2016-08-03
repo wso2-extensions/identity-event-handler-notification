@@ -16,18 +16,18 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.email.bean;
+package org.wso2.carbon.identity.event.handler.notification.email.bean;
 
 
-import org.wso2.carbon.identity.event.handler.email.email.model.EmailTemplate;
-import org.wso2.carbon.identity.event.handler.email.exception.NotificationEventRuntimeException;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-public class EmailNotification extends Notification implements Serializable {
+public class Notification implements Serializable {
 
     private String sendTo;
     private String sendFrom;
@@ -37,7 +37,7 @@ public class EmailNotification extends Notification implements Serializable {
     private String footer;
     private Map<String, String> placeHolderData;
 
-    protected EmailNotification(EmailNotificationBuilder builder) {
+    protected Notification(EmailNotificationBuilder builder) {
         this.sendTo = builder.sendTo;
         this.sendFrom = builder.sendFrom;
         this.template = builder.template;
@@ -54,7 +54,7 @@ public class EmailNotification extends Notification implements Serializable {
                 content = content.replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
                         "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                throw NotificationEventRuntimeException.error(e.getMessage(), e);
+                throw NotificationRuntimeException.error(e.getMessage(), e);
             }
             content = content.replaceAll("\\{\\{" + entry.getKey() + "\\}\\}", entry.getValue());
         }
@@ -112,8 +112,8 @@ public class EmailNotification extends Notification implements Serializable {
             this.placeHolderData.put(key, value);
         }
 
-        public EmailNotification build() {
-            return new EmailNotification(this);
+        public Notification build() {
+            return new Notification(this);
         }
     }
 
