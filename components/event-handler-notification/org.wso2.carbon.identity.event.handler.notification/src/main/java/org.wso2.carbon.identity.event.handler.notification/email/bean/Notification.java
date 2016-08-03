@@ -87,6 +87,7 @@ public class Notification implements Serializable {
 
     public static class EmailNotificationBuilder {
 
+        // mandatory attributes
         private String sendTo;
         private String sendFrom;
         private EmailTemplate template;

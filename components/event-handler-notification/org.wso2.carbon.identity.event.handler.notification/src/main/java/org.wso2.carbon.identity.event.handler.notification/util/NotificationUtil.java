@@ -177,7 +177,7 @@ public class NotificationUtil {
             StreamDefinition streamDefinition = new StreamDefinition(streamName, streamVersion, streamId);
             service.addEventStreamDefinition(streamDefinition);
         } catch (MalformedStreamDefinitionException e) {
-            throw NotificationRuntimeException.error("Error in deploying a stream.", e);
+            throw NotificationRuntimeException.error("Error occurred due to a malformed stream definition.", e);
         } catch (EventStreamConfigurationException e) {
             throw NotificationRuntimeException.error("Error in deploying a stream.", e);
         }
