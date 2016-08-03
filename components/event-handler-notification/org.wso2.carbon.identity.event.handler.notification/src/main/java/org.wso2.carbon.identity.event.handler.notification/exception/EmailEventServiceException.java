@@ -16,31 +16,17 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.event.handler.email.util;
+package org.wso2.carbon.identity.event.handler.notification.exception;
 
-public interface Notification {
+public class EmailEventServiceException extends Exception {
 
-    public String getSendTo();
+    private static final long serialVersionUID = -7830262138811733180L;
 
-    public void setSendTo(String sendTo);
+    public EmailEventServiceException(String message) {
+        super(message);
+    }
 
-    public String getSendFrom();
-
-    public void setSendFrom(String sendFrom);
-
-    public String getSubject();
-
-    public void setSubject(String subject);
-
-    public String getBody();
-
-    public void setBody(String body);
-
-    public String getFooter();
-
-    public void setFooter(String footer);
-
-    public String getContentType();
-
-    public void setContentType(String type);
+    public EmailEventServiceException(String message, Throwable e) {
+        super(message, e);
+    }
 }

@@ -20,28 +20,53 @@
 
     <parent>
         <groupId>org.wso2.carbon.identity</groupId>
-        <artifactId>identity-event-handler-email</artifactId>
+        <artifactId>identity-event-handler-notification</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.event.handler.email.server.feature</artifactId>
+    <artifactId>org.wso2.carbon.event.handler.notification.server.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Email Event management server feature</name>
+    <name>Notification Event management server feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the core bundles required for Back-end functionality of Email-Event-Handling
+    <description>This feature contains the core bundles required for Back-end functionality of Notification-Event-Handling
         management</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.event.handler.email</artifactId>
+            <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prefilter-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>EmailPublisher.xml</include>
+                                        <include>id_gov_notify_stream_1.0.0.json</include>
+                                        <include>p2.inf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
@@ -54,7 +79,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.event.handler.email.server</id>
+                            <id>org.wso2.carbon.event.handler.notification.server</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -65,15 +90,37 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.event.handler.email</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.event.handler.notification</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.core.server:compatible:${carbon.identity.framework.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.event.output.adapter.server:compatible:${carbon.analytics.common.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.event.output.adapter.email.server:compatible:${carbon.analytics.common.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.email.mgt.server:compatible:${identity.event.handler.notification.exp.pkg.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>clean_target</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <tasks>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
