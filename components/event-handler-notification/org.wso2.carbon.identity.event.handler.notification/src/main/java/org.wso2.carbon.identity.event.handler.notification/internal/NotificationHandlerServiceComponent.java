@@ -25,7 +25,7 @@ import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
-import org.wso2.carbon.identity.event.handler.notification.listener.TenantCreationEventListener;
+import org.wso2.carbon.identity.event.handler.notification.listener.NotificationEventTenantListener;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -57,7 +57,7 @@ public class NotificationHandlerServiceComponent {
     protected void activate(ComponentContext context) {
         context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new NotificationHandler(), null);
         context.getBundleContext().registerService(TenantMgtListener.class.getName(),
-                new TenantCreationEventListener(), null);
+                new NotificationEventTenantListener(), null);
         if (log.isDebugEnabled()) {
             log.debug("Notification Handler bundle is activated");
         }

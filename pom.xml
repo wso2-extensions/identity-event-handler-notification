@@ -253,34 +253,34 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.email.mgt</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.server.feature</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui.feature</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.stub</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
-                <version>${project.version}</version>
+                <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang.wso2</groupId>

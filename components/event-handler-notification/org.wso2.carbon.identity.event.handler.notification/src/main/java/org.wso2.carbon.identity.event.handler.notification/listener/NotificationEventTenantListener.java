@@ -33,7 +33,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TenantCreationEventListener implements TenantMgtListener {
+public class NotificationEventTenantListener implements TenantMgtListener {
 
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfoBean) throws StratosException {
@@ -100,7 +100,7 @@ public class TenantCreationEventListener implements TenantMgtListener {
 
     }
 
-    private static EventPublisherConfiguration getEventPublisherConfig() {
+    private EventPublisherConfiguration getEventPublisherConfig() {
         EventPublisherConfiguration eventPublisherConfiguration = new EventPublisherConfiguration();
         eventPublisherConfiguration.setEventPublisherName(NotificationConstants.EmailNotification.EVENT_PUBLISHER_NAME);
         eventPublisherConfiguration.setFromStreamName(NotificationConstants.EmailNotification.STREAM_NAME);
