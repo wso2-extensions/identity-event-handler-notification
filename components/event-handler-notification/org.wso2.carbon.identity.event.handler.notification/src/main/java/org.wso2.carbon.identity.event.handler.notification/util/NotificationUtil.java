@@ -194,7 +194,7 @@ public class NotificationUtil {
         }
     }
 
-    public static Notification getNotification(Event event, Map<String, String> placeHolderData)
+    public static Notification buildNotification(Event event, Map<String, String> placeHolderData)
             throws IdentityEventException, NotificationRuntimeException {
         String sendTo = null;
         Map<String, String> userClaims = new HashMap<>();

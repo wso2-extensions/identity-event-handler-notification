@@ -30,7 +30,6 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
-import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class NotificationHandler extends AbstractEventHandler {
             }
         }
 
-        Notification notification = NotificationUtil.getNotification(event, placeHolderData);
+        Notification notification = NotificationUtil.buildNotification(event, placeHolderData);
         publishToStream(notification, placeHolderData);
     }
 
