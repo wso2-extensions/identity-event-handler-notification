@@ -78,6 +78,10 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -112,6 +116,8 @@
                             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
 
                             org.wso2.carbon.stratos.common.*; version="${carbon.commons.imp.pkg.version}",
+
+                            com.google.gson.*; version="${com.google.code.gson.osgi.version.range}",
 
                             org.wso2.carbon.core;version="${carbon.kernel.imp.pkg.version.range}",
                             org.wso2.carbon.context;version="${carbon.kernel.imp.pkg.version.range}",
