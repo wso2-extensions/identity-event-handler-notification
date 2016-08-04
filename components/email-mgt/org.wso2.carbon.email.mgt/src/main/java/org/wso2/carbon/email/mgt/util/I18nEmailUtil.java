@@ -230,7 +230,7 @@ public class I18nEmailUtil {
                     throw new I18nEmailMgtServerException(String.format(error, templateDisplayName, locale), ex);
                 }
 
-                if (templateContentElements.length != 3) {
+                if (templateContentElements == null || templateContentElements.length != 3) {
                     String errorMsg = "Template %s:%s body is in invalid format. Missing subject,body or footer.";
                     throw new I18nMgtEmailConfigException(String.format(errorMsg, templateDisplayName, locale));
                 }
