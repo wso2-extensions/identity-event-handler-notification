@@ -71,7 +71,7 @@
             the
             link into your browser's address window.
 
-            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
+            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{callback}}
         </body>
         <footer>
             Best Regards,
