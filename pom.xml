@@ -19,7 +19,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <groupId>org.wso2.carbon.identity</groupId>
+    <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
@@ -202,22 +202,22 @@
 
             <!--Carbon Identity Framework Dependencies-->
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.base</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.event</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.core</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
@@ -251,34 +251,34 @@
 
             <!--Identity Event Handler Email Dependencies-->
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.email.mgt</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.server.feature</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui.feature</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.stub</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.event.handler.email</groupId>
                 <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
                 <version>${identity.event.handler.notification.exp.pkg.version}</version>
             </dependency>
