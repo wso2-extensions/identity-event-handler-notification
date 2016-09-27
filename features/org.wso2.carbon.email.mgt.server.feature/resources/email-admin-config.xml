@@ -44,6 +44,27 @@
             http://www.wso2.com
         </footer>
     </configuration>
+    <configuration type="emailConfirm" display="EmailConfirm" locale="en_US" emailContentType="text/plain">
+        <subject>WSO2 Carbon - Email Confirmation</subject>
+        <body>
+            Hi {{user.claim.givenname}},
+
+            You have created an account with following user name
+
+            User Name: {{user-name}}
+
+            Please click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste
+            the
+            link into your browser's address window.
+
+            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
+        </body>
+        <footer>
+            Best Regards,
+            WSO2 Identity Server Team
+            http://www.wso2.com
+        </footer>
+    </configuration>
     <configuration type="accountIdRecovery" display="AccountIdRecovery" locale="en_US" emailContentType="text/plain">
         <subject>WSO2 Carbon - Account Recovery</subject>
         <body>
@@ -116,8 +137,7 @@
             Please change your password for the newly created account : {{user-name}}. Please click the link below to
             create the password.
 
-            https://localhost:8443/InfoRecoverySample/infoRecover/verify?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
-
+            https://localhost:9443/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&userstoredomain={{userstore-domain}}&username={{url:user-name}}&tenantdomain={{tenant-domain}}
             If clicking the link doesn't seem to work, you can copy and paste the
             link into your browser's address window.
         </body>
