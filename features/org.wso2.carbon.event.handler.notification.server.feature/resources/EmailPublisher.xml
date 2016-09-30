@@ -7,7 +7,7 @@
   </mapping>
   <to eventAdapterType="email">
     <property name="email.address">{{send-to}}</property>
-    <property name="email.type">text/plain</property>
+    <property name="email.type">{{content-type}}</property>
     <property name="email.subject">{{subject}}</property>
   </to>
 </eventPublisher>
