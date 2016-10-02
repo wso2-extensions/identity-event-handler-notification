@@ -87,7 +87,6 @@
                                         <button onclick="cancelForm()" type="button" class="button">Cancel</button>
                                     </td>
                                 </tr>
-                                </tbody>
                             </table>
                         </td>
                     </tr>

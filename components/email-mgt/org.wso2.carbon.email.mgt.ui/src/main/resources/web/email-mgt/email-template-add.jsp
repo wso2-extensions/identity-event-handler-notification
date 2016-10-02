@@ -134,6 +134,10 @@
                     document.addemailtemplate.submit();
                 }
 
+                function cancelForm() {
+                    location.href = 'email-template-mgt.jsp';
+                }
+
             </script>
 
             <form name="addemailtemplate" action="email-template-add-finish-ajaxprocessor.jsp" method="post">
@@ -214,8 +218,8 @@
                     </tr>
                     <tr>
                         <td colspan="2" class="buttonRow">
-                            <input type="button" value="<fmt:message key='email.add'/>" class="button"
-                                   onclick="validate();"/>
+                            <button onclick="validate()" type="button" class="button">Add</button>
+                            <button onclick="cancelForm()" type="button" class="button">Cancel</button>
                         </td>
                     </tr>
 
