@@ -249,34 +249,34 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.email.mgt</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.server.feature</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui.feature</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.ui</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.email.mgt.stub</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
                 <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
-                <version>${identity.event.handler.notification.exp.pkg.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang.wso2</groupId>
