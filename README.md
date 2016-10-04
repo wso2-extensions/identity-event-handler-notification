@@ -1,1 +1,1 @@
-# identity-event-handler-email
+# identity-event-handler-notification
