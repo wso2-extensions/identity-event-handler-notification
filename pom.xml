@@ -243,11 +243,6 @@
                 <artifactId>org.wso2.carbon.databridge.commons</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
 
             <!--Identity Event Handler Email Dependencies-->
             <dependency>
