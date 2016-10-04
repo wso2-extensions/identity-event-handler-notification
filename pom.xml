@@ -40,10 +40,11 @@
     </scm>
 
     <modules>
-        <module>components/email-mgt</module>
-        <module>components/event-handler-notification</module>
+        <module>components/email-mgt/org.wso2.carbon.email.mgt</module>
+        <module>components/email-mgt/org.wso2.carbon.email.mgt.ui</module>
+        <module>components/event-handler-notification/org.wso2.carbon.identity.event.handler.notification</module>
 
-        <module>service-stubs/identity</module>
+        <module>service-stubs/identity/org.wso2.carbon.email.mgt.stub</module>
 
         <module>features/org.wso2.carbon.email.mgt.server.feature</module>
         <module>features/org.wso2.carbon.email.mgt.ui.feature</module>
