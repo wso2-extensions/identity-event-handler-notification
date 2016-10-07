@@ -27,6 +27,8 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.Locale" %>
 <%@ page import="java.util.ResourceBundle" %>
 
@@ -36,7 +38,15 @@
 <%
     String emailTemplateType = request.getParameter("templateType");
     String username = request.getParameter("username");
-    Locale[] availableLocale = Locale.getAvailableLocales();
+    Locale[] availableLocales = Locale.getAvailableLocales();
+    Arrays.sort(availableLocales, new Comparator<Locale>() {
+
+        @Override
+        public int compare(Locale o1, Locale o2) {
+
+            return o1.getDisplayName().compareTo(o2.getDisplayName());
+        }
+    });
 
     String forwardTo = null;
     String BUNDLE = "org.wso2.carbon.email.mgt.ui.i18n.Resources";
@@ -172,7 +182,7 @@
                                             key="email.template.locale"/></td>
                                     <td><select id="emailLocale" name="emailLocale" class="leftCol-med">
                                         <%
-                                            for (Locale aLocale : availableLocale) {
+                                            for (Locale aLocale : availableLocales) {
                                                 String localeCode = Util.getLocaleCode(aLocale);
                                         %>
                                         <option value="<%=Encode.forHtmlAttribute(localeCode)%>">
