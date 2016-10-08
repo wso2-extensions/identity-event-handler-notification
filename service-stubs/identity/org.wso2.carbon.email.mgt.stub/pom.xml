@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.1</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -53,7 +53,7 @@
                                     <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${axiom.wso2.version}/axiom-${axiom.wso2.version}.jar" />
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/I18nEmailMgtConfigService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.email.mgt.stub -ns2p http://mgt.email.carbon.wso2.org=org.wso2.carbon.email.mgt.stub,                                     http://model.mgt.email.carbon.wso2.org/xsd=org.wso2.carbon.email.mgt.stub.model" />
+                                    <arg line="-uri src/main/resources/I18nEmailMgtConfigService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.email.mgt.stub -ns2p http://mgt.email.carbon.wso2.org=org.wso2.carbon.email.mgt.stub, http://model.mgt.email.carbon.wso2.org/xsd=org.wso2.carbon.email.mgt.stub.model" />
                                     <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
