@@ -270,29 +270,30 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
 
     @Override
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
-        // before loading templates we check whether they already exist.
+
         try {
-            if (!resourceMgtService.isResourceExists(EMAIL_TEMPLATE_PATH, tenantDomain)) {
-                // load DTOs from the I18nEmailUtil class
-                List<EmailTemplate> defaultTemplates = I18nEmailUtil.getDefaultEmailTemplates();
-                // iterate through the list and write to registry!
-                for (EmailTemplate emailTemplateDTO : defaultTemplates) {
+            // load DTOs from the I18nEmailUtil class
+            List<EmailTemplate> defaultTemplates = I18nEmailUtil.getDefaultEmailTemplates();
+            // iterate through the list and write to registry!
+            for (EmailTemplate emailTemplateDTO : defaultTemplates) {
+                String templateTypeDisplayName = emailTemplateDTO.getTemplateDisplayName();
+                String templateType = I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+
+                String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType; // template type root directory
+                //Check for existence of each category, since some template may have migrated from earlier version
+                //This will also add new template types provided from file, but won't update any existing
+                if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
                     addEmailTemplate(emailTemplateDTO, tenantDomain);
                     if (log.isDebugEnabled()) {
                         String msg = "Default template added to %s tenant registry : %n%s";
                         log.debug(String.format(msg, tenantDomain, emailTemplateDTO.toString()));
                     }
                 }
+            }
 
-                if (log.isDebugEnabled()) {
-                    String msg = "Added %d default email templates to %s tenant registry";
-                    log.debug(String.format(msg, defaultTemplates.size(), tenantDomain));
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    String msg = "Default email templates already exist in %s tenant domain.";
-                    log.debug(String.format(msg, tenantDomain));
-                }
+            if (log.isDebugEnabled()) {
+                String msg = "Added %d default email templates to %s tenant registry";
+                log.debug(String.format(msg, defaultTemplates.size(), tenantDomain));
             }
         } catch (IdentityRuntimeException ex) {
             String error = "Error when tried to check for default email templates in %s tenant registry";
