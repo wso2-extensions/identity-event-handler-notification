@@ -71,7 +71,7 @@
             Hi {{user.claim.givenname}},
 
             We received a request to recover your account user name. The account associated with us indicates that the
-            user name is : {{user-name}}
+            user name is : {{user-name}}@{{tenant-domain}}
         </body>
         <footer>
             Best Regards,
