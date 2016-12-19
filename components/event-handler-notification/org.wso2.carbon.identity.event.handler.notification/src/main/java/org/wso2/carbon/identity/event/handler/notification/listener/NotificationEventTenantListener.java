@@ -105,6 +105,7 @@ public class NotificationEventTenantListener implements TenantMgtListener {
         eventPublisherConfiguration.setEventPublisherName(NotificationConstants.EmailNotification.EVENT_PUBLISHER_NAME);
         eventPublisherConfiguration.setFromStreamName(NotificationConstants.EmailNotification.STREAM_NAME);
         eventPublisherConfiguration.setFromStreamVersion(NotificationConstants.EmailNotification.STREAM_VERSION);
+        eventPublisherConfiguration.setProcessEnabled(true);
 
         OutputEventAdapterConfiguration outputEventAdapterConfiguration = new OutputEventAdapterConfiguration();
         outputEventAdapterConfiguration.setName(NotificationConstants.EmailNotification.OUTPUT_ADAPTOR_NAME);
