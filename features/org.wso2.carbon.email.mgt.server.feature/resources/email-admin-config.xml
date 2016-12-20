@@ -100,6 +100,27 @@
             http://www.wso2.com
         </footer>
     </configuration>
+    <configuration type="resendAccountConfirmation" display="ResendAccountConfirmation" locale="en_US" emailContentType="text/plain">
+        <subject>WSO2 Carbon - Resend Account Confirmation</subject>
+        <body>
+            Hi {{user.claim.givenname}},
+
+            You have created an account with following user name
+
+            User Name: {{user-name}}
+
+            Please click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste
+            the
+            link into your browser's address window.
+
+            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
+        </body>
+        <footer>
+            Best Regards,
+            WSO2 Identity Server Team
+            http://www.wso2.com
+        </footer>
+    </configuration>
     <configuration type="temporaryPassword" display="TemporaryPassword" locale="en_US" emailContentType="text/plain">
         <subject>WSO2 Carbon - Temporary Password</subject>
         <body>
