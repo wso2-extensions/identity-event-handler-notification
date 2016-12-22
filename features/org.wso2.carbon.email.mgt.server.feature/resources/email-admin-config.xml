@@ -281,4 +281,17 @@
             http://www.wso2.com
         </footer>
     </configuration>
+    <configuration type="idleAccountReminder" display="idleAccountReminder" locale="en_US" emailContentType="text/plain">
+        <subject>WSO2 Carbon - Your account is inactive</subject>
+        <body>
+            Hi {{user.claim.givenname}},
+
+            It looks as though you haven't signed in to your account for quite a while. Please sign in to your account if you'd like to keep your account active.
+        </body>
+        <footer>
+            Best Regards,
+            WSO2 Identity Server Team
+            http://www.wso2.com
+        </footer>
+    </configuration>
 </configurations>
