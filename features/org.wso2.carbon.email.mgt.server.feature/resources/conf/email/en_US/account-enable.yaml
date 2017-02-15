@@ -1,0 +1,7 @@
+subject: "WSO2 Carbon - Your account enabled"
+body: "\n            Hi {{user.claim.givenname}},\n\n            Please note that the account registered with us with the user name : {{user-name}} has been enabled.\n        "
+footer: "\n            Best Regards,\n            WSO2 Identity Server Team\n            http://www.wso2.com\n        "
+type: accountEnable
+display: AccountEnable
+locale: en_US
+emailContentType: "text/plain"

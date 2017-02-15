@@ -16,89 +16,73 @@
 
 package org.wso2.carbon.email.mgt.model;
 
-import java.io.Serializable;
-
 /**
  * Encapsulates email template data such as email subject,body,footer etc., which use
  * to construct the email template.
  */
-public class EmailTemplate implements Serializable {
+public class EmailTemplate {
+    private String subject;
+    private String body;
+    private String footer;
+    private String type;
+    private String display;
+    private String locale;
+    private String emailContentType;
 
-	private static final long serialVersionUID = -8854592668563155088L;
-	private String subject;
-	private String body;
-	private String footer;
-	private String templateType;
-	private String templateDisplayName;
-	private String locale;
-	private String emailContentType;
+    public String getSubject() {
+        return subject;
+    }
 
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
-	public String getSubject() {
-		return subject;
-	}
+    public String getBody() {
+        return body;
+    }
 
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+    public void setBody(String body) {
+        this.body = body;
+    }
 
-	public String getBody() {
-		return body;
-	}
+    public String getFooter() {
+        return footer;
+    }
 
-	public void setBody(String body) {
-		this.body = body;
-	}
+    public void setFooter(String footer) {
+        this.footer = footer;
+    }
 
-	public String getFooter() {
-		return footer;
-	}
+    public String getTemplateType() {
+        return type;
+    }
 
-	public void setFooter(String footer) {
-		this.footer = footer;
-	}
+    public void setTemplateType(String templateType) {
+        this.type = templateType;
+    }
 
-	public String getTemplateType() {
-		return templateType;
-	}
+    public String getTemplateDisplayName() {
+        return display;
+    }
 
-	public void setTemplateType(String templateType) {
-		this.templateType = templateType;
-	}
+    public void setTemplateDisplayName(String templateDisplayName) {
+        this.display = templateDisplayName;
+    }
 
-	public String getTemplateDisplayName() {
-		return templateDisplayName;
-	}
+    public String getLocale() {
+        return locale;
+    }
 
-	public void setTemplateDisplayName(String templateDisplayName) {
-		this.templateDisplayName = templateDisplayName;
-	}
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
 
-	public String getLocale() {
-		return locale;
-	}
+    public String getEmailContentType() {
+        return emailContentType;
+    }
 
-	public void setLocale(String locale) {
-		this.locale = locale;
-	}
+    public void setEmailContentType(String emailContentType) {
+        this.emailContentType = emailContentType;
+    }
 
-	public String getEmailContentType() {
-		return emailContentType;
-	}
-
-	public void setEmailContentType(String emailContentType) {
-		this.emailContentType = emailContentType;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("templateDisplayName: ").append(templateDisplayName).append("\n")
-				.append("locale: ").append(locale).append("\n")
-				.append("contentType: ").append(emailContentType).append("\n")
-				.append("subject: ").append(subject).append("\n")
-				.append("body: ").append(body).append("\n")
-				.append("footer: ").append(footer);
-		return stringBuilder.toString();
-	}
 }

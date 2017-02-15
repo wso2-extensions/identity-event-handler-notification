@@ -38,6 +38,10 @@
             <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
             <artifactId>org.wso2.carbon.identity.event.handler.notification</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.mail</groupId>
+            <artifactId>mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -57,8 +61,6 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>EmailPublisher.xml</include>
-                                        <include>id_gov_notify_stream_1.0.0.json</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
@@ -89,12 +91,9 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.identity.event.handler.notification:org.wso2.carbon.identity.event.handler.notification</bundleDef>
+                                <bundleDef>org.wso2.orbit.javax.mail:mail</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.core.server:compatible:${carbon.identity.framework.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.output.adapter.server:compatible:${carbon.analytics.common.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.output.adapter.email.server:compatible:${carbon.analytics.common.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.email.mgt.server:compatible:${identity.event.handler.notification.exp.pkg.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>

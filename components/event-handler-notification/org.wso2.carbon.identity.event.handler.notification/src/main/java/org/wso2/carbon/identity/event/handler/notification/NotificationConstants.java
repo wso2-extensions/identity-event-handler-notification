@@ -18,18 +18,25 @@
 
 package org.wso2.carbon.identity.event.handler.notification;
 
+/**
+ * Notification constant.
+ */
 public class NotificationConstants {
 
     private NotificationConstants() {
     }
 
+    /**
+     * Constant related to email notification.
+     */
     public static class EmailNotification {
+        public static final String EMAIL_SMTP_CONFIG_PATH = "mail-smtp.properties";
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
         public static final String EMAIL_TEMPLATE_TYPE = "TEMPLATE_TYPE";
         public static final String LOCALE_DEFAULT = "en_US";
         public static final String TEMPLATE_CONTENT_TYPE_DEFAULT = "text/plain";
         public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
-        public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/emailaddress";
+        public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/email";
         public static final String IDENTITY_CLAIM_PREFIX = "identity";
         public static final String USER_CLAIM_PREFIX = "user.claim";
         public static final String WSO2_CLAIM_URI = "http://wso2.org/claims/";
@@ -62,6 +69,20 @@ public class NotificationConstants {
         public static final String ARBITRARY_BODY = "body";
         public static final String ARBITRARY_FOOTER = "footer";
 
+    }
+
+    /**
+     * Constant related to smtp configuration.
+     */
+    public static class SMTPProperty {
+        public static final String MAIL_SMTP_FROM = "mail.smtp.from";
+        public static final String MAIL_SMTP_USER = "mail.smtp.user";
+        public static final String MAIL_SMTP_PASSWORD = "mail.smtp.password";
+        public static final String MAIL_SMTP_HOST = "mail.smtp.host";
+        public static final String MAIL_SMTP_PORT = "mail.smtp.port";
+        public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+        public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 
     }
 }
+

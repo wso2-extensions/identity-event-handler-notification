@@ -18,16 +18,17 @@
 
 package org.wso2.carbon.identity.event.handler.notification.email.bean;
 
-
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-public class Notification implements Serializable {
+/**
+ * Notification properties.
+ */
+public class Notification {
 
     private String sendTo;
     private String sendFrom;
@@ -51,7 +52,8 @@ public class Notification implements Serializable {
 
         for (Map.Entry<String, String> entry : tagsData.entrySet()) {
             try {
-                content = content.replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
+                content = content
+                        .replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
                         "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw NotificationRuntimeException.error(e.getMessage(), e);
@@ -85,6 +87,9 @@ public class Notification implements Serializable {
         return this.footer;
     }
 
+    /**
+     * Email notification builder.
+     */
     public static class EmailNotificationBuilder {
 
         // mandatory attributes
@@ -110,7 +115,9 @@ public class Notification implements Serializable {
         }
 
         public void addPlaceHolderData(String key, String value) {
-            this.placeHolderData.put(key, value);
+            if (this.placeHolderData != null) {
+                this.placeHolderData.put(key, value);
+            }
         }
 
         public Notification build() {
