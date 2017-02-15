@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.event.handler.notification.exception;
 
+/**
+ * Email event service exception.
+ */
 public class EmailEventServiceException extends Exception {
 
     private static final long serialVersionUID = -7830262138811733180L;

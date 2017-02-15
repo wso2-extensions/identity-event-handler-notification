@@ -57,7 +57,24 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>email-admin-config.xml</include>
+                                        <include>conf/email/en_US/account-confirmation.yaml</include>
+                                        <include>conf/email/en_US/accountId-recovery.yaml</include>
+                                        <include>conf/email/en_US/admin-forced-password-reset-with-otp.yaml</include>
+                                        <include>conf/email/en_US/email-confirm.yaml</include>
+                                        <include>conf/email/en_US/one-time-password.yaml</include>
+                                        <include>conf/email/en_US/resend-account-confirmation.yaml</include>
+                                        <include>conf/email/en_US/account-disable.yaml</include>
+                                        <include>conf/email/en_US/account-lock.yaml</include>
+                                        <include>conf/email/en_US/admin-forced-password-reset.yaml</include>
+                                        <include>conf/email/en_US/idle-account-reminder.yaml</include>
+                                        <include>conf/email/en_US/password-reset-success.yaml</include>
+                                        <include>conf/email/en_US/temporary-password.yaml</include>
+                                        <include>conf/email/en_US/account-enable.yaml</include>
+                                        <include>conf/email/en_US/account-unlock.yaml</include>
+                                        <include>conf/email/en_US/ask-password.yaml</include>
+                                        <include>conf/email/en_US/initiate-recovery.yaml</include>
+                                        <include>conf/email/en_US/password-reset.yaml</include>
+                                        <include>conf/email/mail-smtp.properties</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
@@ -89,10 +106,6 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.identity.event.handler.notification:org.wso2.carbon.email.mgt</bundleDef>
                             </bundles>
-                            <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.core.server:compatible:${carbon.identity.framework.version}</importFeatureDef>
-                            </importFeatures>
                         </configuration>
                     </execution>
                 </executions>

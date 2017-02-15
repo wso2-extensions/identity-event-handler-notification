@@ -29,7 +29,7 @@ public class I18nMgtConstants {
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
     public static final String EMAIL_CONF_DIRECTORY = "email";
-    public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
+    public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.yaml";
     public static final String DEFAULT_EMAIL_LOCALE = "en_us";
 
     public static final String EMAIL_TEMPLATE_NAME = "templateName";
@@ -46,16 +46,5 @@ public class I18nMgtConstants {
     public static final String TEMPLATE_FOOTER = "footer";
 
     public static final String EMAIL_TEMPLATE_TYPE_REGEX = "[a-zA-Z0-9\\s]+";
-
-
-    public static class ErrorMsg {
-        private ErrorMsg() {
-
-        }
-
-        public static final String DUPLICATE_TEMPLATE_TYPE =
-                "Email template type '%s' already exists in %s tenant registry.";
-
-    }
 
 }
