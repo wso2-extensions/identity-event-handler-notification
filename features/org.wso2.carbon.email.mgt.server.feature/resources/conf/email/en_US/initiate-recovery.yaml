@@ -1,6 +1,9 @@
 subject: "WSO2 Carbon - You started to reset password"
-body: "\n            Hi {{user.claim.givenname}},\n\n            This is to notify that you have initiate to reset your password using security questions.\n        "
-footer: "\n            Best Regards,\n            WSO2 Identity Server Team\n            http://www.wso2.com\n        "
+body: "\nHi {{user.claim.givenname}},\n
+\nThis is to notify that you have initiate to reset your password using security questions.\n"
+footer: "\nBest Regards,
+\nWSO2 Identity Server Team
+\nhttp://www.wso2.com\n"
 type: initiateRecovery
 display: initiateRecovery
 locale: en_US
