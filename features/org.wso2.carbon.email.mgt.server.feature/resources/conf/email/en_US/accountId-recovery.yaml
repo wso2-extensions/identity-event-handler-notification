@@ -1,7 +1,7 @@
 subject: "WSO2 Carbon - Account Recovery"
 body: "\n            Hi {{user.claim.givenname}},\n\n            We received a request to recover your account user name. The account associated with us indicates that the\n            user name is : {{userstore-domain}}/{{user.claim.username}}\n        "
 footer: "\n            Best Regards,\n            WSO2 Carbon Team\n            http://www.wso2.com\n        "
-type: accountIdRecovery
+type: accountidrecovery
 display: AccountIdRecovery
 locale: en_US
 emailContentType: "text/plain"
