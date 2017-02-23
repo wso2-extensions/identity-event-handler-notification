@@ -1,6 +1,9 @@
 subject: "WSO2 Carbon - Your account is inactive"
-body: "\n            Hi {{user.claim.givenname}},\n\n            It looks as though you haven't signed in to your account for quite a while. Please sign in to your account if you'd like to keep your account active.\n        "
-footer: "\n            Best Regards,\n            WSO2 Identity Server Team\n            http://www.wso2.com\n        "
+body: "\nHi {{user.claim.givenname}},\n
+\nIt looks as though you haven't signed in to your account for quite a while. Please sign in to your account if you'd like to keep your account active.\n"
+footer: "\nBest Regards,
+\nWSO2 Identity Server Team
+\nhttp://www.wso2.com\n"
 type: idleAccountReminder
 display: idleAccountReminder
 locale: en_US
