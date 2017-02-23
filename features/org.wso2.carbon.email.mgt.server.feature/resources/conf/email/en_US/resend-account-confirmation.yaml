@@ -1,6 +1,14 @@
 subject: "WSO2 Carbon - Resend Account Confirmation"
-body: "\n            Hi {{user.claim.givenname}},\n\n            You have created an account with following user name\n\n            User Name: {{user-name}}\n\n            Please click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste\n            the\n            link into your browser's address window.\n\n            https://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&userstoredomain={{userstore-domain}}&username={{url:user-name}}&tenantdomain={{tenant-domain}}\n        "
-footer: "\n            Best Regards,\n            WSO2 Identity Server Team\n            http://www.wso2.com\n        "
+body: "\nHi {{user.claim.givenname}},\n
+\nYou have created an account with following user name\n
+\nUser Name: {{user.claim.givenname}}\n
+\nPlease click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste
+\nthe
+\nlink into your browser's address window.\n
+\nhttps://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&userstoredomain={{userstore-domain}}&username={{url:user-name}}&tenantdomain={{tenant-domain}}\n"
+footer: "\nBest Regards,
+\nWSO2 Identity Server Team
+\nhttp://www.wso2.com\n"
 type: resendAccountConfirmation
 display: ResendAccountConfirmation
 locale: en_US
