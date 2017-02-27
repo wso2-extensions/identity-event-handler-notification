@@ -17,14 +17,14 @@
  */
 package org.wso2.carbon.email.mgt.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
@@ -38,7 +38,7 @@ import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
         property = { "componentName=wso2-carbon-email-mgt" })
 public class I18nMgtServiceComponent {
 
-    private static Log log = LogFactory.getLog(I18nMgtServiceComponent.class);
+    private static Logger log = LoggerFactory.getLogger(I18nMgtServiceComponent.class);
 
     private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
 

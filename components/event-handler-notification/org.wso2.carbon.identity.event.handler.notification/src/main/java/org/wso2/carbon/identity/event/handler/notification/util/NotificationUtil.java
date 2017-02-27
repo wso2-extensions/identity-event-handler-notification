@@ -19,11 +19,12 @@
 package org.wso2.carbon.identity.event.handler.notification.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.common.util.IdentityUtils;
 import org.wso2.carbon.identity.event.EventConstants;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
@@ -33,7 +34,6 @@ import org.wso2.carbon.identity.mgt.IdentityStore;
 import org.wso2.carbon.identity.mgt.claim.Claim;
 import org.wso2.carbon.identity.mgt.exception.IdentityStoreException;
 import org.wso2.carbon.identity.mgt.exception.UserNotFoundException;
-import org.wso2.carbon.security.caas.api.util.CarbonSecurityConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +65,7 @@ import javax.mail.internet.MimeMessage;
  */
 public class NotificationUtil {
 
-    private static Log log = LogFactory.getLog(NotificationUtil.class);
+    private static Logger log = LoggerFactory.getLogger(NotificationUtil.class);
     private static Properties properties = new Properties();
 
     public static Map<String, String> getUserClaimValues(String uniqueUserId) {
@@ -237,7 +237,7 @@ public class NotificationUtil {
 
     public static void loadProperties() {
         InputStream inStream = null;
-        Path path = Paths.get(CarbonSecurityConstants.getCarbonHomeDirectory().toString(), "conf",
+        Path path = Paths.get(IdentityUtils.getCarbonHomeDirectory(), "conf",
                 I18nMgtConstants.EMAIL_CONF_DIRECTORY);
 
         // Open the default configuration file in carbon conf directory path .

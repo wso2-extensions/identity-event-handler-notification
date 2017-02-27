@@ -51,6 +51,10 @@
             <groupId>org.wso2.orbit.javax.mail</groupId>
             <artifactId>mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -60,14 +64,13 @@
             org.wso2.carbon.identity.event.handler.notification.*;version="${identity.event.handler.notification.exp.pkg.version}",
         </export.package>
         <import.package>
-            org.apache.commons.logging; version="${commons.logging.imp.pkg.version.range}",
+            org.slf4j; version="${slf4j.logging.package.import.version.range}",
             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
             org.wso2.carbon.email.mgt.*; version="${identity.event.handler.notification.imp.pkg.version.range}",
             org.wso2.carbon.identity.event.handler.*; version="${identity.event.handler.package.export.version}",
             org.wso2.carbon.identity.event.*; version="${identity.event.package.export.version}",
             org.wso2.carbon.identity.mgt.*; version="${org.wso2.carbon.identity.mgt.version.range}",
-            org.wso2.carbon.security.*; version="${org.wso2.carbon.security.version.range}",
             org.apache.commons.lang3; version="${commons-lang3.version}",
             org.wso2.carbon.identity.common.*; version="${carbon.identity.commons.version}",
             javax.mail.*,

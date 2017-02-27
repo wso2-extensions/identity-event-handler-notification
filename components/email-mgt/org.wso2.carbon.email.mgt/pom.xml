@@ -46,11 +46,6 @@
             <version>${org.wso2.carbon.identity.mgt.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.security.caas</groupId>
-            <artifactId>org.wso2.carbon.security.caas</artifactId>
-            <version>${carbon.security.caas.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${org.snakeyaml.version}</version>
@@ -71,10 +66,10 @@
         <import.package>
             org.slf4j; version="${slf4j.logging.package.import.version.range}",
             javax.xml.namespace,
-            org.apache.commons.logging; version="${commons.logging.imp.pkg.version.range}",
             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
             org.apache.commons.io.*; version="2.4.0",
             org.wso2.carbon.identity.mgt.*; version="${org.wso2.carbon.identity.mgt.version.range}",
+            org.wso2.carbon.identity.common.*; version="${carbon.identity.commons.version}",
             org.osgi.framework.*; version="${osgi.framework.imp.pkg.version.range}",
             org.wso2.carbon.security.*; version="${org.wso2.carbon.security.version.range}",
             org.yaml.snakeyaml.*; version="${org.snakeyaml.package.import.version.range}",
