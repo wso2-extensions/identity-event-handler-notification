@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>carbon-identity-event-handler-notification-tests</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -93,11 +93,12 @@
 
                                                 <classfiles>
                                                     <fileset dir="../../components/email-mgt/org.wso2.carbon.email.mgt/target/classes">
-                                                        <exclude name="**/*Constants.class" />
+                                                        <exclude name="**/*Constants*.class" />
                                                         <exclude name="**/*Exception.class" />
+                                                        <exclude name="**/org/wso2/carbon/email/mgt/model/*" />
                                                     </fileset>
                                                     <fileset dir="../../components/event-handler-notification/org.wso2.carbon.identity.event.handler.notification/target/classes">
-                                                        <exclude name="**/*Constants.class" />
+                                                        <exclude name="**/*Constants*.class" />
                                                         <exclude name="**/*Exception.class" />
                                                     </fileset>
                                                 </classfiles>

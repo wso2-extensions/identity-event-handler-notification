@@ -29,7 +29,7 @@ import org.wso2.carbon.identity.common.base.message.MessageContext;
 import org.wso2.carbon.identity.event.AbstractEventHandler;
 import org.wso2.carbon.identity.event.EventException;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationHandlerException;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
 
 import java.util.HashMap;
@@ -55,8 +55,8 @@ public class NotificationHandler extends AbstractEventHandler {
         try {
             Notification notification = NotificationUtil.buildNotification(placeHolderData);
             NotificationUtil.sendEmail(notification);
-        } catch (NotificationRuntimeException e) {
-            log.error("Error while sending email notification", e);
+        } catch (NotificationHandlerException e) {
+            throw new EventException("Error while sending email notification", e);
         }
     }
 
