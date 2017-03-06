@@ -18,17 +18,18 @@
 
 package org.wso2.carbon.identity.event.handler.notification;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.common.base.event.EventContext;
 import org.wso2.carbon.identity.common.base.event.model.Event;
 import org.wso2.carbon.identity.common.base.exception.IdentityException;
 import org.wso2.carbon.identity.common.base.exception.IdentityRuntimeException;
 import org.wso2.carbon.identity.common.base.handler.InitConfig;
+import org.wso2.carbon.identity.common.base.message.MessageContext;
 import org.wso2.carbon.identity.event.AbstractEventHandler;
 import org.wso2.carbon.identity.event.EventException;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationHandlerException;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
 
 import java.util.HashMap;
@@ -39,9 +40,10 @@ import java.util.Map;
  */
 public class NotificationHandler extends AbstractEventHandler {
 
-    private static final Log log = LogFactory.getLog(NotificationHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(NotificationHandler.class);
 
-    @Override public void handle(EventContext eventContext, Event event) throws EventException {
+    @Override
+    public void handle(EventContext eventContext, Event event) throws EventException {
         Map<String, String> placeHolderData = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : event.getEventProperties().entrySet()) {
@@ -53,12 +55,13 @@ public class NotificationHandler extends AbstractEventHandler {
         try {
             Notification notification = NotificationUtil.buildNotification(placeHolderData);
             NotificationUtil.sendEmail(notification);
-        } catch (NotificationRuntimeException e) {
-
+        } catch (NotificationHandlerException e) {
+            throw new EventException("Error while sending email notification", e);
         }
     }
 
-    @Override public void configure(InitConfig initConfig) throws IdentityException {
+    @Override
+    public void configure(InitConfig initConfig) throws IdentityException {
 
     }
 
@@ -68,6 +71,11 @@ public class NotificationHandler extends AbstractEventHandler {
 
     public String getName() {
         return "emailSend";
+    }
+
+    @Override
+    public int getPriority(MessageContext messageContext) {
+        return 50;
     }
 }
 

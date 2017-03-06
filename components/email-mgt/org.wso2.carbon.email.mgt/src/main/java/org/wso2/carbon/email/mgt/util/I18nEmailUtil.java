@@ -17,11 +17,11 @@
 package org.wso2.carbon.email.mgt.util;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.security.caas.api.util.CarbonSecurityConstants;
+import org.wso2.carbon.identity.common.util.IdentityUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
@@ -41,7 +41,7 @@ import java.util.Map;
  * Util class for email management
  */
 public class I18nEmailUtil {
-    private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(I18nEmailUtil.class);
 
     private static Map<String, Map<String, EmailTemplate>> templateCollectionMap;
 
@@ -50,7 +50,7 @@ public class I18nEmailUtil {
 
     public static void buildEmailTemplates() {
         //read all directories
-        Path templateDirectoryPath = Paths.get(CarbonSecurityConstants.getCarbonHomeDirectory().toString(), "conf",
+        Path templateDirectoryPath = Paths.get(IdentityUtils.getCarbonHomeDirectory(), "conf",
                 I18nMgtConstants.EMAIL_CONF_DIRECTORY);
         File emailTemplateFile = new File(templateDirectoryPath.toUri().getPath());
         File[] emailTemplateLocaleFiles = emailTemplateFile.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY);

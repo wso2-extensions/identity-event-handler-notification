@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.identity.event.handler.notification.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -27,6 +25,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.identity.event.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
@@ -39,9 +39,10 @@ import org.wso2.carbon.identity.mgt.RealmService;
 @Component(
         name = "org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerServiceComponent",
         immediate = true,
-        property = { "componentName=wso2-carbon-identity-event" }) public class NotificationHandlerServiceComponent {
+        property = { "componentName=wso2-carbon-identity-event" })
+public class NotificationHandlerServiceComponent {
 
-    private static Log log = LogFactory.getLog(NotificationHandlerServiceComponent.class);
+    private static Logger log = LoggerFactory.getLogger(NotificationHandlerServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext context) {

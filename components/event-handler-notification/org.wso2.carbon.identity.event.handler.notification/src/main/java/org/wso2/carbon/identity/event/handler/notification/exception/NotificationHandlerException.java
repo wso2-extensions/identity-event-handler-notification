@@ -18,27 +18,27 @@
 
 package org.wso2.carbon.identity.event.handler.notification.exception;
 
-import org.wso2.carbon.identity.common.base.exception.IdentityRuntimeException;
+import org.wso2.carbon.identity.common.base.exception.IdentityException;
 
 /**
- * Notification runtime exception.
+ * Notification exception.
  */
-public class NotificationRuntimeException extends IdentityRuntimeException {
+public class NotificationHandlerException extends IdentityException {
 
-    protected NotificationRuntimeException(String errorDescription) {
+    protected NotificationHandlerException(String errorDescription) {
         super(errorDescription);
     }
 
-    protected NotificationRuntimeException(String errorDescription, Throwable cause) {
+    protected NotificationHandlerException(String errorDescription, Throwable cause) {
         super(errorDescription, cause);
     }
 
-    public static NotificationRuntimeException error(String errorDescription) {
-        return new NotificationRuntimeException(errorDescription);
+    public static NotificationHandlerException error(String errorDescription) {
+        return new NotificationHandlerException(errorDescription);
     }
 
-    public static NotificationRuntimeException error(String errorDescription, Throwable cause) {
-        return new NotificationRuntimeException(errorDescription, cause);
+    public static NotificationHandlerException error(String errorDescription, Throwable cause) {
+        return new NotificationHandlerException(errorDescription, cause);
     }
 
 }

@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.email.mgt;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
@@ -27,11 +27,15 @@ import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
  */
 public class EmailTemplateManagerImpl implements EmailTemplateManager {
 
-    private static final Log log = LogFactory.getLog(EmailTemplateManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailTemplateManagerImpl.class);
 
     @Override
     public EmailTemplate getEmailTemplate(String locale, String templateType) throws I18nEmailMgtException {
         EmailTemplate emailTemplate = I18nEmailUtil.getTemplateCollectionMap().get(locale).get(templateType);
+        if (emailTemplate == null) {
+            throw new I18nEmailMgtException("Can not find the email template type: "
+                    + templateType + " with locale: " + locale);
+        }
         return emailTemplate;
     }
 }

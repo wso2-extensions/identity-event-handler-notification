@@ -19,7 +19,7 @@
 package org.wso2.carbon.identity.event.handler.notification.email.bean;
 
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.identity.common.base.exception.IdentityRuntimeException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -56,7 +56,7 @@ public class Notification {
                         .replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
                         "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                throw NotificationRuntimeException.error(e.getMessage(), e);
+                throw new IdentityRuntimeException(e.getMessage(), e);
             }
             content = content.replaceAll("\\{\\{" + entry.getKey() + "\\}\\}", entry.getValue());
         }

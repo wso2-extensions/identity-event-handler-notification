@@ -19,21 +19,21 @@
 package org.wso2.carbon.identity.event.handler.notification.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.common.util.IdentityUtils;
 import org.wso2.carbon.identity.event.EventConstants;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationHandlerException;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.mgt.IdentityStore;
 import org.wso2.carbon.identity.mgt.claim.Claim;
 import org.wso2.carbon.identity.mgt.exception.IdentityStoreException;
 import org.wso2.carbon.identity.mgt.exception.UserNotFoundException;
-import org.wso2.carbon.security.caas.api.util.CarbonSecurityConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +48,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,10 +70,10 @@ import javax.mail.internet.MimeMessage;
  */
 public class NotificationUtil {
 
-    private static Log log = LogFactory.getLog(NotificationUtil.class);
+    private static Logger log = LoggerFactory.getLogger(NotificationUtil.class);
     private static Properties properties = new Properties();
 
-    public static Map<String, String> getUserClaimValues(String uniqueUserId) {
+    public static Map<String, String> getUserClaimValues(String uniqueUserId) throws NotificationHandlerException {
         IdentityStore identityStore = NotificationHandlerDataHolder.getInstance().getRealmService().getIdentityStore();
         List<Claim> userClaims;
         Map<String, String> claimsMap = new HashMap<String, String>();
@@ -82,7 +87,7 @@ public class NotificationUtil {
             }
 
         } catch (UserNotFoundException | IdentityStoreException e) {
-            log.error("Error occurred while retrieving user");
+            throw NotificationHandlerException.error("Error occurred while get user's claims", e);
         }
         return claimsMap;
     }
@@ -148,7 +153,7 @@ public class NotificationUtil {
     }
 
     public static Notification buildNotification(Map<String, String> placeHolderData) throws
-            NotificationRuntimeException {
+            NotificationHandlerException {
         String emailTemplateType = placeHolderData.get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
         String userUniqueId = placeHolderData.get(EventConstants.EventProperty.USER_UNIQUE_ID);
         Map<String, String> userClaims = NotificationUtil.getUserClaimValues(userUniqueId);
@@ -164,12 +169,12 @@ public class NotificationUtil {
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
                         .getEmailTemplate(locale, emailTemplateType);
             } catch (I18nEmailMgtException e) {
-                throw NotificationRuntimeException.error("Error while getting email template");
+                throw NotificationHandlerException.error("Error while getting email template");
             }
         }
 
         if (emailTemplate == null) {
-            throw NotificationRuntimeException.error("Email template can not be null.");
+            throw NotificationHandlerException.error("Email template can not be null.");
         }
 
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
@@ -179,8 +184,8 @@ public class NotificationUtil {
             sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
         }
         if (StringUtils.isEmpty(sendTo)) {
-            throw NotificationRuntimeException.error(
-                    "Email notification sending failed. Sending email address is not configured for the user.");
+            throw NotificationHandlerException
+                    .error("Email notification sending failed. Sending email address is not configured for the user.");
         }
 
         Notification.EmailNotificationBuilder builder = new Notification.EmailNotificationBuilder(sendTo);
@@ -190,7 +195,7 @@ public class NotificationUtil {
         return emailNotification;
     }
 
-    public static void sendEmail(Notification notification) {
+    public static void sendEmail(Notification notification) throws NotificationHandlerException {
         Properties properties = getProperties();
         final String username = properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_USER);
         final String password = properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_PASSWORD);
@@ -220,15 +225,42 @@ public class NotificationUtil {
             message.setSentDate(new Date());
             message.setSubject(notification.getSubject());
             message.setText(notification.getBody() + notification.getFooter());
-
-            Transport.send(message);
+            sendMailExecutor(message);
 
         } catch (AddressException e) {
-            log.error("Error wrongly formatted email address", e);
+            throw NotificationHandlerException.error("Error wrongly formatted email address", e);
         } catch (MessagingException e) {
-            log.error("Error while sending email", e);
+            throw NotificationHandlerException.error("Error while creating the massage content", e);
         }
 
+    }
+
+    private static void sendMailExecutor(Message message) {
+        //mail sending handle by asynchronously
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        Future feature = executorService.submit(() -> {
+            try {
+                Transport.send(message);
+            } catch (MessagingException e) {
+                log.error("Error sending email notification", e);
+            }
+        });
+
+        try {
+            feature.get();
+            executorService.shutdown();
+            long awaitingTime = Long
+                    .parseLong(properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SEND_AWAITING_TIME));
+            executorService.awaitTermination(awaitingTime, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Mail sending task is interrupted", e);
+        } finally {
+            if (!executorService.isTerminated()) {
+                log.warn("Cancel non-finished email sending task");
+            }
+            executorService.shutdownNow();
+        }
     }
 
     public static Properties getProperties() {
@@ -237,7 +269,7 @@ public class NotificationUtil {
 
     public static void loadProperties() {
         InputStream inStream = null;
-        Path path = Paths.get(CarbonSecurityConstants.getCarbonHomeDirectory().toString(), "conf",
+        Path path = Paths.get(IdentityUtils.getCarbonHomeDirectory(), "conf",
                 I18nMgtConstants.EMAIL_CONF_DIRECTORY);
 
         // Open the default configuration file in carbon conf directory path .
