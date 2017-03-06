@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>carbon-identity-event-handler-notification-tests</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -264,8 +264,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <replace dir="target/carbon-identity-event-handler-notification"
-                                         token="false" value="true">
+                                <replace dir="target/carbon-identity-event-handler-notification" token="false" value="true">
                                     <include name="**/bundles.info" />
                                 </replace>
                             </tasks>
