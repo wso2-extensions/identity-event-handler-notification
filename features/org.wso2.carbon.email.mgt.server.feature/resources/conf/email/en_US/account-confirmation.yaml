@@ -20,7 +20,7 @@ body: "\nHi {{user.claim.givenname}},\n
 \nPlease click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste
 \nthe
 \nlink into your browser's address window.\n
-\nhttps://localhost:9443/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&userstoredomain={{userstore-domain}}&username={{url:user-name}}&tenantdomain={{tenant-domain}}&callback={{callback}}\n"
+\nhttps://localhost:9292/user-portal/signup/confirm?confirmation={{confirmation-code}}&callback={{callback}}\n"
 footer: "\nBest Regards,
 \nWSO2 Identity Server Team
 \nhttp://www.wso2.com\n"
