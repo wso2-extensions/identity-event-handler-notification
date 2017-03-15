@@ -77,5 +77,10 @@ public class NotificationHandler extends AbstractEventHandler {
     public int getPriority(MessageContext messageContext) {
         return 50;
     }
+
+    @Override
+    public boolean isAsync() {
+        return true;
+    }
 }
 
