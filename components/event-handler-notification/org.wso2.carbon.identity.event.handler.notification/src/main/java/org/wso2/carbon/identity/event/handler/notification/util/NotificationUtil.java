@@ -48,11 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -217,7 +212,6 @@ public class NotificationUtil {
         });
 
         try {
-
             Message message = new MimeMessage(session);
             message.setFrom(
                     new InternetAddress(properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_FROM)));
@@ -225,7 +219,7 @@ public class NotificationUtil {
             message.setSentDate(new Date());
             message.setSubject(notification.getSubject());
             message.setText(notification.getBody() + notification.getFooter());
-            sendMailExecutor(message);
+            Transport.send(message);
 
         } catch (AddressException e) {
             throw NotificationHandlerException.error("Error wrongly formatted email address", e);
@@ -233,34 +227,6 @@ public class NotificationUtil {
             throw NotificationHandlerException.error("Error while creating the massage content", e);
         }
 
-    }
-
-    private static void sendMailExecutor(Message message) {
-        //mail sending handle by asynchronously
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-        Future feature = executorService.submit(() -> {
-            try {
-                Transport.send(message);
-            } catch (MessagingException e) {
-                log.error("Error sending email notification", e);
-            }
-        });
-
-        try {
-            feature.get();
-            executorService.shutdown();
-            long awaitingTime = Long
-                    .parseLong(properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SEND_AWAITING_TIME));
-            executorService.awaitTermination(awaitingTime, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Mail sending task is interrupted", e);
-        } finally {
-            if (!executorService.isTerminated()) {
-                log.warn("Cancel non-finished email sending task");
-            }
-            executorService.shutdownNow();
-        }
     }
 
     public static Properties getProperties() {
