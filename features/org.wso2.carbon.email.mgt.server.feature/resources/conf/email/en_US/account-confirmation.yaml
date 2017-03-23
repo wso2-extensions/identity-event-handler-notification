@@ -16,11 +16,11 @@
 subject: "WSO2 Carbon - Account Confirmation"
 body: "\nHi {{user.claim.givenname}},\n
 \nYou have created an account with following user name\n
-\nUser Name: {{user.claim.givenname}}\n
+\nUsername: {{user.claim.username}}\n
 \nPlease click the following link to unlock. If clicking the link doesn't seem to work, you can copy and paste
 \nthe
 \nlink into your browser's address window.\n
-\nhttps://localhost:9292/user-portal/signup/confirm?confirmation={{confirmation-code}}&callback={{callback}}\n"
+\nhttps://localhost:9292/user-portal/signup/confirm?confirmation={{confirmation-code}}&id={{user-unique-id}}&callback={{callback}}\n"
 footer: "\nBest Regards,
 \nWSO2 Identity Server Team
 \nhttp://www.wso2.com\n"
