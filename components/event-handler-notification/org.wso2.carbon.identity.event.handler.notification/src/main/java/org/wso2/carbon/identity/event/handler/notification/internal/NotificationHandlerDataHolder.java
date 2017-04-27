@@ -18,16 +18,20 @@
 
 package org.wso2.carbon.identity.event.handler.notification.internal;
 
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
+import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
-import org.wso2.carbon.identity.mgt.RealmService;
 
-/**
- * Notification handler data holder.
- */
 public class NotificationHandlerDataHolder {
 
     private static volatile NotificationHandlerDataHolder instance = new NotificationHandlerDataHolder();
     private RealmService realmService = null;
+    private RegistryService registryService = null;
+    private EventStreamService eventStreamService = null;
+    private EventPublisherService eventPublisherService = null;
     private EmailTemplateManager emailTemplateManager = null;
 
     private NotificationHandlerDataHolder() {
@@ -38,12 +42,36 @@ public class NotificationHandlerDataHolder {
         return instance;
     }
 
+    public RegistryService getRegistryService() {
+        return registryService;
+    }
+
+    public void setRegistryService(RegistryService registryService) {
+        this.registryService = registryService;
+    }
+
     public RealmService getRealmService() {
         return realmService;
     }
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+
+    public EventStreamService getEventStreamService() {
+        return eventStreamService;
+    }
+
+    public void setEventStreamService(EventStreamService eventStreamService) {
+        this.eventStreamService = eventStreamService;
+    }
+
+    public void setEventPublisherService(EventPublisherService eventPublisherService) {
+        this.eventPublisherService = eventPublisherService;
+    }
+
+    public EventPublisherService getEventPublisherService() {
+        return eventPublisherService;
     }
 
     public void setEmailTemplateManager(EmailTemplateManager emailTemplateManager) {
@@ -54,4 +82,3 @@ public class NotificationHandlerDataHolder {
         return emailTemplateManager;
     }
 }
-

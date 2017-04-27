@@ -18,17 +18,16 @@
 
 package org.wso2.carbon.identity.event.handler.notification.email.bean;
 
-import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.identity.common.base.exception.IdentityRuntimeException;
 
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
+
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-/**
- * Notification properties.
- */
-public class Notification {
+public class Notification implements Serializable {
 
     private String sendTo;
     private String sendFrom;
@@ -52,11 +51,10 @@ public class Notification {
 
         for (Map.Entry<String, String> entry : tagsData.entrySet()) {
             try {
-                content = content
-                        .replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
+                content = content.replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
                         "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                throw new IdentityRuntimeException(e.getMessage(), e);
+                throw NotificationRuntimeException.error(e.getMessage(), e);
             }
             content = content.replaceAll("\\{\\{" + entry.getKey() + "\\}\\}", entry.getValue());
         }
@@ -87,9 +85,6 @@ public class Notification {
         return this.footer;
     }
 
-    /**
-     * Email notification builder.
-     */
     public static class EmailNotificationBuilder {
 
         // mandatory attributes
@@ -115,9 +110,7 @@ public class Notification {
         }
 
         public void addPlaceHolderData(String key, String value) {
-            if (this.placeHolderData != null) {
-                this.placeHolderData.put(key, value);
-            }
+            this.placeHolderData.put(key, value);
         }
 
         public Notification build() {

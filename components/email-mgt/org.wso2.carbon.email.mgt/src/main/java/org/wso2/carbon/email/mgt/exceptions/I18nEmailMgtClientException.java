@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.email.mgt.exceptions;
 
-/**
- * Client exception for email mgt.
- */
 public class I18nEmailMgtClientException extends I18nEmailMgtException {
     public I18nEmailMgtClientException(String message) {
         super(message);
