@@ -18,101 +18,96 @@
 
 package org.wso2.carbon.identity.event.handler.notification.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
-import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.identity.common.util.IdentityUtils;
-import org.wso2.carbon.identity.event.EventConstants;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
+import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
+import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
+import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationHandlerException;
+import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
-import org.wso2.carbon.identity.mgt.IdentityStore;
-import org.wso2.carbon.identity.mgt.claim.Claim;
-import org.wso2.carbon.identity.mgt.exception.IdentityStoreException;
-import org.wso2.carbon.identity.mgt.exception.UserNotFoundException;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
-/**
- * Notification utils.
- */
 public class NotificationUtil {
 
-    private static Logger log = LoggerFactory.getLogger(NotificationUtil.class);
-    private static Properties properties = new Properties();
+    private static Log log = LogFactory.getLog(NotificationUtil.class);
 
-    public static Map<String, String> getUserClaimValues(String uniqueUserId) throws NotificationHandlerException {
-        IdentityStore identityStore = NotificationHandlerDataHolder.getInstance().getRealmService().getIdentityStore();
-        List<Claim> userClaims;
+    public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
+
+        Claim[] userClaims;
         Map<String, String> claimsMap = new HashMap<String, String>();
-
         try {
-            userClaims = identityStore.getClaimsOfUser(uniqueUserId);
+            userClaims = userStoreManager.getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
             if (userClaims != null) {
-                for (Claim userClaim : userClaims) {
+                for(Claim userClaim : userClaims) {
                     claimsMap.put(userClaim.getClaimUri(), userClaim.getValue());
                 }
             }
-
-        } catch (UserNotFoundException | IdentityStoreException e) {
-            throw NotificationHandlerException.error("Error occurred while get user's claims", e);
+        } catch (UserStoreException e) {
+            String domainNameProperty = getUserStoreDomainName(userStoreManager);
+            String message = null;
+            if (StringUtils.isNotBlank(domainNameProperty)) {
+                message = "Error occurred while retrieving user claim values for user " + userName + " in user store "
+                        + domainNameProperty + " in tenant " + getTenantDomain(userStoreManager);
+            } else {
+                message = "Error occurred while retrieving user claim values for user " + userName + " in tenant "
+                        + getTenantDomain(userStoreManager);
+            }
+            log.error(message, e);
         }
+
         return claimsMap;
     }
 
-    //todo need to refactor this method
-    //    public static Map<String, String> getUserClaimValues(String userName, String domainName, String tenantDomain)
-    //            throws IdentityEventException {
-    //
-    //        RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
-    //        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-    //        UserStoreManager userStoreManager = null;
-    //        try {
-    //            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-    //            if (userStoreManager == null) {
-    //                String message = "Error occurred while retrieving userStoreManager for tenant " + tenantDomain;
-    //                throw new IdentityEventException(message);
-    //            } else if (userStoreManager instanceof AbstractUserStoreManager) {
-    //                userStoreManager = ((AbstractUserStoreManager) userStoreManager).
-    // getSecondaryUserStoreManager(domainName);
-    //            }
-    //        } catch (UserStoreException e) {
-    //            String message = "Error occurred while retrieving user claim values for user " + userName +
-    // " in user " + "store " + domainName + " in tenant " + tenantDomain;
-    //            throw new IdentityEventException(message, e);
-    //        }
-    //        return getUserClaimValues(userName, userStoreManager);
-    //    }
+    public static Map<String, String> getUserClaimValues(String userName, String domainName, String tenantDomain)
+            throws IdentityEventException {
 
-    public static Map<String, String> getPlaceholderValues(EmailTemplate emailTemplate,
-            Map<String, String> placeHolderData, Map<String, String> userClaims) {
+        RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
+        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+        UserStoreManager userStoreManager = null;
+        try {
+            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+            if (userStoreManager == null) {
+                String message = "Error occurred while retrieving userStoreManager for tenant " + tenantDomain;
+                throw new IdentityEventException(message);
+            } else if (userStoreManager instanceof AbstractUserStoreManager) {
+                userStoreManager = ((AbstractUserStoreManager) userStoreManager).getSecondaryUserStoreManager(domainName);
+            }
+        } catch (UserStoreException e) {
+            String message = "Error occurred while retrieving user claim values for user " + userName + " in user " +
+                    "store " + domainName + " in tenant " + tenantDomain;
+            throw new IdentityEventException(message, e);
+        }
+        return getUserClaimValues(userName, userStoreManager);
+    }
+
+    public static Map<String, String> getPlaceholderValues(EmailTemplate emailTemplate, Map<String,
+            String> placeHolderData, Map<String, String> userClaims) {
 
         List<String> placeHolders = new ArrayList<>();
         placeHolders.addAll(extractPlaceHolders(emailTemplate.getBody()));
@@ -121,10 +116,17 @@ public class NotificationUtil {
 
         if (userClaims != null && !userClaims.isEmpty()) {
             for (String placeHolder : placeHolders) {
-                if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
-                    String userClaim = userClaims
-                            .get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI + placeHolder
-                                    .substring(placeHolder.lastIndexOf(".") + 1));
+                if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX + "."
+                        + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX)) {
+                    String identityClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
+                            + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX + "/"
+                            + placeHolder.substring(placeHolder.lastIndexOf(".") + 1));
+                    if (StringUtils.isNotEmpty(identityClaim)) {
+                        placeHolderData.put(placeHolder, identityClaim);
+                    }
+                } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
+                    String userClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
+                            + placeHolder.substring(placeHolder.lastIndexOf(".") + 1));
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
                     }
@@ -147,126 +149,99 @@ public class NotificationUtil {
         return placeHolders;
     }
 
-    public static Notification buildNotification(Map<String, String> placeHolderData) throws
-            NotificationHandlerException {
-        String emailTemplateType = placeHolderData.get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
-        String userUniqueId = placeHolderData.get(EventConstants.EventProperty.USER_UNIQUE_ID);
-        Map<String, String> userClaims = NotificationUtil.getUserClaimValues(userUniqueId);
+    public static String getUserStoreDomainName(UserStoreManager userStoreManager) {
+        String domainNameProperty = null;
+        if (userStoreManager instanceof org.wso2.carbon.user.core.UserStoreManager) {
+            domainNameProperty = ((org.wso2.carbon.user.core.UserStoreManager)
+                    userStoreManager).getRealmConfiguration()
+                    .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+            if (StringUtils.isBlank(domainNameProperty)) {
+                domainNameProperty = IdentityUtil.getPrimaryDomainName();
+            }
+        }
+        return domainNameProperty;
+    }
+
+    public static String getTenantDomain(UserStoreManager userStoreManager) {
+        try {
+            return IdentityTenantUtil.getTenantDomain(userStoreManager.getTenantId());
+        } catch (UserStoreException e) {
+            throw NotificationRuntimeException.error("Error when getting the tenant domain.", e);
+        }
+    }
+
+    public static void deployStream(String streamName, String streamVersion, String streamId)
+            throws NotificationRuntimeException {
+        try {
+            EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
+            StreamDefinition streamDefinition = new StreamDefinition(streamName, streamVersion, streamId);
+            service.addEventStreamDefinition(streamDefinition);
+        } catch (MalformedStreamDefinitionException e) {
+            throw NotificationRuntimeException.error("Error occurred due to a malformed stream definition.", e);
+        } catch (EventStreamConfigurationException e) {
+            throw NotificationRuntimeException.error("Error in deploying a stream.", e);
+        }
+    }
+
+
+    public static void deployPublisher(EventPublisherConfiguration eventPublisherConfiguration) throws NotificationRuntimeException {
+        EventPublisherService eventPublisherService = NotificationHandlerDataHolder.getInstance().getEventPublisherService();
+        try {
+            eventPublisherService.deployEventPublisherConfiguration(eventPublisherConfiguration);
+        } catch (EventPublisherConfigurationException e) {
+            throw NotificationRuntimeException.error("Error in deploying a publisher.", e);
+        }
+    }
+
+    public static Notification buildNotification(Event event, Map<String, String> placeHolderData)
+            throws IdentityEventException, NotificationRuntimeException {
+        String sendTo = null;
+        Map<String, String> userClaims = new HashMap<>();
+        String notificationEvent = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
+        String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
+        org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) event.getEventProperties().get(
+                IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
+        String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
+        String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
+        String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
+
+        if (StringUtils.isNotBlank(username) && userStoreManager != null) {
+            userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
+        } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
+                StringUtils.isNotBlank(tenantDomain)) {
+            userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
+        }
 
         String locale = NotificationConstants.EmailNotification.LOCALE_DEFAULT;
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
         }
 
-        EmailTemplate emailTemplate = null;
-        if (StringUtils.isNotBlank(emailTemplateType) && StringUtils.isNotBlank(locale)) {
-            try {
-                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
-                        .getEmailTemplate(locale, emailTemplateType);
-            } catch (I18nEmailMgtException e) {
-                throw NotificationHandlerException.error("Error while getting email template");
-            }
-        }
-
-        if (emailTemplate == null) {
-            throw NotificationHandlerException.error("Email template can not be null.");
-        }
-
-        NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
-
-        String sendTo = null;
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
             sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
         }
         if (StringUtils.isEmpty(sendTo)) {
-            throw NotificationHandlerException
-                    .error("Email notification sending failed. Sending email address is not configured for the user.");
+            throw NotificationRuntimeException.error(
+                    "Email notification sending failed. Sending email address is not configured for the user.");
         }
 
-        Notification.EmailNotificationBuilder builder = new Notification.EmailNotificationBuilder(sendTo);
+        EmailTemplate emailTemplate;
+        try {
+            emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain);
+        } catch (I18nEmailMgtException e) {
+            String message = "Error when retrieving template from tenant registry.";
+            throw NotificationRuntimeException.error(message, e);
+        }
+
+        NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
+
+        Notification.EmailNotificationBuilder builder =
+                new Notification.EmailNotificationBuilder(sendTo);
+        builder.setSendFrom(sendFrom);
         builder.setTemplate(emailTemplate);
         builder.setPlaceHolderData(placeHolderData);
         Notification emailNotification = builder.build();
         return emailNotification;
     }
-
-    public static void sendEmail(Notification notification) throws NotificationHandlerException {
-        Properties properties = getProperties();
-        final String username = properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_USER);
-        final String password = properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_PASSWORD);
-
-        Properties props = new Properties();
-        props.put(NotificationConstants.SMTPProperty.MAIL_SMTP_AUTH,
-                properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_AUTH));
-        props.put(NotificationConstants.SMTPProperty.MAIL_SMTP_STARTTLS_ENABLE,
-                properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_STARTTLS_ENABLE));
-        props.put(NotificationConstants.SMTPProperty.MAIL_SMTP_HOST,
-                properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_HOST));
-        props.put(NotificationConstants.SMTPProperty.MAIL_SMTP_PORT,
-                properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_PORT));
-
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
-            }
-        });
-
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(
-                    new InternetAddress(properties.getProperty(NotificationConstants.SMTPProperty.MAIL_SMTP_FROM)));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(notification.getSendTo()));
-            message.setSentDate(new Date());
-            message.setSubject(notification.getSubject());
-            message.setText(notification.getBody() + notification.getFooter());
-            Transport.send(message);
-
-        } catch (AddressException e) {
-            throw NotificationHandlerException.error("Error wrongly formatted email address", e);
-        } catch (MessagingException e) {
-            throw NotificationHandlerException.error("Error while creating the massage content", e);
-        }
-
-    }
-
-    public static Properties getProperties() {
-        return properties;
-    }
-
-    public static void loadProperties() {
-        InputStream inStream = null;
-        Path path = Paths.get(IdentityUtils.getCarbonHomeDirectory(), "conf",
-                I18nMgtConstants.EMAIL_CONF_DIRECTORY);
-
-        // Open the default configuration file in carbon conf directory path .
-        File messageMgtPropertyFile = new File(path.toUri().getPath(),
-                NotificationConstants.EmailNotification.EMAIL_SMTP_CONFIG_PATH);
-
-        try {
-            // If the configuration exists in the carbon conf directory, read properties from there
-            if (messageMgtPropertyFile.exists()) {
-                inStream = new FileInputStream(messageMgtPropertyFile);
-            }
-            if (inStream != null) {
-                properties.load(inStream);
-            }
-            //Even if the configurations are not found, individual modules can behave themselves without configuration
-        } catch (FileNotFoundException e) {
-            log.warn("Could not find configuration file for Message Sending module.", e);
-        } catch (IOException e) {
-            log.warn("Error while opening input stream for property file.", e);
-            // Finally close input stream
-        } finally {
-            try {
-                if (inStream != null) {
-                    inStream.close();
-                }
-            } catch (IOException e) {
-                log.error("Error while closing input stream ", e);
-            }
-        }
-
-    }
 }
-
 

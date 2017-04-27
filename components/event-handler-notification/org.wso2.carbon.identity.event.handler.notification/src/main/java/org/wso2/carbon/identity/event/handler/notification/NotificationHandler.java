@@ -18,32 +18,30 @@
 
 package org.wso2.carbon.identity.event.handler.notification;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.identity.common.base.event.EventContext;
-import org.wso2.carbon.identity.common.base.event.model.Event;
-import org.wso2.carbon.identity.common.base.exception.IdentityException;
-import org.wso2.carbon.identity.common.base.exception.IdentityRuntimeException;
-import org.wso2.carbon.identity.common.base.handler.InitConfig;
-import org.wso2.carbon.identity.common.base.message.MessageContext;
-import org.wso2.carbon.identity.event.AbstractEventHandler;
-import org.wso2.carbon.identity.event.EventException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.handler.InitConfig;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
-import org.wso2.carbon.identity.event.handler.notification.exception.NotificationHandlerException;
+import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- */
 public class NotificationHandler extends AbstractEventHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationHandler.class);
+    private static final Log log = LogFactory.getLog(NotificationHandler.class);
 
     @Override
-    public void handle(EventContext eventContext, Event event) throws EventException {
+    public void handleEvent(Event event) throws IdentityEventException {
+
         Map<String, String> placeHolderData = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : event.getEventProperties().entrySet()) {
@@ -52,35 +50,52 @@ public class NotificationHandler extends AbstractEventHandler {
             }
         }
 
-        try {
-            Notification notification = NotificationUtil.buildNotification(placeHolderData);
-            NotificationUtil.sendEmail(notification);
-        } catch (NotificationHandlerException e) {
-            throw new EventException("Error while sending email notification", e);
-        }
+        Notification notification = NotificationUtil.buildNotification(event, placeHolderData);
+        publishToStream(notification, placeHolderData);
     }
 
-    @Override
-    public void configure(InitConfig initConfig) throws IdentityException {
+    protected void publishToStream(Notification notification, Map<String, String> placeHolderDataMap) {
 
+        EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
+
+        org.wso2.carbon.databridge.commons.Event databridgeEvent = new org.wso2.carbon.databridge.commons.Event();
+        databridgeEvent.setTimeStamp(System.currentTimeMillis());
+        Map<String, String> arbitraryDataMap = new HashMap<>();
+
+        databridgeEvent.setStreamId(NotificationConstants.EmailNotification.STREAM_ID);
+
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE, I18nEmailUtil.getNormalizedName(notification.getTemplate().getTemplateDisplayName()));
+        arbitraryDataMap.put(IdentityEventConstants.EventProperty.USER_NAME,
+                placeHolderDataMap.get(IdentityEventConstants.EventProperty.USER_NAME));
+        arbitraryDataMap.put(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN,
+                placeHolderDataMap.get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN));
+        arbitraryDataMap.put(IdentityEventConstants.EventProperty.TENANT_DOMAIN,
+                placeHolderDataMap.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN));
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM, notification.getSendFrom());
+        for (Map.Entry<String, String> placeHolderDataEntry : placeHolderDataMap.entrySet()) {
+            arbitraryDataMap.put(placeHolderDataEntry.getKey(), placeHolderDataEntry.getValue());
+        }
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.getTemplate().getSubject());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY_TEMPLATE, notification.getTemplate().getBody());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER_TEMPLATE, notification.getTemplate().getFooter());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, notification.getTemplate().getLocale());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.getTemplate().getEmailContentType());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT, notification.getSubject());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY, notification.getBody());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER, notification.getFooter());
+
+
+        databridgeEvent.setArbitraryDataMap(arbitraryDataMap);
+        service.publish(databridgeEvent);
     }
 
     @Override
     public void init(InitConfig configuration) throws IdentityRuntimeException {
     }
 
+    @Override
     public String getName() {
         return "emailSend";
     }
-
-    @Override
-    public int getPriority(MessageContext messageContext) {
-        return 50;
-    }
-
-    @Override
-    public boolean isAsync() {
-        return true;
-    }
 }
-

@@ -19,17 +19,95 @@ package org.wso2.carbon.email.mgt;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 
-/**
- * Email manager operations.
- */
+import java.util.List;
+
 public interface EmailTemplateManager {
 
     /**
-     * Get email template by given template type
-     * @param locale the locale of the email type
-     * @param templateType type of the template
-     * @return email template
+     * Add a new template type to tenant registry.
+     *
+     * @param emailTemplateType
+     * @param tenantDomain
      * @throws I18nEmailMgtException
      */
-    EmailTemplate getEmailTemplate(String locale, String templateType) throws I18nEmailMgtException;
+    void addEmailTemplateType(String emailTemplateType,
+                              String tenantDomain) throws I18nEmailMgtException;
+
+    /**
+     * Delete a template type from tenant registry.
+     *
+     * @param templateDisplayName
+     * @param tenantDomain
+     * @throws I18nEmailMgtException
+     */
+    void deleteEmailTemplateType(String templateDisplayName,
+                                 String tenantDomain) throws I18nEmailMgtException;
+
+    /**
+     * Get all available template types in the tenant registry.
+     *
+     * @param tenantDomain
+     * @return
+     * @throws I18nEmailMgtException
+     */
+    List<String> getAvailableTemplateTypes(String tenantDomain) throws I18nEmailMgtException;
+
+
+    /**
+     * Add an email template to tenant registry.
+     *
+     * @param emailTemplate
+     * @param tenantDomain
+     * @throws I18nEmailMgtException
+     */
+    void addEmailTemplate(EmailTemplate emailTemplate,
+                          String tenantDomain) throws I18nEmailMgtException;
+
+
+    /**
+     * Delete an email template from the tenant registry. Email template is identified with the templateTypeName and
+     * localeCode.
+     *
+     * @param templateTypeName
+     * @param localeCode
+     * @param tenantDomain
+     * @throws I18nEmailMgtException
+     */
+    void deleteEmailTemplate(String templateTypeName,
+                             String localeCode,
+                             String tenantDomain) throws I18nEmailMgtException;
+
+
+    /**
+     * Get an email template from tenant registry.
+     *
+     * @param templateType
+     * @param locale
+     * @param tenantDomain
+     * @return
+     * @throws I18nEmailMgtException
+     */
+    EmailTemplate getEmailTemplate(String templateType,
+                                   String locale,
+                                   String tenantDomain) throws I18nEmailMgtException;
+
+
+    /**
+     * Get all available email templates in a tenant's registry.
+     *
+     * @param tenantDomain
+     * @return
+     * @throws I18nEmailMgtException
+     */
+    List<EmailTemplate> getAllEmailTemplates(String tenantDomain) throws I18nEmailMgtException;
+
+
+    /**
+     * Add default email templates to a tenant's registry.
+     *
+     * @param tenantDomain
+     * @throws I18nEmailMgtException
+     */
+    void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException;
+
 }

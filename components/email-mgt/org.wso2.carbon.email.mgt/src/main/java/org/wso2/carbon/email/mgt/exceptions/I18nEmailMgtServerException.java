@@ -19,16 +19,17 @@
 package org.wso2.carbon.email.mgt.exceptions;
 
 /**
- * Exception class.
+ * Exception class
  */
 public class I18nEmailMgtServerException extends I18nEmailMgtException {
-
-    public I18nEmailMgtServerException(String message, Throwable e) {
-        super(message, e);
-    }
+    
+    private static final long serialVersionUID = -7830262138811733190L;
 
     public I18nEmailMgtServerException(String message) {
-        super(message);
-    }
-}
+		super(message);
+	}
 
+	public I18nEmailMgtServerException(String message, Throwable e) {
+		super(message, e);
+	}
+}

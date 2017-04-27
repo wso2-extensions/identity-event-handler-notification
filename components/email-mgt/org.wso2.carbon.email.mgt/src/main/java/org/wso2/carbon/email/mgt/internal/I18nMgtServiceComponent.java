@@ -15,41 +15,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.email.mgt.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
-import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
+import org.wso2.carbon.user.core.service.RealmService;
+
 
 /**
- * Email mgt service.
+ * @scr.component name="I18nMgtServiceComponent" immediate="true"
+ * @scr.reference name="registry.service"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
+ * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="realm.service"
+ * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
+ * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="RegistryResourceMgtService"
+ * interface="org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService" cardinality="1..1"
+ * policy="dynamic" bind="setRegistryResourceMgtService" unbind="unsetRegistryResourceMgtService"
  */
-@Component(
-        name = "org.wso2.carbon.email.mgt.internal.I18nMgtServiceComponent",
-        immediate = true,
-        property = { "componentName=wso2-carbon-email-mgt" })
+
 public class I18nMgtServiceComponent {
 
-    private static Logger log = LoggerFactory.getLogger(I18nMgtServiceComponent.class);
+    private static Log log = LogFactory.getLog(I18nMgtServiceComponent.class);
 
     private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
 
-    @Activate
     protected void activate(ComponentContext context) {
         try {
             BundleContext bundleCtx = context.getBundleContext();
 
             // Register Email Mgt Service as an OSGi service
-            ServiceRegistration emailTemplateSR = bundleCtx
-                    .registerService(EmailTemplateManager.class.getName(), new EmailTemplateManagerImpl(), null);
+            ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
+                    new EmailTemplateManagerImpl(), null);
 
             if (emailTemplateSR != null) {
                 if (log.isDebugEnabled()) {
@@ -59,8 +68,19 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering Email Template Mgt Service.");
             }
 
+            TenantManagementListener emailMgtTenantListener = new TenantManagementListener();
+            ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(
+                    TenantMgtListener.class.getName(), emailMgtTenantListener, null);
+            if (tenantMgtListenerSR != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("I18n Management - TenantMgtListener registered");
+                }
+            } else {
+                log.error("I18n Management - TenantMgtListener could not be registered");
+            }
+
             // load default email templates
-            I18nEmailUtil.buildEmailTemplates();
+            loadDefaultEmailTemplates();
 
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
@@ -68,10 +88,63 @@ public class I18nMgtServiceComponent {
         }
     }
 
-    @Deactivate
+    private void loadDefaultEmailTemplates() {
+        //Load email template configuration on server startup if they don't already exist.
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
+        try {
+            emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
+        } catch (I18nEmailMgtException e) {
+            log.error("Error occurred while loading default email templates", e);
+        }
+    }
+
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {
             log.debug("I18n Management bundle is de-activated");
         }
     }
+
+    protected void setRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Realm Service");
+        }
+        dataHolder.setRealmService(realmService);
+    }
+
+    protected void setRegistryService(RegistryService registryService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Registry Service");
+        }
+        dataHolder.setRegistryService(registryService);
+    }
+
+    protected void setRegistryResourceMgtService(RegistryResourceMgtService registryResourceMgtService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Registry Resource Mgt Service.");
+        }
+        dataHolder.setRegistryResourceMgtService(registryResourceMgtService);
+    }
+
+    protected void unsetRegistryService(RegistryService registryService) {
+        if (log.isDebugEnabled()) {
+            log.debug("UnSetting the Registry Service");
+        }
+        dataHolder.setRegistryService(null);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("UnSetting the Realm Service");
+        }
+        dataHolder.setRealmService(null);
+    }
+
+    protected void unsetRegistryResourceMgtService(RegistryResourceMgtService registryResourceMgtService) {
+        if (log.isDebugEnabled()) {
+            log.debug("UnSetting Registry Resource Mgt Service.");
+        }
+        dataHolder.setRegistryResourceMgtService(null);
+    }
+
 }
