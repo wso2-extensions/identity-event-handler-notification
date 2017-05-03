@@ -91,22 +91,22 @@
     function validate() {
         var value = document.getElementsByName("emailSubject")[0].value;
         if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.required"/>');
+            CARBON.showWarningDialog('<%=resourceBundle.getString("email.template.subject.is.required")%>');
             return false;
         } else if (value.length > 50) {
-            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.too.long"/>');
+            CARBON.showWarningDialog('<%=resourceBundle.getString("email.template.subject.is.too.long")%>');
             return false;
         }
 
         var value = document.getElementsByName("emailBody")[0].value;
         if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.body.is.required"/>');
+            CARBON.showWarningDialog('<%=resourceBundle.getString("email.template.body.is.required")%>');
             return false;
         }
 
         var value = document.getElementsByName("emailFooter")[0].value;
         if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.footer.is.required"/>');
+            CARBON.showWarningDialog('<%=resourceBundle.getString("email.template.footer.is.required")%>');
             return false;
         }
         document.templateForm.submit();
