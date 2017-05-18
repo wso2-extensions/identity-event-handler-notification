@@ -46,7 +46,7 @@ public class NotificationConstants {
         public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_ADD_PROPERTY = "email.address";
         public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_ADD_VALUE = "{{send-to}}";
         public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_TYPE_PROPERTY = "email.type";
-        public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_TYPE_VALUE = "text/plain";
+        public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_TYPE_VALUE = "{{content-type}}";
         public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_SUBJECT_PROPERTY = "email.subject";
         public static final String OUTPUT_ADAPTOR_DYNAMIC_EMAIL_SUBJECT_VALUE = "{{subject}}";
 
