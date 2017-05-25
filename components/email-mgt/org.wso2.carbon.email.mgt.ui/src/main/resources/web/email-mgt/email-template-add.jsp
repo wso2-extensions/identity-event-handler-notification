@@ -93,7 +93,7 @@
 <fmt:bundle
         basename="org.wso2.carbon.email.mgt.ui.i18n.Resources">
     <carbon:breadcrumb label="email.add"
-                       resourceBundle="org.wso2.carbon.identity.user.profile.ui.i18n.Resources"
+                       resourceBundle="org.wso2.carbon.email.mgt.ui.i18n.Resources"
                        topPage="true" request="<%=request%>"/>
 
     <div id="middle">
@@ -123,7 +123,7 @@
                     if (value == '') {
                         CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.required"/>');
                         return false;
-                    } else if (value.length > 50) {
+                    } else if (value.length > 80) {
                         CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.too.long"/>');
                         return false;
                     }

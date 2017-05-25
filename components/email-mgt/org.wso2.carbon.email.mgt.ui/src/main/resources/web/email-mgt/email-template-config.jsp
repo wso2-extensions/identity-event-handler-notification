@@ -85,102 +85,7 @@
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/error.jsp";
     }
-%>
-<script type="text/javascript">
 
-    function validate() {
-        var value = document.getElementsByName("emailSubject")[0].value;
-        if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.required"/>');
-            return false;
-        } else if (value.length > 50) {
-            CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.too.long"/>');
-            return false;
-        }
-
-        var value = document.getElementsByName("emailBody")[0].value;
-        if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.body.is.required"/>');
-            return false;
-        }
-
-        var value = document.getElementsByName("emailFooter")[0].value;
-        if (value == '') {
-            CARBON.showWarningDialog('<fmt:message key="email.template.footer.is.required"/>');
-            return false;
-        }
-        document.templateForm.submit();
-    }
-
-    function updateFields(elm) {
-        var $selectedOption = jQuery(elm).find(":selected");
-        jQuery('#emailSubject').val($selectedOption.attr('data-subject'));
-        jQuery('#emailBody').val($selectedOption.attr('data-body'));
-        jQuery('#emailFooter').val($selectedOption.attr('data-footer'));
-        jQuery('#templateName').val($selectedOption.attr('data-templateName'));
-        jQuery('#emailContentType').val($selectedOption.attr('data-emailContentType'));
-    }
-
-
-    function updateLocale(elm) {
-        var $selectedOption = jQuery(elm).find(":selected").text().trim();
-        jQuery('<form>', {
-            "id": "getTemplateType",
-            "html": '<input type="text" name="templateType" value="' + $selectedOption + '" />',
-            "action": window.location.href
-        }).appendTo(document.body).submit();
-    }
-
-    function deleteTemplate() {
-        var templateName = document.getElementsByName("emailTypes")[0].value;
-        var locale = document.getElementsByName("emailLanguage")[0].value;
-
-        var deleteFunc = function doDelete() {
-            $.ajax({
-                type: 'POST',
-                url: 'email-template-config-finish-ajaxprocessor.jsp',
-                headers: {
-                    Accept: "text/html"
-                },
-                data: {'delete': true, 'templateName': templateName, 'locale': locale},
-                async: false,
-                success: function (responseText, status) {
-                    if (status == "success") {
-                        location.assign("email-template-config.jsp");
-                    }
-                }
-            });
-        }
-        var msg = "This will delete {0}:{1} email template. Are you sure you want to continue?";
-        msg = msg.replace("{0}", templateName).replace("{1}", locale);
-        CARBON.showConfirmationDialog(msg, deleteFunc, null, null);
-    }
-
-
-    function deleteTemplateType() {
-        var templateName = document.getElementsByName("emailTypes")[0].value;
-        var deleteFunc = function doDelete() {
-            $.ajax({
-                type: 'POST',
-                url: 'email-template-config-finish-ajaxprocessor.jsp',
-                headers: {
-                    Accept: "text/html"
-                },
-                data: {'delete': true, 'templateName': templateName, 'locale': "ALL"},
-                async: false,
-                success: function (responseText, status) {
-                    if (status == "success") {
-                        location.assign("email-template-config.jsp");
-                    }
-                }
-            });
-        }
-        var msg = "This will delete all email templates of type {0}. Are you sure you want to continue?";
-        CARBON.showConfirmationDialog(msg.replace("{0}", templateName), deleteFunc, null);
-    }
-
-</script>
-<%
     if (forwardTo != null) {
 %>
 <script type="text/javascript">
@@ -199,7 +104,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.email.mgt.ui.i18n.Resources">
     <carbon:breadcrumb label="email.template"
-                       resourceBundle="org.wso2.carbon.identity.user.profile.ui.i18n.Resources"
+                       resourceBundle="org.wso2.carbon.email.mgt.ui.i18n.Resources"
                        topPage="true" request="<%=request%>"/>
 
     <div id="middle">
@@ -208,6 +113,102 @@
         </h2>
 
         <div id="workArea">
+
+            <script type="text/javascript">
+
+                function validate() {
+                    var value = document.getElementsByName("emailSubject")[0].value;
+                    if (value == '') {
+                        CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.required"/>');
+                        return false;
+                    } else if (value.length > 80) {
+                        CARBON.showWarningDialog('<fmt:message key="email.template.subject.is.too.long"/>');
+                        return false;
+                    }
+
+                    var value = document.getElementsByName("emailBody")[0].value;
+                    if (value == '') {
+                        CARBON.showWarningDialog('<fmt:message key="email.template.body.is.required"/>');
+                        return false;
+                    }
+
+                    var value = document.getElementsByName("emailFooter")[0].value;
+                    if (value == '') {
+                        CARBON.showWarningDialog('<fmt:message key="email.template.footer.is.required"/>');
+                        return false;
+                    }
+                    document.templateForm.submit();
+                }
+
+                function updateFields(elm) {
+                    var $selectedOption = jQuery(elm).find(":selected");
+                    jQuery('#emailSubject').val($selectedOption.attr('data-subject'));
+                    jQuery('#emailBody').val($selectedOption.attr('data-body'));
+                    jQuery('#emailFooter').val($selectedOption.attr('data-footer'));
+                    jQuery('#templateName').val($selectedOption.attr('data-templateName'));
+                    jQuery('#emailContentType').val($selectedOption.attr('data-emailContentType'));
+                }
+
+
+                function updateLocale(elm) {
+                    var $selectedOption = jQuery(elm).find(":selected").text().trim();
+                    jQuery('<form>', {
+                        "id": "getTemplateType",
+                        "html": '<input type="text" name="templateType" value="' + $selectedOption + '" />',
+                        "action": window.location.href
+                    }).appendTo(document.body).submit();
+                }
+
+                function deleteTemplate() {
+                    var templateName = document.getElementsByName("emailTypes")[0].value;
+                    var locale = document.getElementsByName("emailLanguage")[0].value;
+
+                    var deleteFunc = function doDelete() {
+                        $.ajax({
+                            type: 'POST',
+                            url: 'email-template-config-finish-ajaxprocessor.jsp',
+                            headers: {
+                                Accept: "text/html"
+                            },
+                            data: {'delete': true, 'templateName': templateName, 'locale': locale},
+                            async: false,
+                            success: function (responseText, status) {
+                                if (status == "success") {
+                                    location.assign("email-template-config.jsp");
+                                }
+                            }
+                        });
+                    }
+                    var msg = "This will delete {0}:{1} email template. Are you sure you want to continue?";
+                    msg = msg.replace("{0}", templateName).replace("{1}", locale);
+                    CARBON.showConfirmationDialog(msg, deleteFunc, null, null);
+                }
+
+
+                function deleteTemplateType() {
+                    var templateName = document.getElementsByName("emailTypes")[0].value;
+                    var deleteFunc = function doDelete() {
+                        $.ajax({
+                            type: 'POST',
+                            url: 'email-template-config-finish-ajaxprocessor.jsp',
+                            headers: {
+                                Accept: "text/html"
+                            },
+                            data: {'delete': true, 'templateName': templateName, 'locale': "ALL"},
+                            async: false,
+                            success: function (responseText, status) {
+                                if (status == "success") {
+                                    location.assign("email-template-config.jsp");
+                                }
+                            }
+                        });
+                    }
+                    var msg = "This will delete all email templates of type {0}. Are you sure you want to continue?";
+                    CARBON.showConfirmationDialog(msg.replace("{0}", templateName), deleteFunc, null);
+                }
+
+            </script>
+
             <% if (ArrayUtils.isNotEmpty(emailTemplates)) {%>
 
             <form name="templateForm" action="email-template-config-finish-ajaxprocessor.jsp" method="post"
