@@ -53,6 +53,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification
+        .CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
+
 public class NotificationUtil {
 
     private static Log log = LogFactory.getLog(NotificationUtil.class);
@@ -133,6 +136,8 @@ public class NotificationUtil {
                 }
             }
         }
+        placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, IdentityUtil.getServerURL("", true,
+                false));
         return placeHolderData;
     }
 
