@@ -62,6 +62,7 @@ public class NotificationConstants {
         public static final String ARBITRARY_BODY = "body";
         public static final String ARBITRARY_FOOTER = "footer";
 
+        public static final String CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER = "carbon.product-url";
 
     }
 }
