@@ -27,6 +27,34 @@
         </parameter>
         <parameter name="adminService" locked="true">true</parameter>
         <parameter name="hiddenService" locked="false">false</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+        <parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>
+
+        <operation name="addEmailTemplateType">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/create</parameter>
+        </operation>
+
+        <operation name="deleteEmailTemplateType">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/delete</parameter>
+        </operation>
+
+        <operation name="getEmailTemplateTypes">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/view</parameter>
+        </operation>
+
+        <operation name="saveEmailTemplate">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/update</parameter>
+        </operation>
+
+        <operation name="addEmailTemplate">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/create</parameter>
+        </operation>
+
+        <operation name="deleteEmailTemplate">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/delete</parameter>
+        </operation>
+
+        <operation name="getAllTemplatesForTenant">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/identity/emailmgt/view</parameter>
+        </operation>
     </service>
 </serviceGroup>
