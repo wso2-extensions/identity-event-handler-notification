@@ -153,7 +153,7 @@
     <configuration type="askPassword" display="AskPassword" locale="en_US" emailContentType="text/plain">
         <subject>WSO2 Carbon - Password Change for New Account</subject>
         <body>
-            Hi {{user.claim.givenname}},
+            Hi {{user.claim.username}},
 
             Please change your password for the newly created account : {{user-name}}. Please click the link below to
             create the password.
