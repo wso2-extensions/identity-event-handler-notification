@@ -504,7 +504,7 @@
 				<tr>
 				    <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
 				        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-				            Hi {{user.claim.givenname}},
+				            Hi {{user-name}},
 				        </p>
 				        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
 				            Please change your password for the newly created account <b>{{user-name}}</b>. <br>
@@ -910,10 +910,10 @@
 				<tr>
 				    <td style="text-align: left; padding: 0px 50px;" valign="top">
 				        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-				            Hi {{user.claim.givenname}},
+				            Hi {{user-name}},
 				        </p>
 				        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-				            Please note that your password has been successfully reset.<br>
+				            Please note that your password has been successfully reset for the account <b>{{user-name}}</b>. <br>
 				        </p>
 				    </td>
 				</tr>
