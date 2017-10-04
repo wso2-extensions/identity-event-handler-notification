@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +56,8 @@ import javax.xml.stream.XMLStreamReader;
 
 public class I18nEmailUtil {
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
-
+    private static final String CHARSET_CONSTANT = "charset";
+    private static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
 
     private I18nEmailUtil() {
     }
@@ -209,6 +211,12 @@ public class I18nEmailUtil {
             String templateDisplayName = templateResource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME);
             String templateType = templateResource.getProperty(I18nMgtConstants.TEMPLATE_TYPE);
             String contentType = templateResource.getProperty(I18nMgtConstants.TEMPLATE_CONTENT_TYPE);
+
+            // Setting UTF-8 for all the email templates as it supports many languages and is widely adopted.
+            // There is little to no value addition making the charset configurable.
+            if (contentType != null && !contentType.toLowerCase().contains(CHARSET_CONSTANT)) {
+                contentType = contentType + "; " + CHARSET_UTF_8;
+            }
             String locale = templateResource.getProperty(I18nMgtConstants.TEMPLATE_LOCALE);
 
             emailTemplate.setTemplateDisplayName(templateDisplayName);
