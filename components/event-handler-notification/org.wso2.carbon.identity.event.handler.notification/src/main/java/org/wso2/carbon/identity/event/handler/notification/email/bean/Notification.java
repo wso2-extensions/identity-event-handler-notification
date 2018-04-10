@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 public class Notification implements Serializable {
 
@@ -51,12 +52,18 @@ public class Notification implements Serializable {
 
         for (Map.Entry<String, String> entry : tagsData.entrySet()) {
             try {
+
+                // In email templates the placeholders in a URL, are defined in the format of {{url:key}} -
+                // eg:{{url:user-name}}, So that the values should be URL Encoded
                 content = content.replaceAll("\\{\\{url:" + entry.getKey() + "\\}\\}", URLEncoder.encode(entry.getValue(),
                         "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw NotificationRuntimeException.error(e.getMessage(), e);
             }
-            content = content.replaceAll("\\{\\{" + entry.getKey() + "\\}\\}", entry.getValue());
+
+            // Backslashes (\) and dollar signs ($) in the replacement string is not treated as a literals.
+            content = content.replaceAll("\\{\\{" + entry.getKey() + "\\}\\}", Matcher.quoteReplacement(entry
+                    .getValue()));
         }
         return content;
     }
