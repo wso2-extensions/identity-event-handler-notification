@@ -400,7 +400,7 @@
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.4.7</carbon.kernel.version>
+        <carbon.kernel.version>4.4.29</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version.range>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
@@ -411,8 +411,8 @@
         <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.7.0</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.7.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.version>5.11.220</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version.range>[5.11.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!--Identity Governance Version-->
         <identity.governance.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.governance.imp.pkg.version.range>
