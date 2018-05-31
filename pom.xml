@@ -392,7 +392,7 @@
         <axis2.wso2.imp.pkg.version.range>[1.6.1.wso2v12, 2.0.0)</axis2.wso2.imp.pkg.version.range>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
         <axiom.wso2.imp.pkg.version.range>[1.2.11, 2.0.0)</axiom.wso2.imp.pkg.version.range>
-        <axis2-transports.version>1.1.0-wso2v13</axis2-transports.version>
+        <axis2-transports.version>2.0.0-wso2v21</axis2-transports.version>
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
 
         <commons.logging.imp.pkg.version.range>[1.2,2.0)</commons.logging.imp.pkg.version.range>
