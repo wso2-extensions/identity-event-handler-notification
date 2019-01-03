@@ -61,22 +61,28 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             }
         }
 
+        //Read the send-to parameter which was set by the notification senders.
         String sendTo = arbitraryDataMap.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO);
         Map<String, String> userClaims = new HashMap<>();
 
         String notificationTemplate = getNotificationTemplate(event);
         if(StringUtils.isEmpty(notificationTemplate)) {
-            notificationTemplate = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
+            notificationTemplate = (String) event.getEventProperties().get(
+                    NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
         }
 
         if(StringUtils.isNotEmpty(notificationTemplate)) {
 
             String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
-            org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) event.getEventProperties().get(
+            org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager)
+                    event.getEventProperties().get(
                     IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
-            String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
-            String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
-            String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
+            String userStoreDomainName = (String) event.getEventProperties().get(
+                    IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
+            String tenantDomain = (String) event.getEventProperties().get(
+                    IdentityEventConstants.EventProperty.TENANT_DOMAIN);
+            String sendFrom = (String) event.getEventProperties().get(
+                    NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
 
             if (StringUtils.isNotBlank(username) && userStoreManager != null) {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
@@ -98,7 +104,8 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
 
             EmailTemplate emailTemplate;
             try {
-                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationTemplate, locale, tenantDomain);
+                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(
+                        notificationTemplate, locale, tenantDomain);
             } catch (I18nEmailMgtException e) {
                 String message = "Error when retrieving template from tenant registry.";
                 throw NotificationRuntimeException.error(message, e);
@@ -113,7 +120,8 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             builder.setPlaceHolderData(arbitraryDataMap);
             Notification notification = builder.build();
 
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE, I18nEmailUtil.getNormalizedName(notificationTemplate));
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE,
+                    I18nEmailUtil.getNormalizedName(notificationTemplate));
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM, notification.getSendFrom());
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.
                     getTemplate().getSubject());
@@ -125,7 +133,7 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
                     getLocale());
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.
                     getTemplate().getEmailContentType());
-            //arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT, notification.getSubject());
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY, notification.getBody());
             arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER, notification.getFooter());
@@ -198,7 +206,8 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
         Set<Object> subscriptionPropertyKeys = subscriptionProperties.keySet();
         for (Object subscriptionPropertyKey : subscriptionPropertyKeys) {
             String key = (String)subscriptionPropertyKey;
-            if(!key.startsWith(claimKeyStartWith) && !key.equalsIgnoreCase(streamIdKey) &&  !key.equalsIgnoreCase(templateType)){
+            if(!key.startsWith(claimKeyStartWith) && !key.equalsIgnoreCase(streamIdKey) &&
+                    !key.equalsIgnoreCase(templateType)){
                 String keyPrefix = this.getName() + ".subscription." + event.getEventName();
                 String attribute = key.substring(keyPrefix.length() + 1);
                 String value = (String)subscriptionProperties.get(key);
