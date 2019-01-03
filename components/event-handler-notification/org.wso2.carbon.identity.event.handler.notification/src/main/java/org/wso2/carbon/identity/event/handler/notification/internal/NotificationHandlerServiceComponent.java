@@ -24,6 +24,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.identity.event.handler.notification.DefaultNotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.listener.NotificationEventTenantListener;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -57,6 +58,7 @@ public class NotificationHandlerServiceComponent {
     protected void activate(ComponentContext context) {
         try {
             context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new NotificationHandler(), null);
+            context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new DefaultNotificationHandler(), null);
             context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                     new NotificationEventTenantListener(), null);
         } catch (Throwable e) {

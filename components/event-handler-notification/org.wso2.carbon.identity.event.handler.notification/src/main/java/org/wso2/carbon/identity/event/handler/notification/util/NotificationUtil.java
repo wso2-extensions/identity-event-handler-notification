@@ -200,7 +200,9 @@ public class NotificationUtil {
 
     public static Notification buildNotification(Event event, Map<String, String> placeHolderData)
             throws IdentityEventException, NotificationRuntimeException {
-        String sendTo = null;
+        //send-to parameter will be set by the event senders. Here it is first read from the request parameter and
+        //if it is not there, then assume this sent-to parameter should read from user's email claim only.
+        String sendTo = placeHolderData.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO);
         Map<String, String> userClaims = new HashMap<>();
         String notificationEvent = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
         String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
@@ -221,13 +223,15 @@ public class NotificationUtil {
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
         }
-
-        if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
-            sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
-        }
-        if (StringUtils.isEmpty(sendTo)) {
-            throw NotificationRuntimeException.error(
-                    "Email notification sending failed. Sending email address is not configured for the user.");
+        //Only sendTo value read from claims if it is not set the event sender.
+        if(StringUtils.isEmpty(sendTo)) {
+            if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
+                sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
+            }
+            if (StringUtils.isEmpty(sendTo)) {
+                throw NotificationRuntimeException.error(
+                        "Email notification sending failed. Sending email address is not configured for the user.");
+            }
         }
 
         EmailTemplate emailTemplate;

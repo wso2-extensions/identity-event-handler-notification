@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.event.handler.notification;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.stream.core.EventStreamService;
@@ -35,23 +36,40 @@ import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NotificationHandler extends AbstractEventHandler {
+/**
+ * This is the Email and SMS Notification Handler which connected to the direct CEP stream.
+ * Extended from the DefaultNotificationHandler which is define the default notification send.
+ *
+ */
+public class NotificationHandler extends DefaultNotificationHandler {
 
     private static final Log log = LogFactory.getLog(NotificationHandler.class);
+    private static final String STREAM_ID = "id_gov_notify_stream:1.0.0";
 
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
-
-        Map<String, String> placeHolderData = new HashMap<>();
-
+        //We can set the notification template from the identity-even.properties file as a property of the subscription
+        //property. Then it will get the first priority.
+        String notificationTemplate = getNotificationTemplate(event);
+        if(StringUtils.isNotEmpty(notificationTemplate)){
+            event.getEventProperties().put(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE,
+                    notificationTemplate);
+        }
+        Map<String, String> arbitraryDataMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : event.getEventProperties().entrySet()) {
             if (entry.getValue() instanceof String) {
-                placeHolderData.put(entry.getKey(), (String) entry.getValue());
+                arbitraryDataMap.put(entry.getKey(), (String) entry.getValue());
             }
         }
+        Notification notification = NotificationUtil.buildNotification(event, arbitraryDataMap);
 
-        Notification notification = NotificationUtil.buildNotification(event, placeHolderData);
-        publishToStream(notification, placeHolderData);
+        //Stream definition will be read from the the identity-even.properties file as a property of the subscription
+        //property. Then it will get the first priority.
+        String streamDefinitionID = getStreamDefinitionID(event);
+        //This stream-id was set to the map to pass to the publishToStream method only to avoid API change.
+        arbitraryDataMap.put("tmp-stream-id", streamDefinitionID);
+
+        publishToStream(notification, arbitraryDataMap);
     }
 
     protected void publishToStream(Notification notification, Map<String, String> placeHolderDataMap) {
@@ -62,9 +80,10 @@ public class NotificationHandler extends AbstractEventHandler {
         databridgeEvent.setTimeStamp(System.currentTimeMillis());
         Map<String, String> arbitraryDataMap = new HashMap<>();
 
-        databridgeEvent.setStreamId(NotificationConstants.EmailNotification.STREAM_ID);
+        databridgeEvent.setStreamId(placeHolderDataMap.remove("tmp-stream-id"));
 
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE, I18nEmailUtil.getNormalizedName(notification.getTemplate().getTemplateDisplayName()));
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE, I18nEmailUtil.
+                getNormalizedName(notification.getTemplate().getTemplateDisplayName()));
         arbitraryDataMap.put(IdentityEventConstants.EventProperty.USER_NAME,
                 placeHolderDataMap.get(IdentityEventConstants.EventProperty.USER_NAME));
         arbitraryDataMap.put(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN,
@@ -75,11 +94,16 @@ public class NotificationHandler extends AbstractEventHandler {
         for (Map.Entry<String, String> placeHolderDataEntry : placeHolderDataMap.entrySet()) {
             arbitraryDataMap.put(placeHolderDataEntry.getKey(), placeHolderDataEntry.getValue());
         }
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.getTemplate().getSubject());
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY_TEMPLATE, notification.getTemplate().getBody());
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER_TEMPLATE, notification.getTemplate().getFooter());
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, notification.getTemplate().getLocale());
-        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.getTemplate().getEmailContentType());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.
+                getTemplate().getSubject());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY_TEMPLATE, notification.
+                getTemplate().getBody());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER_TEMPLATE, notification.
+                getTemplate().getFooter());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, notification.getTemplate().
+                getLocale());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.
+                getTemplate().getEmailContentType());
         arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
         arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT, notification.getSubject());
         arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY, notification.getBody());
@@ -90,8 +114,14 @@ public class NotificationHandler extends AbstractEventHandler {
         service.publish(databridgeEvent);
     }
 
+
     @Override
-    public void init(InitConfig configuration) throws IdentityRuntimeException {
+    public String getStreamDefinitionID(Event event) throws IdentityEventException {
+        String streamDefinitionID = super.getStreamDefinitionID(event);
+        if(StringUtils.isEmpty(streamDefinitionID)){
+            streamDefinitionID = STREAM_ID ;
+        }
+        return streamDefinitionID;
     }
 
     @Override
