@@ -90,6 +90,11 @@
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.databridge.commons</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity.governance</groupId>
+            <artifactId>org.wso2.carbon.identity.governance</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -148,6 +153,7 @@
                             org.wso2.carbon.event.publisher.core.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.databridge.commons.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.email.mgt.*; version="${identity.event.handler.notification.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.governance.*; version="${identity.governance.imp.pkg.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>
