@@ -23,6 +23,11 @@ public class NotificationConstants {
     private NotificationConstants() {
     }
 
+    public static final String TEMPLATE_TYPE = "TEMPLATE_TYPE";
+    public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
+    public static final String ARBITRARY_SEND_TO = "send-to";
+    public static final String ARBITRARY_BODY = "body";
+
     public static class EmailNotification {
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
         public static final String EMAIL_TEMPLATE_TYPE = "TEMPLATE_TYPE";
@@ -64,5 +69,13 @@ public class NotificationConstants {
 
         public static final String CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER = "carbon.product-url";
 
+    }
+
+    public static class SMSNotification {
+        public static final String CLAIM_URI_MOBILE = "http://wso2.org/claims/mobile";
+
+        public static final String STREAM_ID = "id_gov_sms_notify_stream:1.0.0";
+        public static final String STREAM_NAME = "id_gov_sms_notify_stream";
+        public static final String STREAM_VERSION = "1.0.0";
     }
 }
