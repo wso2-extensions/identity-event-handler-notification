@@ -388,11 +388,11 @@
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
         <!--Orbit Version-->
-        <axis2.wso2.version>1.6.1.wso2v12</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
         <axis2.wso2.imp.pkg.version.range>[1.6.1.wso2v12, 2.0.0)</axis2.wso2.imp.pkg.version.range>
-        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
+        <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
         <axiom.wso2.imp.pkg.version.range>[1.2.11, 2.0.0)</axiom.wso2.imp.pkg.version.range>
-        <axis2-transports.version>2.0.0-wso2v21</axis2-transports.version>
+        <axis2-transports.version>2.0.0-wso2v35</axis2-transports.version>
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
 
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
@@ -401,26 +401,23 @@
         <commons-lang.version.range>[2.6.0,3.0.0)</commons-lang.version.range>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.4.29</carbon.kernel.version>
-        <carbon.kernel.imp.pkg.version.range>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
+        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.imp.pkg.version.range>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.5.4</carbon.commons.version>
-        <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.version>4.7.0</carbon.commons.version>
+        <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.12.243</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.11.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
-
-        <!--Identity Governance Version-->
-        <identity.governance.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.governance.imp.pkg.version.range>
+        <carbon.identity.framework.version>5.13.4</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version.range>[5.13.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
-        <carbon.analytics.common.version>5.1.57</carbon.analytics.common.version>
-        <carbon.analytics.common.version.range>[5.1.0,6.0.0)</carbon.analytics.common.version.range>
+        <carbon.analytics.common.version>5.2.0</carbon.analytics.common.version>
+        <carbon.analytics.common.version.range>[5.2.0,6.0.0)</carbon.analytics.common.version.range>
 
         <!-- GSON version -->
         <com.google.code.gson.version>2.3.1</com.google.code.gson.version>
