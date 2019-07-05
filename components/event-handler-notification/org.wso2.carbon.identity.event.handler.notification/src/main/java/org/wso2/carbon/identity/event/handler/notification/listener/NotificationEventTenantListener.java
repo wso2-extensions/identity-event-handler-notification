@@ -66,13 +66,7 @@ public class NotificationEventTenantListener implements TenantMgtListener {
         } catch (UserStoreException e) {
             throw new StratosException("Error in starting a tenant flow.", e);
         }
-        NotificationUtil.deployStream(NotificationConstants.EmailNotification.STREAM_NAME,
-                NotificationConstants.EmailNotification.STREAM_VERSION,
-                NotificationConstants.EmailNotification.STREAM_ID);
-        EventPublisherConfiguration eventPublisherConfig = getEventPublisherConfig();
-        NotificationUtil.deployPublisher(eventPublisherConfig);
         PrivilegedCarbonContext.endTenantFlow();
-
     }
 
     @Override
