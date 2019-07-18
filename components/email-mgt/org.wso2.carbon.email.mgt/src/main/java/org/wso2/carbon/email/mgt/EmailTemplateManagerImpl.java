@@ -23,6 +23,7 @@ import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
+import org.wso2.carbon.email.mgt.exceptions.DuplicateEmailTemplateException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
@@ -77,7 +78,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
             // check whether a template exists with the same name.
             if (resourceMgtService.isResourceExists(path, tenantDomain)) {
                 String errorMsg = String.format(DUPLICATE_TEMPLATE_TYPE, emailTemplateDisplayName, tenantDomain);
-                throw new I18nEmailMgtClientException(errorMsg);
+                throw new DuplicateEmailTemplateException(errorMsg);
             }
 
             Collection collection = I18nEmailUtil.createTemplateType(normalizedTemplateName, emailTemplateDisplayName);
@@ -283,7 +284,13 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
                 //Check for existence of each category, since some template may have migrated from earlier version
                 //This will also add new template types provided from file, but won't update any existing
                 if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
-                    addEmailTemplate(emailTemplateDTO, tenantDomain);
+                    try {
+                        addEmailTemplate(emailTemplateDTO, tenantDomain);
+
+                    } catch (DuplicateEmailTemplateException e) {
+                        log.warn("Template" + templateTypeDisplayName + "already exists in the registry,Hence " +
+                                "ignoring addition");
+                    }
                     if (log.isDebugEnabled()) {
                         String msg = "Default template added to %s tenant registry : %n%s";
                         log.debug(String.format(msg, tenantDomain, emailTemplateDTO.toString()));
