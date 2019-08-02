@@ -178,11 +178,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
@@ -313,6 +308,12 @@
                 <classifier>runtime</classifier>
                 <version>${jacoco.version}</version>
             </dependency>
+            <!-- Pax Logging -->
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -421,5 +422,8 @@
         <powermock.version>1.6.6</powermock.version>
         <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
+
+        <!-- Pax Logging Version -->
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
 </project>
