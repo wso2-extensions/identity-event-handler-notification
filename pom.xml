@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>1.2</version>
     </parent>
 
     <scm>
@@ -363,6 +363,25 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!--This parameter disables doclint-->
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -370,7 +389,7 @@
 
         <!--Identity Event Handler Email Version-->
         <identity.event.handler.notification.exp.pkg.version>${project.version}</identity.event.handler.notification.exp.pkg.version>
-        <identity.event.handler.notification.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.event.handler.notification.imp.pkg.version.range>
+        <identity.event.handler.notification.imp.pkg.version.range>[1.2.0, 2.0.0)</identity.event.handler.notification.imp.pkg.version.range>
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
@@ -389,22 +408,22 @@
         <commons-lang.version.range>[2.6.0,3.0.0)</commons-lang.version.range>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.version>4.5.0-m3</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version.range>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.7.0</carbon.commons.version>
-        <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.version>4.7.2</carbon.commons.version>
+        <carbon.commons.imp.pkg.version>[4.7.2, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.13.4</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.13.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.version>5.14.0</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version.range>[5.14.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
-        <carbon.analytics.common.version>5.2.0</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.2</carbon.analytics.common.version>
         <carbon.analytics.common.version.range>[5.2.0,6.0.0)</carbon.analytics.common.version.range>
 
         <!-- GSON version -->
