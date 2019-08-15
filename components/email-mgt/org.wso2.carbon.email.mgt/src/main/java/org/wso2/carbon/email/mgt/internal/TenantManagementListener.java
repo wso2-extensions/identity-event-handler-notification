@@ -30,7 +30,7 @@ import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 public class TenantManagementListener implements TenantMgtListener {
 
     private static final int EXEC_ORDER = 21;
-    private static Log log = LogFactory.getLog(TenantManagementListener.class);
+    private static final Log log = LogFactory.getLog(TenantManagementListener.class);
 
     /**
      * Add the default Email Templates to the registry when a new tenant is registered.

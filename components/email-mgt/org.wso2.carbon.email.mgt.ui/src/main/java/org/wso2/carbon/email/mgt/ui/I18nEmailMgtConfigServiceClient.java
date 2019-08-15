@@ -30,7 +30,7 @@ import org.wso2.carbon.email.mgt.stub.I18NEmailMgtConfigServiceStub;
 
 public class I18nEmailMgtConfigServiceClient {
 
-    private static Log log = LogFactory.getLog(I18nEmailMgtConfigServiceClient.class);
+    private static final Log log = LogFactory.getLog(I18nEmailMgtConfigServiceClient.class);
 
     private I18NEmailMgtConfigServiceStub stub;
 

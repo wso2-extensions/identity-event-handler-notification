@@ -58,7 +58,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 
 public class NotificationUtil {
 
-    private static Log log = LogFactory.getLog(NotificationUtil.class);
+    private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
 
