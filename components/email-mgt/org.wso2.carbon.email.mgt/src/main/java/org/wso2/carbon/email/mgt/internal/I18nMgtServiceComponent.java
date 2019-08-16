@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
          immediate = true)
 public class I18nMgtServiceComponent {
 
-    private static Log log = LogFactory.getLog(I18nMgtServiceComponent.class);
+    private static final Log log = LogFactory.getLog(I18nMgtServiceComponent.class);
 
     private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
 

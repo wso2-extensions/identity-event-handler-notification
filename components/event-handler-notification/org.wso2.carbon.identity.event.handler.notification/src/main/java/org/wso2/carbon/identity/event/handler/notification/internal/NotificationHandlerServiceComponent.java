@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
          immediate = true)
 public class NotificationHandlerServiceComponent {
 
-    private static Log log = LogFactory.getLog(NotificationHandlerServiceComponent.class);
+    private static final Log log = LogFactory.getLog(NotificationHandlerServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext context) {
