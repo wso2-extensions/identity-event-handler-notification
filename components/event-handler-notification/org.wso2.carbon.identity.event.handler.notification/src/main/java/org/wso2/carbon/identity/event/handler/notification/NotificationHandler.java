@@ -70,16 +70,7 @@ public class NotificationHandler extends DefaultNotificationHandler {
         String streamDefinitionID = getStreamDefinitionID(event);
         //This stream-id was set to the map to pass to the publishToStream method only to avoid API change.
         arbitraryDataMap.put("tmp-stream-id", streamDefinitionID);
-
-        try {
-            // Use the super tenant's EmailPublisher.xml and id_gov_notify_stream_1.0.0.json to publish the stream.
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            publishToStream(notification, arbitraryDataMap);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        publishToStream(notification, arbitraryDataMap);
     }
 
     protected void publishToStream(Notification notification, Map<String, String> placeHolderDataMap) {
