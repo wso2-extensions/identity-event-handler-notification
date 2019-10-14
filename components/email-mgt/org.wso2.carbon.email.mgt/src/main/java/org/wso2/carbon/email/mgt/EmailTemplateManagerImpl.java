@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtInternalException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.DuplicateEmailTemplateException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
@@ -78,7 +79,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
             // check whether a template exists with the same name.
             if (resourceMgtService.isResourceExists(path, tenantDomain)) {
                 String errorMsg = String.format(DUPLICATE_TEMPLATE_TYPE, emailTemplateDisplayName, tenantDomain);
-                throw new DuplicateEmailTemplateException(errorMsg);
+                throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS,
+                        errorMsg);
             }
 
             Collection collection = I18nEmailUtil.createTemplateType(normalizedTemplateName, emailTemplateDisplayName);
@@ -197,8 +199,9 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
             if (StringUtils.equalsIgnoreCase(DEFAULT_EMAIL_LOCALE, locale)) {
                 // This means the template type is not there even in the default locale. We need to break the flow at
                 // the consuming side or else will end up with a NPE.
-                String error = "Cannot find '%s' template in the default '%s' locale for '%s' tenant.";
-                handleServerException(String.format(error, templateDisplayName, locale, tenantDomain), null);
+                String error =  "Cannot find '%s' template in the default '%s' locale for '%s' tenant.";
+                throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND,
+                        String.format(error, templateDisplayName, locale, tenantDomain), null);
             } else {
                 // We try to get the template type in our default locale : en_US
                 if (log.isDebugEnabled()) {
