@@ -316,11 +316,29 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
 
         // get template directory name from display name.
         String normalizedTemplateName = I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
-        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName+ PATH_SEPARATOR + locale.toLowerCase();
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName +
+                        PATH_SEPARATOR + locale.toLowerCase();
 
         try {
             Resource template = resourceMgtService.getIdentityResource(path, tenantDomain);
             return template != null;
+        } catch (IdentityRuntimeException e) {
+            String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
+            throw new I18nEmailMgtServerException(error, e);
+        }
+    }
+
+    @Override
+    public boolean isEmailTemplateTypeExists(String templateTypeDisplayName, String tenantDomain)
+            throws I18nEmailMgtException {
+
+        // get template directory name from display name.
+        String normalizedTemplateName = I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName;
+
+        try {
+            Resource templateType = resourceMgtService.getIdentityResource(path, tenantDomain);
+            return templateType != null;
         } catch (IdentityRuntimeException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(error, e);
