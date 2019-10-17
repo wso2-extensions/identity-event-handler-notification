@@ -271,7 +271,6 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
         }
     }
 
-
     @Override
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
 
@@ -311,6 +310,22 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
         }
     }
 
+    @Override
+    public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain)
+            throws I18nEmailMgtException {
+
+        // get template directory name from display name.
+        String normalizedTemplateName = I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName+ PATH_SEPARATOR + locale.toLowerCase();
+
+        try {
+            Resource template = resourceMgtService.getIdentityResource(path, tenantDomain);
+            return template != null;
+        } catch (IdentityRuntimeException e) {
+            String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
+            throw new I18nEmailMgtServerException(error, e);
+        }
+    }
 
     /**
      * Validate an EmailTemplate object before persisting it into tenant's registry.

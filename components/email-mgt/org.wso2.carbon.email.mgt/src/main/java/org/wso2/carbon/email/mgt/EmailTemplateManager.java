@@ -110,4 +110,14 @@ public interface EmailTemplateManager {
      */
     void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException;
 
+    /**
+     * Check whether the given email template type exists in the system.
+     *
+     * @param templateTypeDisplayName Display name of the template type.
+     * @param locale                  Locale of the email template
+     * @param tenantDomain            Tenant Domain
+     * @return True if the template type exists, false otherwise.
+     */
+    boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain)
+            throws I18nEmailMgtException;
 }
