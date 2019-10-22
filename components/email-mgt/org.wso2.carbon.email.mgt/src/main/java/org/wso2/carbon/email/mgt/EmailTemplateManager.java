@@ -138,5 +138,6 @@ public interface EmailTemplateManager {
      * @param tenantDomain            Tenant Domain
      * @return True if the template type exists, false otherwise.
      */
-    boolean isEmailTemplateTypeExists(String templateTypeDisplayName, String tenantDomain) throws I18nEmailMgtException;
+    boolean isEmailTemplateTypeExists(String templateTypeDisplayName, String tenantDomain)
+            throws I18nEmailMgtException;
 }

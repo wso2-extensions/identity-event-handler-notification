@@ -50,8 +50,8 @@ public class I18nMgtConstants {
 
         }
 
-        public static final String DUPLICATE_TEMPLATE_TYPE = "Email template type '%s' already exists in %s tenant " +
-                "registry.";
+        public static final String DUPLICATE_TEMPLATE_TYPE = "Email template type '%s' already exists in %s " +
+                "tenant registry.";
     }
 
     public static class ErrorCodes {

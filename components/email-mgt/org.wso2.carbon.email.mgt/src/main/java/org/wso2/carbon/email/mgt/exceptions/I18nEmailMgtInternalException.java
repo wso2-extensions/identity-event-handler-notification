@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.email.mgt.exceptions;
 
+/**
+ * Exception class to capture error codes.
+ */
 public class I18nEmailMgtInternalException extends I18nEmailMgtException {
 
     public I18nEmailMgtInternalException(String errorCode, String message) {

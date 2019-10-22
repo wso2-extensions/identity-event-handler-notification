@@ -79,8 +79,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
             // check whether a template exists with the same name.
             if (resourceMgtService.isResourceExists(path, tenantDomain)) {
                 String errorMsg = String.format(DUPLICATE_TEMPLATE_TYPE, emailTemplateDisplayName, tenantDomain);
-                throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS,
-                        errorMsg);
+                throw new I18nEmailMgtInternalException(
+                        I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS, errorMsg);
             }
 
             Collection collection = I18nEmailUtil.createTemplateType(normalizedTemplateName, emailTemplateDisplayName);
@@ -147,7 +147,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager {
 
             if (baseDirectory != null) {
                 for (String templateTypeDirectory : baseDirectory.getChildren()) {
-                    templateList.addAll(getAllTemplatesOfTemplateTypeFromRegistry(templateTypeDirectory, tenantDomain));
+                    templateList.addAll(
+                            getAllTemplatesOfTemplateTypeFromRegistry(templateTypeDirectory, tenantDomain));
                 }
             }
         } catch (RegistryException | IdentityRuntimeException e) {
