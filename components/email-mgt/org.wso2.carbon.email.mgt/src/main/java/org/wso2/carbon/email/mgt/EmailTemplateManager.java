@@ -91,6 +91,19 @@ public interface EmailTemplateManager {
                                    String locale,
                                    String tenantDomain) throws I18nEmailMgtException;
 
+    /**
+     * Get an all email templates of an specific template type, from tenant registry.
+     *
+     * @param templateDisplayName Email template type displace name.
+     * @param tenantDomain Tenant domain.
+     * @return A list of email templates that matches to the provided template type.
+     * @throws I18nEmailMgtException if an error occurred.
+     */
+    default List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain)
+            throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("Method not yet supported");
+    }
 
     /**
      * Get all available email templates in a tenant's registry.
@@ -110,4 +123,30 @@ public interface EmailTemplateManager {
      */
     void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException;
 
+    /**
+     * Check whether the given email template type exists in the system.
+     *
+     * @param templateTypeDisplayName Display name of the template type.
+     * @param locale                  Locale of the email template
+     * @param tenantDomain            Tenant Domain
+     * @return True if the template type exists, false otherwise.
+     */
+    default boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain)
+            throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("Method not yet supported");
+    }
+
+    /**
+     * Check whether the given email template type exists in the system.
+     *
+     * @param templateTypeDisplayName Display name of the template type.
+     * @param tenantDomain            Tenant Domain
+     * @return True if the template type exists, false otherwise.
+     */
+    default boolean isEmailTemplateTypeExists(String templateTypeDisplayName, String tenantDomain)
+            throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("Method not yet supported");
+    }
 }
