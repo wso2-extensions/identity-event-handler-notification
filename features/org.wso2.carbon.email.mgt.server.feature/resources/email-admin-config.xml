@@ -22,11 +22,6 @@
   -->
 
 <configurations>
-    <configuration type="smsaccountconfirmation" display="smsaccountconfirmation" locale="en_US" emailContentType="text/plain">
-        <subject>WSO2 - Self Registration OTP</subject>
-        <body>Your One-Time Password is : {{confirmation-code}}</body>
-        <footer>---</footer>
-    </configuration>
     <configuration type="passwordReset" display="PasswordReset" locale="en_US" emailContentType="text/html">
         <subject>WSO2 - Password Reset</subject>
         <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
