@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.event.handler.notification.NotificationConstants
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
 import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -60,6 +61,8 @@ public class NotificationUtil {
 
     private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
+    private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
+
     public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
 
         Claim[] userClaims;
@@ -69,6 +72,19 @@ public class NotificationUtil {
             if (userClaims != null) {
                 for(Claim userClaim : userClaims) {
                     claimsMap.put(userClaim.getClaimUri(), userClaim.getValue());
+                }
+            }
+            UserIdentityClaim userIdentityClaims =
+                    (UserIdentityClaim) IdentityUtil.threadLocalProperties.get().get(USER_IDENTITY_CLAIMS);
+            Map<String, String> userIdentityDataMap;
+            if (userIdentityClaims == null) {
+                userIdentityDataMap = new HashMap<>();
+            } else {
+                userIdentityDataMap = userIdentityClaims.getUserIdentityDataMap();
+            }
+            for (String key : userIdentityDataMap.keySet()) {
+                if (!claimsMap.containsKey(key)) {
+                    claimsMap.put(key, userIdentityDataMap.get(key));
                 }
             }
         } catch (UserStoreException e) {
