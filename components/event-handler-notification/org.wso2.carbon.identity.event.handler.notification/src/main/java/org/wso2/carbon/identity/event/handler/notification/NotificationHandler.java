@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.event.handler.notification;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.handler.InitConfig;
@@ -32,6 +33,7 @@ import org.wso2.carbon.identity.event.handler.notification.email.bean.Notificati
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +70,6 @@ public class NotificationHandler extends DefaultNotificationHandler {
         String streamDefinitionID = getStreamDefinitionID(event);
         //This stream-id was set to the map to pass to the publishToStream method only to avoid API change.
         arbitraryDataMap.put("tmp-stream-id", streamDefinitionID);
-
         publishToStream(notification, arbitraryDataMap);
     }
 

@@ -23,9 +23,7 @@ package org.wso2.carbon.email.mgt.constants;
  */
 public class I18nMgtConstants {
 
-    private I18nMgtConstants() {
-
-    }
+    private I18nMgtConstants() {}
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
     public static final String EMAIL_CONF_DIRECTORY = "email";
@@ -47,15 +45,17 @@ public class I18nMgtConstants {
 
     public static final String EMAIL_TEMPLATE_TYPE_REGEX = "[a-zA-Z0-9\\s]+";
 
-
     public static class ErrorMsg {
         private ErrorMsg() {
 
         }
 
-        public static final String DUPLICATE_TEMPLATE_TYPE =
-                "Email template type '%s' already exists in %s tenant registry.";
-
+        public static final String DUPLICATE_TEMPLATE_TYPE = "Email template type '%s' already exists in %s " +
+                "tenant registry.";
     }
 
+    public static class ErrorCodes {
+        public static final String EMAIL_TEMPLATE_TYPE_NODE_FOUND = "10001";
+        public static final String EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS = "10002";
+    }
 }

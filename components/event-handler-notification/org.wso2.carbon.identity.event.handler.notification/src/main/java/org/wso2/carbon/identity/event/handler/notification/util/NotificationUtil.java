@@ -59,7 +59,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 
 public class NotificationUtil {
 
-    private static Log log = LogFactory.getLog(NotificationUtil.class);
+    private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
 
@@ -139,13 +139,13 @@ public class NotificationUtil {
                         + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX)) {
                     String identityClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
                             + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX + "/"
-                            + placeHolder.substring(placeHolder.lastIndexOf(".") + 1));
+                            + placeHolder.substring(placeHolder.indexOf(".", placeHolder.indexOf("identity")) + 1));
                     if (StringUtils.isNotEmpty(identityClaim)) {
                         placeHolderData.put(placeHolder, identityClaim);
                     }
                 } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
                     String userClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
-                            + placeHolder.substring(placeHolder.lastIndexOf(".") + 1));
+                            + placeHolder.substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
                     }
