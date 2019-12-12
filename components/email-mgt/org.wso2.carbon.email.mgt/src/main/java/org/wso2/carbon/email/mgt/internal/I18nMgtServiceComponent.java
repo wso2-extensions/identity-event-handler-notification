@@ -27,6 +27,7 @@ import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -50,8 +51,11 @@ public class I18nMgtServiceComponent {
     protected void activate(ComponentContext context) {
         try {
             BundleContext bundleCtx = context.getBundleContext();
-            // Register Email Mgt Service as an OSGi service
-            ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(), new EmailTemplateManagerImpl(), null);
+
+            // Register Email Mgt Service as an OSGi service.
+            EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
+            ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
+                    emailTemplateManager, null);
             if (emailTemplateSR != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Email Template Mgt Service registered.");
@@ -59,8 +63,21 @@ public class I18nMgtServiceComponent {
             } else {
                 log.error("Error registering Email Template Mgt Service.");
             }
+
+            // Register EmailTemplateManagerImpl.
+            ServiceRegistration notificationManagerSR = bundleCtx
+                    .registerService(NotificationTemplateManager.class.getName(), emailTemplateManager, null);
+            if (notificationManagerSR != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Notification Template Mgt Service registered.");
+                }
+            } else {
+                log.error("Error registering Notification Template Mgt Service.");
+            }
+
             TenantManagementListener emailMgtTenantListener = new TenantManagementListener();
-            ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(TenantMgtListener.class.getName(), emailMgtTenantListener, null);
+            ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(TenantMgtListener.class.getName(),
+                    emailMgtTenantListener, null);
             if (tenantMgtListenerSR != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("I18n Management - TenantMgtListener registered");
@@ -68,7 +85,8 @@ public class I18nMgtServiceComponent {
             } else {
                 log.error("I18n Management - TenantMgtListener could not be registered");
             }
-            // load default email templates
+
+            // Load default email templates.
             loadDefaultEmailTemplates();
             log.debug("I18n Management is activated");
         } catch (Throwable e) {

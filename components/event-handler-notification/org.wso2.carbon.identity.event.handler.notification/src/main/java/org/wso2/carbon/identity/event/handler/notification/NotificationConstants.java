@@ -27,6 +27,7 @@ public class NotificationConstants {
     public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
     public static final String ARBITRARY_SEND_TO = "send-to";
     public static final String ARBITRARY_BODY = "body";
+    public static final String DEFAULT_NOTIFICATION_LOCALE = "en_US";
 
     public static class EmailNotification {
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
@@ -77,5 +78,6 @@ public class NotificationConstants {
         public static final String STREAM_ID = "id_gov_sms_notify_stream:1.0.0";
         public static final String STREAM_NAME = "id_gov_sms_notify_stream";
         public static final String STREAM_VERSION = "1.0.0";
+        public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
     }
 }

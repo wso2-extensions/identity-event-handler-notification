@@ -20,6 +20,7 @@
 
     <test name="EmailMgtTests" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2.carbon.email.mgt.EmailTemplateManagerImplTest"/>
             <class name="org.wso2.carbon.email.mgt.util.I18nEmailUtilTest"/>
         </classes>
     </test>
