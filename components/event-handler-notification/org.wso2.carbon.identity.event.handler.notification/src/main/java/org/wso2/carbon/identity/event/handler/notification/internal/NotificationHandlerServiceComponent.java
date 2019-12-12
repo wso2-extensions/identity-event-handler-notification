@@ -26,6 +26,7 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.DefaultNotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.listener.NotificationEventTenantListener;
+import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -163,6 +164,37 @@ public class NotificationHandlerServiceComponent {
             log.debug("UnSetting the Email Template Manager");
         }
         NotificationHandlerDataHolder.getInstance().setEmailTemplateManager(null);
+    }
+
+    @Reference(name = "notificationTemplateManager.service",
+               service = org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager.class,
+               cardinality = ReferenceCardinality.MANDATORY,
+               policy = ReferencePolicy.DYNAMIC,
+               unbind = "unsetNotificationTemplateManager")
+    /**
+     * Set NotificationTemplateManager.
+     *
+     * @param notificationTemplateManager
+     * {@link org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
+     */ protected void setNotificationTemplateManager(NotificationTemplateManager notificationTemplateManager) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Notification Template Manager");
+        }
+        NotificationHandlerDataHolder.getInstance().setNotificationTemplateManager(notificationTemplateManager);
+    }
+
+    /**
+     * Get NotificationTemplateManager.
+     *
+     * @param notificationTemplateManager {@link org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
+     */
+    protected void unsetNotificationTemplateManager(NotificationTemplateManager notificationTemplateManager) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("UnSetting the Notification Email Template Manager");
+        }
+        NotificationHandlerDataHolder.getInstance().setNotificationTemplateManager(null);
     }
 }
 

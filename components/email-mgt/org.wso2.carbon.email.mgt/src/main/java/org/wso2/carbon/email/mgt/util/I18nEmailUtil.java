@@ -55,9 +55,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 public class I18nEmailUtil {
+
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
-    private static final String CHARSET_CONSTANT = "charset";
-    private static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
+    public static final String CHARSET_CONSTANT = "charset";
+    public static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
 
     private I18nEmailUtil() {
     }

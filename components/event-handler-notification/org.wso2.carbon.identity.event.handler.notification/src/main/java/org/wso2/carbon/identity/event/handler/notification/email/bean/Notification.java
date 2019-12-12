@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.event.handler.notification.email.bean;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 
@@ -43,9 +44,13 @@ public class Notification implements Serializable {
         this.sendFrom = builder.sendFrom;
         this.template = builder.template;
         this.placeHolderData = builder.placeHolderData;
-        this.subject = replaceTags(template.getSubject(), placeHolderData);
         this.body = replaceTags(template.getBody(), placeHolderData);
-        this.footer = replaceTags(template.getFooter(), placeHolderData);
+        if (StringUtils.isNotEmpty(template.getSubject())) {
+            this.subject = replaceTags(template.getSubject(), placeHolderData);
+        }
+        if (StringUtils.isNotEmpty(template.getFooter())) {
+            this.footer = replaceTags(template.getFooter(), placeHolderData);
+        }
     }
 
     private static String replaceTags(String content, Map<String, String> tagsData) {

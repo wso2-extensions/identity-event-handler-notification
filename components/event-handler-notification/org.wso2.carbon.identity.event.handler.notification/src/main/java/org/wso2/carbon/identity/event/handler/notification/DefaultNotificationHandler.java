@@ -34,6 +34,10 @@ import org.wso2.carbon.identity.event.handler.notification.email.bean.Notificati
 import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
+import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,13 +67,35 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
     }
 
     /**
+     * Resolve notification channel to server supported notification channel (SMS or EMAIL).
+     *
+     * @param notificationChannel Notification channel
+     * @return Resolved notification channel
+     */
+    private String resolveNotificationChannel(String notificationChannel) {
+
+        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)
+                || NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return notificationChannel;
+        } else {
+            if (log.isDebugEnabled()) {
+                String message = String.format("Notification channel : %s is not supported by the server. "
+                                + "Notification channel changed to : %s", notificationChannel,
+                        IdentityGovernanceUtil.getDefaultNotificationChannel());
+                log.debug(message);
+            }
+            return IdentityGovernanceUtil.getDefaultNotificationChannel();
+        }
+    }
+
+    /**
      * This method will build the specific notification data which under this module.
      *
-     * @param event
-     * @return
-     * @throws IdentityEventException
+     * @param event Event attributes
+     * @return Data map with event properties
+     * @throws IdentityEventException Error building the arbitrary data map
      */
-    protected Map<String, String> buildNotificationData(Event event) throws IdentityEventException{
+    protected Map<String, String> buildNotificationData(Event event) throws IdentityEventException {
 
         Map<String, String> arbitraryDataMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : event.getEventProperties().entrySet()) {
@@ -78,17 +104,17 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             }
         }
 
-        //Read the send-to parameter which was set by the notification senders.
+        // Read the send-to parameter which was set by the notification senders.
         String sendTo = arbitraryDataMap.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO);
         Map<String, String> userClaims = new HashMap<>();
 
-        String notificationTemplate = getNotificationTemplate(event);
-        if(StringUtils.isEmpty(notificationTemplate)) {
-            notificationTemplate = (String) event.getEventProperties().get(
-                    NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
+        String notificationTemplateName = getNotificationTemplate(event);
+        if (StringUtils.isEmpty(notificationTemplateName)) {
+            notificationTemplateName = (String) event.getEventProperties()
+                    .get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
         }
 
-        if(StringUtils.isNotEmpty(notificationTemplate)) {
+        if(StringUtils.isNotEmpty(notificationTemplateName)) {
 
             String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
             org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager)
@@ -101,6 +127,10 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             String sendFrom = (String) event.getEventProperties().get(
                     NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
 
+            // Resolve Notification channel.
+            String notificationChannel = resolveNotificationChannel(
+                    (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.NOTIFICATION_CHANNEL));
+
             if (StringUtils.isNotBlank(username) && userStoreManager != null) {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
             } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
@@ -108,55 +138,37 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
             }
 
+            // Resolve notification template locale according to the notification channel.
             String locale = NotificationConstants.EmailNotification.LOCALE_DEFAULT;
-            if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
-                locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
-            }
+            if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel) && userClaims
+                    .containsKey(NotificationConstants.SMSNotification.DEFAULT_SMS_NOTIFICATION_LOCALE)) {
+                locale = userClaims.get(NotificationConstants.SMSNotification.DEFAULT_SMS_NOTIFICATION_LOCALE);
+            } else {
 
+                // By default EMAIL notification template locale is selected.
+                if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
+                    locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
+                }
+            }
             if(StringUtils.isEmpty(sendTo)) {
                 if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
                     sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
                 }
             }
 
-            EmailTemplate emailTemplate;
+            NotificationTemplate notificationTemplate;
             try {
-                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(
-                        notificationTemplate, locale, tenantDomain);
-            } catch (I18nEmailMgtException e) {
+                notificationTemplate = NotificationHandlerDataHolder.getInstance().getNotificationTemplateManager()
+                        .getNotificationTemplate(notificationChannel, notificationTemplateName, locale, tenantDomain);
+            } catch (NotificationTemplateManagerException exception) {
                 String message = "Error when retrieving template from tenant registry.";
-                throw NotificationRuntimeException.error(message, e);
+                throw NotificationRuntimeException.error(message, exception);
             }
 
-            NotificationUtil.getPlaceholderValues(emailTemplate, arbitraryDataMap, userClaims);
-
-            Notification.EmailNotificationBuilder builder =
-                    new Notification.EmailNotificationBuilder(sendTo);
-            builder.setSendFrom(sendFrom);
-            builder.setTemplate(emailTemplate);
-            builder.setPlaceHolderData(arbitraryDataMap);
-            Notification notification = builder.build();
-
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE,
-                    I18nEmailUtil.getNormalizedName(notificationTemplate));
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM, notification.getSendFrom());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.
-                    getTemplate().getSubject());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY_TEMPLATE, notification.
-                    getTemplate().getBody());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER_TEMPLATE, notification.
-                    getTemplate().getFooter());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, notification.getTemplate().
-                    getLocale());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.
-                    getTemplate().getEmailContentType());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT, notification.getSubject());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY, notification.getBody());
-            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER, notification.getFooter());
+            // Add template properties for arbitraryDataMap.
+            addNotificationTemplateDataToArbitraryDataMap(notificationTemplate, notificationTemplateName, sendTo,
+                    sendFrom, arbitraryDataMap, userClaims);
         }
-
-
         Map<String, String> arbitraryDataClaims = getArbitraryDataClaimsFromProperties(event);
         Set<String> keys = arbitraryDataClaims.keySet();
         for (String key : keys) {
@@ -164,13 +176,102 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             String value = userClaims.get(claim);
             arbitraryDataMap.put(key, value);
         }
-
         Map<String, String> arbitraryDataFromProperties = getArbitraryDataFromProperties(event);
         arbitraryDataMap.putAll(arbitraryDataFromProperties);
-
         return arbitraryDataMap ;
     }
 
+    /**
+     * Add the notification template data to the arbitrary data map.
+     *
+     * @param notificationTemplate     {@link
+     *                                 org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
+     *                                 object
+     * @param notificationTemplateName Notification template
+     * @param sendTo                   Notification send to address
+     * @param sendFrom                 Notification send from address
+     * @param arbitraryDataMap         Arbitrary data map
+     * @param userClaims               User claims
+     */
+    private void addNotificationTemplateDataToArbitraryDataMap(NotificationTemplate notificationTemplate,
+            String notificationTemplateName, String sendTo, String sendFrom, Map<String, String> arbitraryDataMap,
+            Map<String, String> userClaims) {
+
+        // Build Notification object using notification template data.
+        // todo: Refer to https://github.com/wso2/product-is/issues/7006
+        EmailTemplate emailTemplate = buildEmailTemplate(notificationTemplate);
+        Notification notification = buildEmailNotification(emailTemplate, arbitraryDataMap, userClaims, sendTo,
+                sendFrom);
+
+        // Add values to the arbitrary data map.
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_EVENT_TYPE,
+                I18nEmailUtil.getNormalizedName(notificationTemplateName));
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM, notification.getSendFrom());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY_TEMPLATE, notification.
+                getTemplate().getBody());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, notification.getTemplate().
+                getLocale());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, notification.getSendTo());
+        arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_BODY, notification.getBody());
+
+        // Additional properties if the notification channel is not SMS.
+        if (!NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationTemplate.getNotificationChannel())) {
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT_TEMPLATE, notification.
+                    getTemplate().getSubject());
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER_TEMPLATE, notification.
+                    getTemplate().getFooter());
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_CONTENT_TYPE, notification.
+                    getTemplate().getEmailContentType());
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_SUBJECT, notification.getSubject());
+            arbitraryDataMap.put(NotificationConstants.EmailNotification.ARBITRARY_FOOTER, notification.getFooter());
+        }
+    }
+
+    /**
+     * Build an Email Template object using SMS template data.
+     *
+     * @param notificationTemplate {@link
+     *                             org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
+     *                             object
+     * @return {@link org.wso2.carbon.email.mgt.model.EmailTemplate} object
+     */
+    private EmailTemplate buildEmailTemplate(NotificationTemplate notificationTemplate) {
+
+        // Build an email template using SMS template data.
+        EmailTemplate emailTemplate = new EmailTemplate();
+        emailTemplate.setTemplateDisplayName(notificationTemplate.getDisplayName());
+        emailTemplate.setTemplateType(notificationTemplate.getType());
+        emailTemplate.setLocale(notificationTemplate.getLocale());
+        emailTemplate.setBody(notificationTemplate.getBody());
+
+        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationTemplate.getNotificationChannel())) {
+            emailTemplate.setSubject(notificationTemplate.getSubject());
+            emailTemplate.setFooter(notificationTemplate.getFooter());
+            emailTemplate.setEmailContentType(notificationTemplate.getContentType());
+        }
+        return emailTemplate;
+    }
+
+    /**
+     * Build Email Notification from the emailTemplate and the arbitrary data.
+     *
+     * @param emailTemplate    {@link org.wso2.carbon.email.mgt.model.EmailTemplate} object
+     * @param arbitraryDataMap Arbitrary data map
+     * @param userClaims       User claims
+     * @param sendTo           Notification send to address
+     * @param sendFrom         Notification send from address
+     * @return {@link org.wso2.carbon.identity.event.handler.notification.email.bean.Notification} object
+     */
+    private Notification buildEmailNotification(EmailTemplate emailTemplate, Map<String, String> arbitraryDataMap,
+            Map<String, String> userClaims, String sendTo, String sendFrom) {
+
+        NotificationUtil.getPlaceholderValues(emailTemplate, arbitraryDataMap, userClaims);
+        Notification.EmailNotificationBuilder builder = new Notification.EmailNotificationBuilder(sendTo);
+        builder.setSendFrom(sendFrom);
+        builder.setTemplate(emailTemplate);
+        builder.setPlaceHolderData(arbitraryDataMap);
+        return builder.build();
+    }
 
     /**
      *

@@ -26,14 +26,16 @@ public class I18nMgtConstants {
     private I18nMgtConstants() {}
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
+    public static final String SMS_TEMPLATE_PATH = "/identity/sms";
     public static final String EMAIL_CONF_DIRECTORY = "email";
     public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
     public static final String DEFAULT_EMAIL_LOCALE = "en_us";
+    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_us";
 
     public static final String EMAIL_TEMPLATE_NAME = "templateName";
     public static final String EMAIL_TEMPLATE_TYPE_DISPLAY_NAME = "templateDisplayName";
 
-    // constants related to email template meta data properties
+    // Constants related to email template meta data properties.
     public static final String TEMPLATE_TYPE = "type";
     public static final String TEMPLATE_TYPE_DISPLAY_NAME = "display";
     public static final String TEMPLATE_LOCALE = "locale";
@@ -55,6 +57,7 @@ public class I18nMgtConstants {
     }
 
     public static class ErrorCodes {
+
         public static final String EMAIL_TEMPLATE_TYPE_NODE_FOUND = "10001";
         public static final String EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS = "10002";
     }
