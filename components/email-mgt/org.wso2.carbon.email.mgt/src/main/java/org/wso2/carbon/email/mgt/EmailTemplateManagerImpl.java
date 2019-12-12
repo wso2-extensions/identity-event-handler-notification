@@ -322,7 +322,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     log.debug(message);
                 }
                 // Try to get the template type in default locale.
-                return getNotificationTemplate(templateType, defaultLocale, notificationChannel, tenantDomain);
+                return getNotificationTemplate(notificationChannel, templateType, defaultLocale, tenantDomain);
             }
         }
         return notificationTemplate;
