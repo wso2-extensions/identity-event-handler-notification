@@ -251,7 +251,7 @@
                 <version>${identity.governance.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.wso2.carbon.identity</groupId>
+                        <groupId>org.wso2.carbon.identity.framework</groupId>
                         <artifactId>org.wso2.carbon.identity.base</artifactId>
                     </exclusion>
                     <exclusion>
