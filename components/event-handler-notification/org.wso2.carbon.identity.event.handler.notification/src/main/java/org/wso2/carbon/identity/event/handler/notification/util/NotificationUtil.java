@@ -255,11 +255,7 @@ public class NotificationUtil {
         }
         //Only sendTo value read from claims if it is not set the event sender.
         if(StringUtils.isEmpty(sendTo)) {
-            if (StringUtils.isNotBlank(placeHolderData.get(NotificationConstants.EmailNotification
-                    .CLAIM_URI_VERIFICATION_PENDING_EMAIL))) {
-                sendTo = placeHolderData.get(NotificationConstants.EmailNotification
-                        .CLAIM_URI_VERIFICATION_PENDING_EMAIL);
-            } else if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
+            if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
                 sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
             }
             if (StringUtils.isEmpty(sendTo)) {

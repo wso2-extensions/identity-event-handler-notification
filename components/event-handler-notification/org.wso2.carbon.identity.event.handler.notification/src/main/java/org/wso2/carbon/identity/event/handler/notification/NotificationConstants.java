@@ -36,8 +36,6 @@ public class NotificationConstants {
         public static final String TEMPLATE_CONTENT_TYPE_DEFAULT = "text/plain";
         public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
         public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/emailaddress";
-        public static final String CLAIM_URI_VERIFICATION_PENDING_EMAIL =
-                "http://wso2.org/claims/identity/verificationPendingEmail";
         public static final String IDENTITY_CLAIM_PREFIX = "identity";
         public static final String USER_CLAIM_PREFIX = "user.claim";
         public static final String WSO2_CLAIM_URI = "http://wso2.org/claims/";
