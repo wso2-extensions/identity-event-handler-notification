@@ -19,7 +19,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import org.apache.commons.lang.StringUtils;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -27,7 +26,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.IObjectFactory;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
@@ -37,6 +35,7 @@ import static org.testng.Assert.*;
 
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -94,7 +93,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      * @param content             Template content
      * @throws Exception Error testing getNotificationTemplate implementation.
      */
-    @Test(dataProvider = "notificationTemplateDataProvider")
+    @Test(dataProvider = "notificationTemplateDataProvider", enabled = true)
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
             String contentType, byte[] content) throws Exception {
 
@@ -131,7 +130,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      * @param contentType         Content type
      * @throws Exception Error testing getNotificationTemplate implementation.
      */
-    @Test(dataProvider = "invalidNotificationTemplateDataProvider")
+    @Test(dataProvider = "invalidNotificationTemplateDataProvider", enabled = true)
     public void testGetNotificationTemplateErrors(String notificationChannel, String displayName, String type,
             String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
             String expectedErrorCode, byte[] content) throws Exception {
@@ -245,13 +244,16 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
 
         // Invalid template type.
         String errorMsg1 = "Invalid template type : ";
-        String expectedErrorCode1 = IdentityMgtConstants.ErrorMessages.ERROR_CODE_INVALID_NOTIFICATION_TEMPLATE
-                .getCode();
+        String expectedErrorCode1 = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME.getCode(),
+                I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
 
         // Invalid template locale.
         String errorMsg2 = "Invalid template locale : ";
-        String expectedErrorCode2 = IdentityMgtConstants.ErrorMessages.ERROR_CODE_INVALID_NOTIFICATION_TEMPLATE
-                .getCode();
+        String expectedErrorCode2 =
+                I18nEmailUtil.prependOperationScenarioToErrorCode(
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE.getCode(),
+                        I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
 
         // Template 1: SMS.
         String notificationChannel1 = NotificationChannels.SMS_CHANNEL.getChannelType();

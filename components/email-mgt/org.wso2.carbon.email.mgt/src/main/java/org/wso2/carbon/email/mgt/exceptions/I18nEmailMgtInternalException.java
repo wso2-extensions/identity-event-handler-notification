@@ -28,4 +28,15 @@ public class I18nEmailMgtInternalException extends I18nEmailMgtException {
     public I18nEmailMgtInternalException(String errorCode, String message, Throwable e) {
         super(errorCode, message, e);
     }
+
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message The detail message
+     * @param cause   The cause
+     */
+    public I18nEmailMgtInternalException(String message, Throwable cause) {
+
+        super(message, cause);
+    }
 }

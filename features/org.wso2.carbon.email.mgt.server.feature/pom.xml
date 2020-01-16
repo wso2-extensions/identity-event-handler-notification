@@ -58,6 +58,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>email-admin-config.xml</include>
+                                        <include>sms-templates-admin-config.xml</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
