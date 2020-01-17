@@ -18,6 +18,8 @@ package org.wso2.carbon.email.mgt;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -44,11 +46,24 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.utils.CarbonUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.List;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
-@PrepareForTest({ IdentityValidationUtil.class, I18nMgtDataHolder.class })
+@PrepareForTest({ IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class})
 public class EmailTemplateManagerImplTest extends PowerMockTestCase {
 
     private EmailTemplateManagerImpl emailTemplateManager;
@@ -217,6 +232,48 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
                     I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
             assertEquals(e.getErrorCode(), expectedCode, errorMessage);
         }
+    }
+
+    /**
+     * Test for retrieving default notification templates from the config file.
+     *
+     * @param baseDirectoryPath   Resource folder location
+     * @param notificationChannel Notification channel (EMAIL or SMS)
+     * @param message             Error message
+     * @throws Exception Error in the test scenario
+     */
+    @Test(dataProvider = "getDefaultNotificationTemplatesList")
+    public void testGetDefaultNotificationTemplates(String baseDirectoryPath, String notificationChannel,
+                                                    String message) throws Exception {
+
+        int numberOfDefaultTemplates = getNumberOfDefaultTemplates(notificationChannel, baseDirectoryPath);
+        mockNotificationChannelConfigPath(baseDirectoryPath);
+        List<NotificationTemplate> defaultNotificationTemplates =
+                emailTemplateManager.getDefaultNotificationTemplates(notificationChannel);
+        assertEquals(defaultNotificationTemplates.size(), numberOfDefaultTemplates, message);
+    }
+
+    /**
+     * Contains notification templates and error scenarios for addNotificationTemplate API.
+     *
+     * @return Object[][]
+     */
+    @DataProvider(name = "getDefaultNotificationTemplatesList")
+    private Object[][] getDefaultNotificationTemplatesList() {
+
+        String baseDirectoryPath = Paths.get(System.getProperty("user.dir"),
+                "src", "test", "resources").toString();
+
+        String notificationChannel1 = NotificationChannels.SMS_CHANNEL.getChannelType();
+        String message1 = "Testing default number of SMS templates : ";
+
+        String notificationChannel2 = NotificationChannels.EMAIL_CHANNEL.getChannelType();
+        String message2 = "Testing default number of EMAIL templates : ";
+
+        return new Object[][]{
+                {baseDirectoryPath, notificationChannel1, message1},
+                {baseDirectoryPath, notificationChannel2, message2}
+        };
     }
 
     /**
@@ -472,5 +529,59 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
         notificationTemplate.setBody(templateContent[5]);
         notificationTemplate.setSubject(templateContent[6]);
         return notificationTemplate;
+    }
+
+    /**
+     * Mock the default config xml path of notification templates.
+     *
+     * @param baseDirectoryPath Resource folder location
+     */
+    private void mockNotificationChannelConfigPath(String baseDirectoryPath) {
+
+        mockStatic(CarbonUtils.class);
+        when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(baseDirectoryPath);
+    }
+
+    /**
+     * Get the number of default notification templates in the config file.
+     *
+     * @param notificationChannel Notification channel (EMAIL or SMS)
+     * @param baseDirectoryPath   Resource folder location
+     * @return Number of default notification templates
+     * @throws XMLStreamException Error reading config file
+     * @throws IOException        Error reading config file
+     */
+    private int getNumberOfDefaultTemplates(String notificationChannel, String baseDirectoryPath)
+            throws XMLStreamException, IOException {
+
+        int numberOfDefaultTemplates = 0;
+        // Build the path to the test config file.
+        String configFilePatch;
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            configFilePatch = baseDirectoryPath + File.separator +
+                    I18nMgtConstants.SMS_CONF_DIRECTORY + File.separator + I18nMgtConstants.SMS_TEMPLAE_ADMIN_CONF_FILE;
+        } else {
+            configFilePatch = baseDirectoryPath + File.separator +
+                    I18nMgtConstants.EMAIL_CONF_DIRECTORY + File.separator + I18nMgtConstants.EMAIL_ADMIN_CONF_FILE;
+        }
+        XMLStreamReader xmlStreamReader = null;
+        try (InputStream inputStream = new FileInputStream(configFilePatch)) {
+            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+            StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+
+            OMElement documentElement = builder.getDocumentElement();
+            Iterator iterator = documentElement.getChildElements();
+            while (iterator.hasNext()) {
+                iterator.next();
+                numberOfDefaultTemplates++;
+            }
+        } catch (FileNotFoundException e) {
+            return numberOfDefaultTemplates;
+        } finally {
+            if (xmlStreamReader != null) {
+                xmlStreamReader.close();
+            }
+        }
+        return numberOfDefaultTemplates;
     }
 }
