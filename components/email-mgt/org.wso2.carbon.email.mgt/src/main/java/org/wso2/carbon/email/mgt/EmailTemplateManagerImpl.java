@@ -515,7 +515,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      *
      * @param notificationTemplate Notification template
      * @return Resource
-     * @throws NotificationTemplateManagerServerException
+     * @throws NotificationTemplateManagerServerException Error while creating the resource
      */
     private Resource createTemplateRegistryResource(NotificationTemplate notificationTemplate)
             throws NotificationTemplateManagerServerException {
@@ -561,8 +561,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain)
             throws NotificationTemplateManagerException {
 
-        String notificationChannel = notificationTemplate.getNotificationChannel();
         validateNotificationTemplate(notificationTemplate);
+        String notificationChannel = notificationTemplate.getNotificationChannel();
 
         Resource templateResource = createTemplateRegistryResource(notificationTemplate);
         String displayName = notificationTemplate.getDisplayName();
@@ -918,6 +918,16 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
         validateTemplateLocale(notificationTemplate.getLocale());
         String body = notificationTemplate.getBody();
+        String subject = notificationTemplate.getSubject();
+        String footer = notificationTemplate.getFooter();
+        if (StringUtils.isBlank(notificationTemplate.getNotificationChannel())) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_CHANNEL.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            throw new NotificationTemplateManagerClientException(errorCode,
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_CHANNEL.getMessage());
+        }
         if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationTemplate.getNotificationChannel())) {
             if (StringUtils.isBlank(body)) {
                 String errorCode =
@@ -927,9 +937,15 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                 throw new NotificationTemplateManagerClientException(errorCode,
                         I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE.getMessage());
             }
+            if (StringUtils.isNotBlank(subject) || StringUtils.isNotBlank(footer)) {
+                String errorCode =
+                        I18nEmailUtil.prependOperationScenarioToErrorCode(
+                                I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getCode(),
+                                I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+                throw new NotificationTemplateManagerClientException(errorCode,
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getMessage());
+            }
         } else {
-            String subject = notificationTemplate.getSubject();
-            String footer = notificationTemplate.getFooter();
             if (StringUtils.isBlank(subject) || StringUtils.isBlank(body) || StringUtils.isBlank(footer)) {
                 String errorCode =
                         I18nEmailUtil.prependOperationScenarioToErrorCode(

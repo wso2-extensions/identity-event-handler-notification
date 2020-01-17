@@ -36,6 +36,7 @@ import static org.testng.Assert.*;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -93,7 +94,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      * @param content             Template content
      * @throws Exception Error testing getNotificationTemplate implementation.
      */
-    @Test(dataProvider = "notificationTemplateDataProvider", enabled = true)
+    @Test(dataProvider = "notificationTemplateDataProvider")
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
             String contentType, byte[] content) throws Exception {
 
@@ -111,7 +112,8 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
             assertNull(notificationTemplate.getSubject(), "SMS notification template cannot have a subject");
         } else {
             assertNotNull(notificationTemplate.getFooter(), "EMAIL notification template must have a footer");
-            assertNotNull(notificationTemplate.getSubject(), "EMAIL notification template must have a subject");
+            assertNotNull(notificationTemplate.getSubject(),
+                    "EMAIL notification template must have a subject");
         }
     }
 
@@ -130,7 +132,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      * @param contentType         Content type
      * @throws Exception Error testing getNotificationTemplate implementation.
      */
-    @Test(dataProvider = "invalidNotificationTemplateDataProvider", enabled = true)
+    @Test(dataProvider = "invalidNotificationTemplateDataProvider")
     public void testGetNotificationTemplateErrors(String notificationChannel, String displayName, String type,
             String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
             String expectedErrorCode, byte[] content) throws Exception {
@@ -149,6 +151,171 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
             }
             assertEquals(errorCode, expectedErrorCode, errorMsg);
         }
+    }
+
+    /**
+     * Test error scenarios of adding a notification template type.
+     *
+     * @param templateName Notification template name
+     * @param channel      Notification channel
+     * @param domain       Tenant domain
+     * @param errorCode    Expected error code (NOTE: Without the scenario code)
+     * @param errorMessage Error message
+     * @param scenarioCode Error scenario
+     */
+    @Test(dataProvider = "addNotificationTemplateTypeProvider")
+    public void TestAddNotificationTemplateType(String templateName, String channel, String domain, String errorCode,
+                                                String errorMessage, int scenarioCode) {
+
+        try {
+            if (scenarioCode == 2) {
+                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
+            }
+            if (scenarioCode == 3) {
+                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+                        .thenThrow(new IdentityRuntimeException("Test Error"));
+            }
+            emailTemplateManager
+                    .addNotificationTemplateType(templateName, channel, domain);
+        } catch (NotificationTemplateManagerException e) {
+            String expectedCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(errorCode,
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            assertEquals(e.getErrorCode(), expectedCode, errorMessage);
+        }
+    }
+
+    /**
+     * Test the error scenarios of AddNotificationTemplate method.
+     *
+     * @param tenantDomain    Tenant domain
+     * @param errorCode       Error code
+     * @param errorMessage    Error message
+     * @param templateContent Contents to build notification template
+     * @throws Exception Error in the test scenario
+     */
+    @Test(dataProvider = "addNotificationTemplateProvider")
+    public void testAddNotificationTemplate(String tenantDomain, String errorCode,
+                                            String errorMessage, String[] templateContent) throws Exception {
+
+        NotificationTemplate notificationTemplate;
+        if (templateContent == null) {
+            notificationTemplate = null;
+        } else {
+            notificationTemplate = buildSampleNotificationTemplate(templateContent);
+        }
+        try {
+            when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+                    .thenThrow(new IdentityRuntimeException("Test Error"));
+            emailTemplateManager.addNotificationTemplate(notificationTemplate, tenantDomain);
+            throw new Exception("Exception should be thrown for above testing scenarios");
+        } catch (NotificationTemplateManagerException e) {
+            if (StringUtils.isBlank(e.getErrorCode())) {
+                throw new Exception("Error code cannot be NULL", e);
+            }
+            String expectedCode = I18nEmailUtil.prependOperationScenarioToErrorCode(errorCode,
+                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            assertEquals(e.getErrorCode(), expectedCode, errorMessage);
+        }
+    }
+
+    /**
+     * Contains notification templates and error scenarios for addNotificationTemplate API.
+     *
+     * @return Object[][]
+     */
+    @DataProvider(name = "addNotificationTemplateProvider")
+    private Object[][] addNotificationTemplateProvider() {
+
+        String tenantDomain = "test domain";
+        String displayName = "Test Value";
+        String testNotificationChannel = "Test Value";
+        String type = "Test Value";
+        String contentType = "Test Value";
+        String locale = "Test Value";
+        String body = "Test Value";
+        String subject = "Test Value";
+        String footer = "Test Value";
+        String smsChannel = NotificationChannels.SMS_CHANNEL.getChannelType();
+        String emailChannel = NotificationChannels.EMAIL_CHANNEL.getChannelType();
+
+        String errorCode1 = I18nMgtConstants.ErrorMessages.ERROR_CODE_NULL_TEMPLATE_OBJECT.getCode();
+        String message1 = "Empty NotificationTemplate object :";
+
+        String errorCode2 = I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_NAME.getCode();
+        String message2 = "Empty template name in the notification template object : ";
+        String[] templateContent2 =
+                {StringUtils.EMPTY, testNotificationChannel, type, contentType, locale, body, subject, footer};
+
+        String errorCode3 = I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_LOCALE.getCode();
+        String message3 = "Empty locale in the notification template object : ";
+        String[] templateContent3 =
+                {displayName, testNotificationChannel, type, contentType, StringUtils.EMPTY, body, subject, footer};
+
+        String errorCode4 = I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE.getCode();
+        String message4 = "Invalid SMS template : ";
+        String[] templateContent4 =
+                {displayName, smsChannel, type, contentType, locale, StringUtils.EMPTY, subject, footer};
+
+        String errorCode5 = I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_CHANNEL.getCode();
+        String message5 = "Empty notification channel in the notification template object : ";
+        String[] templateContent5 = {displayName, StringUtils.EMPTY, type, contentType, locale, body, subject, footer};
+
+        String errorCode6 = I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getCode();
+        String message6 = "Invalid content in the SMS template : ";
+        String[] templateContent6 = {displayName, smsChannel, type, contentType, locale, body, subject, footer};
+
+        String errorCode7 = I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_EMAIL_TEMPLATE.getCode();
+        String message7 = "Invalid EMAIL template : ";
+        String[] templateContent7 =
+                {displayName, emailChannel, type, contentType, locale, body, StringUtils.EMPTY, footer};
+
+        String errorCode8 = I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode();
+        String message8 = "Invalid EMAIL template : ";
+        String[] templateContent8 =
+                {displayName, emailChannel, type, contentType, locale, body, subject, footer};
+
+        return new Object[][]{
+                {tenantDomain, errorCode1, message1, null},
+                {tenantDomain, errorCode2, message2, templateContent2},
+                {tenantDomain, errorCode3, message3, templateContent3},
+                {tenantDomain, errorCode4, message4, templateContent4},
+                {tenantDomain, errorCode5, message5, templateContent5},
+                {tenantDomain, errorCode6, message6, templateContent6},
+                {tenantDomain, errorCode7, message7, templateContent7},
+                {tenantDomain, errorCode8, message8, templateContent8}
+        };
+    }
+
+    /**
+     * Contains the details of error codes and error scenarios.
+     *
+     * @return Object[][]
+     */
+    @DataProvider(name = "addNotificationTemplateTypeProvider")
+    private Object[][] addNotificationTemplateTypeProvider() {
+
+        String testTemplateName = "Test template";
+        String testChannel = "Test Channel";
+        String testDomain = "Test Domain";
+
+        int testScenario1 = 1;
+        String expectedErrorCode1 = I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_NAME.getCode();
+        String errorMessage1 = "TEST EMPTY notification template template name : ";
+
+        int testScenario2 = 2;
+        String expectedErrorCode2 = I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_TEMPLATE_TYPE.getCode();
+        String errorMessage2 = "TEST already existing resource : ";
+
+        int testScenario3 = 3;
+        String expectedErrorCode3 = I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode();
+        String errorMessage3 = "TEST runtime exception while looking for the resource : ";
+
+        return new Object[][]{
+                {StringUtils.EMPTY, testChannel, testDomain, expectedErrorCode1, errorMessage1, testScenario1},
+                {testTemplateName, testChannel, testDomain, expectedErrorCode2, errorMessage2, testScenario2},
+                {testTemplateName, testChannel, testDomain, expectedErrorCode3, errorMessage3, testScenario3},
+        };
     }
 
     /**
@@ -285,5 +452,25 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
                   contentType, true, true, StringUtils.EMPTY, expectedErrorCode5, null
                 }
         };
+    }
+
+    /**
+     * Build a NotificationTemplate model from the given input parameters.
+     * NOTE: parameter order : displayName, channel, type, contentType, locale, body, subject, footer
+     *
+     * @return Notification Template model
+     */
+    private NotificationTemplate buildSampleNotificationTemplate(String[] templateContent) {
+
+        NotificationTemplate notificationTemplate = new NotificationTemplate();
+        notificationTemplate.setNotificationChannel(templateContent[1]);
+        notificationTemplate.setDisplayName(templateContent[0]);
+        notificationTemplate.setType(templateContent[2]);
+        notificationTemplate.setContentType(templateContent[3]);
+        notificationTemplate.setLocale(templateContent[4]);
+        notificationTemplate.setFooter(templateContent[7]);
+        notificationTemplate.setBody(templateContent[5]);
+        notificationTemplate.setSubject(templateContent[6]);
+        return notificationTemplate;
     }
 }
