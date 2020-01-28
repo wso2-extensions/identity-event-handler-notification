@@ -435,7 +435,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      * @param displayName         Display name of the template
      * @param locale              Locale of the template
      * @return Template content
-     * @throws NotificationTemplateManagerException Error getting the template content
+     * @throws NotificationTemplateManagerException If an error occurred while getting the template content
      */
     private String[] getTemplateElements(Resource templateResource, String notificationChannel, String displayName,
             String locale) throws NotificationTemplateManagerException {
@@ -515,7 +515,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      *
      * @param notificationTemplate Notification template
      * @return Resource
-     * @throws NotificationTemplateManagerServerException Error while creating the resource
+     * @throws NotificationTemplateManagerServerException If an error occurred while creating the resource
      */
     private Resource createTemplateRegistryResource(NotificationTemplate notificationTemplate)
             throws NotificationTemplateManagerServerException {

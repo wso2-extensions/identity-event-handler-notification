@@ -90,7 +90,7 @@ public class I18nMgtServiceComponent {
 
             // Load default notification templates.
             loadDefaultEmailTemplates();
-            loadDefaultSMSNotificationTemplates();
+            loadDefaultSMSTemplates();
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
             log.error("Error while activating I18n Management bundle", e);
@@ -111,7 +111,7 @@ public class I18nMgtServiceComponent {
     /**
      * Load default SMS notification template configurations on server startup if they don't already exist.
      */
-    private void loadDefaultSMSNotificationTemplates() {
+    private void loadDefaultSMSTemplates() {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         NotificationTemplateManager notificationTemplateManager = new EmailTemplateManagerImpl();
