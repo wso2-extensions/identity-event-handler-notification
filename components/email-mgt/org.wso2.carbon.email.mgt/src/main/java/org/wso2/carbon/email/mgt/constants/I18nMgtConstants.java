@@ -79,7 +79,7 @@ public class I18nMgtConstants {
      */
     public enum ErrorMessages {
 
-        ERROR_CODE_NULL_TEMPLATE_OBJECT("60001", "Notification template object cannot be null."),
+        ERROR_CODE_NULL_TEMPLATE_OBJECT("60001", "Notification template is not provided."),
         ERROR_CODE_EMPTY_TEMPLATE_NAME("60002", "Notification template name cannot be empty."),
         ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME("60003", "Invalid characters exists in the " +
                 "notification template display name : %s"),
