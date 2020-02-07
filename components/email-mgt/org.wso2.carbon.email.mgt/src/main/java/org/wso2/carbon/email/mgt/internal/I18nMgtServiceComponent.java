@@ -27,6 +27,8 @@ import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
@@ -86,8 +88,9 @@ public class I18nMgtServiceComponent {
                 log.error("I18n Management - TenantMgtListener could not be registered");
             }
 
-            // Load default email templates.
+            // Load default notification templates.
             loadDefaultEmailTemplates();
+            loadDefaultSMSTemplates();
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
             log.error("Error while activating I18n Management bundle", e);
@@ -102,6 +105,21 @@ public class I18nMgtServiceComponent {
             emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
         } catch (I18nEmailMgtException e) {
             log.error("Error occurred while loading default email templates", e);
+        }
+    }
+
+    /**
+     * Load default SMS notification template configurations on server startup if they don't already exist.
+     */
+    private void loadDefaultSMSTemplates() {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        NotificationTemplateManager notificationTemplateManager = new EmailTemplateManagerImpl();
+        try {
+            notificationTemplateManager
+                    .addDefaultNotificationTemplates(NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain);
+        } catch (NotificationTemplateManagerException e) {
+            log.error("Error occurred while loading default SMS templates", e);
         }
     }
 

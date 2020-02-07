@@ -28,7 +28,9 @@ public class I18nMgtConstants {
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
     public static final String SMS_TEMPLATE_PATH = "/identity/sms";
     public static final String EMAIL_CONF_DIRECTORY = "email";
+    public static final String SMS_CONF_DIRECTORY = "sms";
     public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
+    public static final String SMS_TEMPLAE_ADMIN_CONF_FILE = "sms-templates-admin-config.xml";
     public static final String DEFAULT_EMAIL_LOCALE = "en_us";
     public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_us";
 
@@ -46,6 +48,7 @@ public class I18nMgtConstants {
     public static final String TEMPLATE_FOOTER = "footer";
 
     public static final String EMAIL_TEMPLATE_TYPE_REGEX = "[a-zA-Z0-9\\s]+";
+    public static final String ERROR_CODE_DELIMITER = "-";
 
     public static class ErrorMsg {
         private ErrorMsg() {
@@ -60,5 +63,63 @@ public class I18nMgtConstants {
 
         public static final String EMAIL_TEMPLATE_TYPE_NODE_FOUND = "10001";
         public static final String EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS = "10002";
+    }
+
+    /**
+     * Class which contains the error scenarios.
+     */
+    public static class ErrorScenarios {
+
+        // ETM - EMAIL TEMPLATE MANAGER
+        public static final String EMAIL_TEMPLATE_MANAGER = "ETM";
+    }
+
+    /**
+     * Enum which contains error codes and corresponding error messages.
+     */
+    public enum ErrorMessages {
+
+        ERROR_CODE_NULL_TEMPLATE_OBJECT("60001", "Notification template is not provided."),
+        ERROR_CODE_EMPTY_TEMPLATE_NAME("60002", "Notification template name cannot be empty."),
+        ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME("60003", "Invalid characters exists in the " +
+                "notification template display name : %s"),
+        ERROR_CODE_EMPTY_LOCALE("60004", "Locale code cannot be empty"),
+        ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE("60005", "Locale contains invalid characters : %s"),
+        ERROR_CODE_INVALID_EMAIL_TEMPLATE("60006", "Subject/Body/Footer sections of an email template " +
+                "cannot be empty."),
+        ERROR_CODE_INVALID_SMS_TEMPLATE("60007", "Body of a SMS template cannot be empty."),
+        ERROR_CODE_DUPLICATE_TEMPLATE_TYPE("60008", "Notification template type : %s already exists " +
+                "in tenant registry: %s"),
+        ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT("60009", "SMS template cannot have a subject or footer"),
+        ERROR_CODE_EMPTY_TEMPLATE_CHANNEL("60010", "Notification template channel cannot be empty"),
+        ERROR_CODE_ERROR_CREATING_REGISTRY_RESOURCE("65001", "Error creating a registry resource " +
+                "from template : %s in locale : %s"),
+        ERROR_CODE_ERROR_ADDING_TEMPLATE("65002", "Error when adding template : %s to tenant : %s"),
+        ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE("65003", "Error when adding notification template " +
+                "of type : %s, in locale : %s to the tenant registry :  %s");
+        private final String code;
+        private final String message;
+
+        ErrorMessages(String code, String message) {
+
+            this.code = code;
+            this.message = message;
+        }
+
+        public String getCode() {
+
+            return code;
+        }
+
+        public String getMessage() {
+
+            return message;
+        }
+
+        @Override
+        public String toString() {
+
+            return code + " - " + message;
+        }
     }
 }

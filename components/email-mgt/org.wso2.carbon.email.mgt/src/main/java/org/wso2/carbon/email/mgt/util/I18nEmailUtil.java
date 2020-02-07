@@ -76,7 +76,9 @@ public class I18nEmailUtil {
 
 
     /**
-     * @return
+     * Get the default email notification template List.
+     *
+     * @return List of default email notification templates.
      */
     public static List<EmailTemplate> getDefaultEmailTemplates() {
         String configFilePath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
@@ -271,5 +273,27 @@ public class I18nEmailUtil {
         return collection;
     }
 
+    /**
+     * Prepend the operation scenario to the existing exception error code.
+     * (Eg: USR-20045)
+     *
+     * @param exceptionErrorCode Existing error code.
+     * @param scenario           Operation scenario
+     * @return New error code with the scenario prepended (NOTE: Return an empty String if the provided error code is
+     * empty)
+     */
+    public static String prependOperationScenarioToErrorCode(String exceptionErrorCode, String scenario) {
 
+        if (StringUtils.isNotEmpty(exceptionErrorCode)) {
+            // Check whether the scenario is already in the errorCode.
+            if (exceptionErrorCode.contains(I18nMgtConstants.ERROR_CODE_DELIMITER)) {
+                return exceptionErrorCode;
+            }
+            if (StringUtils.isNotEmpty(scenario)) {
+                exceptionErrorCode =
+                        scenario + I18nMgtConstants.ERROR_CODE_DELIMITER + exceptionErrorCode;
+            }
+        }
+        return exceptionErrorCode;
+    }
 }
