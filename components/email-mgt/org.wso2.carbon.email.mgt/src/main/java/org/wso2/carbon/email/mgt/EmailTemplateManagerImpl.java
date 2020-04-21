@@ -76,6 +76,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLAT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_PATH;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_REGEX;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_PATH;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
 import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
@@ -999,26 +1000,26 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         List<EmailTemplate> templateList = new ArrayList<>();
         Collection templateType = (Collection) resourceMgtService.getIdentityResource(templateTypeRegistryPath,
                 tenantDomain);
-        if (templateType != null) {
-            for (String template : templateType.getChildren()) {
-                Resource templateResource = resourceMgtService.getIdentityResource(template, tenantDomain);
-                if (templateResource != null) {
-                    try {
-                        EmailTemplate templateDTO = I18nEmailUtil.getEmailTemplate(templateResource);
-                        templateList.add(templateDTO);
-                    } catch (I18nEmailMgtException ex) {
-                        log.error(ex.getMessage(), ex);
-                    }
-                }
-            }
-            return templateList;
-        } else {
+
+        if (templateType == null) {
             String type = templateTypeRegistryPath.split(PATH_SEPARATOR)[
                     templateTypeRegistryPath.split(PATH_SEPARATOR).length - 1];
             String message =
                     String.format("Email Template Type: %s not found in %s tenant registry.", type, tenantDomain);
-            throw new I18nEmailMgtClientException(message);
+            throw new I18nEmailMgtClientException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
         }
+        for (String template : templateType.getChildren()) {
+            Resource templateResource = resourceMgtService.getIdentityResource(template, tenantDomain);
+            if (templateResource != null) {
+                try {
+                    EmailTemplate templateDTO = I18nEmailUtil.getEmailTemplate(templateResource);
+                    templateList.add(templateDTO);
+                } catch (I18nEmailMgtException ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+            }
+        }
+        return templateList;
     }
 
     private void handleServerException(String errorMsg, Throwable ex) throws I18nEmailMgtServerException {

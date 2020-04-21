@@ -16,7 +16,13 @@
 
 package org.wso2.carbon.email.mgt.exceptions;
 
+/**
+ * Exception class to capture error email mgt client exceptions.
+ */
 public class I18nEmailMgtClientException extends I18nEmailMgtException {
+
+    private String errorCode;
+
     public I18nEmailMgtClientException(String message) {
         super(message);
     }
@@ -24,4 +30,16 @@ public class I18nEmailMgtClientException extends I18nEmailMgtException {
     public I18nEmailMgtClientException(String message, Throwable e) {
         super(message, e);
     }
+
+    public I18nEmailMgtClientException(String errorCode, String message) {
+
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorCode() {
+
+        return errorCode;
+    }
+
 }
