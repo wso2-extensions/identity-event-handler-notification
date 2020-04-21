@@ -994,7 +994,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      */
     private List<EmailTemplate> getAllTemplatesOfTemplateTypeFromRegistry(String templateTypeRegistryPath,
                                                                           String tenantDomain)
-            throws RegistryException, I18nEmailMgtServerException {
+            throws RegistryException, I18nEmailMgtClientException {
 
         List<EmailTemplate> templateList = new ArrayList<>();
         Collection templateType = (Collection) resourceMgtService.getIdentityResource(templateTypeRegistryPath,
@@ -1017,7 +1017,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     templateTypeRegistryPath.split(PATH_SEPARATOR).length - 1];
             String message =
                     String.format("Email Template Type: %s not found in %s tenant registry.", type, tenantDomain);
-            throw new I18nEmailMgtServerException(message);
+            throw new I18nEmailMgtClientException(message);
         }
     }
 
