@@ -1015,7 +1015,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     EmailTemplate templateDTO = I18nEmailUtil.getEmailTemplate(templateResource);
                     templateList.add(templateDTO);
                 } catch (I18nEmailMgtException ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.error("Failed retrieving a template object from the registry resource", ex);
                 }
             }
         }
