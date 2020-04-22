@@ -63,6 +63,7 @@ public class I18nMgtConstants {
 
         public static final String EMAIL_TEMPLATE_TYPE_NODE_FOUND = "10001";
         public static final String EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS = "10002";
+        public static final String EMAIL_TEMPLATE_TYPE_NOT_FOUND = "10003";
     }
 
     /**
