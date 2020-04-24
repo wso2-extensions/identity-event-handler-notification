@@ -28,6 +28,8 @@ import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
+import org.wso2.carbon.identity.core.ServiceURLBuilder;
+import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -166,8 +168,15 @@ public class NotificationUtil {
                 }
             }
         }
-        placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, IdentityUtil.getServerURL(
-                "", true, false));
+        // Building the server url.
+        String serverURL;
+        try {
+            serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
+        } catch (URLBuilderException e) {
+            throw NotificationRuntimeException.error("Error while building the server url.", e);
+        }
+
+        placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
         return placeHolderData;
     }
 
