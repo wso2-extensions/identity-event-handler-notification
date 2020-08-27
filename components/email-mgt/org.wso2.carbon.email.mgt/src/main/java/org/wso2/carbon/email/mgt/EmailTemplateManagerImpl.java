@@ -717,11 +717,13 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             for (NotificationTemplate template : notificationTemplates) {
                 String displayName = template.getDisplayName();
                 String type = I18nEmailUtil.getNormalizedName(displayName);
+                String locale = template.getLocale();
                 String path = buildTemplateRootDirectoryPath(type, notificationChannel);
 
             /*Check for existence of each category, since some template may have migrated from earlier version
             This will also add new template types provided from file, but won't update any existing template*/
-                if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
+                if (!resourceMgtService.isResourceExists(addLocaleToTemplateTypeResourcePath(path, locale),
+                        tenantDomain)) {
                     try {
                         addNotificationTemplate(template, tenantDomain);
                         if (log.isDebugEnabled()) {
@@ -1088,6 +1090,22 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE.getMessage(),
                             locale);
             throw new NotificationTemplateManagerClientException(errorCode, message);
+        }
+    }
+
+    /**
+     * Add the locale to the template type resource path.
+     *
+     * @param path  Email template path
+     * @param locale Locale code of the email template
+     * @return Email template resource path
+     */
+    private String addLocaleToTemplateTypeResourcePath(String path, String locale) {
+
+        if (StringUtils.isNotBlank(locale)) {
+            return path + PATH_SEPARATOR + locale.toLowerCase();
+        } else {
+            return path;
         }
     }
 
