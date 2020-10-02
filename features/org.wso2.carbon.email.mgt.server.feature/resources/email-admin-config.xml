@@ -2048,7 +2048,9 @@
                             Hi {{user.claim.givenname}},
                         </p>
                         <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Please note that your account has been successfully created for the account <b>{{user-name}}</b>. <br>
+                            Please note that your account has been successfully activated. <br>
+                            Now you can use services in {{tenant-domain}}. <br>
+                            Account activation time: {{selfsignup-confirm-time}}
 
                         </p>
                     </td>
