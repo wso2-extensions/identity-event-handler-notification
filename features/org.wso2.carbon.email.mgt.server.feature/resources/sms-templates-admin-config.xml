@@ -38,4 +38,7 @@
     <configuration type="resendPasswordReset" display="resendPasswordReset" locale="en_US">
         <body>Your One-Time Password : {{confirmation-code}}</body>
     </configuration>
+    <configuration type="verifyMobileOnUpdate" display="verifyMobileOnUpdate" locale="en_US">
+        <body>Your Mobile Number Verification Code : {{confirmation-code}}</body>
+    </configuration>
 </configurations>
