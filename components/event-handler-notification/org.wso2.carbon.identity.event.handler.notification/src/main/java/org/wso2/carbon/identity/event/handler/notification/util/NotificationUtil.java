@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.identity.event.handler.notification.util;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -30,6 +33,7 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -46,18 +50,18 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification
-        .CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 
 public class NotificationUtil {
 
@@ -72,7 +76,7 @@ public class NotificationUtil {
         try {
             userClaims = userStoreManager.getUserClaimValues(userName, UserCoreConstants.DEFAULT_PROFILE);
             if (userClaims != null) {
-                for(Claim userClaim : userClaims) {
+                for (Claim userClaim : userClaims) {
                     claimsMap.put(userClaim.getClaimUri(), userClaim.getValue());
                 }
             }
@@ -136,12 +140,12 @@ public class NotificationUtil {
      * @return Place holder data
      */
     public static Map<String, String> getPlaceholderValues(EmailTemplate emailTemplate,
-            Map<String, String> placeHolderData, Map<String, String> userClaims) {
+                                                           Map<String, String> placeHolderData, Map<String, String> userClaims) {
 
-        List<String> placeHolders = new ArrayList<>();
+        Map<String, String> configFilePlaceholders = getConfigFilePlaceholders();
 
         // Having a body is mandatory.
-        placeHolders.addAll(extractPlaceHolders(emailTemplate.getBody()));
+        List<String> placeHolders = new ArrayList<>(extractPlaceHolders(emailTemplate.getBody()));
         if (StringUtils.isNotEmpty(emailTemplate.getSubject())) {
             placeHolders.addAll(extractPlaceHolders(emailTemplate.getSubject()));
         }
@@ -165,6 +169,10 @@ public class NotificationUtil {
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
                     }
+                } else if (placeHolder.startsWith(NotificationConstants.EmailNotification.IDENTITY_TEMPLATE_VALUE_PREFIX)) {
+                    String key = placeHolder.substring(placeHolder.lastIndexOf(".") + 1);
+                    String value = configFilePlaceholders.getOrDefault(key, "");
+                    placeHolderData.put(placeHolder, value);
                 }
             }
         }
@@ -178,6 +186,34 @@ public class NotificationUtil {
 
         placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
         return placeHolderData;
+    }
+
+    public static Map<String, String> getConfigFilePlaceholders() {
+
+        IdentityConfigParser configParser = IdentityConfigParser.getInstance();
+        OMElement placeHolderElem = configParser.getConfigElement(
+                NotificationConstants.EmailNotification.TEMPLATE_PLACEHOLDERS_ELEM);
+        if (placeHolderElem == null) {
+            return Collections.emptyMap();
+        }
+
+        Iterator iterator = placeHolderElem.getChildrenWithLocalName(
+                NotificationConstants.EmailNotification.TEMPLATE_PLACEHOLDER_ELEM);
+        if (iterator == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> placeholderMap = new HashMap<>();
+        while (iterator.hasNext()) {
+            OMElement omElement = (OMElement) iterator.next();
+            if (omElement != null) {
+                String key = omElement.getAttributeValue(
+                        new QName(NotificationConstants.EmailNotification.TEMPLATE_PLACEHOLDER_KEY_ATTRIB));
+                String value = omElement.getText();
+                placeholderMap.put(key, value);
+            }
+        }
+        return placeholderMap;
     }
 
     public static List<String> extractPlaceHolders(String value) {
@@ -263,7 +299,7 @@ public class NotificationUtil {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
         }
         //Only sendTo value read from claims if it is not set the event sender.
-        if(StringUtils.isEmpty(sendTo)) {
+        if (StringUtils.isEmpty(sendTo)) {
             if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
                 sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
             }
