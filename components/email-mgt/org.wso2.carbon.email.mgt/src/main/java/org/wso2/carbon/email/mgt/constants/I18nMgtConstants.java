@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.email.mgt.constants;
 
+import org.wso2.carbon.utils.CarbonUtils;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * i18n management related constants
  */
@@ -49,6 +54,12 @@ public class I18nMgtConstants {
 
     public static final String EMAIL_TEMPLATE_TYPE_REGEX = "[a-zA-Z0-9\\s]+";
     public static final String ERROR_CODE_DELIMITER = "-";
+
+    public static final String SMS_PROVIDER_POST_BODY_TEMPLATES_FILE = "sms-providers-api-body-templates.xml";
+    public static final Path
+            SMS_PROVIDER_POST_BODY_TEMPLATES_DIR_PATH = Paths.get(CarbonUtils.getCarbonHome(), "repository",
+            "conf", "sms",SMS_PROVIDER_POST_BODY_TEMPLATES_FILE);
+    public static final String SMS_PROVIDER= "provider";
 
     public static class ErrorMsg {
         private ErrorMsg() {

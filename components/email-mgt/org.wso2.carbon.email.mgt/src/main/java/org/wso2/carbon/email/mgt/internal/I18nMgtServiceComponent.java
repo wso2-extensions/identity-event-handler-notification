@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.email.mgt.internal;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -25,7 +28,10 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
+import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
@@ -39,6 +45,25 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_PROVIDER;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_PROVIDER_POST_BODY_TEMPLATES_DIR_PATH;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_BODY;
 
 @Component(
          name = "I18nMgtServiceComponent", 
@@ -88,9 +113,25 @@ public class I18nMgtServiceComponent {
                 log.error("I18n Management - TenantMgtListener could not be registered");
             }
 
+            // Register SMSProviderPayloadTemplateManagerImpl.
+            SMSProviderPayloadTemplateManagerImpl smsProviderPayloadTemplateManager =
+                    new SMSProviderPayloadTemplateManagerImpl();
+            ServiceRegistration smsProviderPayloadTemplateManagerSR = bundleCtx
+                    .registerService(SMSProviderPayloadTemplateManager.class.getName(),
+                            smsProviderPayloadTemplateManager, null);
+            if (smsProviderPayloadTemplateManagerSR != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("SMS Provider Payload Template Mgt Service registered.");
+                }
+            } else {
+                log.error("Error registering SMS Provider Payload Template Mgt Service.");
+            }
+
             // Load default notification templates.
             loadDefaultEmailTemplates();
             loadDefaultSMSTemplates();
+            // Load SMS service providers' sms send API payloads.
+            loadDefaultSMSProviderPostBodyTemplates();
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
             log.error("Error while activating I18n Management bundle", e);
@@ -120,6 +161,66 @@ public class I18nMgtServiceComponent {
                     .addDefaultNotificationTemplates(NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain);
         } catch (NotificationTemplateManagerException e) {
             log.error("Error occurred while loading default SMS templates", e);
+        }
+    }
+
+    /**
+     * Load default SMS providers' SMS send API post body templates on server startup.
+     */
+    private void loadDefaultSMSProviderPostBodyTemplates() {
+
+        Path path = SMS_PROVIDER_POST_BODY_TEMPLATES_DIR_PATH;
+        if (!Files.exists(path) || !Files.isRegularFile(path)) {
+            if (log.isDebugEnabled()) {
+                log.debug("SMS providers' SMS send API body templates are not present at: " + path);
+            }
+        }
+        List<SMSProviderTemplate> defaultSMSProviderPostBodyTemplates = new ArrayList<>();
+        XMLStreamReader xmlStreamReader = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(path.toString());
+            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+            StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+
+            OMElement documentElement = builder.getDocumentElement();
+            Iterator iterator = documentElement.getChildElements();
+            while (iterator.hasNext()) {
+                OMElement omElement = (OMElement) iterator.next();
+                Iterator it = omElement.getChildElements();
+                String body = null;
+                while (it.hasNext()) {
+                    OMElement element = (OMElement) it.next();
+                    String elementName = element.getLocalName();
+                    String elementText = element.getText();
+                    if (StringUtils.equalsIgnoreCase(TEMPLATE_BODY, elementName)) {
+                        body = elementText;
+                    }
+                }
+
+                // Create SMS provider template.
+                SMSProviderTemplate smsProviderTemplate = new SMSProviderTemplate();
+                smsProviderTemplate.setProvider(omElement.getAttributeValue(new QName(SMS_PROVIDER)));
+                smsProviderTemplate.setBody(body);
+                defaultSMSProviderPostBodyTemplates.add(smsProviderTemplate);
+            }
+            SMSProviderPayloadTemplateDataHolder.getInstance()
+                    .setSMSProvidersAPIPayloads(defaultSMSProviderPostBodyTemplates);
+        } catch (XMLStreamException | FileNotFoundException e) {
+            log.warn("Error while loading default SMS providers' SMS send POST API payload templates.", e);
+        } finally {
+            try {
+                if (xmlStreamReader != null) {
+                    xmlStreamReader.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (XMLStreamException e) {
+                log.error("Error while closing XML stream", e);
+            } catch (IOException e) {
+                log.error("Error while closing input stream", e);
+            }
         }
     }
 
