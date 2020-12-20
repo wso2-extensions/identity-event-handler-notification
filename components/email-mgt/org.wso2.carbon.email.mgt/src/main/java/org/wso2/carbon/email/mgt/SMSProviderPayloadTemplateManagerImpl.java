@@ -40,7 +40,7 @@ public class SMSProviderPayloadTemplateManagerImpl implements SMSProviderPayload
     public SMSProviderTemplate getSMSProviderPayloadTemplateByProvider(String provider) {
 
         return SMSProviderPayloadTemplateDataHolder.getInstance().getSmsProvidersAPIPayloads().stream()
-                .filter(smsProviderTemplate -> smsProviderTemplate.getProvider().equals(provider)).findAny()
+                .filter(smsProviderTemplate -> smsProviderTemplate.getProvider().equalsIgnoreCase(provider)).findAny()
                 .orElse(null);
     }
 }
