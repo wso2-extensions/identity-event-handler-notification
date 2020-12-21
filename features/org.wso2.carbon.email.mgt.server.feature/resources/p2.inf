@@ -4,3 +4,4 @@ org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../r
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../repository/conf/sms); \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.email.mgt.server_${feature.version}/sms-templates-admin-config.xml,target:${installFolder}/../../conf/sms/sms-templates-admin-config.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.email.mgt.server_${feature.version}/email-admin-config.xml,target:${installFolder}/../../conf/email/email-admin-config.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.email.mgt.server_${feature.version}/sms-providers-api-body-templates.xml,target:${installFolder}/../../conf/sms/sms-providers-api-body-templates.xml,overwrite:true);\
