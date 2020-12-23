@@ -58,6 +58,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>EmailPublisher.xml</include>
+                                        <include>SMSPublisher.xml</include>
                                         <include>id_gov_notify_stream_1.0.0.json</include>
                                         <include>p2.inf</include>
                                         <include>id_gov_sms_notify_stream_1.0.0.json</include>

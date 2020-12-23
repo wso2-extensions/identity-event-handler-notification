@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventPublisher name="SMSPublisher" processing="enable"
+                statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+    <from streamName="id_gov_sms_notify_stream" version="1.0.0"/>
+    <mapping customMapping="enable" type="json">
+        <inline>{}</inline>
+    </mapping>
+    <to eventAdapterType="http">
+        <property name="http.client.method">httpPost</property>
+        <property name="http.url"></property>
+    </to>
+</eventPublisher>
