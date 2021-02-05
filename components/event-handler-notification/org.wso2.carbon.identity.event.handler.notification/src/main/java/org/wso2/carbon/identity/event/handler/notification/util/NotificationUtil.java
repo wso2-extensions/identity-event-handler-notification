@@ -152,27 +152,32 @@ public class NotificationUtil {
         if (StringUtils.isNotEmpty(emailTemplate.getFooter())) {
             placeHolders.addAll(extractPlaceHolders(emailTemplate.getFooter()));
         }
-        if (userClaims != null && !userClaims.isEmpty()) {
-            for (String placeHolder : placeHolders) {
-                if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX + "."
-                        + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX)) {
-                    String identityClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
-                            + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX + "/" + placeHolder
-                            .substring(placeHolder.indexOf(".", placeHolder.indexOf("identity")) + 1));
-                    if (StringUtils.isNotEmpty(identityClaim)) {
-                        placeHolderData.put(placeHolder, identityClaim);
-                    }
-                } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
-                    String userClaim = userClaims
-                            .get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI + placeHolder
-                                    .substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
-                    if (StringUtils.isNotEmpty(userClaim)) {
-                        placeHolderData.put(placeHolder, userClaim);
-                    }
-                } else if (placeHolder.startsWith(NotificationConstants.EmailNotification.IDENTITY_TEMPLATE_VALUE_PREFIX)) {
-                    String key = placeHolder.substring(placeHolder.lastIndexOf(".") + 1);
-                    String value = configFilePlaceholders.getOrDefault(key, "");
-                    placeHolderData.put(placeHolder, value);
+
+        for (String placeHolder : placeHolders) {
+            // Setting config file place holders.
+            if (placeHolder.startsWith(NotificationConstants.EmailNotification.IDENTITY_TEMPLATE_VALUE_PREFIX)) {
+                String key = placeHolder.substring(placeHolder.lastIndexOf(".") + 1);
+                String value = configFilePlaceholders.getOrDefault(key, "");
+                placeHolderData.put(placeHolder, value);
+            }
+            if (userClaims == null || userClaims.isEmpty()) {
+                // If the user has no claims, following logic is not needed.
+                continue;
+            }
+            if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX + "."
+                    + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX)) {
+                String identityClaim = userClaims.get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI
+                        + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX + "/" + placeHolder
+                        .substring(placeHolder.indexOf(".", placeHolder.indexOf("identity")) + 1));
+                if (StringUtils.isNotEmpty(identityClaim)) {
+                    placeHolderData.put(placeHolder, identityClaim);
+                }
+            } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
+                String userClaim = userClaims
+                        .get(NotificationConstants.EmailNotification.WSO2_CLAIM_URI + placeHolder
+                                .substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
+                if (StringUtils.isNotEmpty(userClaim)) {
+                    placeHolderData.put(placeHolder, userClaim);
                 }
             }
         }
@@ -230,6 +235,7 @@ public class NotificationUtil {
     }
 
     public static String getUserStoreDomainName(UserStoreManager userStoreManager) {
+
         String domainNameProperty = null;
         if (userStoreManager instanceof org.wso2.carbon.user.core.UserStoreManager) {
             domainNameProperty = ((org.wso2.carbon.user.core.UserStoreManager)
@@ -243,6 +249,7 @@ public class NotificationUtil {
     }
 
     public static String getTenantDomain(UserStoreManager userStoreManager) {
+
         try {
             return IdentityTenantUtil.getTenantDomain(userStoreManager.getTenantId());
         } catch (UserStoreException e) {
@@ -252,6 +259,7 @@ public class NotificationUtil {
 
     public static void deployStream(String streamName, String streamVersion, String streamId)
             throws NotificationRuntimeException {
+
         try {
             EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
             StreamDefinition streamDefinition = new StreamDefinition(streamName, streamVersion, streamId);
@@ -263,8 +271,8 @@ public class NotificationUtil {
         }
     }
 
-
     public static void deployPublisher(EventPublisherConfiguration eventPublisherConfiguration) throws NotificationRuntimeException {
+
         EventPublisherService eventPublisherService = NotificationHandlerDataHolder.getInstance().getEventPublisherService();
         try {
             eventPublisherService.deployEventPublisherConfiguration(eventPublisherConfiguration);
