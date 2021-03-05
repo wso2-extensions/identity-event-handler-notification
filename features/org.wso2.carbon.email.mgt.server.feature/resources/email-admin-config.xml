@@ -1756,7 +1756,7 @@
                         <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
                             <tr>
                                 <td style="border-radius: 6px;  padding: 14px 0px;">
-                                    <a href="{{product-url-with-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console"
+                                    <a href="{{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console"
                                        target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Set Password</a>
                                 </td>
                             </tr>
@@ -1768,8 +1768,8 @@
                         <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
                             If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
                             <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
-                               href="{{product-url-with-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console">
-                                {{product-url-with-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console</a>
+                               href="{{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console">
+                                {{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console</a>
                         </p>
                     </td>
                 </tr>

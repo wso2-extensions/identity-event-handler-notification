@@ -74,7 +74,7 @@ public class NotificationConstants {
 
         public static final String CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER = "carbon.product-url";
         public static final String CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER
-                = "product-url-with-tenant";
+                = "product-url-with-user-tenant";
 
     }
 
