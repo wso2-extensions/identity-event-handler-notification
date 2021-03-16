@@ -185,11 +185,10 @@ public class NotificationUtil {
         String carbonUrlWithUserTenant;
         try {
             serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
+            carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
             if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
-                carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t/"
-                         + placeHolderData.get("tenant-domain");
-            } else {
-                carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
+                carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t" +
+                        "/" + placeHolderData.get("tenant-domain");
             }
         } catch (URLBuilderException e) {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
