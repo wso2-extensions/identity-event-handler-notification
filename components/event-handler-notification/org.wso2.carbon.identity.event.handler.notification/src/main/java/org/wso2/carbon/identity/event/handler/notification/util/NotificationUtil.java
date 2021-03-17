@@ -62,6 +62,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
 
 public class NotificationUtil {
 
@@ -181,13 +182,20 @@ public class NotificationUtil {
         }
         // Building the server url.
         String serverURL;
+        String carbonUrlWithUserTenant;
         try {
             serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
+            carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
+            if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
+                carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t" +
+                        "/" + placeHolderData.get("tenant-domain");
+            }
         } catch (URLBuilderException e) {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
         }
 
         placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
+        placeHolderData.put(CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER, carbonUrlWithUserTenant);
         return placeHolderData;
     }
 
