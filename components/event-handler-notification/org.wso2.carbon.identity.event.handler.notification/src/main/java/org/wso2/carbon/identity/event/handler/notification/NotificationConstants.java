@@ -26,7 +26,9 @@ public class NotificationConstants {
     }
 
     private static String getClaimUriLocale() {
-        if ("true".equals(IdentityUtil.getProperty("isLegacyLocalityClaimUri"))) {
+
+        if (Boolean.parseBoolean(IdentityUtil.getProperty("isLegacyLocalityClaimUri"))
+        || IdentityUtil.getProperty("isLegacyLocalityClaimUri") == null) {
             return "http://wso2.org/claims/locality";
         } else {
             return "http://wso2.org/claims/local";
