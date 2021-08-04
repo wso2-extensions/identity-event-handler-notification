@@ -27,9 +27,10 @@ public class NotificationConstants {
 
     private static String getClaimUriLocale() {
 
-        if (Boolean.parseBoolean(IdentityUtil.getProperty("useLegacyLocalizationClaim"))
-        || IdentityUtil.getProperty("useLegacyLocalizationClaim") == null) {
+        if (Boolean.parseBoolean(IdentityUtil.getProperty("UseLegacyLocalizationClaim"))) {
             return "http://wso2.org/claims/locality";
+        } else if (IdentityUtil.getProperty("UseLegacyLocalizationClaim") == null) {
+            return "http://wso2.org/claims/local";
         } else {
             return "http://wso2.org/claims/local";
         }
