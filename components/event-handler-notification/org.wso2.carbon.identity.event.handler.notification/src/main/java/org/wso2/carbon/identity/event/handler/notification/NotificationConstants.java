@@ -18,13 +18,15 @@
 
 package org.wso2.carbon.identity.event.handler.notification;
 
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+
 public class NotificationConstants {
 
     private NotificationConstants() {
     }
 
     public static final String TEMPLATE_TYPE = "TEMPLATE_TYPE";
-    public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
+    public static final String CLAIM_URI_LOCALE = IdentityUtil.getClaimUriLocale();
     public static final String ARBITRARY_SEND_TO = "send-to";
     public static final String ARBITRARY_BODY = "body";
     public static final String DEFAULT_NOTIFICATION_LOCALE = "en_US";
@@ -34,7 +36,7 @@ public class NotificationConstants {
         public static final String EMAIL_TEMPLATE_TYPE = "TEMPLATE_TYPE";
         public static final String LOCALE_DEFAULT = "en_US";
         public static final String TEMPLATE_CONTENT_TYPE_DEFAULT = "text/plain";
-        public static final String CLAIM_URI_LOCALE = "http://wso2.org/claims/locality";
+        public static final String CLAIM_URI_LOCALE = IdentityUtil.getClaimUriLocale();
         public static final String CLAIM_URI_EMAIL = "http://wso2.org/claims/emailaddress";
         public static final String IDENTITY_CLAIM_PREFIX = "identity";
         public static final String USER_CLAIM_PREFIX = "user.claim";
