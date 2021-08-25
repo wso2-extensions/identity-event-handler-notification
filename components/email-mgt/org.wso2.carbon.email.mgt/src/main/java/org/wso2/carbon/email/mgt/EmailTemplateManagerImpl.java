@@ -18,13 +18,10 @@ package org.wso2.carbon.email.mgt;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.exceptions.DuplicateEmailTemplateException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtInternalException;
@@ -50,25 +47,11 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
@@ -78,6 +61,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLAT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_REGEX;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_PATH;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
 import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 
@@ -275,28 +259,6 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             String error = "Error when retrieving '%s' template type from %s tenant registry.";
             throw new I18nEmailMgtServerException(String.format(error, templateDisplayName, tenantDomain), ex);
         }
-    }
-
-    /**
-     * Build an Email Template object using SMS template data.
-     *
-     * @param notificationTemplate {@link
-     *                             org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
-     *                             object
-     * @return {@link org.wso2.carbon.email.mgt.model.EmailTemplate} object
-     */
-    private EmailTemplate buildEmailTemplate(NotificationTemplate notificationTemplate) {
-
-        // Build an email template using SMS template data.
-        EmailTemplate emailTemplate = new EmailTemplate();
-        emailTemplate.setTemplateDisplayName(notificationTemplate.getDisplayName());
-        emailTemplate.setTemplateType(notificationTemplate.getType());
-        emailTemplate.setLocale(notificationTemplate.getLocale());
-        emailTemplate.setBody(notificationTemplate.getBody());
-        emailTemplate.setSubject(notificationTemplate.getSubject());
-        emailTemplate.setFooter(notificationTemplate.getFooter());
-        emailTemplate.setEmailContentType(notificationTemplate.getContentType());
-        return emailTemplate;
     }
 
     /**
@@ -659,42 +621,6 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         } catch (NotificationTemplateManagerException e) {
             throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
-
-
-        try {
-            // load DTOs from the I18nEmailUtil class
-            List<EmailTemplate> defaultTemplates = I18nEmailUtil.getDefaultEmailTemplates();
-            // iterate through the list and write to registry!
-            for (EmailTemplate emailTemplateDTO : defaultTemplates) {
-                String templateTypeDisplayName = emailTemplateDTO.getTemplateDisplayName();
-                String templateType = I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
-
-                String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType; // template type root directory
-                //Check for existence of each category, since some template may have migrated from earlier version
-                //This will also add new template types provided from file, but won't update any existing
-                if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
-                    try {
-                        addEmailTemplate(emailTemplateDTO, tenantDomain);
-
-                    } catch (DuplicateEmailTemplateException e) {
-                        log.warn("Template" + templateTypeDisplayName + "already exists in the registry,Hence " +
-                                "ignoring addition");
-                    }
-                    if (log.isDebugEnabled()) {
-                        String msg = "Default template added to %s tenant registry : %n%s";
-                        log.debug(String.format(msg, tenantDomain, emailTemplateDTO.toString()));
-                    }
-                }
-            }
-
-            if (log.isDebugEnabled()) {
-                String msg = "Added %d default email templates to %s tenant registry";
-                log.debug(String.format(msg, defaultTemplates.size(), tenantDomain));
-            }
-        } catch (IdentityRuntimeException ex) {
-            String error = "Error when tried to check for default email templates in %s tenant registry";
-            log.error(String.format(error, tenantDomain), ex);
-        }
     }
 
     /**
@@ -756,103 +682,10 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     @Override
     public List<NotificationTemplate> getDefaultNotificationTemplates(String notificationChannel) {
 
-        String configFilePath = buildNotificationTemplateConfigPath(notificationChannel);
-        File configFile = new File(configFilePath);
-        if (!configFile.exists()) {
-            log.error("Email Configuration File is not present at: " + configFilePath);
-        }
-
-        List<NotificationTemplate> defaultNotificationTemplates = new ArrayList<>();
-        XMLStreamReader xmlStreamReader = null;
-        InputStream inputStream = null;
-
-        try {
-            inputStream = new FileInputStream(configFile);
-            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-            StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
-
-            OMElement documentElement = builder.getDocumentElement();
-            Iterator iterator = documentElement.getChildElements();
-            while (iterator.hasNext()) {
-                OMElement omElement = (OMElement) iterator.next();
-                Map<String, String> templateContentMap = getNotificationTemplateContent(omElement);
-
-                // Create notification template model with the template attributes.
-                NotificationTemplate notificationTemplate = new NotificationTemplate();
-                notificationTemplate.setType(omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE)));
-                notificationTemplate.setDisplayName(
-                        omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)));
-                notificationTemplate
-                        .setLocale(omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_LOCALE)));
-                notificationTemplate.setBody(templateContentMap.get(I18nMgtConstants.TEMPLATE_BODY));
-                notificationTemplate.setNotificationChannel(notificationChannel);
-
-                if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
-                    notificationTemplate.setContentType(
-                            omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_CONTENT_TYPE)));
-                    notificationTemplate.setFooter(templateContentMap.get(I18nMgtConstants.TEMPLATE_FOOTER));
-                    notificationTemplate.setSubject(templateContentMap.get(I18nMgtConstants.TEMPLATE_SUBJECT));
-                }
-                defaultNotificationTemplates.add(notificationTemplate);
-            }
-        } catch (XMLStreamException | FileNotFoundException e) {
-            log.warn("Error while loading default templates to the registry.", e);
-        } finally {
-            try {
-                if (xmlStreamReader != null) {
-                    xmlStreamReader.close();
-                }
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (XMLStreamException e) {
-                log.error("Error while closing XML stream", e);
-            } catch (IOException e) {
-                log.error("Error while closing input stream", e);
-            }
-        }
-        return defaultNotificationTemplates;
-    }
-
-    /**
-     * Get the template attributes of the notification template such as SUBJECT, BODY, EMAIL.
-     *
-     * @param templateElement OMElement
-     * @return List of attributes in the notification template
-     */
-    private static Map<String, String> getNotificationTemplateContent(OMElement templateElement) {
-
-        Map<String, String> notificationTemplateContent = new HashMap<>();
-        Iterator it = templateElement.getChildElements();
-        while (it.hasNext()) {
-            OMElement element = (OMElement) it.next();
-            String elementName = element.getLocalName();
-            String elementText = element.getText();
-            if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_SUBJECT, elementName)) {
-                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_SUBJECT, elementText);
-            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_BODY, elementName)) {
-                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_BODY, elementText);
-            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_FOOTER, elementName)) {
-                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_FOOTER, elementText);
-            }
-        }
-        return notificationTemplateContent;
-    }
-
-    /**
-     * Build the file path of the notification template config file according to the given channel.
-     *
-     * @param notificationChannel Notification channel name (EMAIL,SMS)
-     * @return Path of the configuration file
-     */
-    private String buildNotificationTemplateConfigPath(String notificationChannel) {
-
         if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                    I18nMgtConstants.SMS_CONF_DIRECTORY + File.separator + I18nMgtConstants.SMS_TEMPLAE_ADMIN_CONF_FILE;
+            return I18nMgtDataHolder.getInstance().getDefaultSMSTemplates();
         }
-        return CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                I18nMgtConstants.EMAIL_CONF_DIRECTORY + File.separator + I18nMgtConstants.EMAIL_ADMIN_CONF_FILE;
+        return I18nMgtDataHolder.getInstance().getDefaultEmailTemplates();
     }
 
     @Override

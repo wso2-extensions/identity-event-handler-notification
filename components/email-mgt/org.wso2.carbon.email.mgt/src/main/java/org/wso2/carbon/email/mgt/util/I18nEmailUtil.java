@@ -18,8 +18,6 @@ package org.wso2.carbon.email.mgt.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,32 +25,21 @@ import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 public class I18nEmailUtil {
 
@@ -80,88 +67,37 @@ public class I18nEmailUtil {
      *
      * @return List of default email notification templates.
      */
+    @Deprecated
     public static List<EmailTemplate> getDefaultEmailTemplates() {
-        String configFilePath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                I18nMgtConstants.EMAIL_CONF_DIRECTORY + File.separator + I18nMgtConstants.EMAIL_ADMIN_CONF_FILE;
 
-        List<EmailTemplate> defaultTemplates = new ArrayList<>();
-        File configFile = new File(configFilePath);
-        if (!configFile.exists()) {
-            log.error("Email Configuration File is not present at: " + configFilePath);
-        }
-
-        XMLStreamReader xmlStreamReader = null;
-        InputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(configFile);
-            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-            StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
-
-            OMElement documentElement = builder.getDocumentElement();
-            Iterator iterator = documentElement.getChildElements();
-            while (iterator.hasNext()) {
-                OMElement omElement = (OMElement) iterator.next();
-                String type = omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE));
-                String displayName = omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME));
-                String locale = omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_LOCALE));
-                String contentType = omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_CONTENT_TYPE));
-
-                Map<String, String> emailContentMap = getEmailContent(omElement);
-                String subject = emailContentMap.get(I18nMgtConstants.TEMPLATE_SUBJECT);
-                String body = emailContentMap.get(I18nMgtConstants.TEMPLATE_BODY);
-                String footer = emailContentMap.get(I18nMgtConstants.TEMPLATE_FOOTER);
-
-                // create the DTO and add to list
-                EmailTemplate emailTemplateDTO = new EmailTemplate();
-                emailTemplateDTO.setTemplateType(type);
-                emailTemplateDTO.setTemplateDisplayName(displayName);
-                emailTemplateDTO.setLocale(locale);
-                emailTemplateDTO.setEmailContentType(contentType);
-
-                emailTemplateDTO.setSubject(subject);
-                emailTemplateDTO.setBody(body);
-                emailTemplateDTO.setFooter(footer);
-
-                defaultTemplates.add(emailTemplateDTO);
-            }
-        } catch (XMLStreamException | FileNotFoundException e) {
-            log.warn("Error while loading default templates to the registry.", e);
-        } finally {
-            try {
-                if (xmlStreamReader != null) {
-                    xmlStreamReader.close();
-                }
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (XMLStreamException e) {
-                log.error("Error while closing XML stream", e);
-            } catch (IOException e) {
-                log.error("Error while closing input stream", e);
-            }
-        }
-
-        return defaultTemplates;
+        List<NotificationTemplate> defaultEmailTemplates = I18nMgtDataHolder.getInstance().getDefaultEmailTemplates();
+        List<EmailTemplate> mailTemplates = new ArrayList<>();
+        defaultEmailTemplates.forEach(notificationTemplate ->
+                mailTemplates.add(buildEmailTemplate(notificationTemplate)));
+        return mailTemplates;
     }
 
-    private static Map<String, String> getEmailContent(OMElement templateElement) {
-        Map<String, String> emailContentMap = new HashMap<>();
-        Iterator it = templateElement.getChildElements();
-        while (it.hasNext()) {
-            OMElement element = (OMElement) it.next();
-            String elementName = element.getLocalName();
-            String elementText = element.getText();
-            if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_SUBJECT, elementName)) {
-                emailContentMap.put(I18nMgtConstants.TEMPLATE_SUBJECT, elementText);
-            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_BODY, elementName)) {
-                emailContentMap.put(I18nMgtConstants.TEMPLATE_BODY, elementText);
-            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_FOOTER, elementName)) {
-                emailContentMap.put(I18nMgtConstants.TEMPLATE_FOOTER, elementText);
-            }
-        }
-        return emailContentMap;
-    }
+    /**
+     * Build an Email Template object using Notification template data.
+     *
+     * @param notificationTemplate {@link
+     *                             org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager}
+     *                             object
+     * @return {@link org.wso2.carbon.email.mgt.model.EmailTemplate} object
+     */
+    public static EmailTemplate buildEmailTemplate(NotificationTemplate notificationTemplate) {
 
+        // Build an email template using SMS template data.
+        EmailTemplate emailTemplate = new EmailTemplate();
+        emailTemplate.setTemplateDisplayName(notificationTemplate.getDisplayName());
+        emailTemplate.setTemplateType(notificationTemplate.getType());
+        emailTemplate.setLocale(notificationTemplate.getLocale());
+        emailTemplate.setBody(notificationTemplate.getBody());
+        emailTemplate.setSubject(notificationTemplate.getSubject());
+        emailTemplate.setFooter(notificationTemplate.getFooter());
+        emailTemplate.setEmailContentType(notificationTemplate.getContentType());
+        return emailTemplate;
+    }
 
     /**
      * @param emailTemplate

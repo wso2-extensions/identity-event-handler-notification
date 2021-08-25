@@ -16,6 +16,9 @@
 package org.wso2.carbon.email.mgt;
 
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import org.apache.axiom.om.OMElement;
@@ -23,6 +26,8 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
@@ -37,6 +42,7 @@ import static org.testng.Assert.*;
 
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.internal.I18nMgtServiceComponent;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
@@ -248,8 +254,9 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
 
         int numberOfDefaultTemplates = getNumberOfDefaultTemplates(notificationChannel, baseDirectoryPath);
         mockNotificationChannelConfigPath(baseDirectoryPath);
+        I18nMgtServiceComponent component =  new I18nMgtServiceComponent();
         List<NotificationTemplate> defaultNotificationTemplates =
-                emailTemplateManager.getDefaultNotificationTemplates(notificationChannel);
+                component.loadDefaultTemplatesFromFile(notificationChannel);
         assertEquals(defaultNotificationTemplates.size(), numberOfDefaultTemplates, message);
     }
 
