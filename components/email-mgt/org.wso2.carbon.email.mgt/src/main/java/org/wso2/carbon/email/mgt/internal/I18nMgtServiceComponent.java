@@ -30,10 +30,12 @@ import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -45,7 +47,9 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,8 +57,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -126,6 +132,12 @@ public class I18nMgtServiceComponent {
             } else {
                 log.error("Error registering SMS Provider Payload Template Mgt Service.");
             }
+
+            // Load default notification templates from file
+            I18nMgtDataHolder.getInstance().setDefaultEmailTemplates(
+                    loadDefaultTemplatesFromFile(NotificationChannels.EMAIL_CHANNEL.getChannelType()));
+            I18nMgtDataHolder.getInstance().setDefaultSMSTemplates(
+                    loadDefaultTemplatesFromFile(NotificationChannels.SMS_CHANNEL.getChannelType()));
 
             // Load default notification templates.
             loadDefaultEmailTemplates();
@@ -222,6 +234,106 @@ public class I18nMgtServiceComponent {
                 log.error("Error while closing input stream", e);
             }
         }
+    }
+
+    /**
+     * Loads the default templates from the file for the channel(EMAIL or SMS) and create list of Notification Template.
+     *
+     * @param notificationChannel   Channel of the notification.
+     * @return                      List of NotificationTemplate.
+     */
+    public List<NotificationTemplate> loadDefaultTemplatesFromFile(String notificationChannel) {
+
+        String configFilePath = buildNotificationTemplateConfigPath(notificationChannel);
+        File configFile = new File(configFilePath);
+        if (!configFile.exists()) {
+            log.error("Email Configuration File is not present at: " + configFilePath);
+        }
+
+        List<NotificationTemplate> defaultNotificationTemplates = new ArrayList<>();
+        XMLStreamReader xmlStreamReader = null;
+
+        try (InputStream inputStream = new FileInputStream(configFile)) {
+            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+            StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+
+            OMElement documentElement = builder.getDocumentElement();
+            Iterator iterator = documentElement.getChildElements();
+            while (iterator.hasNext()) {
+                OMElement omElement = (OMElement) iterator.next();
+                Map<String, String> templateContentMap = getNotificationTemplateContent(omElement);
+
+                // Create notification template model with the template attributes.
+                NotificationTemplate notificationTemplate = new NotificationTemplate();
+                notificationTemplate.setType(omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE)));
+                notificationTemplate.setDisplayName(
+                        omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)));
+                notificationTemplate
+                        .setLocale(omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_LOCALE)));
+                notificationTemplate.setBody(templateContentMap.get(I18nMgtConstants.TEMPLATE_BODY));
+                notificationTemplate.setNotificationChannel(notificationChannel);
+
+                if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
+                    notificationTemplate.setContentType(
+                            omElement.getAttributeValue(new QName(I18nMgtConstants.TEMPLATE_CONTENT_TYPE)));
+                    notificationTemplate.setFooter(templateContentMap.get(I18nMgtConstants.TEMPLATE_FOOTER));
+                    notificationTemplate.setSubject(templateContentMap.get(I18nMgtConstants.TEMPLATE_SUBJECT));
+                }
+                defaultNotificationTemplates.add(notificationTemplate);
+            }
+        } catch (XMLStreamException | IOException e) {
+            log.warn("Error while loading default templates from file.", e);
+        } finally {
+            try {
+                if (xmlStreamReader != null) {
+                    xmlStreamReader.close();
+                }
+            } catch (XMLStreamException e) {
+                log.error("Error while closing XML stream", e);
+            }
+        }
+        return defaultNotificationTemplates;
+    }
+
+    /**
+     * Get the template attributes of the notification template such as SUBJECT, BODY, EMAIL.
+     *
+     * @param templateElement OMElement
+     * @return List of attributes in the notification template
+     */
+    private static Map<String, String> getNotificationTemplateContent(OMElement templateElement) {
+
+        Map<String, String> notificationTemplateContent = new HashMap<>();
+        Iterator it = templateElement.getChildElements();
+        while (it.hasNext()) {
+            OMElement element = (OMElement) it.next();
+            String elementName = element.getLocalName();
+            String elementText = element.getText();
+            if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_SUBJECT, elementName)) {
+                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_SUBJECT, elementText);
+            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_BODY, elementName)) {
+                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_BODY, elementText);
+            } else if (StringUtils.equalsIgnoreCase(I18nMgtConstants.TEMPLATE_FOOTER, elementName)) {
+                notificationTemplateContent.put(I18nMgtConstants.TEMPLATE_FOOTER, elementText);
+            }
+        }
+        return notificationTemplateContent;
+    }
+
+    /**
+     * Build the file path of the notification template config file according to the given channel.
+     *
+     * @param notificationChannel Notification channel name (EMAIL,SMS)
+     * @return Path of the configuration file
+     */
+    private String buildNotificationTemplateConfigPath(String notificationChannel) {
+
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return CarbonUtils.getCarbonConfigDirPath() + File.separator +
+                    I18nMgtConstants.SMS_CONF_DIRECTORY + File.separator + I18nMgtConstants.SMS_TEMPLAE_ADMIN_CONF_FILE;
+        }
+        return CarbonUtils.getCarbonConfigDirPath() + File.separator +
+                I18nMgtConstants.EMAIL_CONF_DIRECTORY + File.separator + I18nMgtConstants.EMAIL_ADMIN_CONF_FILE;
     }
 
     @Deactivate
