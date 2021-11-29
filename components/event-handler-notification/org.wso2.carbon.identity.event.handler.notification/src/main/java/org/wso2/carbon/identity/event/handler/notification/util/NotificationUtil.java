@@ -318,8 +318,8 @@ public class NotificationUtil {
                 sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
             }
             if (StringUtils.isEmpty(sendTo)) {
-                throw NotificationRuntimeException.error(
-                        "Email notification sending failed. Sending email address is not configured for the user.");
+                throw new IdentityEventException("Email notification sending failed. " +
+                        "Sending email address is not configured for the user.");
             }
         }
 
