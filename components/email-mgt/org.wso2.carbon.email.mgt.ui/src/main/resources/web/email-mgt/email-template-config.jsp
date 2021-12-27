@@ -300,13 +300,18 @@
                                 <%
                                     for (String currentType : emailContentTypeArr) {
                                         String currentSelectedAttr = "";
-                                        if (currentType.equals(emailContentType0)) {
+                                        if (StringUtils.contains(emailContentType0, currentType)) {
                                             currentSelectedAttr = "selected=\"selected\"";
-                                        }
                                 %>
-                                <option <%=Encode.forHtmlAttribute(currentSelectedAttr)%>><%=Encode.forHtmlContent(currentType)%>
+                                <option <%=Encode.forHtmlAttribute(currentSelectedAttr)%>> <%=Encode.forHtmlContent(currentType)%>
                                 </option>
                                 <%
+                                        } else {
+                                %>
+                                <option> <%=Encode.forHtmlContent(currentType)%>
+                                </option>
+                                <%
+                                        }
                                     }
                                 %>
                             </select></td>
