@@ -332,7 +332,7 @@ public class NotificationUtil {
             throw NotificationRuntimeException.error(message, e);
         }
 
-        // this is added to change the copyright year in the email templates dynamically.
+        // This is added to change the copyright year in the email templates dynamically.
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         placeHolderData.put("current-year", String.valueOf(currentYear));
 
