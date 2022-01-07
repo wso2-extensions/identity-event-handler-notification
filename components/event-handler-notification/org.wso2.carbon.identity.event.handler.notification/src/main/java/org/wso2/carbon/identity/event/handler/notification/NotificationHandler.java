@@ -37,7 +37,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Calendar;
 
 /**
  * This is the Email and SMS Notification Handler which connected to the direct CEP stream.
@@ -64,8 +63,6 @@ public class NotificationHandler extends DefaultNotificationHandler {
                 arbitraryDataMap.put(entry.getKey(), (String) entry.getValue());
             }
         }
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        arbitraryDataMap.put("current-year", String.valueOf(currentYear));
         Notification notification = NotificationUtil.buildNotification(event, arbitraryDataMap);
 
         //Stream definition will be read from the the identity-even.properties file as a property of the subscription

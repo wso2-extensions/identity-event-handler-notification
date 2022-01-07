@@ -53,6 +53,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -330,6 +331,10 @@ public class NotificationUtil {
             String message = "Error when retrieving template from tenant registry.";
             throw NotificationRuntimeException.error(message, e);
         }
+
+        //this is added to change the copyright year in the email templates dynamically
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        placeHolderData.put("current-year", String.valueOf(currentYear));
 
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
 
