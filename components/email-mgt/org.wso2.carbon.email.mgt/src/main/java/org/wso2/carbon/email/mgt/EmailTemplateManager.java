@@ -91,6 +91,12 @@ public interface EmailTemplateManager {
                                    String locale,
                                    String tenantDomain) throws I18nEmailMgtException;
 
+
+    EmailTemplate getEmailTemplate(String templateType,
+                                   String locale,
+                                   String tenantDomain,
+                                   String service) throws I18nEmailMgtException;
+
     /**
      * Get an all email templates of an specific template type, from tenant registry.
      *

@@ -245,6 +245,43 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     @Override
+    public EmailTemplate getEmailTemplate(String templateDisplayName, String locale, String tenantDomain,
+                                          String service) throws I18nEmailMgtException {
+
+        try {
+            NotificationTemplate notificationTemplate = getNotificationTemplate(
+                    NotificationChannels.EMAIL_CHANNEL.getChannelType(), templateDisplayName, locale, tenantDomain, service);
+            return buildEmailTemplate(notificationTemplate);
+        } catch (NotificationTemplateManagerException exception) {
+            String errorCode = exception.getErrorCode();
+            String errorMsg = exception.getMessage();
+            Throwable throwable = exception.getCause();
+
+            // Match NotificationTemplateManagerExceptions with the existing I18nEmailMgtException error types.
+            if (StringUtils.isNotEmpty(exception.getErrorCode())) {
+                if (IdentityMgtConstants.ErrorMessages.ERROR_CODE_INVALID_NOTIFICATION_TEMPLATE.getCode()
+                        .equals(errorCode) || IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_CONTENT_IN_TEMPLATE
+                        .getCode().equals(errorCode) ||
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME.getCode()
+                                .equals(errorCode) ||
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE
+                                .getCode().equals(errorCode)) {
+                    throw new I18nEmailMgtClientException(errorMsg, throwable);
+
+                } else if (IdentityMgtConstants.ErrorMessages.ERROR_CODE_INVALID_EMAIL_TEMPLATE_CONTENT.getCode()
+                        .equals(errorCode)) {
+                    throw new I18nMgtEmailConfigException(errorMsg, throwable);
+                } else if (IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_TEMPLATE_FOUND.getCode()
+                        .equals(errorCode)) {
+                    throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND,
+                            errorMsg, throwable);
+                }
+            }
+            throw new I18nEmailMgtServerException(exception.getMessage(), exception.getCause());
+        }
+    }
+
+    @Override
     public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain)
             throws I18nEmailMgtException {
 
@@ -343,6 +380,78 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             }
         }
         return notificationTemplate;
+    }
+
+    /**
+     * Return the notification template from the tenant registry which matches the given channel and template name.
+     *
+     * @param notificationChannel Notification Channel Name (Eg: SMS or EMAIL)
+     * @param templateType        Type of the template
+     * @param locale              Locale
+     * @param tenantDomain        Tenant Domain
+     * @param service             Service that triggered notification
+     * @return Return {@link org.wso2.carbon.identity.governance.model.NotificationTemplate} object
+     * @throws NotificationTemplateManagerException Error getting the notification template
+     */
+    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
+                                                        String tenantDomain, String service)
+            throws NotificationTemplateManagerException {
+
+        // Resolve channel to either SMS or EMAIL.
+        notificationChannel = resolveNotificationChannel(notificationChannel);
+        validateTemplateLocale(locale);
+        validateDisplayNameOfTemplateType(templateType);
+        NotificationTemplate notificationTemplate = null;
+
+        // Get notification template registry path.
+        String path;
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            path = SMS_TEMPLATE_PATH + PATH_SEPARATOR + I18nEmailUtil.getNormalizedName(templateType);
+        } else {
+            path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + I18nEmailUtil.getNormalizedName(templateType);
+        }
+
+        // Get registry resource.
+        try {
+            Resource registryResource = resourceMgtService.getIdentityResource(path, tenantDomain, locale, service);
+            if (registryResource != null) {
+                notificationTemplate = getNotificationTemplate(registryResource, notificationChannel);
+            }
+        } catch (IdentityRuntimeException exception) {
+            String error = String
+                    .format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY
+                            .getMessage(), templateType, locale, tenantDomain);
+            throw new NotificationTemplateManagerServerException(
+                    IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getCode(),
+                    error, exception);
+        }
+
+        // Handle not having the requested SMS template type in required locale for this tenantDomain.
+        if (notificationTemplate == null) {
+            String defaultLocale = getDefaultNotificationLocale(notificationChannel);
+            if (!StringUtils.equalsIgnoreCase(defaultLocale, locale)) {
+                // Try to get the template type in default locale if not it exists for provided locale.
+                if (log.isDebugEnabled()) {
+                    String message = String
+                            .format("'%s' template in '%s' locale was not found in '%s' tenant. Trying to return the "
+                                            + "template in default locale : '%s'", templateType, locale, tenantDomain,
+                                    DEFAULT_SMS_NOTIFICATION_LOCALE);
+                    log.debug(message);
+                }
+                return getNotificationTemplate(notificationChannel, templateType, defaultLocale, tenantDomain, service);
+            } else {
+                if (log.isDebugEnabled()) {
+                    String message = String
+                            .format("'%s' template of '%s' service was not found in '%s' tenant. Trying to return the "
+                                            + "template for default service.", templateType, service, tenantDomain);
+                    log.debug(message);
+                }
+                // Try to get template for default service and provided locale. Called method will fall back to
+                // default locale if template not exists.
+                return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain);
+            }
+        }
+            return notificationTemplate;
     }
 
     /**

@@ -301,6 +301,11 @@ public class NotificationUtil {
         String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
         String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
+        String service = "";
+        if (StringUtils.isNotBlank((String)
+                event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SERVICE))) {
+            service = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SERVICE);
+        }
 
         if (StringUtils.isNotBlank(username) && userStoreManager != null) {
             userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
@@ -312,6 +317,10 @@ public class NotificationUtil {
         String locale = NotificationConstants.EmailNotification.LOCALE_DEFAULT;
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
+        } else if (StringUtils.isNotBlank((String)
+        event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_LOCALE))) {
+
+            locale = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_LOCALE);
         }
         //Only sendTo value read from claims if it is not set the event sender.
         if (StringUtils.isEmpty(sendTo)) {
@@ -326,7 +335,13 @@ public class NotificationUtil {
 
         EmailTemplate emailTemplate;
         try {
-            emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain);
+            if (StringUtils.isNotBlank(service)) {
+                emailTemplate =
+                        NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain, service);
+            } else {
+                emailTemplate =
+                        NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain);
+            }
         } catch (I18nEmailMgtException e) {
             String message = "Error when retrieving template from tenant registry.";
             throw NotificationRuntimeException.error(message, e);

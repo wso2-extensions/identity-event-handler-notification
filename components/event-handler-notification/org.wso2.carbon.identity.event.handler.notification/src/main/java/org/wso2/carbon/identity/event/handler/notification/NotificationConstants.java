@@ -68,6 +68,7 @@ public class NotificationConstants {
         public static final String ARBITRARY_BODY_TEMPLATE = "body-template";
         public static final String ARBITRARY_FOOTER_TEMPLATE = "footer-template";
         public static final String ARBITRARY_LOCALE = "locale";
+        public static final String ARBITRARY_SERVICE = "service";
         public static final String ARBITRARY_CONTENT_TYPE = "content-type";
         public static final String ARBITRARY_SEND_TO = "send-to";
         public static final String ARBITRARY_SUBJECT = "subject";
