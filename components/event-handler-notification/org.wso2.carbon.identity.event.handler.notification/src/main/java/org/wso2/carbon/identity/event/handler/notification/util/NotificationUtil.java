@@ -62,8 +62,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.*;
 
 public class NotificationUtil {
 
@@ -177,6 +176,10 @@ public class NotificationUtil {
                                     .substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
+                    } else {
+                        if (placeHolder.equals(USER_CLAIM_PREFIX + ".givenname")) {
+                            placeHolderData.put(placeHolder, "");
+                        }
                     }
                 }
             }
