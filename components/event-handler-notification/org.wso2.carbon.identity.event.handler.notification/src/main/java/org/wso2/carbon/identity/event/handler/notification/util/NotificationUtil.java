@@ -170,6 +170,8 @@ public class NotificationUtil {
                             .substring(placeHolder.indexOf(".", placeHolder.indexOf("identity")) + 1));
                     if (StringUtils.isNotEmpty(identityClaim)) {
                         placeHolderData.put(placeHolder, identityClaim);
+                    } else {
+                        placeHolderData.put(placeHolder, "");
                     }
                 } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
                     String userClaim = userClaims
@@ -177,6 +179,8 @@ public class NotificationUtil {
                                     .substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
+                    } else {
+                        placeHolderData.put(placeHolder, "");
                     }
                 }
             }
