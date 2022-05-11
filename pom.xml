@@ -357,7 +357,7 @@
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.20.142</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.20.347</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
