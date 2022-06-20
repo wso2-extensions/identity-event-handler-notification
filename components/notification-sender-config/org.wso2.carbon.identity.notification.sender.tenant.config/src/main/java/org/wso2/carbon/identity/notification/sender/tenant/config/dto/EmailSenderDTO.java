@@ -105,4 +105,3 @@ public class EmailSenderDTO {
         this.properties = properties;
     }
 }
-

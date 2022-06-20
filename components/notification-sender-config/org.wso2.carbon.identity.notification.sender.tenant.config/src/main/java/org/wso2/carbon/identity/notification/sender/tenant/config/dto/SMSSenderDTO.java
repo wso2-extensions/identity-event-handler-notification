@@ -104,4 +104,3 @@ public class SMSSenderDTO {
         this.properties = properties;
     }
 }
-
