@@ -31,6 +31,7 @@ import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
+import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -53,6 +54,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +63,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
 
@@ -169,6 +173,8 @@ public class NotificationUtil {
                             .substring(placeHolder.indexOf(".", placeHolder.indexOf("identity")) + 1));
                     if (StringUtils.isNotEmpty(identityClaim)) {
                         placeHolderData.put(placeHolder, identityClaim);
+                    } else {
+                        placeHolderData.put(placeHolder, "");
                     }
                 } else if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX)) {
                     String userClaim = userClaims
@@ -176,6 +182,8 @@ public class NotificationUtil {
                                     .substring(placeHolder.indexOf(".", placeHolder.indexOf("claim")) + 1));
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
+                    } else {
+                        placeHolderData.put(placeHolder, "");
                     }
                 }
             }
@@ -183,6 +191,8 @@ public class NotificationUtil {
         // Building the server url.
         String serverURL;
         String carbonUrlWithUserTenant;
+        String accountRecoveryEndpointURL = ConfigurationFacade.getInstance().getAccountRecoveryEndpointPath();
+        String authenticationEndpointURL = ConfigurationFacade.getInstance().getAuthenticationEndpointURL();
         try {
             serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
             carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
@@ -194,6 +204,8 @@ public class NotificationUtil {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
         }
 
+        placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
+        placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
         placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
         placeHolderData.put(CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER, carbonUrlWithUserTenant);
         return placeHolderData;
@@ -318,8 +330,8 @@ public class NotificationUtil {
                 sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
             }
             if (StringUtils.isEmpty(sendTo)) {
-                throw NotificationRuntimeException.error(
-                        "Email notification sending failed. Sending email address is not configured for the user.");
+                throw new IdentityEventException("Email notification sending failed. " +
+                        "Sending email address is not configured for the user.");
             }
         }
 
@@ -330,6 +342,10 @@ public class NotificationUtil {
             String message = "Error when retrieving template from tenant registry.";
             throw NotificationRuntimeException.error(message, e);
         }
+
+        // This is added to change the copyright year in the email templates dynamically.
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        placeHolderData.put("current-year", String.valueOf(currentYear));
 
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
 
