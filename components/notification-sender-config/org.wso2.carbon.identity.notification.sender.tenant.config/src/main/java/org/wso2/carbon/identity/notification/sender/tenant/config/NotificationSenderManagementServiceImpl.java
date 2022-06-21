@@ -36,6 +36,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterDeleteMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -43,7 +44,9 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
+import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
 
 import java.io.InputStream;
@@ -67,6 +70,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_RESOURCE_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PARSER_CONFIG_EXCEPTION;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PUBLISHER_NOT_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER;
@@ -119,6 +123,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(emailSender.getName());
+        // Add the publisher type to the new publisher.
+        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, EMAIL_PUBLISHER_TYPE);
         emailSender.getProperties().putAll(defaultPublisherProperties);
 
         Resource emailSenderResource = buildResourceFromEmailSender(emailSender);
@@ -159,6 +165,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(smsSender.getName());
+        // Add the publisher type to the new publisher.
+        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
         smsSender.getProperties().putAll(defaultPublisherProperties);
         Resource smsSenderResource = buildResourceFromSmsSender(smsSender);
 
@@ -171,6 +179,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
              */
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .addResource(PUBLISHER_RESOURCE_TYPE, smsSenderResource);
+
+            reDeployEventPublisherConfiguration(smsSenderResource);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER, smsSender.getName());
         }
@@ -183,37 +193,41 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         try {
 
             Resource resource = getPublisherResource(senderName);
+            if (resource == null) {
+                throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+            }
+
+            NotificationSenderTenantConfigDataHolder.getInstance().getResourceManager()
+                    .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, senderName);
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .deleteResource(PUBLISHER_RESOURCE_TYPE, senderName);
-            reDeployEventPublisherConfiguration(resource);
+
+            sendEventPublisherClusterDeleteMessage(senderName);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER, senderName);
+        } catch (TenantResourceManagementException e) {
+            throw handleTenantResourceManagementException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER, senderName);
         }
     }
 
     @Override
     public EmailSenderDTO getEmailSender(String senderName) throws NotificationSenderManagementException {
 
-        try {
-
-            Resource resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .getResource(PUBLISHER_RESOURCE_TYPE, senderName);
-            return buildEmailSenderFromResource(resource);
-        } catch (ConfigurationManagementException e) {
-            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER, senderName);
+        Resource resource = getPublisherResource(senderName);
+        if (resource == null) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
+        return buildEmailSenderFromResource(resource);
     }
 
     @Override
     public SMSSenderDTO getSMSSender(String senderName) throws NotificationSenderManagementException {
 
-        try {
-            Resource resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .getResource(PUBLISHER_RESOURCE_TYPE, senderName);
-            return buildSmsSenderFromResource(resource);
-        } catch (ConfigurationManagementException e) {
-            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER, senderName);
+        Resource resource = getPublisherResource(senderName);
+        if (resource == null) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
+        return buildSmsSenderFromResource(resource);
     }
 
     @Override
@@ -264,6 +278,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(emailSender.getName());
+        // Add the publisher type to the new publisher.
+        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, EMAIL_PUBLISHER_TYPE);
         emailSender.getProperties().putAll(defaultPublisherProperties);
 
         Resource emailSenderResource = buildResourceFromEmailSender(emailSender);
@@ -293,6 +309,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(smsSender.getName());
+        // Add the publisher type to the new publisher.
+        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
         smsSender.getProperties().putAll(defaultPublisherProperties);
 
         smsSenderResource = buildResourceFromSmsSender(smsSender);
@@ -300,6 +318,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         try {
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .replaceResource(PUBLISHER_RESOURCE_TYPE, smsSenderResource);
+
+            reDeployEventPublisherConfiguration(smsSenderResource);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
                     smsSender.getName());
@@ -333,6 +353,47 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             log.warn(ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR.getMessage() + e.getMessage());
         }
         sendEventPublisherClusterInvalidationMessage(file);
+    }
+
+
+    private void sendEventPublisherClusterDeleteMessage(String senderName) {
+
+        if (getClusteringAgent() == null) {
+            return;
+        }
+
+        EventPublisherClusterDeleteMessage message = new EventPublisherClusterDeleteMessage(
+                NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE, senderName,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+
+        int numberOfRetries = 0;
+        if (log.isDebugEnabled()) {
+            log.debug("Sending cluster invalidation message to other cluster nodes for event publisher delete for "
+                    + senderName);
+        }
+
+        while (numberOfRetries < 60) {
+            try {
+                getClusteringAgent().sendMessage(message, true);
+                log.debug("Sent [" + message + "]");
+                break;
+            } catch (ClusteringFault e) {
+                numberOfRetries++;
+                if (numberOfRetries < 60) {
+                    log.warn("Could not send cluster invalidation message for event publisher delete for '"
+                            + senderName + "'. Retry will be attempted in 2s. Request: " +
+                            message, e);
+                } else {
+                    log.error("Could not send cluster invalidation message for event publisher delete for '"
+                            + senderName + "'. Several retries failed. Request:" + message, e);
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                    // Do nothing.
+                }
+            }
+        }
     }
 
     private void sendEventPublisherClusterInvalidationMessage(ResourceFile resourceFile) {
@@ -453,8 +514,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         properties.put(STREAM_NAME, publisherInSuperTenant.getFromStreamName());
         properties.put(STREAM_VERSION, publisherInSuperTenant.getFromStreamVersion());
-        // Add the publisher type to the new publisher.
-        properties.put(PUBLISHER_TYPE_PROPERTY, EMAIL_PUBLISHER_TYPE);
         return properties;
     }
 
@@ -634,6 +693,19 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (e instanceof ConfigurationManagementClientException) {
             return new NotificationSenderManagementClientException(error, data, e);
         } else if (e instanceof ConfigurationManagementServerException) {
+            return new NotificationSenderManagementServerException(error, data, e);
+        } else {
+            return new NotificationSenderManagementException(error, data, e);
+        }
+    }
+
+    private NotificationSenderManagementException handleTenantResourceManagementException(
+            TenantResourceManagementException e, ErrorMessage error, String data) {
+
+
+        if (e instanceof TenantResourceManagementClientException) {
+            return new NotificationSenderManagementClientException(error, data, e);
+        } else if (e instanceof TenantResourceManagementServerException) {
             return new NotificationSenderManagementServerException(error, data, e);
         } else {
             return new NotificationSenderManagementException(error, data, e);

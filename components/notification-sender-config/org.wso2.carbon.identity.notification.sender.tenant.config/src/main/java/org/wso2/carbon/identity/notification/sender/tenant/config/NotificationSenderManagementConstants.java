@@ -126,6 +126,8 @@ public class NotificationSenderManagementConstants {
                 "SMS send API payload for provider: %s, is not defined in file or POST body properties."),
         ERROR_CODE_SMS_PROVIDER_URL_REQUIRED("60005", "Required attribute is missing",
                 "SMS provider url is not defined for notification sender."),
+        ERROR_CODE_PUBLISHER_NOT_EXISTS("60006", "No notification sender found.",
+                "No notification sender found : %s"),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",

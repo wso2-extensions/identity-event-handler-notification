@@ -25,27 +25,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.api.IdempotentMessage;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
 
 /**
- * Cluster Messaging for Event Publisher invalidation.
+ * Cluster Messaging for Event Publisher Deletion.
  */
 @IdempotentMessage
-public class EventPublisherClusterInvalidationMessage extends ClusteringMessage {
+public class EventPublisherClusterDeleteMessage extends ClusteringMessage {
 
-    private static final Log log = LogFactory.getLog(EventPublisherClusterInvalidationMessage.class);
-    private static final long serialVersionUID = 708146871146295699L;
-    private final String id;
-    private final String name;
+    private static final Log log = LogFactory.getLog(EventPublisherClusterDeleteMessage.class);
+    private static final long serialVersionUID = 176393211389794727L;
+    private final String publisherResourceType;
+    private final String senderName;
     private final int tenantId;
 
-    public EventPublisherClusterInvalidationMessage(ResourceFile resourceFile, int tenantId) {
+    public EventPublisherClusterDeleteMessage(String publisherResourceType, String senderName, int tenantId) {
 
-        this.name = resourceFile.getName();
-        this.id = resourceFile.getId();
+        this.publisherResourceType = publisherResourceType;
+        this.senderName = senderName;
         this.tenantId = tenantId;
     }
 
@@ -61,9 +60,9 @@ public class EventPublisherClusterInvalidationMessage extends ClusteringMessage 
         try {
             ResourceUtils.startTenantFlow(tenantId);
             NotificationSenderTenantConfigDataHolder.getInstance().getResourceManager()
-                    .addEventPublisherConfiguration(new ResourceFile(id, name));
+                    .removeEventPublisherConfiguration(publisherResourceType, senderName);
         } catch (TenantResourceManagementException e) {
-            log.error("Error while redeploying event publisher. " + name, e);
+            log.error("Error while redeploying event publisher. " + senderName, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
