@@ -381,7 +381,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         EventPublisherClusterInvalidationMessage message = new EventPublisherClusterInvalidationMessage(resourceFile,
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
 
-        int numberOfRetries = 0;
         if (log.isDebugEnabled()) {
             log.debug("Sending cluster invalidation message to other cluster nodes for event publisher update for "
                     + resourceFile.getName());

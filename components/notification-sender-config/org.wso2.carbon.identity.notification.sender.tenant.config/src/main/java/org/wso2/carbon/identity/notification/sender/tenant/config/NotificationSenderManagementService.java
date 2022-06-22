@@ -99,7 +99,7 @@ public interface NotificationSenderManagementService {
     EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException;
 
     /**
-     * Update sms sender details by name.
+     * Update sms sender details.
      *
      * @param smsSender SMS sender's updated configurations.
      * @return Updated SMS sender.
