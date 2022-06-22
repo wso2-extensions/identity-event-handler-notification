@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.notification.sender.tenant.config;
 
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -105,6 +107,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 public class NotificationSenderManagementServiceImpl implements NotificationSenderManagementService {
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
+    public static final int MAX_RETRY_COUNT = 60;
 
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
@@ -116,9 +119,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         // Check whether a publisher already exists with the same name in the particular tenant to be added.
-        Resource resource = getPublisherResource(emailSender.getName());
+        Optional<Resource> resourceOptional = getPublisherResource(emailSender.getName());
 
-        if (resource != null) {
+        if (resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, emailSender.getName());
         }
 
@@ -158,9 +161,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         validateSMSSender(smsSender);
 
-        Resource resource = getPublisherResource(smsSender.getName());
+        Optional<Resource> resourceOptional = getPublisherResource(smsSender.getName());
 
-        if (resource != null) {
+        if (resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, smsSender.getSender());
         }
 
@@ -192,8 +195,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         try {
 
-            Resource resource = getPublisherResource(senderName);
-            if (resource == null) {
+            Optional<Resource> resourceOptional = getPublisherResource(senderName);
+            if (!resourceOptional.isPresent()) {
                 throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
             }
 
@@ -213,20 +216,22 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO getEmailSender(String senderName) throws NotificationSenderManagementException {
 
-        Resource resource = getPublisherResource(senderName);
-        if (resource == null) {
+        Optional<Resource> resourceOptional  = getPublisherResource(senderName);
+        if (!resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
+        Resource resource = resourceOptional.get();
         return buildEmailSenderFromResource(resource);
     }
 
     @Override
     public SMSSenderDTO getSMSSender(String senderName) throws NotificationSenderManagementException {
 
-        Resource resource = getPublisherResource(senderName);
-        if (resource == null) {
+        Optional<Resource> resourceOptional = getPublisherResource(senderName);
+        if (!resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
+        Resource resource = resourceOptional.get();
         return buildSmsSenderFromResource(resource);
     }
 
@@ -272,8 +277,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
         // Check whether a publisher exists to replace.
-        Resource resource = getPublisherResource(emailSender.getName());
-        if (resource == null) {
+        Optional<Resource> resourceOptional = getPublisherResource(emailSender.getName());
+        if (!resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_NO_RESOURCE_EXISTS, emailSender.getName());
         }
 
@@ -302,9 +307,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         validateSMSSender(smsSender);
 
-        Resource smsSenderResource = getPublisherResource(smsSender.getName());
-
-        if (smsSenderResource == null) {
+        Optional<Resource> resourceOptional = getPublisherResource(smsSender.getName());
+        if (!resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_NO_RESOURCE_EXISTS, smsSender.getName());
         }
 
@@ -313,7 +317,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
         smsSender.getProperties().putAll(defaultPublisherProperties);
 
-        smsSenderResource = buildResourceFromSmsSender(smsSender);
+        Resource smsSenderResource = buildResourceFromSmsSender(smsSender);
 
         try {
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
@@ -327,12 +331,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         return buildSmsSenderFromResource(smsSenderResource);
     }
 
-    private Resource getPublisherResource(String resourceName) throws NotificationSenderManagementException {
+    private Optional<Resource> getPublisherResource(String resourceName) throws NotificationSenderManagementException {
 
-        Resource resource = null;
         try {
-            resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .getResource(PUBLISHER_RESOURCE_TYPE, resourceName);
+            return Optional.ofNullable(NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .getResource(PUBLISHER_RESOURCE_TYPE, resourceName));
 
         } catch (ConfigurationManagementException e) {
             // If the resource not exists handling it as null and throw different error code.
@@ -340,7 +343,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER, resourceName);
             }
         }
-        return resource;
+        return Optional.empty();
     }
 
     private void reDeployEventPublisherConfiguration(Resource resource) {
@@ -366,34 +369,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE, senderName,
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
 
-        int numberOfRetries = 0;
-        if (log.isDebugEnabled()) {
-            log.debug("Sending cluster invalidation message to other cluster nodes for event publisher delete for "
-                    + senderName);
-        }
-
-        while (numberOfRetries < 60) {
-            try {
-                getClusteringAgent().sendMessage(message, true);
-                log.debug("Sent [" + message + "]");
-                break;
-            } catch (ClusteringFault e) {
-                numberOfRetries++;
-                if (numberOfRetries < 60) {
-                    log.warn("Could not send cluster invalidation message for event publisher delete for '"
-                            + senderName + "'. Retry will be attempted in 2s. Request: " +
-                            message, e);
-                } else {
-                    log.error("Could not send cluster invalidation message for event publisher delete for '"
-                            + senderName + "'. Several retries failed. Request:" + message, e);
-                }
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {
-                    // Do nothing.
-                }
-            }
-        }
+        sendClusterMessage(message, senderName);
     }
 
     private void sendEventPublisherClusterInvalidationMessage(ResourceFile resourceFile) {
@@ -411,20 +387,28 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     + resourceFile.getName());
         }
 
-        while (numberOfRetries < 60) {
+        sendClusterMessage(message, resourceFile.getName());
+    }
+
+    private void sendClusterMessage(ClusteringMessage message, String senderName) {
+
+        int numberOfRetries = 0;
+        while (numberOfRetries < MAX_RETRY_COUNT) {
             try {
                 getClusteringAgent().sendMessage(message, true);
-                log.debug("Sent [" + message + "]");
+                if (log.isDebugEnabled()) {
+                    log.debug("Sent [" + message + "]");
+                }
                 break;
             } catch (ClusteringFault e) {
                 numberOfRetries++;
-                if (numberOfRetries < 60) {
-                    log.warn("Could not send cluster invalidation message for event publisher update for '"
-                            + resourceFile.getName() + "'. Retry will be attempted in 2s. Request: " +
+                if (numberOfRetries < MAX_RETRY_COUNT) {
+                    log.warn("Could not send cluster invalidation message for event publisher '"
+                            + senderName + "' change. Retry will be attempted in 2s. Request: " +
                             message, e);
                 } else {
-                    log.error("Could not send cluster invalidation message for event publisher update for '"
-                            + resourceFile.getName() + "'. Several retries failed. Request:" + message, e);
+                    log.error("Could not send cluster invalidation message for event publisher '"
+                            + senderName + " change'. Several retries failed. Request:" + message, e);
                 }
                 try {
                     Thread.sleep(2000);

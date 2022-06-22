@@ -228,8 +228,7 @@ public class NotificationSenderUtils {
     }
 
     private static void addMappingElementToSMSEventPublisher(SMSSenderDTO smsSender, Map<String, String> properties,
-                                                             Document document,
-                                                             Element root) {
+                                                             Document document, Element root) {
 
         Element mapping = document.createElement(MAPPING);
         root.appendChild(mapping);
@@ -257,8 +256,7 @@ public class NotificationSenderUtils {
     }
 
     private static void addToElementToEmailEventPublisher(EmailSenderDTO emailSender, Map<String, String> properties,
-                                                          Document document,
-                                                          Element root) {
+                                                          Document document, Element root) {
 
         Element to = document.createElement(TO);
         root.appendChild(to);
@@ -304,8 +302,7 @@ public class NotificationSenderUtils {
     }
 
     private static void addToElementToSMSEventPublisher(SMSSenderDTO smsSender, Map<String, String> properties,
-                                                        Document document,
-                                                        Element root) {
+                                                        Document document, Element root) {
 
         Element to = document.createElement(TO);
         root.appendChild(to);
