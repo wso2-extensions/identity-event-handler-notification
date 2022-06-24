@@ -115,19 +115,18 @@ public class NotificationSenderManagementConstants {
     public enum ErrorMessage {
 
         // Client errors 600xx.
-        ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT("60001",
-                "No matching notification sender found in super tenant.",
-                "Can not find a notification sender named: %s, in carbon.super."),
+        ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT("60001", "No defined system notification sender.",
+                "There is no notification sender: %s, defined in system."),
         ERROR_CODE_CONFLICT_PUBLISHER("60002", "Notification sender already exists.",
-                "There exists a notification sender: %s in the tenant."),
-        ERROR_CODE_SMS_PROVIDER_REQUIRED("60003", "Required attribute is missing",
+                "There is already exists a notification sender: %s."),
+        ERROR_CODE_SMS_PROVIDER_REQUIRED("60003", "Required attribute is missing.",
                 "SMS provider is not defined for notification sender."),
-        ERROR_CODE_SMS_PAYLOAD_NOT_FOUND("60004", "SMS send API payload is not defined",
-                "SMS send API payload for provider: %s, is not defined in file or POST body properties."),
-        ERROR_CODE_SMS_PROVIDER_URL_REQUIRED("60005", "Required attribute is missing",
+        ERROR_CODE_SMS_PAYLOAD_NOT_FOUND("60004", "Required attribute is missing.",
+                "SMS payload is not defined for notification sender."),
+        ERROR_CODE_SMS_PROVIDER_URL_REQUIRED("60005", "Required attribute is missing.",
                 "SMS provider url is not defined for notification sender."),
         ERROR_CODE_PUBLISHER_NOT_EXISTS("60006", "No notification sender found.",
-                "No notification sender found : %s"),
+                "There is no notification sender for publisher: %s."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",
