@@ -60,6 +60,7 @@ public class NotificationSenderManagementConstants {
     public static final String KEY = "key";
     public static final String SECRET = "secret";
     public static final String SENDER = "sender";
+    public static final String CONTENT_TYPE = "contentType";
     public static final String CLIENT_HTTP_METHOD_PROPERTY = "http.client.method";
     public static final String SMS_PUBLISHER_TYPE = "sms";
 

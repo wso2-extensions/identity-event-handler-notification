@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
@@ -614,6 +615,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         smsSenderAttributes.put(KEY, smsSender.getKey());
         smsSenderAttributes.put(SECRET, smsSender.getSecret());
         smsSenderAttributes.put(SENDER, smsSender.getSender());
+        smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
@@ -661,6 +663,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     break;
                 case SENDER:
                     smsSender.setSender(value);
+                    break;
+                case CONTENT_TYPE:
+                    smsSender.setContentType(value);
                     break;
                 default:
                     smsSender.getProperties().put(key, value);

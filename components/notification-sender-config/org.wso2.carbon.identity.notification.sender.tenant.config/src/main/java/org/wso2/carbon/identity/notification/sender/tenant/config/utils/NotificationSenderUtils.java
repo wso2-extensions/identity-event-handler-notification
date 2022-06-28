@@ -64,7 +64,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE_BODY_PARAM_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE_BODY_PROPERTY;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.JSON;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING_TYPE_KEY;
@@ -237,7 +236,7 @@ public class NotificationSenderUtils {
         customMappingAttr.setValue(ENABLE);
         mapping.setAttributeNode(customMappingAttr);
         Attr mappingTypeAttr = document.createAttribute(MAPPING_TYPE_KEY);
-        mappingTypeAttr.setValue(JSON);
+        mappingTypeAttr.setValue(smsSender.getContentType().toLowerCase());
         mapping.setAttributeNode(mappingTypeAttr);
         // Inline element.
         Element inline = document.createElement(INLINE);
