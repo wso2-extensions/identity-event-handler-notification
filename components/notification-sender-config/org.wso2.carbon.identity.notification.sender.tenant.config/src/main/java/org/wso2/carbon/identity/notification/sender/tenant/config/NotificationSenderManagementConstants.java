@@ -81,7 +81,6 @@ public class NotificationSenderManagementConstants {
     public static final String CUSTOM_MAPPING_KEY = "customMapping";
     public static final String MAPPING_TYPE_KEY = "type";
     public static final String TEXT = "text";
-    public static final String JSON = "json";
     public static final String INLINE = "inline";
     public static final String EMAIL_INLINE_BODY = "{{body}}{{footer}}";
     public static final String TO = "to";

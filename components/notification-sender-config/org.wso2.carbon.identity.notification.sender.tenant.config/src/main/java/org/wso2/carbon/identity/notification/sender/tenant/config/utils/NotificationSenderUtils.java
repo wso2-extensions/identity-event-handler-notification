@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -236,7 +237,7 @@ public class NotificationSenderUtils {
         customMappingAttr.setValue(ENABLE);
         mapping.setAttributeNode(customMappingAttr);
         Attr mappingTypeAttr = document.createAttribute(MAPPING_TYPE_KEY);
-        mappingTypeAttr.setValue(smsSender.getContentType().toLowerCase());
+        mappingTypeAttr.setValue(smsSender.getContentType().toLowerCase(Locale.getDefault()));
         mapping.setAttributeNode(mappingTypeAttr);
         // Inline element.
         Element inline = document.createElement(INLINE);
