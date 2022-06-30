@@ -60,6 +60,7 @@ public class NotificationSenderManagementConstants {
     public static final String KEY = "key";
     public static final String SECRET = "secret";
     public static final String SENDER = "sender";
+    public static final String CONTENT_TYPE = "contentType";
     public static final String CLIENT_HTTP_METHOD_PROPERTY = "http.client.method";
     public static final String SMS_PUBLISHER_TYPE = "sms";
 
@@ -80,7 +81,6 @@ public class NotificationSenderManagementConstants {
     public static final String CUSTOM_MAPPING_KEY = "customMapping";
     public static final String MAPPING_TYPE_KEY = "type";
     public static final String TEXT = "text";
-    public static final String JSON = "json";
     public static final String INLINE = "inline";
     public static final String EMAIL_INLINE_BODY = "{{body}}{{footer}}";
     public static final String TO = "to";

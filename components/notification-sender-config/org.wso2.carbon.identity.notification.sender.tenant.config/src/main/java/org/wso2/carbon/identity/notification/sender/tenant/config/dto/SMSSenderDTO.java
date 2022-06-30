@@ -32,6 +32,7 @@ public class SMSSenderDTO {
     private String key;
     private String secret;
     private String sender;
+    private String contentType;
     private Map<String, String> properties = new HashMap<>();
 
     public String getName() {
@@ -92,6 +93,16 @@ public class SMSSenderDTO {
     public void setSender(String sender) {
 
         this.sender = sender;
+    }
+
+    public String getContentType() {
+
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+
+        this.contentType = contentType;
     }
 
     public Map<String, String> getProperties() {
