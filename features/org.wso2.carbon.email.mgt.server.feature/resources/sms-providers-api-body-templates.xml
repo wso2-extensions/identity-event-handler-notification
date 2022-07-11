@@ -17,11 +17,11 @@
   -->
 <configurations>
     <configuration provider="Vonage">
-        <body>{"from" = "NEXMO", "text" = {{body}}, "to" = {{mobile}}, "api_key" = $key, "api_secret" = $secret}
+        <body>{"from" : "$sender", "text" : "{{body}}", "to" : "{{mobile}}", "api_key" = "$key", "api_secret" = "$secret"}
         </body>
     </configuration>
     <configuration provider="Twilio">
-        <body>{Body = {{body}}, To = {{mobile}}, From = $sender}</body>
+        <body>Body={{body}},To={{mobile}},From=$sender</body>
     </configuration>
     <configuration provider="Bulksms">
         <body>[{ "from": $sender, "to": {{mobile}}, "body": {{body}} }]
