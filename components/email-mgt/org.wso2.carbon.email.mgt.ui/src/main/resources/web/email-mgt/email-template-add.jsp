@@ -141,6 +141,12 @@
                         CARBON.showWarningDialog('<fmt:message key="email.template.footer.is.required"/>');
                         return false;
                     }
+
+                    var emailBody = document.getElementsByName("emailBody")[0].value;
+                    document.getElementsByName("emailBody")[0].value = btoa(emailBody);
+                    var emailFooter = document.getElementsByName("emailFooter")[0].value;
+                    document.getElementsByName("emailFooter")[0].value = btoa(emailFooter);
+
                     document.addemailtemplate.submit();
                 }
 

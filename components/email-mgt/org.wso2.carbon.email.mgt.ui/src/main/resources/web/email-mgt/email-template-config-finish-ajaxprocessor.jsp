@@ -18,6 +18,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
+<%@page import="java.nio.charset.StandardCharsets"%>
+<%@page import="java.util.Base64"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.apache.commons.lang.StringUtils" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
@@ -41,7 +43,9 @@
 
     String emailSubject = request.getParameter("emailSubject");
     String emailBody = request.getParameter("emailBody");
+    emailBody = new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8);
     String emailFooter = request.getParameter("emailFooter");
+    emailFooter = new String(Base64.getDecoder().decode(emailFooter), StandardCharsets.UTF_8);
 
     // params to handle deleting templates
     boolean deleteTemplate = false;
