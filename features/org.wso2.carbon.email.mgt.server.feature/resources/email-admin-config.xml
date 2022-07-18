@@ -2289,10 +2289,11 @@
                                         style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left;">
                                         If clicking the button doesn't seem to work, you can copy and paste the following link into
                                         your browser. <br />
-                                        <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
-                                            href="{{carbon.product-url}}/commonauth?mlt={{magicToken}}">
-                                            {{carbon.product-url}}/commonauth?mlt={{magicToken}}</a>
                                     </p>
+                                    <a style="word-break: break-all; color: #ff5000; font-size: 14px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;"
+                                        target="_blank" href="{{carbon.product-url}}/commonauth?mlt={{magicToken}}">
+                                        {{carbon.product-url}}/commonauth?mlt={{magicToken}}
+                                    </a>
                                 </td>
                             </tr>
                             <tr>
