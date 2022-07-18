@@ -2277,7 +2277,7 @@
                                             <td style="border-radius: 6px;  padding: 14px 0px;">
                                                 <a href="{{carbon.product-url}}/commonauth?mlt={{magicToken}}""
                                                     target="_blank"
-                                                    style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Click</a>
+                                                    style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Sign In</a>
                                             </td>
                                         </tr>
                                     </table>
