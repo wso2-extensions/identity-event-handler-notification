@@ -2265,7 +2265,7 @@
                                     </p>
                                     <p
                                         style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                                        Please click the button below to confirm your account. Be sure to use the same browser as your app.
+                                        Please click the button to sign in to {{application-name}}. Be sure to use the same browser as your app.
                                     </p>
                                 </td>
                             </tr>
