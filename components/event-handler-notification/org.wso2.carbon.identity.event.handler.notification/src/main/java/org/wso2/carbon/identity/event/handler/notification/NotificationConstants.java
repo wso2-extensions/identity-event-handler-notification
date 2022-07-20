@@ -80,6 +80,13 @@ public class NotificationConstants {
         public static final String CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER
                 = "product-url-with-user-tenant";
 
+        public static final String ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING = "EnableOrganizationLevelEmailBranding";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACKS_ELEM
+                =  "OrganizationLevelEmailBrandingFallbacks";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_ELEM
+                =  "OrganizationLevelEmailBrandingFallback";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_KEY_ATTRIBUTE = "key";
+
     }
 
     public static class SMSNotification {
