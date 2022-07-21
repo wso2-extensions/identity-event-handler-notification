@@ -60,13 +60,7 @@ import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -185,8 +179,9 @@ public class NotificationUtil {
         if (StringUtils.isNotEmpty(emailTemplate.getFooter())) {
             placeHolders.addAll(extractPlaceHolders(emailTemplate.getFooter()));
         }
+        Set<String> placeHoldersSet = new HashSet<>(placeHolders);
 
-        for (String placeHolder : placeHolders) {
+        for (String placeHolder : placeHoldersSet) {
             // Setting config file place holders.
             if (placeHolder.startsWith(NotificationConstants.EmailNotification.IDENTITY_TEMPLATE_VALUE_PREFIX)) {
                 String key = placeHolder.substring(placeHolder.lastIndexOf(".") + 1);
