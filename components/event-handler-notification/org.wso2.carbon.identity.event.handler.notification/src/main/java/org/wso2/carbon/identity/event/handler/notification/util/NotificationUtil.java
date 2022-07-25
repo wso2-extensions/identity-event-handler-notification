@@ -334,7 +334,7 @@ public class NotificationUtil {
      *
      * @return map of default organization level branding configs
      */
-    private static Map<String, String> getBrandingFallbacksFromConfigFile() {
+    public static Map<String, String> getBrandingFallbacksFromConfigFile() {
 
         IdentityConfigParser configParser = IdentityConfigParser.getInstance();
         OMElement fallbackElem = configParser.getConfigElement(
@@ -370,69 +370,70 @@ public class NotificationUtil {
      * @param brandingFallbacks     default branding values
      * @return map of default organization branding
      */
-    private static String getBrandingPreference(String key, JsonNode brandingPreferences, Map<String, String> brandingFallbacks) {
+    public static String getBrandingPreference(String key, JsonNode brandingPreferences, Map<String, String> brandingFallbacks) {
 
         String value = null;
         String theme = brandingPreferences != null
                 ? brandingPreferences.at("/theme/activeTheme").asText()
                 : "LIGHT";
+        boolean brandingIsEnabled = (brandingPreferences != null) && brandingPreferences.at("/configs/isBrandingEnabled").asBoolean();
         switch (key) {
             case "organization.logo.display" : {
-                value = (brandingPreferences != null && StringUtils.isNotBlank(brandingPreferences.at("/theme/" + theme + "/images/logo/imgURL").asText()))
+                value = (brandingIsEnabled && StringUtils.isNotBlank(brandingPreferences.at("/theme/" + theme + "/images/logo/imgURL").asText()))
                         ? "block"
                         : "none";
                 break;
             }
             case "organization.logo.img" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/images/logo/imgURL").asText()
                         : "";
                 break;
             }
             case "organization.logo.altText" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/images/logo/altText").asText()
                         : "";
                 break;
             }
             case "organization.copyright.text" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/organizationDetails/copyrightText").asText()
                         : brandingFallbacks.get("copyrightText");
                 break;
             }
             case "organization.support.mail" : {
-                value = (brandingPreferences != null && StringUtils.isNotBlank(brandingPreferences.at("/organizationDetails/supportEmail").asText()))
+                value = (brandingIsEnabled && StringUtils.isNotBlank(brandingPreferences.at("/organizationDetails/supportEmail").asText()))
                         ? brandingPreferences.at("/organizationDetails/supportEmail").asText()
                         : brandingFallbacks.get("supportMail");
                 break;
             }
             case "organization.color.primary" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/colors/primary").asText()
                         : brandingFallbacks.get("primaryColor");
                 break;
             }
             case "organization.color.background" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/page/background/backgroundColor").asText()
                         : brandingFallbacks.get("backgroundColor");
                 break;
             }
             case "organization.font" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/typography/font/fontFamily").asText()
                         : brandingFallbacks.get("fontStyle");
                 break;
             }
             case "organization.font.color" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/page/font/color").asText()
                         : brandingFallbacks.get("fontColor");
                 break;
             }
             case "organization.button.font.color" : {
-                value = brandingPreferences != null
+                value = brandingIsEnabled
                         ? brandingPreferences.at("/theme/" + theme + "/buttons/primary/base/font/color").asText()
                         : brandingFallbacks.get("buttonFontColor");
                 break;
