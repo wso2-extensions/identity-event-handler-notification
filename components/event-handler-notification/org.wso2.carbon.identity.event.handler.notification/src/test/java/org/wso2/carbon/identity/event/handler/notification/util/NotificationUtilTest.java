@@ -108,11 +108,6 @@ public class NotificationUtilTest {
         };
     }
 
-    @Test
-    public void testGetBrandingFallbacksFromConfigFile() {
-
-    }
-
     @Test(dataProvider = "GetBrandingPreferenceDataProvider")
     public void testGetBrandingPreference(JsonNode brandingPreferences, Map<String, String> brandingFallback, int caseNo) {
         String logoDisplay = NotificationUtil.getBrandingPreference(ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER, brandingPreferences, brandingFallback);
