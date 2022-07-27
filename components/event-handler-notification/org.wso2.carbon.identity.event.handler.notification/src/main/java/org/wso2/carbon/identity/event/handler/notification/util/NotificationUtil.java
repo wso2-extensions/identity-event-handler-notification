@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.identity.event.handler.notification.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMElement;
@@ -37,6 +36,7 @@ import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationExcep
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManager;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManagerImpl;
+import org.wso2.carbon.identity.branding.preference.management.core.constant.BrandingPreferenceMgtConstants;
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
@@ -74,6 +74,8 @@ import java.util.regex.Pattern;
 
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
 
@@ -165,17 +167,30 @@ public class NotificationUtil {
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
                 BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
-                BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference("ORG", placeHolderData.get("tenant-domain"), "en-US");
+                BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference(
+                        BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
+                        placeHolderData.get("tenant-domain"),
+                        BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(responseDTO.getPreference());
                 brandingPreferences = objectMapper.readTree(json);
 
-                if (!brandingPreferences.at("/configs/isBrandingEnabled").asBoolean()) {
+                if (!brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH)
+                        .asBoolean()) {
                     brandingPreferences = null;
                 }
-            } catch (BrandingPreferenceMgtException | JsonProcessingException e) {
-                brandingPreferences = null;
+            } catch (BrandingPreferenceMgtException e) {
+                if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_BRANDING_PREFERENCE_NOT_EXISTS.getCode()
+                        .equals(e.getErrorCode())) {
+                    brandingPreferences = null;
+                } else {
+                    String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                    log.error(message, e);
+                }
+            } catch (Exception e) {
+                String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                log.error(message, e);
             }
         }
 
@@ -197,7 +212,7 @@ public class NotificationUtil {
                 placeHolderData.put(placeHolder, value);
             }
 
-            // Setting branding placeholders
+            // Setting branding placeholders.
             String brandingValue = getBrandingPreference(placeHolder, brandingPreferences, brandingFallbacks);
             if (brandingValue != null) {
                 placeHolderData.put(placeHolder, brandingValue);
@@ -338,7 +353,7 @@ public class NotificationUtil {
     }
 
     /**
-     * Retrieve default organization level branding configs
+     * Retrieve default organization level branding configs.
      *
      * @return map of default organization level branding configs
      */
@@ -381,87 +396,84 @@ public class NotificationUtil {
     public static String getBrandingPreference(String key, JsonNode brandingPreferences, Map<String, String> brandingFallbacks) {
 
         String value = null;
-        String theme = brandingPreferences != null
+        boolean brandingIsEnabled = (brandingPreferences != null)
+                && brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH).asBoolean();
+        String theme = brandingIsEnabled
                 ? brandingPreferences.at("/theme/activeTheme").asText()
-                : "LIGHT";
-        boolean brandingIsEnabled = (brandingPreferences != null) && brandingPreferences.at("/configs/isBrandingEnabled").asBoolean();
+                : NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME;
+
         switch (key) {
-            case "organization.logo.display" : {
-                value = (brandingIsEnabled && StringUtils.isNotBlank(brandingPreferences.at("/theme/" + theme + "/images/logo/imgURL").asText()))
+            case "organization.logo.display" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")))
                         ? "block"
                         : "none";
                 break;
-            }
-            case "organization.logo.img" : {
+            case "organization.logo.img" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/images/logo/imgURL").asText()
-                        : "";
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")
+                        : StringUtils.EMPTY;
                 break;
-            }
-            case "organization.logo.altText" : {
+            case "organization.logo.altText" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/images/logo/altText").asText()
-                        : "";
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/altText")
+                        : StringUtils.EMPTY;
                 break;
-            }
-            case "organization.copyright.text" : {
-                value = brandingIsEnabled
-                        ? brandingPreferences.at("/organizationDetails/copyrightText").asText()
+            case "organization.copyright.text" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()
                         : brandingFallbacks.get("copyrightText");
                 break;
-            }
-            case "organization.support.mail" : {
-                value = (brandingIsEnabled && StringUtils.isNotBlank(brandingPreferences.at("/organizationDetails/supportEmail").asText()))
+            case "organization.support.mail" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()))
                         ? brandingPreferences.at("/organizationDetails/supportEmail").asText()
                         : brandingFallbacks.get("supportMail");
                 break;
-            }
-            case "organization.color.primary" : {
+            case "organization.color.primary" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/colors/primary").asText()
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
                         : brandingFallbacks.get("primaryColor");
                 break;
-            }
-            case "organization.color.background" : {
+            case "organization.color.background" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/page/background/backgroundColor").asText()
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
                         : brandingFallbacks.get("backgroundColor");
                 break;
-            }
-            case "organization.font" : {
+            case "organization.font" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/typography/font/fontFamily").asText()
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/typography/font/fontFamily")
                         : brandingFallbacks.get("fontStyle");
                 break;
-            }
-            case "organization.font.color" : {
+            case "organization.font.color" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/page/font/color").asText()
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
                         : brandingFallbacks.get("fontColor");
                 break;
-            }
-            case "organization.button.font.color" : {
+            case "organization.button.font.color" :
                 value = brandingIsEnabled
-                        ? brandingPreferences.at("/theme/" + theme + "/buttons/primary/base/font/color").asText()
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/buttons/primary/base/font/color")
                         : brandingFallbacks.get("buttonFontColor");
                 break;
-            }
-            case "organization.theme.background.color" : {
-                value = theme.equals("LIGHT")
+            case "organization.theme.background.color" :
+                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
                         ? brandingFallbacks.get("lightBackgroundColor")
                         : brandingFallbacks.get("darkBackgroundColor");
                 break;
-            }
-            case "organization.theme.border.color" : {
-                value = theme.equals("LIGHT")
+            case "organization.theme.border.color" :
+                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
                         ? brandingFallbacks.get("lightBorderColor")
                         : brandingFallbacks.get("darkBorderColor");
                 break;
-            }
             default: break;
         }
 
         return value;
+    }
+
+    private static String getBrandingPreferenceByTheme(JsonNode brandingPreferences, String theme, String path) {
+
+        return brandingPreferences.at("/theme/" + theme + path).asText();
     }
 
     public static Notification buildNotification(Event event, Map<String, String> placeHolderData)

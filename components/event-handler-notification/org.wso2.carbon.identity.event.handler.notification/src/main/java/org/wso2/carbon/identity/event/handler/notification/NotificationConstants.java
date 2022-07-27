@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -86,6 +86,11 @@ public class NotificationConstants {
         public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_ELEM
                 =  "OrganizationLevelEmailBrandingFallback";
         public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_KEY_ATTRIBUTE = "key";
+
+        public static final String BRANDING_PREFERENCES_IS_ENABLED_PATH = "/configs/isBrandingEnabled";
+        public static final String BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH = "/organizationDetails/copyrightText";
+        public static final String BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH = "/organizationDetails/supportEmail";
+        public static final String BRANDING_PREFERENCES_LIGHT_THEME = "LIGHT";
 
     }
 

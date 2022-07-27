@@ -1,18 +1,41 @@
+/*
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.identity.event.handler.notification.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class that contains the test cases for NotificationUtil class.
+ */
 public class NotificationUtilTest {
 
-    // placeholders
+    // Placeholders.
     String ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER = "organization.logo.display";
     String ORGANIZATION_LOGO_URL_PLACEHOLDER = "organization.logo.img";
     String ORGANIZATION_LOGO_ALT_TEXT_PLACEHOLDER = "organization.logo.altText";
@@ -26,7 +49,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_THEME_BACKGROUND_COLOR_PLACEHOLDER = "organization.theme.background.color";
     String ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER = "organization.theme.border.color";
 
-    // sample values for branding fallbacks
+    // Sample values for branding fallbacks.
     String ORGANIZATION_COPYRIGHT_TEXT_FALLBACK = "Fallback Copyright Text";
     String ORGANIZATION_SUPPORT_EMAIL_FALLBACK = "fallback@support.com";
     String ORGANIZATION_PRIMARY_COLOR_FALLBACK = "#3CB371";
@@ -39,7 +62,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK = "#D5D8DC";
     String ORGANIZATION_DARK_BORDER_COLOR_FALLBACK = "#AEB6BF";
 
-    // sample values for branding preferences
+    // Sample values for branding preferences.
     String ORGANIZATION_LIGHT_LOGO_URL = "light.logo.url";
     String ORGANIZATION_DARK_LOGO_URL = "dark.logo.url";
     String ORGANIZATION_LIGHT_LOGO_ALT_TEXT = "light.logo.alt.text";
@@ -63,17 +86,51 @@ public class NotificationUtilTest {
     String BRANDING_ENABLED = "true";
     String BRANDING_DISABLED = "false";
 
+    String DISPLAY_BLOCK = "block";
+    String DISPLAY_NONE = "none";
+
     int CASE_1 = 1;
     int CASE_2 = 2;
     int CASE_3 = 3;
     int CASE_4 = 4;
 
-
     @DataProvider(name = "GetBrandingPreferenceDataProvider")
     public Object[][] provideTestData() {
-        String brandingPreferencesStr1 = "{\"configs\":{\"isBrandingEnabled\":" + BRANDING_ENABLED + "},\"organizationDetails\":{\"copyrightText\":\"" + ORGANIZATION_COPYRIGHT_TEXT + "\",\"supportEmail\":\"" + ORGANIZATION_SUPPORT_EMAIL + "\"},\"theme\":{\"activeTheme\":\"" + LIGHT_THEME + "\",\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_LIGHT_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_LIGHT_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_LIGHT_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_LIGHT_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_LIGHT_FONT + "\"}}},\"DARK\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_DARK_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_DARK_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_DARK_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_DARK_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_DARK_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_DARK_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_DARK_FONT + "\"}}}}}";
-        String brandingPreferencesStr2 = "{\"configs\":{\"isBrandingEnabled\":" + BRANDING_ENABLED + "},\"organizationDetails\":{\"copyrightText\":\"" + ORGANIZATION_COPYRIGHT_TEXT + "\",\"supportEmail\":\"" + ORGANIZATION_SUPPORT_EMAIL + "\"},\"theme\":{\"activeTheme\":\"" + DARK_THEME + "\",\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_LIGHT_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_LIGHT_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_LIGHT_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_LIGHT_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_LIGHT_FONT + "\"}}},\"DARK\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_DARK_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_DARK_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_DARK_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_DARK_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_DARK_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_DARK_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_DARK_FONT + "\"}}}}}";
-        String brandingPreferencesStr3 = "{\"configs\":{\"isBrandingEnabled\":" + BRANDING_DISABLED + "},\"organizationDetails\":{\"copyrightText\":\"" + ORGANIZATION_COPYRIGHT_TEXT + "\",\"supportEmail\":\"" + ORGANIZATION_SUPPORT_EMAIL + "\"},\"theme\":{\"activeTheme\":\"" + LIGHT_THEME + "\",\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_LIGHT_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_LIGHT_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_LIGHT_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_LIGHT_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_LIGHT_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_LIGHT_FONT + "\"}}},\"DARK\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"" + ORGANIZATION_DARK_BUTTON_FONT_COLOR + "\"}}}},\"colors\":{\"primary\":\"" + ORGANIZATION_DARK_PRIMARY_COLOR + "\"},\"images\":{\"logo\": {\"altText\": \"" + ORGANIZATION_DARK_LOGO_ALT_TEXT + "\",\"imgURL\": \"" + ORGANIZATION_DARK_LOGO_URL + "\"}},\"page\":{\"background\":{\"backgroundColor\":\"" + ORGANIZATION_DARK_BACKGROUND_COLOR + "\"},\"font\":{\"color\":\"" + ORGANIZATION_DARK_FONT_COLOR + "\"}},\"typography\":{\"font\":{\"fontFamily\":\"" + ORGANIZATION_DARK_FONT + "\"}}}}}";
+
+        String brandingPreferencesStr = "{" +
+                "\"configs\":{\"isBrandingEnabled\":%s}," +
+                "\"organizationDetails\":{\"copyrightText\":\"%s\",\"supportEmail\":\"%s\"}," +
+                "\"theme\":{\"activeTheme\":\"%s\"," +
+                "\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"%s\"}}}}," +
+                "\"colors\":{\"primary\":\"%s\"},\"images\":{\"logo\": {\"altText\": \"%s\",\"imgURL\": \"%s\"}}," +
+                "\"page\":{\"background\":{\"backgroundColor\":\"%s\"},\"font\":{\"color\":\"%s\"}}," +
+                "\"typography\":{\"font\":{\"fontFamily\":\"%s\"}}}," +
+                "\"DARK\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"%s\"}}}}," +
+                "\"colors\":{\"primary\":\"%s\"},\"images\":{\"logo\": {\"altText\": \"%s\",\"imgURL\": \"%s\"}}," +
+                "\"page\":{\"background\":{\"backgroundColor\":\"%s\"},\"font\":{\"color\":\"%s\"}}," +
+                "\"typography\":{\"font\":{\"fontFamily\":\"%s\"}}}}}";
+
+        String brandingPreferencesStr1 = String.format(brandingPreferencesStr,
+                BRANDING_ENABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
+                ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
+                ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
+                ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
+                ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
+                ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
+        String brandingPreferencesStr2 = String.format(brandingPreferencesStr,
+                BRANDING_ENABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, DARK_THEME,
+                ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
+                ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
+                ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
+                ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
+                ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
+        String brandingPreferencesStr3 = String.format(brandingPreferencesStr,
+                BRANDING_DISABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
+                ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
+                ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
+                ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
+                ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
+                ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
 
         JsonNode brandingPreferences1, brandingPreferences2, brandingPreferences3;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -110,21 +167,34 @@ public class NotificationUtilTest {
 
     @Test(dataProvider = "GetBrandingPreferenceDataProvider")
     public void testGetBrandingPreference(JsonNode brandingPreferences, Map<String, String> brandingFallback, int caseNo) {
-        String logoDisplay = NotificationUtil.getBrandingPreference(ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String logoUrl = NotificationUtil.getBrandingPreference(ORGANIZATION_LOGO_URL_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String logoAltText = NotificationUtil.getBrandingPreference(ORGANIZATION_LOGO_ALT_TEXT_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String copyrightText = NotificationUtil.getBrandingPreference(ORGANIZATION_COPYRIGHT_TEXT_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String supportMail = NotificationUtil.getBrandingPreference(ORGANIZATION_SUPPORT_EMAIL_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String primaryColor = NotificationUtil.getBrandingPreference(ORGANIZATION_PRIMARY_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String backgroundColor = NotificationUtil.getBrandingPreference(ORGANIZATION_BACKGROUND_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String font = NotificationUtil.getBrandingPreference(ORGANIZATION_FONT_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String fontColor = NotificationUtil.getBrandingPreference(ORGANIZATION_FONT_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String buttonFontColor = NotificationUtil.getBrandingPreference(ORGANIZATION_BUTTON_FONT_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String themeBackgroundColor = NotificationUtil.getBrandingPreference(ORGANIZATION_THEME_BACKGROUND_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
-        String themeBorderColor = NotificationUtil.getBrandingPreference(ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+
+        String logoDisplay = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String logoUrl = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_LOGO_URL_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String logoAltText = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_LOGO_ALT_TEXT_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String copyrightText = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_COPYRIGHT_TEXT_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String supportMail = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_SUPPORT_EMAIL_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String primaryColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_PRIMARY_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String backgroundColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_BACKGROUND_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String font = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_FONT_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String fontColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_FONT_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String buttonFontColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_BUTTON_FONT_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String themeBackgroundColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_THEME_BACKGROUND_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String themeBorderColor = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
 
         if (caseNo == 1) {
-            Assert.assertEquals(logoDisplay, "block" ,"This test is failing");
+            Assert.assertEquals(logoDisplay, DISPLAY_BLOCK);
             Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL);
             Assert.assertEquals(logoAltText, ORGANIZATION_LIGHT_LOGO_ALT_TEXT);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT);
@@ -151,9 +221,9 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 3) {
-            Assert.assertEquals(logoDisplay, "none");
-            Assert.assertEquals(logoUrl, "");
-            Assert.assertEquals(logoAltText, "");
+            Assert.assertEquals(logoDisplay, DISPLAY_NONE);
+            Assert.assertEquals(logoUrl, StringUtils.EMPTY);
+            Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
             Assert.assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
@@ -166,9 +236,9 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 4) {
-            Assert.assertEquals(logoDisplay, "none");
-            Assert.assertEquals(logoUrl, "");
-            Assert.assertEquals(logoAltText, "");
+            Assert.assertEquals(logoDisplay, DISPLAY_NONE);
+            Assert.assertEquals(logoUrl, StringUtils.EMPTY);
+            Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
             Assert.assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
