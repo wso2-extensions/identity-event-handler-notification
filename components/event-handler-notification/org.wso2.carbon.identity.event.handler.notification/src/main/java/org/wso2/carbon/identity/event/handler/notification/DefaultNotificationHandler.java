@@ -174,7 +174,9 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
         for (String key : keys) {
             String claim = arbitraryDataClaims.get(key);
             String value = userClaims.get(claim);
-            arbitraryDataMap.put(key, value);
+            if (value != null) {
+                arbitraryDataMap.put(key, value);
+            }
         }
         Map<String, String> arbitraryDataFromProperties = getArbitraryDataFromProperties(event);
         arbitraryDataMap.putAll(arbitraryDataFromProperties);
