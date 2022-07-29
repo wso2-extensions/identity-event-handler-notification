@@ -2,7 +2,7 @@
  * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
+ *  Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -403,18 +403,15 @@ public class NotificationUtil {
                 : NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME;
 
         switch (key) {
-            case "organization.logo.display" :
-                value = (brandingIsEnabled && StringUtils.isNotBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")))
-                        ? "block"
-                        : "none";
-                break;
             case "organization.logo.img" :
-                value = brandingIsEnabled
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")))
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")
-                        : StringUtils.EMPTY;
+                        : brandingFallbacks.get("logoUrl");
                 break;
             case "organization.logo.altText" :
-                value = brandingIsEnabled
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/altText")))
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/altText")
                         : StringUtils.EMPTY;
                 break;
@@ -423,6 +420,9 @@ public class NotificationUtil {
                             brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
                         ? brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()
                         : brandingFallbacks.get("copyrightText");
+                value = !brandingIsEnabled
+                        ? value.replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)))
+                        : value;
                 break;
             case "organization.support.mail" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
