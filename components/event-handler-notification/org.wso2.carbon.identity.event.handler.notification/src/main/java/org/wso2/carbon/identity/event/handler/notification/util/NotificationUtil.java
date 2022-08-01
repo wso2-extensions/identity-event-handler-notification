@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2016, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -355,7 +355,7 @@ public class NotificationUtil {
     /**
      * Retrieve default organization level branding configs.
      *
-     * @return map of default organization level branding configs
+     * @return map of default organization level branding configs.
      */
     public static Map<String, String> getBrandingFallbacksFromConfigFile() {
 
@@ -386,12 +386,12 @@ public class NotificationUtil {
     }
 
     /**
-     * Retrive branding value by the placeholder
+     * Retrive branding value by the placeholder.
      *
-     * @param key                   placeholder in the email template
-     * @param brandingPreferences   list of branding preferences
-     * @param brandingFallbacks     default branding values
-     * @return map of default organization branding
+     * @param key                   placeholder in the email template.
+     * @param brandingPreferences   list of branding preferences.
+     * @param brandingFallbacks     default branding values.
+     * @return map of default organization branding.
      */
     public static String getBrandingPreference(String key, JsonNode brandingPreferences, Map<String, String> brandingFallbacks) {
 
@@ -420,9 +420,10 @@ public class NotificationUtil {
                             brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
                         ? brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()
                         : brandingFallbacks.get("copyrightText");
-                value = !brandingIsEnabled
-                        ? value.replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)))
-                        : value;
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                        brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
+                        ? value
+                        : value.replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
                 break;
             case "organization.support.mail" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
