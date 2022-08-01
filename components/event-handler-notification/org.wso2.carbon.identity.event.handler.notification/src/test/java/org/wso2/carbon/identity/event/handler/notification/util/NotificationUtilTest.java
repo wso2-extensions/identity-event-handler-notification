@@ -36,7 +36,6 @@ import java.util.Map;
 public class NotificationUtilTest {
 
     // Placeholders.
-    String ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER = "organization.logo.display";
     String ORGANIZATION_LOGO_URL_PLACEHOLDER = "organization.logo.img";
     String ORGANIZATION_LOGO_ALT_TEXT_PLACEHOLDER = "organization.logo.altText";
     String ORGANIZATION_COPYRIGHT_TEXT_PLACEHOLDER = "organization.copyright.text";
@@ -50,6 +49,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER = "organization.theme.border.color";
 
     // Sample values for branding fallbacks.
+    String ORGANIZATION_LOGO_URL_FALLBACK = "https://example.com/logo";
     String ORGANIZATION_COPYRIGHT_TEXT_FALLBACK = "Fallback Copyright Text";
     String ORGANIZATION_SUPPORT_EMAIL_FALLBACK = "fallback@support.com";
     String ORGANIZATION_PRIMARY_COLOR_FALLBACK = "#3CB371";
@@ -85,9 +85,6 @@ public class NotificationUtilTest {
 
     String BRANDING_ENABLED = "true";
     String BRANDING_DISABLED = "false";
-
-    String DISPLAY_BLOCK = "block";
-    String DISPLAY_NONE = "none";
 
     int CASE_1 = 1;
     int CASE_2 = 2;
@@ -145,6 +142,7 @@ public class NotificationUtilTest {
         }
 
         Map<String, String> brandingFallbacks = new HashMap<>();
+        brandingFallbacks.put("logoUrl", ORGANIZATION_LOGO_URL_FALLBACK);
         brandingFallbacks.put("copyrightText", ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
         brandingFallbacks.put("supportMail", ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
         brandingFallbacks.put("primaryColor", ORGANIZATION_PRIMARY_COLOR_FALLBACK);
@@ -168,8 +166,6 @@ public class NotificationUtilTest {
     @Test(dataProvider = "GetBrandingPreferenceDataProvider")
     public void testGetBrandingPreference(JsonNode brandingPreferences, Map<String, String> brandingFallback, int caseNo) {
 
-        String logoDisplay = NotificationUtil.getBrandingPreference(
-                ORGANIZATION_LOGO_DISPLAY_PLACEHOLDER, brandingPreferences, brandingFallback);
         String logoUrl = NotificationUtil.getBrandingPreference(
                 ORGANIZATION_LOGO_URL_PLACEHOLDER, brandingPreferences, brandingFallback);
         String logoAltText = NotificationUtil.getBrandingPreference(
@@ -194,7 +190,6 @@ public class NotificationUtilTest {
                 ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
 
         if (caseNo == 1) {
-            Assert.assertEquals(logoDisplay, DISPLAY_BLOCK);
             Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL);
             Assert.assertEquals(logoAltText, ORGANIZATION_LIGHT_LOGO_ALT_TEXT);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT);
@@ -221,8 +216,7 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 3) {
-            Assert.assertEquals(logoDisplay, DISPLAY_NONE);
-            Assert.assertEquals(logoUrl, StringUtils.EMPTY);
+            Assert.assertEquals(logoUrl, ORGANIZATION_LOGO_URL_FALLBACK);
             Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
@@ -236,8 +230,7 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 4) {
-            Assert.assertEquals(logoDisplay, DISPLAY_NONE);
-            Assert.assertEquals(logoUrl, StringUtils.EMPTY);
+            Assert.assertEquals(logoUrl, ORGANIZATION_LOGO_URL_FALLBACK);
             Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
