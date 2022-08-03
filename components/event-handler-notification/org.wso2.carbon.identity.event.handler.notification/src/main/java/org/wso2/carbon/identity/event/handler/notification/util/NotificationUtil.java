@@ -186,11 +186,11 @@ public class NotificationUtil {
                     brandingPreferences = null;
                 } else {
                     String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
-                    log.error(message, e);
+                    log.debug(message, e);
                 }
             } catch (Exception e) {
                 String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
-                log.error(message, e);
+                log.debug(message, e);
             }
         }
 
