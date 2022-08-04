@@ -142,18 +142,18 @@ public class NotificationUtilTest {
         }
 
         Map<String, String> brandingFallbacks = new HashMap<>();
-        brandingFallbacks.put("logoUrl", ORGANIZATION_LOGO_URL_FALLBACK);
-        brandingFallbacks.put("copyrightText", ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
-        brandingFallbacks.put("supportMail", ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
-        brandingFallbacks.put("primaryColor", ORGANIZATION_PRIMARY_COLOR_FALLBACK);
-        brandingFallbacks.put("backgroundColor", ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
-        brandingFallbacks.put("lightBackgroundColor", ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
-        brandingFallbacks.put("darkBackgroundColor", ORGANIZATION_DARK_BACKGROUND_COLOR_FALLBACK);
-        brandingFallbacks.put("fontStyle", ORGANIZATION_FONT_FALLBACK);
-        brandingFallbacks.put("fontColor", ORGANIZATION_FONT_COLOR_FALLBACK);
-        brandingFallbacks.put("buttonFontColor", ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
-        brandingFallbacks.put("lightBorderColor", ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
-        brandingFallbacks.put("darkBorderColor", ORGANIZATION_DARK_BORDER_COLOR_FALLBACK);
+        brandingFallbacks.put("logo_url", ORGANIZATION_LOGO_URL_FALLBACK);
+        brandingFallbacks.put("copyright_text", ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
+        brandingFallbacks.put("support_mail", ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
+        brandingFallbacks.put("primary_color", ORGANIZATION_PRIMARY_COLOR_FALLBACK);
+        brandingFallbacks.put("background_color", ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
+        brandingFallbacks.put("light_background_color", ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
+        brandingFallbacks.put("dark_background_color", ORGANIZATION_DARK_BACKGROUND_COLOR_FALLBACK);
+        brandingFallbacks.put("font_style", ORGANIZATION_FONT_FALLBACK);
+        brandingFallbacks.put("font_color", ORGANIZATION_FONT_COLOR_FALLBACK);
+        brandingFallbacks.put("button_font_color", ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
+        brandingFallbacks.put("light_border_color", ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
+        brandingFallbacks.put("dark_border_color", ORGANIZATION_DARK_BORDER_COLOR_FALLBACK);
 
         return new Object[][] {
                 {brandingPreferences1, brandingFallbacks, CASE_1},
