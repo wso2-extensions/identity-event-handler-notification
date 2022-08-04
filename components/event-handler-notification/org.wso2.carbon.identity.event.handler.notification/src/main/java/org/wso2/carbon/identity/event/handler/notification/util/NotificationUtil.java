@@ -185,12 +185,16 @@ public class NotificationUtil {
                         .equals(e.getErrorCode())) {
                     brandingPreferences = null;
                 } else {
+                    if (log.isDebugEnabled()) {
+                        String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                        log.debug(message, e);
+                    }
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
                     String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
                     log.debug(message, e);
                 }
-            } catch (Exception e) {
-                String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
-                log.debug(message, e);
             }
         }
 
@@ -407,7 +411,7 @@ public class NotificationUtil {
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
                             getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")))
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")
-                        : brandingFallbacks.get("logoUrl");
+                        : brandingFallbacks.get("logo_url");
                 break;
             case "organization.logo.altText" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
@@ -419,52 +423,49 @@ public class NotificationUtil {
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
                             brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
                         ? brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()
-                        : brandingFallbacks.get("copyrightText");
-                value = (brandingIsEnabled && StringUtils.isNotBlank(
-                        brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
-                        ? value
-                        : value.replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+                        : brandingFallbacks.get("copyright_text")
+                            .replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
                 break;
             case "organization.support.mail" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
                             brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()))
                         ? brandingPreferences.at("/organizationDetails/supportEmail").asText()
-                        : brandingFallbacks.get("supportMail");
+                        : brandingFallbacks.get("support_mail");
                 break;
             case "organization.color.primary" :
                 value = brandingIsEnabled
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
-                        : brandingFallbacks.get("primaryColor");
+                        : brandingFallbacks.get("primary_color");
                 break;
             case "organization.color.background" :
                 value = brandingIsEnabled
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
-                        : brandingFallbacks.get("backgroundColor");
+                        : brandingFallbacks.get("background_color");
                 break;
             case "organization.font" :
                 value = brandingIsEnabled
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/typography/font/fontFamily")
-                        : brandingFallbacks.get("fontStyle");
+                        : brandingFallbacks.get("font_style");
                 break;
             case "organization.font.color" :
                 value = brandingIsEnabled
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
-                        : brandingFallbacks.get("fontColor");
+                        : brandingFallbacks.get("font_color");
                 break;
             case "organization.button.font.color" :
                 value = brandingIsEnabled
                         ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/buttons/primary/base/font/color")
-                        : brandingFallbacks.get("buttonFontColor");
+                        : brandingFallbacks.get("button_font_color");
                 break;
             case "organization.theme.background.color" :
                 value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("lightBackgroundColor")
-                        : brandingFallbacks.get("darkBackgroundColor");
+                        ? brandingFallbacks.get("light_background_color")
+                        : brandingFallbacks.get("dark_background_color");
                 break;
             case "organization.theme.border.color" :
                 value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("lightBorderColor")
-                        : brandingFallbacks.get("darkBorderColor");
+                        ? brandingFallbacks.get("light_border_color")
+                        : brandingFallbacks.get("dark_border_color");
                 break;
             default: break;
         }
