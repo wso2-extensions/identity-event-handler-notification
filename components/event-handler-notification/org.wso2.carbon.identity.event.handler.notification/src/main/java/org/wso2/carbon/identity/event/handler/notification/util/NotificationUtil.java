@@ -68,6 +68,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -408,10 +409,18 @@ public class NotificationUtil {
 
         switch (key) {
             case "organization.logo.img" :
-                value = (brandingIsEnabled && StringUtils.isNotBlank(
-                            getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")))
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL")
-                        : brandingFallbacks.get("logo_url");
+                if (brandingIsEnabled) {
+                    String logoUrl = getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL");
+                    if (StringUtils.isNotBlank(logoUrl)) {
+                        value = logoUrl;
+                    } else {
+                        value = (theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME))
+                                ? brandingFallbacks.get("light_logo_url")
+                                : brandingFallbacks.get("dark_logo_url");
+                    }
+                } else {
+                    value = brandingFallbacks.get("light_logo_url");
+                }
                 break;
             case "organization.logo.altText" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
