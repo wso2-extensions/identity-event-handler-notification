@@ -88,7 +88,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054, USA
@@ -166,7 +166,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -241,7 +241,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -293,7 +293,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -369,7 +369,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -445,7 +445,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -498,7 +498,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -549,7 +549,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -600,7 +600,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -675,7 +675,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -750,7 +750,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -824,7 +824,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -899,7 +899,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -952,7 +952,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1005,7 +1005,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1056,7 +1056,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1108,7 +1108,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1160,7 +1160,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1211,7 +1211,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1262,7 +1262,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1313,7 +1313,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1364,7 +1364,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1415,7 +1415,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1466,7 +1466,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1518,7 +1518,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1593,7 +1593,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1752,7 +1752,7 @@
                     <tr>
                         <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                             <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                                &copy; 2022
+                                &copy; {{current-year}}
                                 <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">
                                     WSO2
                                 </a>
@@ -1810,7 +1810,7 @@
                     <tr>
                         <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                             <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                                &copy; 2022
+                                &copy; {{current-year}}
                                 <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">
                                     WSO2
                                 </a>
@@ -1887,7 +1887,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2022
+                            &copy; {{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -1963,7 +1963,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -2040,7 +2040,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2022
+                            &copy;{{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -2115,7 +2115,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2022
+                            &copy; {{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -2168,7 +2168,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2022
+                            &copy; {{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -2221,7 +2221,7 @@
                 <tr>
                     <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                         <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2022
+                            &copy; {{current-year}}
                             <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
                             <br>
                             3080 Olcott St., Suite C220, Santa Clara, CA 95054.
@@ -2315,7 +2315,7 @@
                                 <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
                                     <p
                                         style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                                        &copy;2022
+                                        &copy;{{current-year}}
                                         <a href="http://wso2.com/" target="_blank"
                                             style="color: #777; text-decoration: none">WSO2</a>
                                         <br>
