@@ -26,7 +26,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER = "organization.theme.border.color";
 
     // Sample values for branding fallbacks.
-    String ORGANIZATION_LOGO_URL_FALLBACK = "https://example.com/logo";
+    String ORGANIZATION_LIGHT_LOGO_URL_FALLBACK = "https://example.com/logo";
     String ORGANIZATION_COPYRIGHT_TEXT_FALLBACK = "Fallback Copyright Text";
     String ORGANIZATION_SUPPORT_EMAIL_FALLBACK = "fallback@support.com";
     String ORGANIZATION_PRIMARY_COLOR_FALLBACK = "#3CB371";
@@ -142,7 +141,7 @@ public class NotificationUtilTest {
         }
 
         Map<String, String> brandingFallbacks = new HashMap<>();
-        brandingFallbacks.put("logo_url", ORGANIZATION_LOGO_URL_FALLBACK);
+        brandingFallbacks.put("light_logo_url", ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
         brandingFallbacks.put("copyright_text", ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
         brandingFallbacks.put("support_mail", ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
         brandingFallbacks.put("primary_color", ORGANIZATION_PRIMARY_COLOR_FALLBACK);
@@ -216,7 +215,7 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 3) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_LOGO_URL_FALLBACK);
+            Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
             Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
@@ -230,7 +229,7 @@ public class NotificationUtilTest {
         }
 
         if (caseNo == 4) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_LOGO_URL_FALLBACK);
+            Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
             Assert.assertEquals(logoAltText, StringUtils.EMPTY);
             Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
             Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
