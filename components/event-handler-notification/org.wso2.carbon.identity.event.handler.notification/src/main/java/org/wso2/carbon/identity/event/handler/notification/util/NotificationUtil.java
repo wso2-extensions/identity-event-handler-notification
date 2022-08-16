@@ -76,6 +76,8 @@ import java.util.regex.Pattern;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_URL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
@@ -410,8 +412,8 @@ public class NotificationUtil {
         switch (key) {
             case "organization.logo.img" :
                 if (brandingIsEnabled && StringUtils.isNotBlank(
-                        getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL"))) {
-                    value = getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL");
+                        getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_URL_PATH))) {
+                    value = getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_URL_PATH);
                 } else {
                     value = (theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME))
                             ? brandingFallbacks.get("light_logo_url")
@@ -420,8 +422,8 @@ public class NotificationUtil {
                 break;
             case "organization.logo.altText" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
-                            getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/altText")))
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/altText")
+                            getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH)))
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH)
                         : StringUtils.EMPTY;
                 break;
             case "organization.copyright.text" :
@@ -434,7 +436,7 @@ public class NotificationUtil {
             case "organization.support.mail" :
                 value = (brandingIsEnabled && StringUtils.isNotBlank(
                             brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()))
-                        ? brandingPreferences.at("/organizationDetails/supportEmail").asText()
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()
                         : brandingFallbacks.get("support_mail");
                 break;
             case "organization.color.primary" :
