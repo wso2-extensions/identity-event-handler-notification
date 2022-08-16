@@ -409,17 +409,13 @@ public class NotificationUtil {
 
         switch (key) {
             case "organization.logo.img" :
-                if (brandingIsEnabled) {
-                    String logoUrl = getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL");
-                    if (StringUtils.isNotBlank(logoUrl)) {
-                        value = logoUrl;
-                    } else {
-                        value = (theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME))
-                                ? brandingFallbacks.get("light_logo_url")
-                                : brandingFallbacks.get("dark_logo_url");
-                    }
+                if (brandingIsEnabled && StringUtils.isNotBlank(
+                        getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL"))) {
+                    value = getBrandingPreferenceByTheme(brandingPreferences, theme, "/images/logo/imgURL");
                 } else {
-                    value = brandingFallbacks.get("light_logo_url");
+                    value = (theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME))
+                            ? brandingFallbacks.get("light_logo_url")
+                            : brandingFallbacks.get("dark_logo_url");
                 }
                 break;
             case "organization.logo.altText" :
