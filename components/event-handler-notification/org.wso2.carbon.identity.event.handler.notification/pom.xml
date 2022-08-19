@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ Copyright (c) 2016, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -77,6 +77,16 @@
             <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
             <artifactId>org.wso2.carbon.email.mgt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.branding.preference.management</groupId>
+            <artifactId>org.wso2.carbon.identity.branding.preference.management.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!--dependencies for cep notification support -->
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
@@ -93,6 +103,16 @@
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -151,7 +171,8 @@
                             org.wso2.carbon.event.publisher.core.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.databridge.commons.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.email.mgt.*; version="${identity.event.handler.notification.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.governance.*; version="${identity.governance.imp.pkg.version.range}"
+                            org.wso2.carbon.identity.governance.*; version="${identity.governance.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.branding.preference.management.core.*; version="${identity.branding.preference.management.version}"
                         </Import-Package>
                     </instructions>
                 </configuration>

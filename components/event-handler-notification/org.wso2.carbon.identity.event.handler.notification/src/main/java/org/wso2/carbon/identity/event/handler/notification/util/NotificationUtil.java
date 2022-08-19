@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.event.handler.notification.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -32,6 +34,11 @@ import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfiguratio
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManager;
+import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManagerImpl;
+import org.wso2.carbon.identity.branding.preference.management.core.constant.BrandingPreferenceMgtConstants;
+import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
+import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -57,14 +64,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_URL_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
 
@@ -149,6 +163,44 @@ public class NotificationUtil {
 
         Map<String, String> configFilePlaceholders = getConfigFilePlaceholders();
 
+        JsonNode brandingPreferences = null;
+        Map<String, String> brandingFallbacks = getBrandingFallbacksFromConfigFile();
+
+        if (Boolean.parseBoolean(
+                IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
+            try {
+                BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
+                BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference(
+                        BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
+                        placeHolderData.get("tenant-domain"),
+                        BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(responseDTO.getPreference());
+                brandingPreferences = objectMapper.readTree(json);
+
+                if (!brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH)
+                        .asBoolean()) {
+                    brandingPreferences = null;
+                }
+            } catch (BrandingPreferenceMgtException e) {
+                if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_BRANDING_PREFERENCE_NOT_EXISTS.getCode()
+                        .equals(e.getErrorCode())) {
+                    brandingPreferences = null;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                        log.debug(message, e);
+                    }
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                    log.debug(message, e);
+                }
+            }
+        }
+
         // Having a body is mandatory.
         List<String> placeHolders = new ArrayList<>(extractPlaceHolders(emailTemplate.getBody()));
         if (StringUtils.isNotEmpty(emailTemplate.getSubject())) {
@@ -157,14 +209,22 @@ public class NotificationUtil {
         if (StringUtils.isNotEmpty(emailTemplate.getFooter())) {
             placeHolders.addAll(extractPlaceHolders(emailTemplate.getFooter()));
         }
+        Set<String> placeHoldersSet = new HashSet<>(placeHolders);
 
-        for (String placeHolder : placeHolders) {
+        for (String placeHolder : placeHoldersSet) {
             // Setting config file place holders.
             if (placeHolder.startsWith(NotificationConstants.EmailNotification.IDENTITY_TEMPLATE_VALUE_PREFIX)) {
                 String key = placeHolder.substring(placeHolder.lastIndexOf(".") + 1);
                 String value = configFilePlaceholders.getOrDefault(key, "");
                 placeHolderData.put(placeHolder, value);
             }
+
+            // Setting branding placeholders.
+            String brandingValue = getBrandingPreference(placeHolder, brandingPreferences, brandingFallbacks);
+            if (brandingValue != null) {
+                placeHolderData.put(placeHolder, brandingValue);
+            }
+
             if (userClaims != null && !userClaims.isEmpty()) {
                 if (placeHolder.contains(NotificationConstants.EmailNotification.USER_CLAIM_PREFIX + "."
                         + NotificationConstants.EmailNotification.IDENTITY_CLAIM_PREFIX)) {
@@ -297,6 +357,132 @@ public class NotificationUtil {
         } catch (EventPublisherConfigurationException e) {
             throw NotificationRuntimeException.error("Error in deploying a publisher.", e);
         }
+    }
+
+    /**
+     * Retrieve default organization level branding configs.
+     *
+     * @return map of default organization level branding configs.
+     */
+    public static Map<String, String> getBrandingFallbacksFromConfigFile() {
+
+        IdentityConfigParser configParser = IdentityConfigParser.getInstance();
+        OMElement fallbackElem = configParser.getConfigElement(
+                NotificationConstants.EmailNotification.ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACKS_ELEM);
+        if (fallbackElem == null) {
+            return Collections.emptyMap();
+        }
+
+        Iterator iterator = fallbackElem.getChildrenWithLocalName(
+                NotificationConstants.EmailNotification.ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_ELEM);
+        if (iterator == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> fallbackMap = new HashMap<>();
+        while (iterator.hasNext()) {
+            OMElement omElement = (OMElement) iterator.next();
+            if (omElement != null) {
+                String key = omElement.getAttributeValue(
+                        new QName(NotificationConstants.EmailNotification.ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_KEY_ATTRIBUTE));
+                String value = omElement.getText();
+                fallbackMap.put(key, value);
+            }
+        }
+        return fallbackMap;
+    }
+
+    /**
+     * Retrive branding value by the placeholder.
+     *
+     * @param key                   placeholder in the email template.
+     * @param brandingPreferences   list of branding preferences.
+     * @param brandingFallbacks     default branding values.
+     * @return map of default organization branding.
+     */
+    public static String getBrandingPreference(String key, JsonNode brandingPreferences, Map<String, String> brandingFallbacks) {
+
+        String value = null;
+        boolean brandingIsEnabled = (brandingPreferences != null)
+                && brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH).asBoolean();
+        String theme = brandingIsEnabled
+                ? brandingPreferences.at("/theme/activeTheme").asText()
+                : NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME;
+
+        switch (key) {
+            case "organization.logo.img" :
+                if (brandingIsEnabled && StringUtils.isNotBlank(
+                        getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_URL_PATH))) {
+                    value = getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_URL_PATH);
+                } else {
+                    value = (theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME))
+                            ? brandingFallbacks.get("light_logo_url")
+                            : brandingFallbacks.get("dark_logo_url");
+                }
+                break;
+            case "organization.logo.altText" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH)))
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH)
+                        : StringUtils.EMPTY;
+                break;
+            case "organization.copyright.text" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()))
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH).asText()
+                        : brandingFallbacks.get("copyright_text")
+                            .replace("YYYY", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+                break;
+            case "organization.support.mail" :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                            brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()))
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()
+                        : brandingFallbacks.get("support_mail");
+                break;
+            case "organization.color.primary" :
+                value = brandingIsEnabled
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
+                        : brandingFallbacks.get("primary_color");
+                break;
+            case "organization.color.background" :
+                value = brandingIsEnabled
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
+                        : brandingFallbacks.get("background_color");
+                break;
+            case "organization.font" :
+                value = brandingIsEnabled
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/typography/font/fontFamily")
+                        : brandingFallbacks.get("font_style");
+                break;
+            case "organization.font.color" :
+                value = brandingIsEnabled
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
+                        : brandingFallbacks.get("font_color");
+                break;
+            case "organization.button.font.color" :
+                value = brandingIsEnabled
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/buttons/primary/base/font/color")
+                        : brandingFallbacks.get("button_font_color");
+                break;
+            case "organization.theme.background.color" :
+                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                        ? brandingFallbacks.get("light_background_color")
+                        : brandingFallbacks.get("dark_background_color");
+                break;
+            case "organization.theme.border.color" :
+                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                        ? brandingFallbacks.get("light_border_color")
+                        : brandingFallbacks.get("dark_border_color");
+                break;
+            default: break;
+        }
+
+        return value;
+    }
+
+    private static String getBrandingPreferenceByTheme(JsonNode brandingPreferences, String theme, String path) {
+
+        return brandingPreferences.at("/theme/" + theme + path).asText();
     }
 
     public static Notification buildNotification(Event event, Map<String, String> placeHolderData)
