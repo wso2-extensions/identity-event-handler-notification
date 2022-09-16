@@ -17,6 +17,7 @@
 -->
 <%@page import="java.nio.charset.StandardCharsets"%>
 <%@page import="java.util.Base64"%>
+<%@page import="java.net.URLDecoder"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
@@ -40,9 +41,9 @@
 
     String emailSubject = request.getParameter("emailSubject");
     String emailBody = request.getParameter("emailBody");
-    emailBody = new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8);
+    emailBody =  URLDecoder.decode(new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8));
     String emailFooter = request.getParameter("emailFooter");
-    emailFooter = new String(Base64.getDecoder().decode(emailFooter), StandardCharsets.UTF_8);
+    emailFooter = URLDecoder.decode(new String(Base64.getDecoder().decode(emailFooter), StandardCharsets.UTF_8));
 
     EmailTemplate templateAdded = new EmailTemplate();
     if (StringUtils.isNotBlank(emailTypeDisplayName)) {

@@ -139,9 +139,9 @@
                     }
 
                     var emailBody = document.getElementsByName("emailBody")[0].value;
-                    document.getElementsByName("emailBody")[0].value = btoa(emailBody);
+                    document.getElementsByName("emailBody")[0].value = btoa(encodeURIComponent(emailBody));
                     var emailFooter = document.getElementsByName("emailFooter")[0].value;
-                    document.getElementsByName("emailFooter")[0].value = btoa(emailFooter);
+                    document.getElementsByName("emailFooter")[0].value = btoa(encodeURIComponent(emailFooter));
 
                     document.templateForm.submit();
                 }
