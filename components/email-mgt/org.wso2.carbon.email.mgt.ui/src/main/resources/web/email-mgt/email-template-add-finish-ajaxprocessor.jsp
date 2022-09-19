@@ -41,7 +41,7 @@
 
     String emailSubject = request.getParameter("emailSubject");
     String emailBody = request.getParameter("emailBody");
-    emailBody =  URLDecoder.decode(new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8));
+    emailBody = URLDecoder.decode(new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8));
     String emailFooter = request.getParameter("emailFooter");
     emailFooter = URLDecoder.decode(new String(Base64.getDecoder().decode(emailFooter), StandardCharsets.UTF_8));
 
