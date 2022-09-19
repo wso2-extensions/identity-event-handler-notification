@@ -58,8 +58,8 @@
 
     EmailTemplate templateChanged = new EmailTemplate();
     if (!deleteTemplate) {
-        //decode the  emailBody and emailFooter
-        emailBody =  URLDecoder.decode(new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8));
+        // Decode emailBody and emailFooter.
+        emailBody = URLDecoder.decode(new String(Base64.getDecoder().decode(emailBody), StandardCharsets.UTF_8));
         emailFooter = URLDecoder.decode(new String(Base64.getDecoder().decode(emailFooter), StandardCharsets.UTF_8));
 
         if (StringUtils.isNotBlank(templateDisplayName)) {
