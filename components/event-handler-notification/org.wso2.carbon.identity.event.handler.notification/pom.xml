@@ -78,6 +78,10 @@
             <artifactId>org.wso2.carbon.email.mgt</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
+            <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity.branding.preference.management</groupId>
             <artifactId>org.wso2.carbon.identity.branding.preference.management.core</artifactId>
             <scope>provided</scope>
@@ -172,7 +176,10 @@
                             org.wso2.carbon.databridge.commons.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.email.mgt.*; version="${identity.event.handler.notification.imp.pkg.version.range}",
                             org.wso2.carbon.identity.governance.*; version="${identity.governance.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.branding.preference.management.core.*; version="${identity.branding.preference.management.version}"
+                            org.wso2.carbon.identity.branding.preference.management.core.*; version="${identity.branding.preference.management.version}",
+                            org.wso2.carbon.identity.organization.management.service;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.management.service.constant;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.management.service.exception;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>

@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.event.handler.notification.DefaultNotificationHa
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.listener.NotificationEventTenantListener;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -195,6 +196,21 @@ public class NotificationHandlerServiceComponent {
             log.debug("UnSetting the Notification Email Template Manager");
         }
         NotificationHandlerDataHolder.getInstance().setNotificationTemplateManager(null);
+    }
+
+    @Reference(name = "identity.organization.management.component",
+            service = OrganizationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrganizationManager")
+    protected void setOrganizationManager(OrganizationManager organizationManager) {
+
+        NotificationHandlerDataHolder.getInstance().setOrganizationManager(organizationManager);
+    }
+
+    protected void unsetOrganizationManager(OrganizationManager organizationManager) {
+
+        NotificationHandlerDataHolder.getInstance().setOrganizationManager(null);
     }
 }
 
