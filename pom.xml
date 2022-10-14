@@ -248,6 +248,13 @@
                 <version>${com.fasterxml.jackson.databind.version}</version>
             </dependency>
 
+            <!-- Organization management Dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
+                <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
+                <version>${identity.organization.management.core.version}</version>
+            </dependency>
+
             <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -406,6 +413,11 @@
         <!--Carbon Identity Framework Version-->
         <carbon.identity.framework.version>5.23.17</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
+
+        <!-- Organization management Version -->
+        <identity.organization.management.core.version>1.0.19</identity.organization.management.core.version>
+        <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
+        </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
         <carbon.analytics.common.version>5.2.10</carbon.analytics.common.version>

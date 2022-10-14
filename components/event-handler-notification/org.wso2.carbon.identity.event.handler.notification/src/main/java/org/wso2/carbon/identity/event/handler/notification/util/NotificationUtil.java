@@ -52,6 +52,9 @@ import org.wso2.carbon.identity.event.handler.notification.email.bean.Notificati
 import org.wso2.carbon.identity.event.handler.notification.exception.NotificationRuntimeException;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -81,6 +84,8 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
 
 public class NotificationUtil {
 
@@ -533,6 +538,10 @@ public class NotificationUtil {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         placeHolderData.put("current-year", String.valueOf(currentYear));
 
+        // Resolve human-readable organization name, and add it to "organization-name" placeholder.
+        String organizationName = resolveHumanReadableOrganizationName(tenantDomain);
+        placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
+
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
 
         Notification.EmailNotificationBuilder builder =
@@ -542,6 +551,31 @@ public class NotificationUtil {
         builder.setPlaceHolderData(placeHolderData);
         Notification emailNotification = builder.build();
         return emailNotification;
+    }
+
+    /**
+     * If the tenant domain is a UUID, resolve the organization name from the associated organization resource.
+     *
+     * @param tenantDomain Tenant domain.
+     * @return Human-readable name related to the represented organization space.
+     * @throws IdentityEventException Error while resolving organization name.
+     */
+    private static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
+
+        String organizationName = tenantDomain;
+        try {
+            OrganizationManager organizationManager =
+                    NotificationHandlerDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+            organizationName = organizationManager.getOrganizationNameById(organizationId);
+        } catch (OrganizationManagementClientException e) {
+            if (!ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT.getCode().equals(e.getErrorCode())) {
+                throw new IdentityEventException(e.getMessage(), e);
+            }
+        } catch (OrganizationManagementException e) {
+            throw new IdentityEventException(e.getMessage(), e);
+        }
+        return organizationName;
     }
 }
 
