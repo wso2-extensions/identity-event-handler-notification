@@ -62,6 +62,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -565,9 +566,15 @@ public class NotificationUtil {
 
         String organizationName = tenantDomain;
         try {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return organizationName;
+            }
             RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
             int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
             Tenant tenant = realmService.getTenantManager().getTenant(tenantId);
+            if (tenant == null) {
+                return organizationName;
+            }
             String associatedOrganizationUUID = tenant.getAssociatedOrganizationUUID();
             if (StringUtils.isBlank(associatedOrganizationUUID)) {
                 return organizationName;
