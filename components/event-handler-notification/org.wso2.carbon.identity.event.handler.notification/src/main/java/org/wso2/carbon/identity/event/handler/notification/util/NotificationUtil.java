@@ -56,11 +56,13 @@ import org.wso2.carbon.identity.organization.management.service.OrganizationMana
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -564,15 +566,27 @@ public class NotificationUtil {
 
         String organizationName = tenantDomain;
         try {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return organizationName;
+            }
+            RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
+            int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+            Tenant tenant = realmService.getTenantManager().getTenant(tenantId);
+            if (tenant == null) {
+                return organizationName;
+            }
+            String associatedOrganizationUUID = tenant.getAssociatedOrganizationUUID();
+            if (StringUtils.isBlank(associatedOrganizationUUID)) {
+                return organizationName;
+            }
             OrganizationManager organizationManager =
                     NotificationHandlerDataHolder.getInstance().getOrganizationManager();
-            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
-            organizationName = organizationManager.getOrganizationNameById(organizationId);
+            organizationName = organizationManager.getOrganizationNameById(associatedOrganizationUUID);
         } catch (OrganizationManagementClientException e) {
             if (!ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT.getCode().equals(e.getErrorCode())) {
                 throw new IdentityEventException(e.getMessage(), e);
             }
-        } catch (OrganizationManagementException e) {
+        } catch (OrganizationManagementException | UserStoreException e) {
             throw new IdentityEventException(e.getMessage(), e);
         }
         return organizationName;
