@@ -33,7 +33,7 @@
         <url>https://github.com/wso2-extensions/identity-event-handler-notification.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</connection>
-        <tag>v1.5.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
