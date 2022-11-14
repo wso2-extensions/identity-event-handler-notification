@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.event.handler.notification.internal;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -35,6 +36,7 @@ public class NotificationHandlerDataHolder {
     private EventPublisherService eventPublisherService = null;
     private EmailTemplateManager emailTemplateManager = null;
     private NotificationTemplateManager notificationTemplateManager = null;
+    private OrganizationManager organizationManager;
 
     private NotificationHandlerDataHolder() {
 
@@ -103,5 +105,25 @@ public class NotificationHandlerDataHolder {
     public NotificationTemplateManager getNotificationTemplateManager() {
 
         return notificationTemplateManager;
+    }
+
+    /**
+     * Get organization manager service.
+     *
+     * @return {@link org.wso2.carbon.identity.organization.management.service.OrganizationManager} service.
+     */
+    public OrganizationManager getOrganizationManager() {
+
+        return organizationManager;
+    }
+
+    /**
+     * Set organization manager.
+     *
+     * @param organizationManager {@link org.wso2.carbon.identity.organization.management.service.OrganizationManager} service.
+     */
+    public void setOrganizationManager(OrganizationManager organizationManager) {
+
+        this.organizationManager = organizationManager;
     }
 }

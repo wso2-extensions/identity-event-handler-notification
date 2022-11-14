@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,21 @@ public class NotificationConstants {
         public static final String AUTHENTICATION_ENDPOINT_PLACEHOLDER = "authentication.endpoint-url";
         public static final String CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER
                 = "product-url-with-user-tenant";
+        public static final String ORGANIZATION_NAME_PLACEHOLDER = "organization-name";
+
+        public static final String ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING = "EnableOrganizationLevelEmailBranding";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACKS_ELEM
+                =  "OrganizationLevelEmailBrandingFallbacks";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_ELEM
+                =  "OrganizationLevelEmailBrandingFallback";
+        public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACK_KEY_ATTRIBUTE = "key";
+
+        public static final String BRANDING_PREFERENCES_IS_ENABLED_PATH = "/configs/isBrandingEnabled";
+        public static final String BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH = "/organizationDetails/copyrightText";
+        public static final String BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH = "/organizationDetails/supportEmail";
+        public static final String BRANDING_PREFERENCES_LOGO_URL_PATH = "/images/logo/imgURL";
+        public static final String BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH = "/images/logo/altText";
+        public static final String BRANDING_PREFERENCES_LIGHT_THEME = "LIGHT";
 
     }
 

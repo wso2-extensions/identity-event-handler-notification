@@ -115,6 +115,10 @@
         <div id="workArea">
 
             <script type="text/javascript">
+                const emailContentTypeMap = new Map([
+                    ["text/plain; charset=UTF-8", "text/plain"],
+                    ["text/html; charset=UTF-8", "text/html"]
+                ]);
 
                 function validate() {
                     var value = document.getElementsByName("emailSubject")[0].value;
@@ -139,9 +143,9 @@
                     }
 
                     var emailBody = document.getElementsByName("emailBody")[0].value;
-                    document.getElementsByName("emailBody")[0].value = btoa(emailBody);
+                    document.getElementsByName("emailBody")[0].value = btoa(encodeURIComponent(emailBody));
                     var emailFooter = document.getElementsByName("emailFooter")[0].value;
-                    document.getElementsByName("emailFooter")[0].value = btoa(emailFooter);
+                    document.getElementsByName("emailFooter")[0].value = btoa(encodeURIComponent(emailFooter));
 
                     document.templateForm.submit();
                 }
@@ -152,7 +156,7 @@
                     jQuery('#emailBody').val($selectedOption.attr('data-body'));
                     jQuery('#emailFooter').val($selectedOption.attr('data-footer'));
                     jQuery('#templateName').val($selectedOption.attr('data-templateName'));
-                    jQuery('#emailContentType').val($selectedOption.attr('data-emailContentType'));
+                    jQuery('#emailContentType').val(emailContentTypeMap.get($selectedOption.attr('data-emailContentType')));
                 }
 
 
