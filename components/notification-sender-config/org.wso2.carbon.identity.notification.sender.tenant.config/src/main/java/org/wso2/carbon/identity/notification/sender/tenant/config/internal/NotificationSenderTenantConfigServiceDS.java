@@ -32,8 +32,13 @@ import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Component class for Notification Sender service.
@@ -43,6 +48,8 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 public class NotificationSenderTenantConfigServiceDS {
 
     private static final Log log = LogFactory.getLog(NotificationSenderTenantConfigServiceDS.class);
+    private static final List<ConfigurationHandler> configurationHandlerList = new
+            ArrayList<>();
 
     /**
      * Register Tenant Aware Axis2 Configuration Context Observer as an OSGI service.
@@ -53,6 +60,12 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void activate(ComponentContext context) {
 
         try {
+            NotificationSenderManagementServiceImpl notificationSenderManagementService =
+                    new NotificationSenderManagementServiceImpl();
+            NotificationSenderTenantConfigDataHolder.getInstance().
+                    setNotificationSenderManagementService(notificationSenderManagementService);
+            configurationHandlerList.add(new DefaultChannelConfigurationHandler());
+            registerConfigurationHandler();
             context.getBundleContext().registerService(NotificationSenderManagementService.class.getName(),
                     new NotificationSenderManagementServiceImpl(), null);
         } catch (Exception e) {
@@ -152,4 +165,36 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void unsetSMSProviderPayloadTemplateManager(SMSProviderPayloadTemplateManager manager) {
         NotificationSenderTenantConfigDataHolder.getInstance().setSMSProviderPayloadTemplateManager(null);
     }
+
+    @Reference(name = "configuration.handler.tracker.service",
+            service = org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationHandler")
+    protected void setConfigurationHandler(ConfigurationHandler configurationHandler) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Configuration Handler");
+        }
+
+        if (NotificationSenderTenantConfigDataHolder.getInstance().getNotificationSenderManagementService() != null) {
+            NotificationSenderTenantConfigDataHolder.getInstance().getNotificationSenderManagementService()
+                    .registerConfigurationHandler(configurationHandler);
+        } else {
+            configurationHandlerList.add(configurationHandler);
+        }
+    }
+
+    protected void unsetConfigurationHandler(ConfigurationHandler configurationHandler) {
+
+        //TODO unregistering logic
+    }
+
+    private void registerConfigurationHandler() {
+
+        configurationHandlerList.forEach(handler ->
+                NotificationSenderTenantConfigDataHolder.getInstance()
+                        .getNotificationSenderManagementService().registerConfigurationHandler(handler));
+    }
+
 }

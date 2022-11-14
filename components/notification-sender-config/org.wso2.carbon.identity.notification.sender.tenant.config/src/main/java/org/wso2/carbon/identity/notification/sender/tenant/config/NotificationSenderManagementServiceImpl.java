@@ -44,6 +44,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
@@ -60,9 +61,9 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
@@ -109,6 +110,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;
+    Map<String, ConfigurationHandler> configurationHandlerMap = new HashMap<>();
 
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
@@ -155,40 +157,16 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
-        // Set the default publisher name if name is not defined.
-        if (StringUtils.isEmpty(smsSender.getName())) {
-            smsSender.setName(DEFAULT_SMS_PUBLISHER);
+        Map<String, String> properties = smsSender.getProperties();
+        String channel;
+        if (!StringUtils.isEmpty(properties.get(CHANNEL_TYPE_PROPERTY))) {
+            channel = properties.get(CHANNEL_TYPE_PROPERTY);
+        } else {
+            channel = properties.get("default");
         }
 
-        validateSMSSender(smsSender);
+        return configurationHandlerMap.get(channel).addSMSSender(smsSender);
 
-        Optional<Resource> resourceOptional = getPublisherResource(smsSender.getName());
-
-        if (resourceOptional.isPresent()) {
-            throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, smsSender.getSender());
-        }
-
-        Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(smsSender.getName());
-        // Add the publisher type to the new publisher.
-        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
-        smsSender.getProperties().putAll(defaultPublisherProperties);
-        Resource smsSenderResource = buildResourceFromSmsSender(smsSender);
-
-        try {
-            /*
-            The input properties will be saved as the attributes of a resource to return to the notification-senders
-            API responses.
-            Also, an event publisher file is generated with the input values and save it as a file of the resource.
-            It is used when loading tenant wise event publisher loading flow.
-             */
-            NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .addResource(PUBLISHER_RESOURCE_TYPE, smsSenderResource);
-
-            reDeployEventPublisherConfiguration(smsSenderResource);
-        } catch (ConfigurationManagementException e) {
-            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER, smsSender.getName());
-        }
-        return buildSmsSenderFromResource(smsSenderResource);
     }
 
     @Override
@@ -699,4 +677,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             return new NotificationSenderManagementException(error, data, e);
         }
     }
+
+    public void registerConfigurationHandler(ConfigurationHandler handler) {
+
+        configurationHandlerMap.put(handler.getName(), handler);
+    }
+
+
 }

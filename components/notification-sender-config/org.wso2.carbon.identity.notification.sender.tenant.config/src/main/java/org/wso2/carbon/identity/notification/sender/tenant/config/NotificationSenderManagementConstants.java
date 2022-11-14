@@ -102,12 +102,14 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_PORT_PROPERTY = "mail.smtp.port";
     public static final String HTTP_URL_PROPERTY = "http.url";
     public static final String CONSTANT_HTTP_POST = "HttpPost";
+    public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
 
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
     public static final List<String> PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG =
             Collections.unmodifiableList(
                     Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY, INLINE_BODY_PROPERTY));
+
 
     /**
      * Enums for error messages.

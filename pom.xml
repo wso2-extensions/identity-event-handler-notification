@@ -298,6 +298,12 @@
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
             </dependency>
+            <!-- WebSubHub Dependency -->
+            <dependency>
+                <groupId>com.wso2.identity.outbound.adapters</groupId>
+                <artifactId>org.wso2.carbon.event.outbound.adapter.websubhub</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
