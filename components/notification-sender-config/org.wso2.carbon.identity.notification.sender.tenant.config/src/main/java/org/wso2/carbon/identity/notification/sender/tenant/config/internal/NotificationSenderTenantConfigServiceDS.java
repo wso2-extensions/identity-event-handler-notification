@@ -67,7 +67,7 @@ public class NotificationSenderTenantConfigServiceDS {
             configurationHandlerList.add(new DefaultChannelConfigurationHandler());
             registerConfigurationHandler();
             context.getBundleContext().registerService(NotificationSenderManagementService.class.getName(),
-                    new NotificationSenderManagementServiceImpl(), null);
+                    notificationSenderManagementService, null);
         } catch (Exception e) {
             log.error("Can not create the tenant wise email sender config service.", e);
         }

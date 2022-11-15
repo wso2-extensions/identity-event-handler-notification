@@ -165,7 +165,12 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             channel = properties.get("default");
         }
 
-        return configurationHandlerMap.get(channel).addSMSSender(smsSender);
+        if (configurationHandlerMap.containsKey(channel)) {
+            return configurationHandlerMap.get(channel).addSMSSender(smsSender);
+        } else {
+            //TODO handle this part properly
+            return null;
+        }
 
     }
 
