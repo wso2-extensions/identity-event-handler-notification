@@ -47,6 +47,7 @@
         <module>features/org.wso2.carbon.email.mgt.ui.feature</module>
         <module>features/org.wso2.carbon.email.mgt.feature</module>
         <module>features/org.wso2.carbon.event.handler.notification.server.feature</module>
+        <module>components/sms-mgt/org.wso2.carbon.identity.event.sms.notification.handler</module>
 
     </modules>
 
@@ -297,6 +298,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wso2.identity.outbound.adapters</groupId>
+                <artifactId>org.wso2.carbon.event.outbound.adapter.websubhub</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
