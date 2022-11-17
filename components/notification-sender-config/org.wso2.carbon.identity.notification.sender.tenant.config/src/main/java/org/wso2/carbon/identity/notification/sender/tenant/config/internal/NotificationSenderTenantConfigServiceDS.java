@@ -45,6 +45,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 public class NotificationSenderTenantConfigServiceDS {
 
     private static final Log log = LogFactory.getLog(NotificationSenderTenantConfigServiceDS.class);
+
     /**
      * Register Tenant Aware Axis2 Configuration Context Observer as an OSGI service.
      *
