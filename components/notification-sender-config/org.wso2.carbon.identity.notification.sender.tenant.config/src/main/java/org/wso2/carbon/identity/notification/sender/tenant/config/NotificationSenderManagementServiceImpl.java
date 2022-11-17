@@ -111,6 +111,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;
+
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
