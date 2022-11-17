@@ -32,13 +32,10 @@ import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
-import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler;
-import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Component class for Notification Sender service.
@@ -48,9 +45,6 @@ import java.util.List;
 public class NotificationSenderTenantConfigServiceDS {
 
     private static final Log log = LogFactory.getLog(NotificationSenderTenantConfigServiceDS.class);
-    private static final List<ConfigurationHandler> configurationHandlerList = new
-            ArrayList<>();
-
     /**
      * Register Tenant Aware Axis2 Configuration Context Observer as an OSGI service.
      *
@@ -60,16 +54,12 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void activate(ComponentContext context) {
 
         try {
-            NotificationSenderManagementServiceImpl notificationSenderManagementService =
-                    new NotificationSenderManagementServiceImpl();
-            NotificationSenderTenantConfigDataHolder.getInstance().
-                    setNotificationSenderManagementService(notificationSenderManagementService);
-            configurationHandlerList.add(new DefaultChannelConfigurationHandler());
-            registerConfigurationHandler();
+            NotificationSenderTenantConfigDataHolder.getInstance()
+                    .registerConfigurationHandler(new DefaultChannelChannelConfigurationHandler());
             context.getBundleContext().registerService(NotificationSenderManagementService.class.getName(),
-                    notificationSenderManagementService, null);
+                    new NotificationSenderManagementServiceImpl(), null);
         } catch (Exception e) {
-            log.error("Can not create the tenant wise email sender config service.", e);
+            log.error("Can not create the tenant wise notification sender config service.", e);
         }
     }
 
@@ -77,7 +67,7 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void deactivate(ComponentContext context) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Tenant wise email sender config service bundle is de-activated");
+            log.debug("Tenant wise notification sender config service bundle is de-activated");
         }
     }
 
@@ -167,34 +157,25 @@ public class NotificationSenderTenantConfigServiceDS {
     }
 
     @Reference(name = "configuration.handler.tracker.service",
-            service = org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler.class,
+            service = ChannelConfigurationHandler.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetConfigurationHandler")
-    protected void setConfigurationHandler(ConfigurationHandler configurationHandler) {
+    protected void setConfigurationHandler(ChannelConfigurationHandler configurationHandler) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Setting the Configuration Handler");
+            log.debug("Registering the Channel Configuration Handler");
         }
 
-        if (NotificationSenderTenantConfigDataHolder.getInstance().getNotificationSenderManagementService() != null) {
-            NotificationSenderTenantConfigDataHolder.getInstance().getNotificationSenderManagementService()
-                    .registerConfigurationHandler(configurationHandler);
-        } else {
-            configurationHandlerList.add(configurationHandler);
+        NotificationSenderTenantConfigDataHolder.getInstance().registerConfigurationHandler(configurationHandler);
+    }
+
+    protected void unsetConfigurationHandler(ChannelConfigurationHandler configurationHandler) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Unregistering the Channel Configuration Handler");
         }
+
+        NotificationSenderTenantConfigDataHolder.getInstance().unregisterConfigurationHandler(configurationHandler);
     }
-
-    protected void unsetConfigurationHandler(ConfigurationHandler configurationHandler) {
-
-        //TODO unregistering logic
-    }
-
-    private void registerConfigurationHandler() {
-
-        configurationHandlerList.forEach(handler ->
-                NotificationSenderTenantConfigDataHolder.getInstance()
-                        .getNotificationSenderManagementService().registerConfigurationHandler(handler));
-    }
-
 }

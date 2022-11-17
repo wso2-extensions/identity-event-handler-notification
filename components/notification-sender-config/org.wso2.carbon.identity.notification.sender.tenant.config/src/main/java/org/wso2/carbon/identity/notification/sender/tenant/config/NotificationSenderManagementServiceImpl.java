@@ -44,7 +44,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
@@ -64,7 +63,9 @@ import javax.xml.transform.TransformerException;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER;
@@ -110,8 +111,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;
-    Map<String, ConfigurationHandler> configurationHandlerMap = new HashMap<>();
-
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
@@ -159,19 +158,18 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         Map<String, String> properties = smsSender.getProperties();
         String channel;
-        if (!StringUtils.isEmpty(properties.get(CHANNEL_TYPE_PROPERTY))) {
+        if (StringUtils.isNotEmpty(properties.get(CHANNEL_TYPE_PROPERTY))) {
             channel = properties.get(CHANNEL_TYPE_PROPERTY);
         } else {
-            channel = properties.get("default");
+            channel = DEFAULT_HANDLER_NAME;
         }
 
-        if (configurationHandlerMap.containsKey(channel)) {
-            return configurationHandlerMap.get(channel).addSMSSender(smsSender);
+        if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
+            return NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
+                    .get(channel).addSMSSender(smsSender);
         } else {
-            //TODO handle this part properly
-            return null;
+            throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
-
     }
 
     @Override
@@ -682,11 +680,4 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             return new NotificationSenderManagementException(error, data, e);
         }
     }
-
-    public void registerConfigurationHandler(ConfigurationHandler handler) {
-
-        configurationHandlerMap.put(handler.getName(), handler);
-    }
-
-
 }

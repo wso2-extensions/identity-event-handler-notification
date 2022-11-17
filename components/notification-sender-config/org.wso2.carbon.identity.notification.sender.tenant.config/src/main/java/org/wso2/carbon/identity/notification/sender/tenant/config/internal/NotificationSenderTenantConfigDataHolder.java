@@ -22,8 +22,11 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * DataHolder for Tenant wise notification sender.
@@ -37,7 +40,7 @@ public class NotificationSenderTenantConfigDataHolder {
     private ResourceManager resourceManager = null;
     private ClusteringAgent clusteringAgent = null;
     private SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager = null;
-    private NotificationSenderManagementServiceImpl notificationSenderManagementService;
+    Map<String, ChannelConfigurationHandler> configurationHandlerMap = new HashMap<>();
 
     private NotificationSenderTenantConfigDataHolder() {
     }
@@ -97,15 +100,18 @@ public class NotificationSenderTenantConfigDataHolder {
         return smsProviderPayloadTemplateManager;
     }
 
-    public NotificationSenderManagementServiceImpl getNotificationSenderManagementService() {
+    public Map<String, ChannelConfigurationHandler> getConfigurationHandlerMap() {
 
-        return notificationSenderManagementService;
+        return configurationHandlerMap;
     }
 
-    public void setNotificationSenderManagementService(NotificationSenderManagementServiceImpl
-                                                               notificationSenderManagementService) {
+    public void registerConfigurationHandler(ChannelConfigurationHandler handler) {
 
-        this.notificationSenderManagementService = notificationSenderManagementService;
+        configurationHandlerMap.put(handler.getName(), handler);
     }
 
+    public void unregisterConfigurationHandler(ChannelConfigurationHandler handler) {
+
+        configurationHandlerMap.remove(handler.getName(), handler);
+    }
 }

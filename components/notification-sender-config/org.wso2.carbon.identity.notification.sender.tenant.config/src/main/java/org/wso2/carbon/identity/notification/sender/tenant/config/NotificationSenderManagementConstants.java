@@ -103,13 +103,13 @@ public class NotificationSenderManagementConstants {
     public static final String HTTP_URL_PROPERTY = "http.url";
     public static final String CONSTANT_HTTP_POST = "HttpPost";
     public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
+    public static final String DEFAULT_HANDLER_NAME = "default";
 
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
     public static final List<String> PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG =
             Collections.unmodifiableList(
                     Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY, INLINE_BODY_PROPERTY));
-
 
     /**
      * Enums for error messages.
@@ -153,7 +153,10 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR("65011", "Error while re-deploying resource.",
                                               "Error while re-deploying resource with name: %s."),
         ERROR_CODE_RESOURCE_DELETE_ERROR("65011", "Error while deleting resource.",
-                "Error while deleting resource with name: %s.");
+                "Error while deleting resource with name: %s."),
+        ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND("65012",
+                "No configuration handler found for the given channel type.",
+                "No configuration handler found for the given channel type: %s.");
 
         private final String code;
         private final String message;
