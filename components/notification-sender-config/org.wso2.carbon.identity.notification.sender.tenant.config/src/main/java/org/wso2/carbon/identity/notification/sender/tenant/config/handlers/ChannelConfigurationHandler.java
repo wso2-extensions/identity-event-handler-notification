@@ -50,6 +50,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 public abstract class ChannelConfigurationHandler {
 
     public abstract String getName();
+
     public abstract SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws
             NotificationSenderManagementException;
 
