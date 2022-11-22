@@ -156,7 +156,13 @@ public class NotificationSenderManagementConstants {
                 "Error while deleting resource with name: %s."),
         ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND("65012",
                 "No configuration handler found for the given channel type.",
-                "No configuration handler found for the given channel type: %s.");
+                "No configuration handler found for the given channel type: %s."),
+        ERROR_CODE_ERROR_REGISTERING_HUB_TOPIC("65013",
+                "Error while registering hub topic for websub notification channel.",
+                "Error while registering hub topic for websub notification channel: %s."),
+        ERROR_CODE_ERROR_UNREGISTERING_HUB_TOPIC("65014",
+                "Error while unregistering hub topic for websub notification channel.",
+                "Error while unregistering hub topic for websub notification channel.: %s.");
 
         private final String code;
         private final String message;

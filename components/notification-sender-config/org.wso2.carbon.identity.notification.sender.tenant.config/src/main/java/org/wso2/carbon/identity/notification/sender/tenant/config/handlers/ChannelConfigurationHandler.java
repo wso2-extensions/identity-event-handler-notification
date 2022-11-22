@@ -54,6 +54,8 @@ public abstract class ChannelConfigurationHandler {
     public abstract SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws
             NotificationSenderManagementException;
 
+    public abstract void deleteNotificationSender(String senderName) throws NotificationSenderManagementException;
+
     protected Optional<Resource> getPublisherResource(String resourceName)
             throws NotificationSenderManagementException {
 
