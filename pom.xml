@@ -289,7 +289,7 @@
             </dependency>
             <!-- Pax Logging -->
             <dependency>
-                <groupId>org.ops4j.pax.logging</groupId>
+                <groupId>org.wso2.org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
                 <version>${pax.logging.api.version}</version>
             </dependency>
@@ -371,12 +371,12 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.5.77</identity.governance.version>
-        <identity.governance.imp.pkg.version.range>[1.0.0, 2.0.0)</identity.governance.imp.pkg.version.range>
+        <identity.governance.version>2.0.0</identity.governance.version>
+        <identity.governance.imp.pkg.version.range>[2.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
         <identity.event.handler.notification.exp.pkg.version>${project.version}</identity.event.handler.notification.exp.pkg.version>
-        <identity.event.handler.notification.imp.pkg.version.range>[1.2.0, 2.0.0)</identity.event.handler.notification.imp.pkg.version.range>
+        <identity.event.handler.notification.imp.pkg.version.range>[2.0.0, 3.0.0)</identity.event.handler.notification.imp.pkg.version.range>
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
@@ -411,12 +411,12 @@
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.23.17</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.version>6.0.0</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version.range>[6.0.0, 7.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
-        <identity.organization.management.core.version>1.0.19</identity.organization.management.core.version>
-        <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
+        <identity.organization.management.core.version>2.0.0</identity.organization.management.core.version>
+        <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[2.0.0,3.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
@@ -441,7 +441,7 @@
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
 
         <!-- Pax Logging Version -->
-        <pax.logging.api.version>1.10.1</pax.logging.api.version>
+        <pax.logging.api.version>2.1.0-wso2v4</pax.logging.api.version>
 
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
