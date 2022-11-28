@@ -88,7 +88,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 /**
  * Configuration handler class for notifications sent through default channel.
  */
-public class DefaultChannelChannelConfigurationHandler extends ChannelConfigurationHandler {
+public class DefaultChannelConfigurationHandler extends ChannelConfigurationHandler {
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;

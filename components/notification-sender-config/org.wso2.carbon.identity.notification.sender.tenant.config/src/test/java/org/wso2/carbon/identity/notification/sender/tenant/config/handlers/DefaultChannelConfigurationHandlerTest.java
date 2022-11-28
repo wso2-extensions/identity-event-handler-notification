@@ -1,0 +1,482 @@
+package org.wso2.carbon.identity.notification.sender.tenant.config.handlers;
+
+
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.ClusteringMessage;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import org.wso2.carbon.base.CarbonBaseConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
+import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
+import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
+import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
+import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
+import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
+import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
+import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
+import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Mockito.when;
+
+/**
+ * Unit tests for {@link DefaultChannelConfigurationHandler}.
+ */
+public class DefaultChannelConfigurationHandlerTest {
+
+    public static final String PUBLISHER_RESOURCE_TYPE = "Publisher";
+    private DefaultChannelConfigurationHandler defaultChannelConfigurationHandler;
+    @Mock
+    private SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager;
+    @Mock
+    private ConfigurationManager configurationManager;
+    @Mock
+    private EventPublisherService carbonEventPublisherService;
+    @Mock
+    private ClusteringAgent clusteringAgent;
+    @Mock
+    private ResourceManager resourceManager;
+    private MockedStatic<ResourceUtils> mockedResourceUtils;
+    private MockedStatic<NotificationSenderUtils> mockedNotificationSenderUtils;
+
+    @BeforeClass
+    public void beforeTest() {
+
+        mockIdentityTenantUtil();
+        mockNotificationSenderUtils();
+    }
+
+    @AfterClass
+    public void afterTest() {
+
+        closeMockedIdentityTenantUtil();
+        closeNotificationSenderUtils();
+    }
+
+    public void mockIdentityTenantUtil() {
+
+        mockedResourceUtils = mockStatic(ResourceUtils.class);
+
+    }
+
+    public void closeMockedIdentityTenantUtil() {
+
+        mockedResourceUtils.close();
+    }
+
+    public void mockNotificationSenderUtils() {
+
+        mockedNotificationSenderUtils = mockStatic(NotificationSenderUtils.class);
+    }
+
+    public void closeNotificationSenderUtils() {
+
+        mockedNotificationSenderUtils.close();
+    }
+
+    @BeforeMethod
+    public void setUp() {
+
+        MockitoAnnotations.openMocks(this);
+
+        setCarbonHome();
+        setCarbonContextForTenant();
+
+        defaultChannelConfigurationHandler = new DefaultChannelConfigurationHandler();
+
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setSMSProviderPayloadTemplateManager(smsProviderPayloadTemplateManager);
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setConfigurationManager(configurationManager);
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setCarbonEventPublisherService(carbonEventPublisherService);
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setClusteringAgent(clusteringAgent);
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setResourceManager(resourceManager);
+    }
+
+    @Test(dataProvider = "addSMSSenderDataProvider")
+    public void testAddSMSSender(String name, String providerName, String inlineBodyProperty, String providerUrl)
+            throws Exception {
+
+
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDTO(name, providerName, inlineBodyProperty, providerUrl);
+        SMSProviderTemplate smsProviderTemplate = constructSMSProviderTemplate();
+
+        List<EventPublisherConfiguration> eventPublisherConfigurationList =
+                new ArrayList<>();
+        eventPublisherConfigurationList.add(constructEventPublisherConfiguration("SMSPublisher"));
+
+        when(smsProviderPayloadTemplateManager
+                .getSMSProviderPayloadTemplateByProvider(smsSenderDTO.getProvider()))
+                .thenReturn(smsProviderTemplate);
+        when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
+                .thenReturn(null);
+        when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
+                .thenReturn(eventPublisherConfigurationList);
+
+        InputStream inputStream = constructInputStream();
+
+        when(NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
+                .thenReturn(inputStream);
+
+        Resource resource = constructResource(inputStream, smsSenderDTO);
+
+        when(configurationManager.addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class)))
+                .thenReturn(resource);
+
+        doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
+        when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
+
+        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
+
+    }
+
+    @DataProvider(name = "addSMSSenderDataProvider")
+    public Object[][] provideSMSSenderDTOData() {
+
+        return new Object[][]{
+//                 name, provider, providerURL, contentType
+                {null, "Twilio", null,
+                        "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json"},
+                {"SMSPublisher", "Twilio", null,
+                        "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json"},
+                {null, "Twilio", "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                        "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json"}
+
+        };
+    }
+
+
+    @Test(dataProvider = "addSMSSenderDataProviderForException",
+            expectedExceptions = NotificationSenderManagementException.class)
+    public void testAddSMSSenderExceptions(SMSSenderDTO smsSenderDTO, SMSProviderTemplate smsProviderTemplate,
+                                           List<EventPublisherConfiguration> eventPublisherConfigurationList,
+                                           InputStream inputStream, Resource addedResource,
+                                           Resource existingSMSPublisherResource) throws Exception {
+
+        when(smsProviderPayloadTemplateManager
+                .getSMSProviderPayloadTemplateByProvider(smsSenderDTO.getProvider()))
+                .thenReturn(smsProviderTemplate);
+        when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
+                .thenReturn(existingSMSPublisherResource);
+        when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
+                .thenReturn(eventPublisherConfigurationList);
+
+        when(NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
+                .thenReturn(inputStream);
+
+        when(configurationManager.addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class)))
+                .thenReturn(addedResource);
+
+        doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
+        when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
+
+        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
+
+    }
+
+    @DataProvider(name = "addSMSSenderDataProviderForException")
+    public Object[][] provideSMSSenderDTOExceptions() {
+
+        SMSProviderTemplate smsProviderTemplate = constructSMSProviderTemplate();
+        List<EventPublisherConfiguration> eventPublisherConfigurationList = new ArrayList<>();
+        eventPublisherConfigurationList.add(constructEventPublisherConfiguration("SMSPublisher"));
+        InputStream inputStream = constructInputStream();
+
+
+        SMSSenderDTO smsSenderDTO1 = constructSMSSenderDTO("SMSPublisher",
+                "Twilio",
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
+
+
+        Resource addedResource1 = constructResource(inputStream, smsSenderDTO1);
+
+        SMSSenderDTO smsSenderDTO2 = constructSMSSenderDTO("SMSPublisher",
+                null,
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
+
+        Resource addedResource2 = constructResource(inputStream, smsSenderDTO2);
+
+        SMSSenderDTO smsSenderDTO3 = constructSMSSenderDTO("SMSPublisher",
+                "Twilio",
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                null);
+
+        Resource addedResource3 = constructResource(inputStream, smsSenderDTO3);
+
+        SMSSenderDTO smsSenderDTO4 = constructSMSSenderDTO("SMSPublisher",
+                "Twilio",
+                null,
+                null);
+
+        Resource addedResource4 = constructResource(inputStream, smsSenderDTO4);
+
+
+//        smsSenderDTO, smsProviderTemplate, eventPublisherConfigurationList, inputStream, addedResource,
+//        existingSMSPublisherResource
+        return new Object[][]{
+                {
+                        smsSenderDTO1,
+                        smsProviderTemplate,
+                        eventPublisherConfigurationList,
+                        inputStream,
+                        addedResource1,
+                        new Resource()
+                },
+                {
+                        smsSenderDTO2,
+                        smsProviderTemplate,
+                        eventPublisherConfigurationList,
+                        inputStream,
+                        addedResource2,
+                        null
+                },
+                {
+                        smsSenderDTO3,
+                        smsProviderTemplate,
+                        eventPublisherConfigurationList,
+                        inputStream,
+                        addedResource3,
+                        null
+                },
+                {
+                        smsSenderDTO1,
+                        smsProviderTemplate,
+                        null,
+                        inputStream,
+                        addedResource1,
+                        null
+                },
+                {
+                        smsSenderDTO4,
+                        null,
+                        eventPublisherConfigurationList,
+                        inputStream,
+                        addedResource4,
+                        null
+                },
+                {
+                        smsSenderDTO1,
+                        smsProviderTemplate,
+                        new ArrayList<>(),
+                        inputStream,
+                        addedResource1,
+                        null
+                },
+        };
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testAddSMSSenderConfigurationManagementException() throws ConfigurationManagementException,
+            EventPublisherConfigurationException, NotificationSenderManagementException {
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDTO("SMSPublisher",
+                "Twilio",
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
+
+        List<EventPublisherConfiguration> eventPublisherConfigurationList = new ArrayList<>();
+        eventPublisherConfigurationList.add(constructEventPublisherConfiguration("SMSPublisher"));
+
+        when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
+                .thenReturn(null);
+        when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
+                .thenReturn(eventPublisherConfigurationList);
+
+        doThrow(ConfigurationManagementException.class).when(configurationManager)
+                .addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class));
+
+        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
+
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testAddSMSSenderEventPublisherConfigurationException() throws ConfigurationManagementException,
+            EventPublisherConfigurationException, NotificationSenderManagementException {
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDTO("SMSPublisher",
+                "Twilio",
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
+
+        when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
+                .thenReturn(null);
+        doThrow(EventPublisherConfigurationException.class).when(carbonEventPublisherService)
+                .getAllActiveEventPublisherConfigurations();
+
+        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
+
+    }
+
+    @Test
+    public void testDeleteNotificationSender() throws ClusteringFault, NotificationSenderManagementException {
+
+        when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testDeleteNotificationSenderTenantResourceManagementClientException() throws
+            NotificationSenderManagementException, TenantResourceManagementException {
+
+        doThrow(TenantResourceManagementClientException.class).when(resourceManager)
+                .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testDeleteNotificationSenderTenantResourceManagementServerException() throws
+            NotificationSenderManagementException, TenantResourceManagementException {
+
+        doThrow(TenantResourceManagementServerException.class).when(resourceManager)
+                .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testDeleteNotificationSenderTenantManagementServerException() throws
+            NotificationSenderManagementException, TenantResourceManagementException {
+
+        doThrow(TenantResourceManagementException.class).when(resourceManager)
+                .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testDeleteNotificationSenderConfigurationManagementClientException() throws
+            NotificationSenderManagementException, ConfigurationManagementException {
+
+        doThrow(ConfigurationManagementClientException.class).when(configurationManager)
+                .deleteResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testDeleteNotificationSenderConfigurationManagementServerException() throws
+            NotificationSenderManagementException, ConfigurationManagementException {
+
+        doThrow(ConfigurationManagementServerException.class).when(configurationManager)
+                .deleteResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
+        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+    }
+
+    private SMSSenderDTO constructSMSSenderDTO(String name, String providerName, String inLineBodyProperty,
+                                               String providerUrl) {
+
+        SMSSenderDTO smsSenderDTO = new SMSSenderDTO();
+
+        if (name != null) {
+            smsSenderDTO.setName(name);
+        }
+
+        smsSenderDTO.setProvider(providerName);
+        smsSenderDTO.setProviderURL(providerUrl);
+        smsSenderDTO.setSender("+12536496764");
+        smsSenderDTO.setContentType("FORM");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("http.headers", "Authorization: Basic ABCD");
+
+        if (inLineBodyProperty != null) {
+            properties.put("body", inLineBodyProperty);
+        }
+        smsSenderDTO.setProperties(properties);
+
+        return smsSenderDTO;
+
+    }
+
+    private SMSProviderTemplate constructSMSProviderTemplate() {
+
+        SMSProviderTemplate smsProviderTemplate = new SMSProviderTemplate();
+        smsProviderTemplate.setProvider("Twilio");
+        smsProviderTemplate.setBody("Your one-time password for the {{application-name}} is " +
+                "{{otpToken}}. This expires in {{otp-expiry-time}} minutes");
+        return smsProviderTemplate;
+    }
+
+    private EventPublisherConfiguration constructEventPublisherConfiguration(String name) {
+
+        EventPublisherConfiguration eventPublisherConfiguration = new EventPublisherConfiguration();
+        eventPublisherConfiguration.setEventPublisherName(name);
+        eventPublisherConfiguration.setFromStreamName("id_gov_sms_notify_stream");
+        eventPublisherConfiguration.setFromStreamVersion("1.0.0");
+        return eventPublisherConfiguration;
+    }
+
+    private Resource constructResource(InputStream inputStream, SMSSenderDTO smsSenderDTO) {
+
+        Resource resource = new Resource();
+        ResourceFile file = new ResourceFile();
+        file.setName(smsSenderDTO.getName());
+        file.setInputStream(inputStream);
+        List<ResourceFile> resourceFiles = new ArrayList<>();
+        resourceFiles.add(file);
+        resource.setFiles(resourceFiles);
+
+        return resource;
+    }
+
+    private InputStream constructInputStream() {
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        return new ByteArrayInputStream(outputStream.toByteArray());
+
+    }
+
+    private void setCarbonHome() {
+
+        String carbonHome = Paths.get(System.getProperty("user.dir"), "target", "test-classes", "repository").
+                toString();
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, carbonHome);
+        System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome, "conf").toString());
+    }
+
+    private void setCarbonContextForTenant() {
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+    }
+}

@@ -177,12 +177,15 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
 
-        Optional<Attribute> channelTypeAttribute = resourceOptional.get().getAttributes().stream().findAny()
-                .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY));
-
         String channel;
-        if (channelTypeAttribute.isPresent()) {
-            channel = channelTypeAttribute.get().getValue();
+        if (resourceOptional.get().getAttributes() != null) {
+            Optional<Attribute> channelTypeAttribute = resourceOptional.get().getAttributes().stream().findAny()
+                    .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY));
+            if (channelTypeAttribute.isPresent()) {
+                channel = channelTypeAttribute.get().getValue();
+            } else {
+                channel = DEFAULT_HANDLER_NAME;
+            }
         } else {
             channel = DEFAULT_HANDLER_NAME;
         }

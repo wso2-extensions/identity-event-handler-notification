@@ -33,7 +33,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
-import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelChannelConfigurationHandler;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -56,7 +56,7 @@ public class NotificationSenderTenantConfigServiceDS {
 
         try {
             NotificationSenderTenantConfigDataHolder.getInstance()
-                    .registerConfigurationHandler(new DefaultChannelChannelConfigurationHandler());
+                    .registerConfigurationHandler(new DefaultChannelConfigurationHandler());
             context.getBundleContext().registerService(NotificationSenderManagementService.class.getName(),
                     new NotificationSenderManagementServiceImpl(), null);
         } catch (Exception e) {
