@@ -34,7 +34,6 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterDeleteMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -90,7 +89,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
  */
 public class DefaultChannelConfigurationHandler extends ChannelConfigurationHandler {
 
-    private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
+    private static final Log log = LogFactory.getLog(DefaultChannelConfigurationHandler.class);
     public static final int MAX_RETRY_COUNT = 60;
 
     @Override

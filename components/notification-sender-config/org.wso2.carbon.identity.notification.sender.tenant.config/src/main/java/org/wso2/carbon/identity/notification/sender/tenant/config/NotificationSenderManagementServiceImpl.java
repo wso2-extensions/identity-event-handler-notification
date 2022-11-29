@@ -172,24 +172,17 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public void deleteNotificationSender(String senderName) throws NotificationSenderManagementException {
 
-        Optional<Resource> resourceOptional = getPublisherResource(senderName);
-        if (!resourceOptional.isPresent()) {
-            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
-        }
+        Resource resource = getPublisherResource(senderName).orElseThrow(() ->
+                new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName));
 
         String channel;
-        if (resourceOptional.get().getAttributes() != null) {
-            Optional<Attribute> channelTypeAttribute = resourceOptional.get().getAttributes().stream().findAny()
-                    .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY));
-            if (channelTypeAttribute.isPresent()) {
-                channel = channelTypeAttribute.get().getValue();
-            } else {
-                channel = DEFAULT_HANDLER_NAME;
-            }
-        } else {
+        if (resource.getAttributes() == null || resource.getAttributes().isEmpty()) {
             channel = DEFAULT_HANDLER_NAME;
+        } else {
+            channel = resource.getAttributes().stream()
+                    .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY)).findAny()
+                    .map(Attribute::getValue).orElse(DEFAULT_HANDLER_NAME);
         }
-
         if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
                     .get(channel).deleteNotificationSender(senderName);
