@@ -129,6 +129,9 @@ public class NotificationSenderManagementConstants {
                 "SMS provider url is not defined for notification sender."),
         ERROR_CODE_PUBLISHER_NOT_EXISTS("60006", "No notification sender found.",
                 "There is no notification sender for publisher: %s."),
+        ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED("60007",
+                "Updating channel type is not allowed.",
+                "Updating channel type is not allowed for SMS notification sender: %s."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",

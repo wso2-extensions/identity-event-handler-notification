@@ -25,8 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
-import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
@@ -43,6 +41,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
@@ -62,6 +61,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
@@ -75,12 +75,8 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SMS_PAYLOAD_NOT_FOUND;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SMS_PROVIDER_REQUIRED;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SMS_PROVIDER_URL_REQUIRED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_TRANSFORMER_EXCEPTION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM_ADDRESS;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE_BODY_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
@@ -98,7 +94,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateSMSPublisher;
 
 /**
  * OSGi service of Notification Sender Management operations.
@@ -153,17 +148,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
-        Map<String, String> properties = smsSender.getProperties();
-        String channel;
-        if (StringUtils.isNotEmpty(properties.get(CHANNEL_TYPE_PROPERTY))) {
-            channel = properties.get(CHANNEL_TYPE_PROPERTY);
-        } else {
-            channel = DEFAULT_HANDLER_NAME;
-        }
+        ChannelConfigurationHandler configurationHandler = NotificationSenderTenantConfigDataHolder.getInstance()
+                .getConfigurationHandlerMap().get(getChannelTypeFromSMSSenderDTO(smsSender));
 
-        if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
-            return NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
-                    .get(channel).addSMSSender(smsSender);
+        if (configurationHandler != null) {
+            return configurationHandler.addSMSSender(smsSender);
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
@@ -175,14 +164,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         Resource resource = getPublisherResource(senderName).orElseThrow(() ->
                 new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName));
 
-        String channel;
-        if (resource.getAttributes() == null || resource.getAttributes().isEmpty()) {
-            channel = DEFAULT_HANDLER_NAME;
-        } else {
-            channel = resource.getAttributes().stream()
-                    .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY)).findAny()
-                    .map(Attribute::getValue).orElse(DEFAULT_HANDLER_NAME);
-        }
+        String channel = getChannelTypeFromResource(resource);
         if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
                     .get(channel).deleteNotificationSender(senderName);
@@ -283,30 +265,25 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
-        validateSMSSender(smsSender);
+        Resource resource = getPublisherResource(smsSender.getName()).orElseThrow(() ->
+                new NotificationSenderManagementClientException(ERROR_CODE_NO_RESOURCE_EXISTS,
+                        smsSender.getSender()));
 
-        Optional<Resource> resourceOptional = getPublisherResource(smsSender.getName());
-        if (!resourceOptional.isPresent()) {
-            throw new NotificationSenderManagementClientException(ERROR_CODE_NO_RESOURCE_EXISTS, smsSender.getName());
-        }
+        String channelType = getChannelTypeFromSMSSenderDTO(smsSender);
+        String channelTypeOfExistingResource = getChannelTypeFromResource(resource);
 
-        Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(smsSender.getName());
-        // Add the publisher type to the new publisher.
-        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
-        smsSender.getProperties().putAll(defaultPublisherProperties);
-
-        Resource smsSenderResource = buildResourceFromSmsSender(smsSender);
-
-        try {
-            NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .replaceResource(PUBLISHER_RESOURCE_TYPE, smsSenderResource);
-
-            reDeployEventPublisherConfiguration(smsSenderResource);
-        } catch (ConfigurationManagementException e) {
-            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
+        if (!StringUtils.equals(channelType, channelTypeOfExistingResource)) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED,
                     smsSender.getName());
         }
-        return buildSmsSenderFromResource(smsSenderResource);
+
+        ChannelConfigurationHandler configurationHandler = NotificationSenderTenantConfigDataHolder.getInstance()
+                .getConfigurationHandlerMap().get(channelType);
+        if (configurationHandler != null) {
+            return configurationHandler.updateSMSSender(smsSender);
+        } else {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
+        }
     }
 
     private Optional<Resource> getPublisherResource(String resourceName) throws NotificationSenderManagementException {
@@ -425,26 +402,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         return publisherInSuperTenant;
     }
 
-    private void validateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementClientException {
-
-        SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager =
-                NotificationSenderTenantConfigDataHolder.getInstance().getSmsProviderPayloadTemplateManager();
-        Map<String, String> properties = smsSender.getProperties();
-        if (StringUtils.isEmpty(smsSender.getProvider())) {
-            throw new NotificationSenderManagementClientException(ERROR_CODE_SMS_PROVIDER_REQUIRED);
-        }
-        if (StringUtils.isEmpty(properties.get(INLINE_BODY_PROPERTY))) {
-            SMSProviderTemplate sendSmsAPIPayload = smsProviderPayloadTemplateManager
-                    .getSMSProviderPayloadTemplateByProvider(smsSender.getProvider());
-            if (sendSmsAPIPayload == null) {
-                throw new NotificationSenderManagementClientException(ERROR_CODE_SMS_PAYLOAD_NOT_FOUND);
-            }
-        }
-        if (StringUtils.isEmpty(smsSender.getProviderURL())) {
-            throw new NotificationSenderManagementClientException(ERROR_CODE_SMS_PROVIDER_URL_REQUIRED);
-        }
-    }
-
     /**
      * Get default properties of super tenant Publisher.
      *
@@ -552,50 +509,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     /**
-     * Build a resource object from SMS Sender post body.
-     *
-     * @param smsSender SMS sender post body.
-     * @return Resource object.
-     */
-    private Resource buildResourceFromSmsSender(SMSSenderDTO smsSender)
-            throws NotificationSenderManagementServerException {
-
-        InputStream inputStream;
-        try {
-            inputStream = generateSMSPublisher(smsSender);
-        } catch (ParserConfigurationException e) {
-            throw new NotificationSenderManagementServerException(ERROR_CODE_PARSER_CONFIG_EXCEPTION,
-                    e.getMessage(), e);
-        } catch (TransformerException e) {
-            throw new NotificationSenderManagementServerException(ERROR_CODE_TRANSFORMER_EXCEPTION, e.getMessage(), e);
-        }
-
-        Resource resource = new Resource();
-        resource.setResourceName(smsSender.getName());
-        Map<String, String> smsSenderAttributes = new HashMap<>();
-        smsSenderAttributes.put(PROVIDER, smsSender.getProvider());
-        smsSenderAttributes.put(PROVIDER_URL, smsSender.getProviderURL());
-        smsSenderAttributes.put(KEY, smsSender.getKey());
-        smsSenderAttributes.put(SECRET, smsSender.getSecret());
-        smsSenderAttributes.put(SENDER, smsSender.getSender());
-        smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
-        smsSenderAttributes.putAll(smsSender.getProperties());
-        List<Attribute> resourceAttributes =
-                smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
-                        .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
-                        .collect(Collectors.toList());
-        resource.setAttributes(resourceAttributes);
-        // Set file.
-        ResourceFile file = new ResourceFile();
-        file.setName(smsSender.getName());
-        file.setInputStream(inputStream);
-        List<ResourceFile> resourceFiles = new ArrayList<>();
-        resourceFiles.add(file);
-        resource.setFiles(resourceFiles);
-        return resource;
-    }
-
-    /**
      * Build an SMS sender response from SMS sender's resource object.
      *
      * @param resource SMS sender resource object.
@@ -647,6 +560,27 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             return new NotificationSenderManagementServerException(error, data, e);
         } else {
             return new NotificationSenderManagementException(error, data, e);
+        }
+    }
+
+    private String getChannelTypeFromSMSSenderDTO(SMSSenderDTO smsSender) {
+
+        Map<String, String> properties = smsSender.getProperties();
+        if (StringUtils.isNotEmpty(properties.get(CHANNEL_TYPE_PROPERTY))) {
+            return properties.get(CHANNEL_TYPE_PROPERTY);
+        } else {
+            return DEFAULT_HANDLER_NAME;
+        }
+    }
+
+    private String getChannelTypeFromResource(Resource resource) {
+
+        if (resource.getAttributes() == null || resource.getAttributes().isEmpty()) {
+            return DEFAULT_HANDLER_NAME;
+        } else {
+            return resource.getAttributes().stream()
+                    .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY)).findAny()
+                    .map(Attribute::getValue).orElse(DEFAULT_HANDLER_NAME);
         }
     }
 }

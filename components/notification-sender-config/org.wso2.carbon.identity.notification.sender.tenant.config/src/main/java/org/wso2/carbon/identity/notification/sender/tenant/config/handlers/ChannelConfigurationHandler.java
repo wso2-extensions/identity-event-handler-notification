@@ -29,6 +29,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,6 +54,8 @@ public abstract class ChannelConfigurationHandler {
 
     public abstract SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws
             NotificationSenderManagementException;
+
+    public abstract SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException;
 
     public abstract void deleteNotificationSender(String senderName) throws NotificationSenderManagementException;
 

@@ -62,6 +62,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PARSER_CONFIG_EXCEPTION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT;
@@ -151,6 +152,30 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         } catch (TenantResourceManagementException e) {
             throw handleTenantResourceManagementException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER, senderName);
         }
+    }
+
+    @Override
+    public SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
+
+        validateSMSSender(smsSender);
+
+        Map<String, String> defaultPublisherProperties = getDefaultPublisherProperties(smsSender.getName());
+        // Add the publisher type to the new publisher.
+        defaultPublisherProperties.put(PUBLISHER_TYPE_PROPERTY, SMS_PUBLISHER_TYPE);
+        smsSender.getProperties().putAll(defaultPublisherProperties);
+
+        Resource smsSenderResource = buildResourceFromSmsSender(smsSender);
+
+        try {
+            NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .replaceResource(PUBLISHER_RESOURCE_TYPE, smsSenderResource);
+            reDeployEventPublisherConfiguration(smsSenderResource);
+
+        } catch (ConfigurationManagementException e) {
+            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
+                    smsSender.getName());
+        }
+        return buildSmsSenderFromResource(smsSenderResource);
     }
 
     private void validateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementClientException {
