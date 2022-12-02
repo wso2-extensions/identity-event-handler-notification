@@ -22,6 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
@@ -32,6 +34,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,6 +53,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_HTTP_METHOD_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONSTANT_HTTP_POST;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CUSTOM_MAPPING_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISABLE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_ADDRESS_PROPERTY;
@@ -65,12 +69,15 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE_BODY_PARAM_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE_BODY_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PLACEHOLDER_IDENTIFIER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROCESSING_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ROOT_ELEMENT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
@@ -363,5 +370,47 @@ public class NotificationSenderUtils {
                     inlineBody.replace(PLACEHOLDER_IDENTIFIER + property.getKey(), (CharSequence) property.getValue());
         }
         return inlineBody;
+    }
+
+    /**
+     * Build an SMS sender response from SMS sender's resource object.
+     *
+     * @param resource SMS sender resource object.
+     * @return SMS sender response.
+     */
+    public static SMSSenderDTO buildSmsSenderFromResource(Resource resource) {
+
+        SMSSenderDTO smsSender = new SMSSenderDTO();
+        smsSender.setName(resource.getResourceName());
+        // Skip STREAM_NAME, STREAM_VERSION and PUBLISHER_TYPE_PROPERTY properties which are stored for internal use.
+        Map<String, String> attributesMap =
+                resource.getAttributes().stream()
+                        .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
+                        .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        attributesMap.forEach((key, value) -> {
+            switch (key) {
+                case PROVIDER:
+                    smsSender.setProvider(value);
+                    break;
+                case PROVIDER_URL:
+                    smsSender.setProviderURL(value);
+                    break;
+                case KEY:
+                    smsSender.setKey(value);
+                    break;
+                case SECRET:
+                    smsSender.setSecret(value);
+                    break;
+                case SENDER:
+                    smsSender.setSender(value);
+                    break;
+                case CONTENT_TYPE:
+                    smsSender.setContentType(value);
+                    break;
+                default:
+                    smsSender.getProperties().put(key, value);
+            }
+        });
+        return smsSender;
     }
 }

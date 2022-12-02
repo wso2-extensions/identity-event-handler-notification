@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.notification.sender.tenant.config.handlers;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -29,20 +28,12 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
+import java.util.Optional;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_PROPERTIES;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.KEY;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SENDER;
 
 /**
  * Abstract Handler class for notifications sent through different channels.
@@ -94,37 +85,6 @@ public abstract class ChannelConfigurationHandler {
      */
     protected SMSSenderDTO buildSmsSenderFromResource(Resource resource) {
 
-        SMSSenderDTO smsSender = new SMSSenderDTO();
-        smsSender.setName(resource.getResourceName());
-        // Skip STREAM_NAME, STREAM_VERSION and PUBLISHER_TYPE_PROPERTY properties which are stored for internal use.
-        Map<String, String> attributesMap =
-                resource.getAttributes().stream()
-                        .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
-                        .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
-        attributesMap.forEach((key, value) -> {
-            switch (key) {
-                case PROVIDER:
-                    smsSender.setProvider(value);
-                    break;
-                case PROVIDER_URL:
-                    smsSender.setProviderURL(value);
-                    break;
-                case KEY:
-                    smsSender.setKey(value);
-                    break;
-                case SECRET:
-                    smsSender.setSecret(value);
-                    break;
-                case SENDER:
-                    smsSender.setSender(value);
-                    break;
-                case CONTENT_TYPE:
-                    smsSender.setContentType(value);
-                    break;
-                default:
-                    smsSender.getProperties().put(key, value);
-            }
-        });
-        return smsSender;
+        return NotificationSenderUtils.buildSmsSenderFromResource(resource);
     }
 }
