@@ -22,8 +22,8 @@
 
     <test name="NotificationSenderTenantConfigTest" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl"/>
-            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImplTest"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandlerTest"/>
         </classes>
     </test>
 </suite>
