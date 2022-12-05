@@ -36,6 +36,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterDeleteMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -90,13 +92,19 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
  */
 public class DefaultChannelConfigurationHandler extends ChannelConfigurationHandler {
 
-    private static final Log log = LogFactory.getLog(DefaultChannelConfigurationHandler.class);
     public static final int MAX_RETRY_COUNT = 60;
+    private static final Log log = LogFactory.getLog(DefaultChannelConfigurationHandler.class);
 
     @Override
     public String getName() {
 
         return DEFAULT_HANDLER_NAME;
+    }
+
+    @Override
+    public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
+
+        throw new IllegalArgumentException("Channel support for the email notifications is not implemented.");
     }
 
     @Override
@@ -155,6 +163,12 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
     }
 
     @Override
+    public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
+
+        throw new IllegalArgumentException("Channel support for the email notifications is not implemented.");
+    }
+
+    @Override
     public SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
         validateSMSSender(smsSender);
@@ -201,13 +215,11 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
     /**
      * Get default properties of super tenant Publisher.
      *
-     * @param publisherName    Name of the publisher.
-     *
-     * @return  Map of Properties.
+     * @param publisherName Name of the publisher.
+     * @return Map of Properties.
      */
     private Map<String, String> getDefaultPublisherProperties(String publisherName)
             throws NotificationSenderManagementException {
-
 
         Map<String, String> properties = new HashMap<>();
         EventPublisherConfiguration publisherInSuperTenant = getPublisherInSuperTenant(publisherName);
@@ -304,7 +316,7 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
                         eventPublisherName);
             }
         } catch (EventPublisherConfigurationException e) {
-            throw  new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
                     eventPublisherName, e);
         }
         return publisherInSuperTenant;
@@ -377,7 +389,6 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
     private NotificationSenderManagementException handleTenantResourceManagementException(
             TenantResourceManagementException e,
             NotificationSenderManagementConstants.ErrorMessage error, String data) {
-
 
         if (e instanceof TenantResourceManagementClientException) {
             return new NotificationSenderManagementClientException(error, data, e);

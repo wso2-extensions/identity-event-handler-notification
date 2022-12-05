@@ -22,7 +22,8 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -31,6 +32,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.internal.Notif
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 
 import java.util.Optional;
+
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
@@ -40,15 +42,70 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
  */
 public abstract class ChannelConfigurationHandler {
 
+    /**
+     * Method should return the friendly name of the channel configuration handler
+     *
+     * @return friendly name of the channel handler.
+     */
     public abstract String getName();
 
+    /**
+     * Method holds the implementation of adding the Email sender configurations.
+     * TODO: Adding this since channel support will be added to email notification senders too.
+     *
+     * @param emailSender contains the configurations of Email sender.
+     * @return persisted Email notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when adding the Email notification sender configurations.
+     */
+    public abstract EmailSenderDTO addEmailSender(EmailSenderDTO emailSender)
+            throws NotificationSenderManagementException;
+
+    /**
+     * Method holds the implementation of adding the SMS sender configurations.
+     *
+     * @param smsSender contains the configurations of SMS sender.
+     * @return persisted SMS notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when adding the SMS notification sender configurations.
+     */
     public abstract SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws
             NotificationSenderManagementException;
 
+    /**
+     * Method holds the implementation of updating the Email sender configurations.
+     * TODO: Adding this since channel support will be added to email notification senders too.
+     *
+     * @param emailSender contains the configurations of Email sender.
+     * @return persisted Email notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when updating the Email notification sender
+     *                                               configurations.
+     */
+    public abstract EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender)
+            throws NotificationSenderManagementException;
+
+    /**
+     * Method holds the implementation of updating the SMS sender configurations.
+     *
+     * @param smsSender contains the configurations of SMS sender.
+     * @return persisted SMS notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when adding the SMS notification sender configurations.
+     */
     public abstract SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException;
 
+    /**
+     * Method holds the common implementation of deleting the notification sender configurations.
+     *
+     * @param senderName contains the configurations of SMS sender.
+     * @throws NotificationSenderManagementException on errors when deleting the notification sender configurations.
+     */
     public abstract void deleteNotificationSender(String senderName) throws NotificationSenderManagementException;
 
+    /**
+     * Method returns the optional instance of {@link Resource} containing the sender configurations.
+     *
+     * @param resourceName name of the notification sender.
+     * @return optional instance of {@link Resource}.
+     * @throws NotificationSenderManagementException on errors when retrieving the notification sender resources.
+     */
     protected Optional<Resource> getPublisherResource(String resourceName)
             throws NotificationSenderManagementException {
 
@@ -65,8 +122,17 @@ public abstract class ChannelConfigurationHandler {
         return Optional.empty();
     }
 
+    /**
+     * Handle {@link ConfigurationManagementException} and wrapping the exception as
+     * {@link NotificationSenderManagementException}.
+     *
+     * @param e     instance of {@link ConfigurationManagementException}.
+     * @param error Enum errors related to notification senders operations.
+     * @param data  Data related to the errors when processing notification senders.
+     * @return NotificationSenderManagementConstants exception wrapping the config management exception.
+     */
     protected NotificationSenderManagementException handleConfigurationMgtException(ConfigurationManagementException e,
-         NotificationSenderManagementConstants.ErrorMessage error, String data) {
+                                                                                    ErrorMessage error, String data) {
 
         if (e instanceof ConfigurationManagementClientException) {
             return new NotificationSenderManagementClientException(error, data, e);
