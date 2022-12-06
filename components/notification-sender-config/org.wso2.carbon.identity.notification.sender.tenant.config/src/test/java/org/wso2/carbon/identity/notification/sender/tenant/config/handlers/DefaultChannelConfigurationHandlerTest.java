@@ -224,7 +224,6 @@ public class DefaultChannelConfigurationHandlerTest {
 
         defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
 
-
     }
 
     @DataProvider(name = "addSMSSenderDataProviderForException")
