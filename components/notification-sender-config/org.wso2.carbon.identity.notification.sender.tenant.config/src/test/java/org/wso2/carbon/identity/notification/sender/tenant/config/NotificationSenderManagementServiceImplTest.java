@@ -57,6 +57,8 @@ public class NotificationSenderManagementServiceImplTest {
     private ChannelConfigurationHandler websubhubChannelConfigurationHandler;
     @Mock
     private ConfigurationManager configurationManager;
+    private String defaultHandlerName = "default";
+    private String websubhubHandlerName = "choreo";
 
     @BeforeMethod
     public void setup() {
@@ -64,8 +66,8 @@ public class NotificationSenderManagementServiceImplTest {
         MockitoAnnotations.openMocks(this);
         notificationSenderManagementService = new NotificationSenderManagementServiceImpl();
 
-        when(defaultChannelConfigurationHandler.getName()).thenReturn("default");
-        when(websubhubChannelConfigurationHandler.getName()).thenReturn("websubhub");
+        when(defaultChannelConfigurationHandler.getName()).thenReturn(defaultHandlerName);
+        when(websubhubChannelConfigurationHandler.getName()).thenReturn(websubhubHandlerName);
 
         NotificationSenderTenantConfigDataHolder.getInstance()
                 .registerConfigurationHandler(defaultChannelConfigurationHandler);
@@ -102,8 +104,8 @@ public class NotificationSenderManagementServiceImplTest {
 
         return new Object[][]{
                 // channel type
-                {"default"},
-                {"websubhub"},
+                {defaultHandlerName},
+                {websubhubHandlerName},
                 {""},
                 {null}
         };
@@ -136,8 +138,8 @@ public class NotificationSenderManagementServiceImplTest {
 
         return new Object[][]{
                 //resource
-                {constructResource("default", false)},
-                {constructResource("websubhub", false)},
+                {constructResource(defaultHandlerName, false)},
+                {constructResource(websubhubHandlerName, false)},
                 {constructResource(null, false)},
                 {constructResource(null, true)}
         };
@@ -150,6 +152,71 @@ public class NotificationSenderManagementServiceImplTest {
                 //resource
                 {constructResource("dummyChannel", false)},
                 {null},
+        };
+    }
+
+    @Test(dataProvider = "updateNotificationSenderDataProvider")
+    public void testUpdateSMSSender(SMSSenderDTO smsSenderDTO, Resource resource)
+            throws ConfigurationManagementException, NotificationSenderManagementException {
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+        when(defaultChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class)))
+                .thenReturn(constructSMSSenderDto(smsSenderDTO.getProperties().get("channel.type")));
+        when(websubhubChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class)))
+                .thenReturn(constructSMSSenderDto(smsSenderDTO.getProperties().get("channel.type")));
+        SMSSenderDTO smsSenderDTOReturned = notificationSenderManagementService.updateSMSSender(smsSenderDTO);
+        Assert.assertEquals(smsSenderDTOReturned.getProperties().get("channel.type")
+                , smsSenderDTO.getProperties().get("channel.type"));
+
+    }
+
+    @DataProvider(name = "updateNotificationSenderDataProvider")
+    public Object[][] provideDataForUpdateSMSSender() {
+
+        SMSSenderDTO smsSenderDTO1 = constructSMSSenderDto(defaultHandlerName);
+        Resource resource1 = constructResource(defaultHandlerName, false);
+
+        SMSSenderDTO smsSenderDTO2 = constructSMSSenderDto(websubhubHandlerName);
+        Resource resource2 = constructResource(websubhubHandlerName, false);
+
+        return new Object[][]{
+                //SMSSenderDTO object, Resource object
+                {smsSenderDTO1, resource1},
+                {smsSenderDTO2, resource2}
+        };
+    }
+
+    @Test(dataProvider = "updateNotificationSenderExceptionDataProvider",
+            expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testUpdateSMSSenderExceptions(SMSSenderDTO smsSenderDTO, Resource resource)
+            throws ConfigurationManagementException, NotificationSenderManagementException {
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+        when(defaultChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class)))
+                .thenReturn(constructSMSSenderDto(smsSenderDTO.getProperties().get("channel.type")));
+        when(websubhubChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class)))
+                .thenReturn(constructSMSSenderDto(smsSenderDTO.getProperties().get("channel.type")));
+
+        notificationSenderManagementService.updateSMSSender(smsSenderDTO);
+
+    }
+
+    @DataProvider(name = "updateNotificationSenderExceptionDataProvider")
+    public Object[][] provideDataForUpdateSMSSenderExceptions() {
+
+        SMSSenderDTO smsSenderDTO1 = constructSMSSenderDto(defaultHandlerName);
+
+        SMSSenderDTO smsSenderDTO2 = constructSMSSenderDto(defaultHandlerName);
+        Resource resource2 = constructResource(websubhubHandlerName, false);
+
+        SMSSenderDTO smsSenderDTO3 = constructSMSSenderDto("dummyType");
+        Resource resource3 = constructResource("dummyType", false);
+
+        return new Object[][]{
+                //SMSSenderDTO object, Resource object
+                {smsSenderDTO1, null},
+                {smsSenderDTO2, resource2},
+                {smsSenderDTO3, resource3}
         };
     }
 
