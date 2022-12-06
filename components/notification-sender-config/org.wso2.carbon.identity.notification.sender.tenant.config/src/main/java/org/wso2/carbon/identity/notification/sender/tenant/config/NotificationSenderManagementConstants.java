@@ -102,6 +102,8 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_PORT_PROPERTY = "mail.smtp.port";
     public static final String HTTP_URL_PROPERTY = "http.url";
     public static final String CONSTANT_HTTP_POST = "HttpPost";
+    public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
+    public static final String DEFAULT_HANDLER_NAME = "default";
 
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
@@ -127,6 +129,9 @@ public class NotificationSenderManagementConstants {
                 "SMS provider url is not defined for notification sender."),
         ERROR_CODE_PUBLISHER_NOT_EXISTS("60006", "No notification sender found.",
                 "There is no notification sender for publisher: %s."),
+        ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED("60007",
+                "Updating channel type is not allowed.",
+                "Updating channel type is not allowed for SMS notification sender: %s."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",
@@ -151,7 +156,16 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR("65011", "Error while re-deploying resource.",
                                               "Error while re-deploying resource with name: %s."),
         ERROR_CODE_RESOURCE_DELETE_ERROR("65011", "Error while deleting resource.",
-                "Error while deleting resource with name: %s.");
+                "Error while deleting resource with name: %s."),
+        ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND("65012",
+                "No configuration handler found for the given channel type.",
+                "No configuration handler found for the given channel type: %s."),
+        ERROR_CODE_ERROR_REGISTERING_HUB_TOPIC("65013",
+                "Error while registering hub topic for websub notification channel.",
+                "Error while registering hub topic for websub notification channel: %s."),
+        ERROR_CODE_ERROR_UNREGISTERING_HUB_TOPIC("65014",
+                "Error while unregistering hub topic for websub notification channel.",
+                "Error while unregistering hub topic for websub notification channel.: %s.");
 
         private final String code;
         private final String message;

@@ -32,6 +32,8 @@ import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
+import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -53,10 +55,12 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void activate(ComponentContext context) {
 
         try {
+            NotificationSenderTenantConfigDataHolder.getInstance()
+                    .registerConfigurationHandler(new DefaultChannelConfigurationHandler());
             context.getBundleContext().registerService(NotificationSenderManagementService.class.getName(),
                     new NotificationSenderManagementServiceImpl(), null);
         } catch (Exception e) {
-            log.error("Can not create the tenant wise email sender config service.", e);
+            log.error("Can not create the tenant wise notification sender config service.", e);
         }
     }
 
@@ -64,7 +68,7 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void deactivate(ComponentContext context) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Tenant wise email sender config service bundle is de-activated");
+            log.debug("Tenant wise notification sender config service bundle is de-activated");
         }
     }
 
@@ -151,5 +155,28 @@ public class NotificationSenderTenantConfigServiceDS {
 
     protected void unsetSMSProviderPayloadTemplateManager(SMSProviderPayloadTemplateManager manager) {
         NotificationSenderTenantConfigDataHolder.getInstance().setSMSProviderPayloadTemplateManager(null);
+    }
+
+    @Reference(name = "configuration.handler.tracker.service",
+            service = ChannelConfigurationHandler.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationHandler")
+    protected void setConfigurationHandler(ChannelConfigurationHandler configurationHandler) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Registering the Channel Configuration Handler");
+        }
+
+        NotificationSenderTenantConfigDataHolder.getInstance().registerConfigurationHandler(configurationHandler);
+    }
+
+    protected void unsetConfigurationHandler(ChannelConfigurationHandler configurationHandler) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Unregistering the Channel Configuration Handler");
+        }
+
+        NotificationSenderTenantConfigDataHolder.getInstance().unregisterConfigurationHandler(configurationHandler);
     }
 }
