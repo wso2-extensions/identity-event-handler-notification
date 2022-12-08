@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 
 /**
@@ -60,7 +61,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
  */
 public class DefaultChannelConfigurationHandlerTest {
 
-    public static final String PUBLISHER_RESOURCE_TYPE = "Publisher";
     private DefaultChannelConfigurationHandler defaultChannelConfigurationHandler;
     @Mock
     private SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager;
@@ -135,7 +135,7 @@ public class DefaultChannelConfigurationHandlerTest {
     @Test
     public void testGetName() {
 
-        Assert.assertEquals(defaultChannelConfigurationHandler.getName(), "default");
+        Assert.assertEquals(defaultChannelConfigurationHandler.getName(), DEFAULT_HANDLER_NAME);
     }
 
     @Test(dataProvider = "addSMSSenderDataProvider")
