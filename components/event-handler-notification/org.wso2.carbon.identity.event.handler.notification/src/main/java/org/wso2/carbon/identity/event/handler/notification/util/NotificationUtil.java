@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -55,6 +56,7 @@ import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -86,6 +88,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_ID_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
 
@@ -177,29 +180,36 @@ public class NotificationUtil {
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
                 BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
-                BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference(
-                        BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
-                        placeHolderData.get("tenant-domain"),
-                        BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
-
+                BrandingPreference responseDTO;
+                if (placeHolderData.get(ORGANIZATION_ID_PLACEHOLDER) != null) {
+                    List<String> ancestorOrgIds = getOrganizationManager().getAncestorOrganizationIds(placeHolderData.get(ORGANIZATION_ID_PLACEHOLDER));
+                    responseDTO = fetchBrandingPreferenceFromOrgHierarchy(ancestorOrgIds, brandingPreferenceManager);
+                } else {
+                    responseDTO = brandingPreferenceManager.getBrandingPreference(
+                            BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
+                            placeHolderData.get("tenant-domain"),
+                            BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
+                }
                 ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(responseDTO.getPreference());
-                brandingPreferences = objectMapper.readTree(json);
+                if (responseDTO != null) {
+                    String json = objectMapper.writeValueAsString(responseDTO.getPreference());
+                    brandingPreferences = objectMapper.readTree(json);
+                }
 
-                if (!brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH)
+                if (brandingPreferences != null && !brandingPreferences.at(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_IS_ENABLED_PATH)
                         .asBoolean()) {
                     brandingPreferences = null;
                 }
             } catch (BrandingPreferenceMgtException e) {
-                if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_BRANDING_PREFERENCE_NOT_EXISTS.getCode()
+                if (!BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_BRANDING_PREFERENCE_NOT_EXISTS.getCode()
                         .equals(e.getErrorCode())) {
-                    brandingPreferences = null;
-                } else {
                     if (log.isDebugEnabled()) {
                         String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
                         log.debug(message, e);
                     }
                 }
+            } catch (OrganizationManagementServerException e) {
+                log.error("Error occurred while retrieving ancestor organization to resolve branding preferences");
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
                     String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
@@ -540,9 +550,8 @@ public class NotificationUtil {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         placeHolderData.put("current-year", String.valueOf(currentYear));
 
-        // Resolve human-readable organization name, and add it to "organization-name" placeholder.
-        String organizationName = resolveHumanReadableOrganizationName(tenantDomain);
-        placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
+        // Resolve organization name and organization id, and add them to placeholder.
+        resolveOrgNameAndOrgId(tenantDomain, placeHolderData);
 
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
 
@@ -556,32 +565,32 @@ public class NotificationUtil {
     }
 
     /**
-     * If the tenant domain is a UUID, resolve the organization name from the associated organization resource.
+     * If the tenant domain is a UUID, resolve the organization name and id from the associated organization resource
+     * and store in the placeholder map.
      *
-     * @param tenantDomain Tenant domain.
-     * @return Human-readable name related to the represented organization space.
+     * @param tenantDomain    Tenant domain.
+     * @param placeHolderData Placeholder map to store the required details.
      * @throws IdentityEventException Error while resolving organization name.
      */
-    private static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
+    private static void resolveOrgNameAndOrgId(String tenantDomain, Map<String, String> placeHolderData)
+            throws IdentityEventException {
 
-        String organizationName = tenantDomain;
+        placeHolderData.put(ORGANIZATION_ID_PLACEHOLDER, null);
+        placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, tenantDomain);
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                return organizationName;
+                return;
             }
             RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
             int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
             Tenant tenant = realmService.getTenantManager().getTenant(tenantId);
-            if (tenant == null) {
-                return organizationName;
+            if (tenant == null || StringUtils.isBlank(tenant.getAssociatedOrganizationUUID())) {
+                return;
             }
-            String associatedOrganizationUUID = tenant.getAssociatedOrganizationUUID();
-            if (StringUtils.isBlank(associatedOrganizationUUID)) {
-                return organizationName;
-            }
-            OrganizationManager organizationManager =
-                    NotificationHandlerDataHolder.getInstance().getOrganizationManager();
-            organizationName = organizationManager.getOrganizationNameById(associatedOrganizationUUID);
+
+            placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER,
+                    getOrganizationManager().getOrganizationNameById(tenant.getAssociatedOrganizationUUID()));
+            placeHolderData.put(ORGANIZATION_ID_PLACEHOLDER, tenant.getAssociatedOrganizationUUID());
         } catch (OrganizationManagementClientException e) {
             if (!ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT.getCode().equals(e.getErrorCode())) {
                 throw new IdentityEventException(e.getMessage(), e);
@@ -589,7 +598,50 @@ public class NotificationUtil {
         } catch (OrganizationManagementException | UserStoreException e) {
             throw new IdentityEventException(e.getMessage(), e);
         }
-        return organizationName;
+    }
+
+    /**
+     * Fetch the branding preferences from the organization hierarchy by traversing from the base org to the super org.
+     * If branding preferences enabled organization is found, that will be used as the branding preference.
+     *
+     * @param ancestorOrgIds The list of ancestor org ids including the base organization itself.
+     * @param brandingPreferenceManager The branding preference manager.
+     * @return Branding preferences of the immediate organization which has configured branding preferences.
+     */
+    private static BrandingPreference fetchBrandingPreferenceFromOrgHierarchy(List<String> ancestorOrgIds, BrandingPreferenceManager brandingPreferenceManager) {
+
+        String tenantDomain = null;
+        for (String orgId : ancestorOrgIds) {
+            try {
+                tenantDomain = getOrganizationManager().resolveTenantDomain(orgId);
+                int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+                return brandingPreferenceManager.getBrandingPreference(
+                        BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
+                        tenantDomain,
+                        BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
+            } catch (BrandingPreferenceMgtException e) {
+                if (!BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_BRANDING_PREFERENCE_NOT_EXISTS.getCode()
+                        .equals(e.getErrorCode())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error occurred while retrieving branding preferences for organization " + tenantDomain, e);
+                    }
+                }
+            } catch (OrganizationManagementException e) {
+                log.error("Error occurred while resolving tenant from organization id: " + orgId, e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return null;
+    }
+
+    private static OrganizationManager getOrganizationManager() {
+
+        return NotificationHandlerDataHolder.getInstance().getOrganizationManager();
     }
 }
 
