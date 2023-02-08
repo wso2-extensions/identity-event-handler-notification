@@ -87,6 +87,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.TENANT_DOMAIN_PLACEHOLDER;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
 
 public class NotificationUtil {
@@ -179,7 +180,7 @@ public class NotificationUtil {
                 BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
                 BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference(
                         BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
-                        placeHolderData.get("tenant-domain"),
+                        placeHolderData.get(TENANT_DOMAIN_PLACEHOLDER),
                         BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
 
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -196,13 +197,15 @@ public class NotificationUtil {
                     brandingPreferences = null;
                 } else {
                     if (log.isDebugEnabled()) {
-                        String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                        String message = "Error occurred while retrieving branding preferences for organization "
+                                + placeHolderData.get(TENANT_DOMAIN_PLACEHOLDER);
                         log.debug(message, e);
                     }
                 }
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get("tenant-domain");
+                    String message = "Error occurred while retrieving branding preferences for organization "
+                            + placeHolderData.get(TENANT_DOMAIN_PLACEHOLDER);
                     log.debug(message, e);
                 }
             }
@@ -265,7 +268,7 @@ public class NotificationUtil {
             carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
             if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
                 carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t" +
-                        "/" + placeHolderData.get("tenant-domain");
+                        "/" + placeHolderData.get(TENANT_DOMAIN_PLACEHOLDER);
             }
         } catch (URLBuilderException e) {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
