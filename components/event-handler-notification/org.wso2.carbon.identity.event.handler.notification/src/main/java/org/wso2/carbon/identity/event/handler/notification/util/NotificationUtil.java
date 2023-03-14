@@ -178,7 +178,7 @@ public class NotificationUtil {
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
                 BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
-                BrandingPreference responseDTO = brandingPreferenceManager.getBrandingPreference(
+                BrandingPreference responseDTO = brandingPreferenceManager.resolveBrandingPreference(
                         BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
                         placeHolderData.get(TENANT_DOMAIN_PLACEHOLDER),
                         BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
