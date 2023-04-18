@@ -448,12 +448,16 @@ public class NotificationUtil {
                 break;
             case "organization.color.primary" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
+                        ? (getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main") != null
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary"))
                         : brandingFallbacks.get("primary_color");
                 break;
             case "organization.color.background" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main") != null
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
                         : brandingFallbacks.get("background_color");
                 break;
             case "organization.font" :
@@ -463,7 +467,9 @@ public class NotificationUtil {
                 break;
             case "organization.font.color" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary") != null
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
                         : brandingFallbacks.get("font_color");
                 break;
             case "organization.button.font.color" :
