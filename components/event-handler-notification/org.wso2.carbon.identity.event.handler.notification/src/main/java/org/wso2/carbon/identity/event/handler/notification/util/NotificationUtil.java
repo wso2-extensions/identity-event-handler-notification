@@ -448,14 +448,14 @@ public class NotificationUtil {
                 break;
             case "organization.color.primary" :
                 value = brandingIsEnabled
-                        ? (getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main") != null
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main"))
                             ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main")
-                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary"))
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
                         : brandingFallbacks.get("primary_color");
                 break;
             case "organization.color.background" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main") != null
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main"))
                             ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main")
                             : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
                         : brandingFallbacks.get("background_color");
@@ -467,7 +467,7 @@ public class NotificationUtil {
                 break;
             case "organization.font.color" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary") != null
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary"))
                             ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary")
                             : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
                         : brandingFallbacks.get("font_color");
