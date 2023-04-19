@@ -478,14 +478,18 @@ public class NotificationUtil {
                         : brandingFallbacks.get("button_font_color");
                 break;
             case "organization.theme.background.color" :
-                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("light_background_color")
-                        : brandingFallbacks.get("dark_background_color");
+                value = brandingIsEnabled && !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/surface/main"))
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/surface/main")
+                            : theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                                ? brandingFallbacks.get("light_background_color")
+                                : brandingFallbacks.get("dark_background_color");
                 break;
             case "organization.theme.border.color" :
-                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("light_border_color")
-                        : brandingFallbacks.get("dark_border_color");
+                value = brandingIsEnabled && !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/outlined/default"))
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/outlined/default")
+                        : theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                            ? brandingFallbacks.get("light_border_color")
+                            : brandingFallbacks.get("dark_border_color");
                 break;
             default: break;
         }
