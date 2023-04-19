@@ -165,7 +165,11 @@ public class NotificationSenderManagementConstants {
                 "Error while registering hub topic for websub notification channel: %s."),
         ERROR_CODE_ERROR_UNREGISTERING_HUB_TOPIC("65014",
                 "Error while unregistering hub topic for websub notification channel.",
-                "Error while unregistering hub topic for websub notification channel.: %s.");
+                "Error while unregistering hub topic for websub notification channel.: %s."),
+        ERROR_CODE_TOPIC_DEREGISTRATION_FAILURE_ACTIVE_SUBS("65015",
+                "Error occurred while de-registering hub topic for websub notification channel.",
+                "Error received from WebSubHub while attempting to de-register notification channel: %s due to active" +
+                " subscribers.");
 
         private final String code;
         private final String message;
