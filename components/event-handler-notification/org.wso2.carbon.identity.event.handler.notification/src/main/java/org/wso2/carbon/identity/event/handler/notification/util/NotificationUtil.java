@@ -448,12 +448,16 @@ public class NotificationUtil {
                 break;
             case "organization.color.primary" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main"))
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary")
                         : brandingFallbacks.get("primary_color");
                 break;
             case "organization.color.background" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main"))
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/body/main")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/background/backgroundColor")
                         : brandingFallbacks.get("background_color");
                 break;
             case "organization.font" :
@@ -463,7 +467,9 @@ public class NotificationUtil {
                 break;
             case "organization.font.color" :
                 value = brandingIsEnabled
-                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
+                        ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary"))
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/text/primary")
+                            : getBrandingPreferenceByTheme(brandingPreferences, theme, "/page/font/color")
                         : brandingFallbacks.get("font_color");
                 break;
             case "organization.button.font.color" :
@@ -472,14 +478,18 @@ public class NotificationUtil {
                         : brandingFallbacks.get("button_font_color");
                 break;
             case "organization.theme.background.color" :
-                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("light_background_color")
-                        : brandingFallbacks.get("dark_background_color");
+                value = brandingIsEnabled && !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/surface/main"))
+                            ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/background/surface/main")
+                            : theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                                ? brandingFallbacks.get("light_background_color")
+                                : brandingFallbacks.get("dark_background_color");
                 break;
             case "organization.theme.border.color" :
-                value = theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
-                        ? brandingFallbacks.get("light_border_color")
-                        : brandingFallbacks.get("dark_border_color");
+                value = brandingIsEnabled && !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/outlined/default"))
+                        ? getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/outlined/default")
+                        : theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
+                            ? brandingFallbacks.get("light_border_color")
+                            : brandingFallbacks.get("dark_border_color");
                 break;
             default: break;
         }
