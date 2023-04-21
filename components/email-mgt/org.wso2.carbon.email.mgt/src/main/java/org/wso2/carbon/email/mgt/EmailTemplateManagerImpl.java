@@ -21,6 +21,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -29,10 +30,12 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.model.EmailTemplateXDSWrapper;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
@@ -42,6 +45,9 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.xds.client.mgt.util.XDSUtils;
+import org.wso2.carbon.identity.xds.common.constant.XDSConstants;
+import org.wso2.carbon.identity.xds.common.constant.XDSOperationType;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -90,6 +96,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         try {
             addNotificationTemplateType(emailTemplateDisplayName, NotificationChannels.EMAIL_CHANNEL.getChannelType(),
                     tenantDomain);
+            if (isControlPlane()) {
+                EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
+                        .setDisplayName(emailTemplateDisplayName)
+                        .setTenantDomain(tenantDomain)
+                        .build();
+                publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
+                        EmailTemplateXDSOperationType.ADD_EMAIL_TEMPLATE_TYPE);
+            }
         } catch (NotificationTemplateManagerClientException e) {
             throw new I18nEmailMgtClientException(e.getMessage(), e);
         } catch (NotificationTemplateManagerInternalException e) {
@@ -150,6 +164,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         try {
             resourceMgtService.deleteIdentityResource(path, tenantDomain);
+            if (isControlPlane()) {
+                EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
+                        .setDisplayName(emailTemplateDisplayName)
+                        .setTenantDomain(tenantDomain)
+                        .build();
+                publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
+                        EmailTemplateXDSOperationType.DELETE_EMAIL_TEMPLATE_TYPE);
+            }
         } catch (IdentityRuntimeException ex) {
             String errorMsg = String.format
                     ("Error deleting email template type %s from %s tenant.", emailTemplateDisplayName, tenantDomain);
@@ -561,6 +583,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         NotificationTemplate notificationTemplate = buildNotificationTemplateFromEmailTemplate(emailTemplate);
         try {
             addNotificationTemplate(notificationTemplate, tenantDomain);
+            if (isControlPlane()) {
+                EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
+                        .setEmailTemplate(emailTemplate)
+                        .setTenantDomain(tenantDomain)
+                        .build();
+                publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
+                        EmailTemplateXDSOperationType.ADD_EMAIL_TEMPLATE);
+            }
         } catch (NotificationTemplateManagerClientException e) {
             throw new I18nEmailMgtClientException(e.getMessage(), e);
         } catch (NotificationTemplateManagerInternalException e) {
@@ -595,6 +625,15 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         try {
             resourceMgtService.deleteIdentityResource(path, tenantDomain, localeCode);
+            if (isControlPlane()) {
+                EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
+                        .setTemplateTypeName(templateTypeName)
+                        .setLocaleCode(localeCode)
+                        .setTenantDomain(tenantDomain)
+                        .build();
+                publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
+                        EmailTemplateXDSOperationType.DELETE_EMAIL_TEMPLATE);
+            }
         } catch (IdentityRuntimeException ex) {
             String msg = String.format("Error deleting %s:%s template from %s tenant registry.", templateTypeName,
                     localeCode, tenantDomain);
@@ -607,6 +646,13 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         try {
             addDefaultNotificationTemplates(NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
+            if (isControlPlane()) {
+                EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
+                        .setTenantDomain(tenantDomain)
+                        .build();
+                publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
+                        EmailTemplateXDSOperationType.ADD_DEFAULT_EMAIL_TEMPLATES);
+            }
         } catch (NotificationTemplateManagerClientException e) {
             throw new I18nEmailMgtClientException(e.getMessage(), e);
         } catch (NotificationTemplateManagerInternalException e) {
@@ -976,4 +1022,24 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         notificationTemplate.setContentType(emailTemplate.getEmailContentType());
         return notificationTemplate;
     }
+    private String buildJson(EmailTemplateXDSWrapper emailTemplateXDSWrapper) {
+
+        Gson gson = new Gson();
+        return gson.toJson(emailTemplateXDSWrapper);
+    }
+
+    private boolean isControlPlane() {
+
+        return Boolean.parseBoolean(IdentityUtil.getProperty("Server.ControlPlane"));
+    }
+
+    private void publishData(EmailTemplateXDSWrapper emailTemplateXDSWrapper, XDSConstants.EventType eventType,
+                             XDSOperationType xdsOperationType) {
+
+        String json = buildJson(emailTemplateXDSWrapper);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        XDSUtils.publishData(tenantDomain, username, json, eventType, xdsOperationType);
+    }
+
 }

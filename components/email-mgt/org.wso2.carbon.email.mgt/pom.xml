@@ -85,6 +85,14 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.xds.client.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.xds.common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -142,7 +150,10 @@
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.identity.base; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.governance.*;version="${identity.governance.imp.pkg.version.range}"
+                            org.wso2.carbon.identity.governance.*;version="${identity.governance.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.xds.client.mgt.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.xds.common.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+
                         </Import-Package>
                     </instructions>
                 </configuration>
