@@ -98,7 +98,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     tenantDomain);
             if (isControlPlane()) {
                 EmailTemplateXDSWrapper emailTemplateXDSWrapper = new EmailTemplateXDSWrapper.EmailTemplateXDSWrapperBuilder()
-                        .setDisplayName(emailTemplateDisplayName)
+                        .setTemplateTypeName(emailTemplateDisplayName)
                         .setTenantDomain(tenantDomain)
                         .build();
                 publishData(emailTemplateXDSWrapper, XDSConstants.EventType.EMAIL_TEMPLATE,
@@ -1039,7 +1039,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         String json = buildJson(emailTemplateXDSWrapper);
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        XDSUtils.publishData(tenantDomain, username, json, eventType, xdsOperationType);
+        I18nMgtDataHolder.getInstance().getXdsClientService()
+                .publishData(tenantDomain, username, json, eventType, xdsOperationType);
     }
 
 }

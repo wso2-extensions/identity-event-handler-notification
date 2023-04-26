@@ -18,6 +18,7 @@ package org.wso2.carbon.email.mgt.internal;
 
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.xds.client.mgt.XDSClientService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -28,6 +29,7 @@ public class I18nMgtDataHolder{
     private RealmService realmService;
     private RegistryService registryService;
     private RegistryResourceMgtService registryResourceMgtService;
+    private XDSClientService xdsClientService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
 
@@ -92,5 +94,13 @@ public class I18nMgtDataHolder{
     public List<NotificationTemplate> getDefaultSMSTemplates() {
 
         return defaultSMSTemplates;
+    }
+
+    public XDSClientService getXdsClientService() {
+        return xdsClientService;
+    }
+
+    public void setXdsClientService(XDSClientService xdsClientService) {
+        this.xdsClientService = xdsClientService;
     }
 }
