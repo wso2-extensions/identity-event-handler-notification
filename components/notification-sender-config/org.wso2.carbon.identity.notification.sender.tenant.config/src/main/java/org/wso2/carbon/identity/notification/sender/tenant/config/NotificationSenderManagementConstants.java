@@ -63,6 +63,8 @@ public class NotificationSenderManagementConstants {
     public static final String CONTENT_TYPE = "contentType";
     public static final String CLIENT_HTTP_METHOD_PROPERTY = "http.client.method";
     public static final String SMS_PUBLISHER_TYPE = "sms";
+    public static final String MY_ACCOUNT_SMS_RESOURCE_TYPE = "myaccount";
+    public static final String MY_ACCOUNT_SMS_RESOURCE_NAME = "myaccount-2FA-config";
 
     // Constant for eventPublisher file generation.
     public static final String ROOT_ELEMENT = "eventPublisher";
@@ -132,6 +134,9 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED("60007",
                 "Updating channel type is not allowed.",
                 "Updating channel type is not allowed for SMS notification sender: %s."),
+        ERROR_CODE_CONNECTED_APPLICATION_EXISTS("60008",
+                "Unable to disable.",
+                "There are applications using this connection."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",

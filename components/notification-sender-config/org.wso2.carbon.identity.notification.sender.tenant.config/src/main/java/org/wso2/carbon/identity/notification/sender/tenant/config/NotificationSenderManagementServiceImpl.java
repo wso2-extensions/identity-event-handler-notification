@@ -27,6 +27,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementClientException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
+import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Error;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
@@ -46,9 +50,12 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.internal.Notif
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
+import org.wso2.carbon.idp.mgt.model.ConnectedAppsResult;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +64,19 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MY_ACCOUNT_SMS_RESOURCE_NAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MY_ACCOUNT_SMS_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONNECTED_APPLICATION_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
@@ -98,6 +110,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;
+    public static final String SMS_OTP_AUTHENTICATOR = "sms-otp-authenticator";
+
+    public static final Map<String, String> senders = new HashMap<String, String>() {{
+        put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
+    }};
 
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
@@ -159,6 +176,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         Resource resource = getPublisherResource(senderName).orElseThrow(() ->
                 new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName));
+
+        if (!checkAllowDelete(senderName)) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_CONNECTED_APPLICATION_EXISTS, senderName);
+        }
 
         String channel = getChannelTypeFromResource(resource);
         if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
@@ -504,6 +525,18 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         return emailSender;
     }
 
+    private NotificationSenderManagementException handleApplicationMgtException(IdentityApplicationManagementException e,
+                                                                                  ErrorMessage error,
+                                                                                  String data) {
+        if (e instanceof IdentityApplicationManagementClientException) {
+            return new NotificationSenderManagementClientException(error, data, e);
+        } else if (e instanceof IdentityApplicationManagementServerException) {
+            return new NotificationSenderManagementServerException(error, data, e);
+        } else {
+            return new NotificationSenderManagementException(error, data, e);
+        }
+    }
+
     private NotificationSenderManagementException handleConfigurationMgtException(ConfigurationManagementException e,
                                                                                   ErrorMessage error,
                                                                                   String data) {
@@ -550,5 +583,52 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY)).findAny()
                     .map(Attribute::getValue).orElse(DEFAULT_HANDLER_NAME);
         }
+    }
+
+    /**
+     * Method to check whether the sender is allowed to delete.
+     * @param senderName    Name of the sender.
+     * @return  whether the sender is allowed to delete.
+     * @throws NotificationSenderManagementException If an error occurred while checking the sender.
+     */
+    private boolean checkAllowDelete(String senderName) throws NotificationSenderManagementException {
+
+        if (senders.get(senderName) != null) {
+            String authenticatorId = new String(Base64.getUrlEncoder()
+                    .encode(senders.get(senderName).getBytes(StandardCharsets.UTF_8)),
+                    StandardCharsets.UTF_8);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            try {
+                ConnectedAppsResult appsResult =
+                        NotificationSenderTenantConfigDataHolder.getInstance()
+                        .getApplicationManagementService()
+                        .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 ,0);
+                if (appsResult.getApps().size() > 0) {
+                    return false;
+                }
+                Resource resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                        .getResource(MY_ACCOUNT_SMS_RESOURCE_TYPE, MY_ACCOUNT_SMS_RESOURCE_NAME);
+                String smsOtpEnabled = resource.getAttributes().stream().filter(attribute -> attribute.getKey().equals("sms_otp_enabled")).collect(
+                        Collectors.toList()).get(0).getValue();
+                if (Boolean.parseBoolean(smsOtpEnabled)) {
+                    return false;
+                }
+            } catch (IdentityApplicationManagementException e) {
+                if (e instanceof IdentityApplicationManagementClientException && e.getErrorCode()
+                        .equals(Error.AUTHENTICATOR_NOT_FOUND.getCode())) {
+                    return true;
+                }
+                throw handleApplicationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
+                        senderName);
+            } catch (ConfigurationManagementException e) {
+                if (e instanceof ConfigurationManagementClientException && e.getErrorCode()
+                        .equals(ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode())) {
+                    return true;
+                }
+                throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
+                        senderName);
+            }
+        }
+        return true;
     }
 }
