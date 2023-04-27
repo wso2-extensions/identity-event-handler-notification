@@ -604,6 +604,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         NotificationSenderTenantConfigDataHolder.getInstance()
                         .getApplicationManagementService()
                         .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 ,0);
+                // If there are any connected apps, the sender cannot be deleted.
                 if (appsResult.getApps().size() > 0) {
                     return false;
                 }
@@ -611,6 +612,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         .getResource(MY_ACCOUNT_SMS_RESOURCE_TYPE, MY_ACCOUNT_SMS_RESOURCE_NAME);
                 String smsOtpEnabled = resource.getAttributes().stream().filter(attribute -> attribute.getKey().equals("sms_otp_enabled")).collect(
                         Collectors.toList()).get(0).getValue();
+                // If SMS OTP is enabled for my account, the sender cannot be deleted.
                 if (Boolean.parseBoolean(smsOtpEnabled)) {
                     return false;
                 }
