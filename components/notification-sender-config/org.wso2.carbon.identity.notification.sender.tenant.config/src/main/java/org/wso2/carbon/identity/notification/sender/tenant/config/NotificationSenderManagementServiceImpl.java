@@ -587,6 +587,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     /**
      * Method to check whether the sender is allowed to delete.
+     *
      * @param senderName    Name of the sender.
      * @return  whether the sender is allowed to delete.
      * @throws NotificationSenderManagementException If an error occurred while checking the sender.
