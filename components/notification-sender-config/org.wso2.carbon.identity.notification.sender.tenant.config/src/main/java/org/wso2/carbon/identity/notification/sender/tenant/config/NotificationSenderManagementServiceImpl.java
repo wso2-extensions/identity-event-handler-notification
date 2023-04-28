@@ -112,9 +112,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public static final int MAX_RETRY_COUNT = 60;
     public static final String SMS_OTP_AUTHENTICATOR = "sms-otp-authenticator";
 
-    public static final Map<String, String> senders = new HashMap<String, String>() {{
+    public static final Map<String, String> SENDERS = new HashMap<String, String>() { {
         put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
-    }};
+    } };
 
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
@@ -525,9 +525,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         return emailSender;
     }
 
-    private NotificationSenderManagementException handleApplicationMgtException(IdentityApplicationManagementException e,
-                                                                                  ErrorMessage error,
-                                                                                  String data) {
+    private NotificationSenderManagementException handleApplicationMgtException(
+            IdentityApplicationManagementException e, ErrorMessage error, String data) {
+
         if (e instanceof IdentityApplicationManagementClientException) {
             return new NotificationSenderManagementClientException(error, data, e);
         } else if (e instanceof IdentityApplicationManagementServerException) {
@@ -594,23 +594,24 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
      */
     private boolean checkAllowDelete(String senderName) throws NotificationSenderManagementException {
 
-        if (senders.get(senderName) != null) {
+        if (SENDERS.get(senderName) != null) {
             String authenticatorId = new String(Base64.getUrlEncoder()
-                    .encode(senders.get(senderName).getBytes(StandardCharsets.UTF_8)),
+                    .encode(SENDERS.get(senderName).getBytes(StandardCharsets.UTF_8)),
                     StandardCharsets.UTF_8);
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             try {
                 ConnectedAppsResult appsResult =
                         NotificationSenderTenantConfigDataHolder.getInstance()
                         .getApplicationManagementService()
-                        .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 ,0);
+                        .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 , 0);
                 // If there are any connected apps, the sender cannot be deleted.
                 if (appsResult.getApps().size() > 0) {
                     return false;
                 }
                 Resource resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                         .getResource(MY_ACCOUNT_SMS_RESOURCE_TYPE, MY_ACCOUNT_SMS_RESOURCE_NAME);
-                String smsOtpEnabled = resource.getAttributes().stream().filter(attribute -> attribute.getKey().equals("sms_otp_enabled")).collect(
+                String smsOtpEnabled = resource.getAttributes().stream().filter(attribute -> attribute
+                        .getKey().equals("sms_otp_enabled")).collect(
                         Collectors.toList()).get(0).getValue();
                 // If SMS OTP is enabled for my account, the sender cannot be deleted.
                 if (Boolean.parseBoolean(smsOtpEnabled)) {
