@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
@@ -35,6 +36,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +67,8 @@ public class NotificationSenderManagementServiceImplTest {
     public void setup() {
 
         MockitoAnnotations.openMocks(this);
+
+        setCarbonHome();
         setCarbonContextForTenant();
         notificationSenderManagementService = new NotificationSenderManagementServiceImpl();
 
@@ -260,6 +264,14 @@ public class NotificationSenderManagementServiceImplTest {
             resource.setAttributes(attributes);
         }
         return resource;
+    }
+
+    private void setCarbonHome() {
+
+        String carbonHome = Paths.get(System.getProperty("user.dir"), "target", "test-classes", "repository").
+                toString();
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, carbonHome);
+        System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome, "conf").toString());
     }
 
     private void setCarbonContextForTenant() {
