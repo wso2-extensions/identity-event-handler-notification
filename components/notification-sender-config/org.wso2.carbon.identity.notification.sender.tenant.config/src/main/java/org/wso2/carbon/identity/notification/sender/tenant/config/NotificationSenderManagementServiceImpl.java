@@ -86,6 +86,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_RESOURCE_RE_DEPLOY_ERROR;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_TRANSFORMER_EXCEPTION;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_VALIDATING_CONNECTED_APPS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM_ADDRESS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MY_ACCOUNT_SMS_RESOURCE_NAME;
@@ -632,14 +633,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         Error.AUTHENTICATOR_NOT_FOUND.getCode().equals(e.getErrorCode())) {
                     return true;
                 }
-                throw handleApplicationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
+                throw handleApplicationMgtException(e, ERROR_CODE_VALIDATING_CONNECTED_APPS,
                         senderName);
             } catch (ConfigurationManagementException e) {
                 if (e instanceof ConfigurationManagementClientException &&
                         ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode())) {
                     return true;
                 }
-                throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
+                throw handleConfigurationMgtException(e, ERROR_CODE_VALIDATING_CONNECTED_APPS,
                         senderName);
             }
         }

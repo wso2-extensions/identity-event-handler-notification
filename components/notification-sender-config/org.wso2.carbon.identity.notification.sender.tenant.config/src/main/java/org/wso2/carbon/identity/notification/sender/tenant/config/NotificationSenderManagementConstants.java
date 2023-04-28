@@ -174,7 +174,10 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_TOPIC_DEREGISTRATION_FAILURE_ACTIVE_SUBS("65015",
                 "Error occurred while de-registering hub topic for websub notification channel.",
                 "Error received from WebSubHub while attempting to de-register notification channel: %s due to active" +
-                " subscribers.");
+                " subscribers."),
+        ERROR_CODE_VALIDATING_CONNECTED_APPS("65016",
+                "Error while validating connected applications.",
+                "Error while validating connected applications: %s.");
 
         private final String code;
         private final String message;
