@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
@@ -64,6 +65,7 @@ public class NotificationSenderManagementServiceImplTest {
     public void setup() {
 
         MockitoAnnotations.openMocks(this);
+        setCarbonContextForTenant();
         notificationSenderManagementService = new NotificationSenderManagementServiceImpl();
 
         when(defaultChannelConfigurationHandler.getName()).thenReturn(DEFAULT_HANDLER_NAME);
@@ -258,5 +260,12 @@ public class NotificationSenderManagementServiceImplTest {
             resource.setAttributes(attributes);
         }
         return resource;
+    }
+
+    private void setCarbonContextForTenant() {
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
     }
 }
