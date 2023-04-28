@@ -177,7 +177,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         Resource resource = getPublisherResource(senderName).orElseThrow(() ->
                 new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName));
 
-        if (!checkAllowDelete(senderName)) {
+        if (!canSenderDelete(senderName)) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONNECTED_APPLICATION_EXISTS, senderName);
         }
 
@@ -592,7 +592,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
      * @return  whether the sender is allowed to delete.
      * @throws NotificationSenderManagementException If an error occurred while checking the sender.
      */
-    private boolean checkAllowDelete(String senderName) throws NotificationSenderManagementException {
+    private boolean canSenderDelete(String senderName) throws NotificationSenderManagementException {
 
         if (SENDERS.get(senderName) != null) {
             String authenticatorId = new String(Base64.getUrlEncoder()
@@ -600,33 +600,43 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     StandardCharsets.UTF_8);
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             try {
+                // Since we are checking whether the sender is connected to any application, we can use the limit as 1
+                // and offset as 0.
                 ConnectedAppsResult appsResult =
                         NotificationSenderTenantConfigDataHolder.getInstance()
                         .getApplicationManagementService()
                         .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 , 0);
                 // If there are any connected apps, the sender cannot be deleted.
-                if (appsResult.getApps().size() > 0) {
+                if (appsResult.getApps() != null && appsResult.getApps().size() > 0) {
                     return false;
                 }
                 Resource resource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                         .getResource(MY_ACCOUNT_SMS_RESOURCE_TYPE, MY_ACCOUNT_SMS_RESOURCE_NAME);
-                String smsOtpEnabled = resource.getAttributes().stream().filter(attribute -> attribute
+
+                if (resource == null || resource.getAttributes() == null || resource.getAttributes().isEmpty()) {
+                    return true;
+                }
+                List<Attribute> smsAttributes = resource.getAttributes().stream().filter(attribute -> attribute
                         .getKey().equals("sms_otp_enabled")).collect(
-                        Collectors.toList()).get(0).getValue();
+                        Collectors.toList());
+                String smsOtpEnabled = null;        
+                if (!smsAttributes.isEmpty()) {
+                    smsOtpEnabled = smsAttributes.get(0).getValue();
+                }
                 // If SMS OTP is enabled for my account, the sender cannot be deleted.
                 if (Boolean.parseBoolean(smsOtpEnabled)) {
                     return false;
                 }
             } catch (IdentityApplicationManagementException e) {
-                if (e instanceof IdentityApplicationManagementClientException && e.getErrorCode()
-                        .equals(Error.AUTHENTICATOR_NOT_FOUND.getCode())) {
+                if (e instanceof IdentityApplicationManagementClientException &&
+                        Error.AUTHENTICATOR_NOT_FOUND.getCode().equals(e.getErrorCode())) {
                     return true;
                 }
                 throw handleApplicationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
                         senderName);
             } catch (ConfigurationManagementException e) {
-                if (e instanceof ConfigurationManagementClientException && e.getErrorCode()
-                        .equals(ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode())) {
+                if (e instanceof ConfigurationManagementClientException &&
+                        ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode())) {
                     return true;
                 }
                 throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER,
