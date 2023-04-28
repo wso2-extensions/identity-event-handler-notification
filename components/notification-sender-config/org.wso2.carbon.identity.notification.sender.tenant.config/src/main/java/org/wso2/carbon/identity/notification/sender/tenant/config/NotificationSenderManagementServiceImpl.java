@@ -112,7 +112,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public static final int MAX_RETRY_COUNT = 60;
     public static final String SMS_OTP_AUTHENTICATOR = "sms-otp-authenticator";
 
-    public static final Map<String, String> SENDERS = new HashMap<String, String>() { {
+    static final Map<String, String> SENDERS = new HashMap<String, String>() { {
         put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
     } };
 
