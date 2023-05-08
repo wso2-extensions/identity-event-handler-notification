@@ -57,6 +57,10 @@
             <artifactId>mockito-inline</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
+            <artifactId>org.wso2.carbon.email.mgt</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -104,9 +108,16 @@
                             org.wso2.carbon.event.publisher.core.config; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.event.publisher.core.exception; version="${carbon.analytics.common.version.range}",
 
+                            org.wso2.carbon.identity.application.mgt; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.common; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.common.util; version="${carbon.identity.framework.imp.pkg.version.range}",
+
+                            org.wso2.carbon.idp.mgt.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+
                             org.wso2.carbon.identity.configuration.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.configuration.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.configuration.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.configuration.mgt.core.constant; version="${carbon.identity.framework.imp.pkg.version.range}",
 
                             org.wso2.carbon.identity.tenant.resource.manager.core; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.identity.tenant.resource.manager.exception; version="${identity.governance.imp.pkg.version.range}",

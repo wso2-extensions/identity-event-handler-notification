@@ -24,6 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.base.CarbonBaseConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
@@ -33,13 +37,16 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.idp.mgt.model.ConnectedAppsResult;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -58,12 +65,17 @@ public class NotificationSenderManagementServiceImplTest {
     private ChannelConfigurationHandler websubhubChannelConfigurationHandler;
     @Mock
     private ConfigurationManager configurationManager;
+    @Mock
+    private ApplicationManagementService applicationManagementService;
     private static final String WEB_SUB_HUB_HANDLER_NAME = "choreo";
 
     @BeforeMethod
     public void setup() {
 
         MockitoAnnotations.openMocks(this);
+
+        setCarbonHome();
+        setCarbonContextForTenant();
         notificationSenderManagementService = new NotificationSenderManagementServiceImpl();
 
         when(defaultChannelConfigurationHandler.getName()).thenReturn(DEFAULT_HANDLER_NAME);
@@ -75,6 +87,8 @@ public class NotificationSenderManagementServiceImplTest {
                 .registerConfigurationHandler(websubhubChannelConfigurationHandler);
         NotificationSenderTenantConfigDataHolder.getInstance()
                 .setConfigurationManager(configurationManager);
+        NotificationSenderTenantConfigDataHolder.getInstance()
+                .setApplicationManagementService(applicationManagementService);
 
     }
 
@@ -112,10 +126,14 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test(dataProvider = "deleteNotificationSenderDataProvider")
-    public void testDeleteNotificationSender(Resource resource) throws ConfigurationManagementException,
-            NotificationSenderManagementException {
+    public void testDeleteNotificationSender(Resource resource, ConnectedAppsResult connectedAppsResult)
+            throws ConfigurationManagementException, NotificationSenderManagementException,
+            IdentityApplicationManagementException {
 
         when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+        when(applicationManagementService.getConnectedAppsForLocalAuthenticator(anyString(), anyString(),
+                anyInt(), anyInt()))
+                .thenReturn(connectedAppsResult);
         doNothing().when(websubhubChannelConfigurationHandler).deleteNotificationSender(anyString());
         doNothing().when(defaultChannelConfigurationHandler).deleteNotificationSender(anyString());
 
@@ -125,33 +143,43 @@ public class NotificationSenderManagementServiceImplTest {
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class,
             dataProvider = "deleteNotificationSenderExceptionDataProvider")
-    public void testDeleteNotificationSenderException(Resource resource) throws NotificationSenderManagementException,
-            ConfigurationManagementException {
+    public void testDeleteNotificationSenderException(Resource resource, ConnectedAppsResult connectedAppsResult)
+            throws NotificationSenderManagementException, ConfigurationManagementException,
+            IdentityApplicationManagementException {
 
         when(configurationManager.getResource(anyString(), anyString())).
                 thenReturn(resource);
+        when(applicationManagementService.getConnectedAppsForLocalAuthenticator(anyString(), anyString(),
+                anyInt(), anyInt()))
+                .thenReturn(connectedAppsResult);
         notificationSenderManagementService.deleteNotificationSender("SMSPublisher");
     }
 
     @DataProvider(name = "deleteNotificationSenderDataProvider")
     public Object[][] provideDataForResource() {
 
+        ConnectedAppsResult connectedAppsResult = new ConnectedAppsResult();
+        connectedAppsResult.setApps(new ArrayList<>());
+
         return new Object[][]{
                 //resource
-                {constructResource(DEFAULT_HANDLER_NAME, false)},
-                {constructResource(WEB_SUB_HUB_HANDLER_NAME, false)},
-                {constructResource(null, false)},
-                {constructResource(null, true)}
+                {constructResource(DEFAULT_HANDLER_NAME, false), connectedAppsResult},
+                {constructResource(WEB_SUB_HUB_HANDLER_NAME, false), connectedAppsResult},
+                {constructResource(null, false), connectedAppsResult},
+                {constructResource(null, true), connectedAppsResult}
         };
     }
 
     @DataProvider(name = "deleteNotificationSenderExceptionDataProvider")
     public Object[][] provideDataForResourceForException() {
 
+        ConnectedAppsResult connectedAppsResult = new ConnectedAppsResult();
+        connectedAppsResult.setApps(new ArrayList<>());
+
         return new Object[][]{
                 //resource
-                {constructResource("dummyChannel", false)},
-                {null},
+                {constructResource("dummyChannel", false), connectedAppsResult},
+                {null, connectedAppsResult},
         };
     }
 
@@ -258,5 +286,20 @@ public class NotificationSenderManagementServiceImplTest {
             resource.setAttributes(attributes);
         }
         return resource;
+    }
+
+    private void setCarbonHome() {
+
+        String carbonHome = Paths.get(System.getProperty("user.dir"), "target", "test-classes", "repository").
+                toString();
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, carbonHome);
+        System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome, "conf").toString());
+    }
+
+    private void setCarbonContextForTenant() {
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
     }
 }

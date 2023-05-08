@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.notification.sender.tenant.config.internal;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
@@ -41,6 +42,7 @@ public class NotificationSenderTenantConfigDataHolder {
     private ClusteringAgent clusteringAgent = null;
     private SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager = null;
     Map<String, ChannelConfigurationHandler> configurationHandlerMap = new HashMap<>();
+    private ApplicationManagementService applicationManagementService = null;
 
     private NotificationSenderTenantConfigDataHolder() {
     }
@@ -113,5 +115,15 @@ public class NotificationSenderTenantConfigDataHolder {
     public void unregisterConfigurationHandler(ChannelConfigurationHandler handler) {
 
         configurationHandlerMap.remove(handler.getName(), handler);
+    }
+
+    public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        this.applicationManagementService = applicationManagementService;
+    }
+
+    public ApplicationManagementService getApplicationManagementService() {
+
+        return applicationManagementService;
     }
 }
