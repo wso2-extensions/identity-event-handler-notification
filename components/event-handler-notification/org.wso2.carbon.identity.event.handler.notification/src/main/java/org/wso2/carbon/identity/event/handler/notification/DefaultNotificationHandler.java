@@ -151,8 +151,15 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
                 }
             }
             if(StringUtils.isEmpty(sendTo)) {
-                if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
-                    sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
+                if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+                    if (userClaims.containsKey(NotificationConstants.SMSNotification.CLAIM_URI_MOBILE)) {
+                        sendTo = userClaims.get(NotificationConstants.SMSNotification.CLAIM_URI_MOBILE);
+                    }
+                }
+                else {
+                    if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
+                        sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
+                    }
                 }
             }
 
