@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
+import com.google.gson.Gson;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
@@ -34,6 +35,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
@@ -43,9 +45,12 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.notification.sender.tenant.config.model.NotificationSenderXDSWrapper;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
+import org.wso2.carbon.identity.xds.common.constant.XDSConstants;
+import org.wso2.carbon.identity.xds.common.constant.XDSOperationType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -133,7 +138,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     .addResource(PUBLISHER_RESOURCE_TYPE, emailSenderResource);
 
             reDeployEventPublisherConfiguration(emailSenderResource);
-
+            if (isControlPlane()) {
+                NotificationSenderXDSWrapper notificationSenderXDSWrapper = new NotificationSenderXDSWrapper
+                        .NotificationSenderXDSWrapperBuilder()
+                        .setEmailSender(emailSender)
+                        .build();
+                publishData(notificationSenderXDSWrapper, XDSConstants.EventType.NOTIFICATION_SENDER,
+                        NotificationSenderXDSOperationType.ADD_EMAIL_SENDER);
+            }
             return buildEmailSenderFromResource(emailSenderResource);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER,
@@ -148,7 +160,16 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 .getConfigurationHandlerMap().get(getChannelTypeFromSMSSenderDTO(smsSender));
 
         if (configurationHandler != null) {
-            return configurationHandler.addSMSSender(smsSender);
+            SMSSenderDTO smsSenderDTO = configurationHandler.addSMSSender(smsSender);
+            if (isControlPlane()) {
+                NotificationSenderXDSWrapper notificationSenderXDSWrapper = new NotificationSenderXDSWrapper
+                        .NotificationSenderXDSWrapperBuilder()
+                        .setSMSSender(smsSenderDTO)
+                        .build();
+                publishData(notificationSenderXDSWrapper, XDSConstants.EventType.NOTIFICATION_SENDER,
+                        NotificationSenderXDSOperationType.ADD_SMS_SENDER);
+            }
+            return smsSenderDTO;
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
@@ -164,6 +185,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
                     .get(channel).deleteNotificationSender(senderName);
+            if (isControlPlane()) {
+                NotificationSenderXDSWrapper notificationSenderXDSWrapper = new NotificationSenderXDSWrapper
+                        .NotificationSenderXDSWrapperBuilder()
+                        .setSenderName(senderName)
+                        .build();
+                publishData(notificationSenderXDSWrapper, XDSConstants.EventType.NOTIFICATION_SENDER,
+                        NotificationSenderXDSOperationType.DELETE_NOTIFICATION_SENDER);
+            }
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
@@ -250,6 +279,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     .replaceResource(PUBLISHER_RESOURCE_TYPE, emailSenderResource);
 
             reDeployEventPublisherConfiguration(emailSenderResource);
+            if (isControlPlane()) {
+                NotificationSenderXDSWrapper notificationSenderXDSWrapper = new NotificationSenderXDSWrapper
+                        .NotificationSenderXDSWrapperBuilder()
+                        .setEmailSender(emailSender)
+                        .build();
+                publishData(notificationSenderXDSWrapper, XDSConstants.EventType.NOTIFICATION_SENDER,
+                        NotificationSenderXDSOperationType.UPDATE_EMAIL_SENDER);
+            }
 
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
@@ -276,7 +313,17 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         ChannelConfigurationHandler configurationHandler = NotificationSenderTenantConfigDataHolder.getInstance()
                 .getConfigurationHandlerMap().get(channelType);
         if (configurationHandler != null) {
-            return configurationHandler.updateSMSSender(smsSender);
+            SMSSenderDTO smsSenderDTO = configurationHandler.updateSMSSender(smsSender);
+            if (isControlPlane()) {
+                NotificationSenderXDSWrapper notificationSenderXDSWrapper = new NotificationSenderXDSWrapper
+                        .NotificationSenderXDSWrapperBuilder()
+                        .setSMSSender(smsSender)
+                        .build();
+                publishData(notificationSenderXDSWrapper, XDSConstants.EventType.NOTIFICATION_SENDER,
+                        NotificationSenderXDSOperationType.UPDATE_SMS_SENDER);
+            }
+
+            return smsSenderDTO;
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
@@ -550,5 +597,26 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     .filter(attribute -> attribute.getKey().equals(CHANNEL_TYPE_PROPERTY)).findAny()
                     .map(Attribute::getValue).orElse(DEFAULT_HANDLER_NAME);
         }
+    }
+
+    private String buildJson(NotificationSenderXDSWrapper notificationSenderXDSWrapper) {
+
+        Gson gson = new Gson();
+        return gson.toJson(notificationSenderXDSWrapper);
+    }
+
+    private boolean isControlPlane() {
+
+        return Boolean.parseBoolean(IdentityUtil.getProperty("Server.ControlPlane"));
+    }
+
+    private void publishData(NotificationSenderXDSWrapper notificationSenderXDSWrapper,
+                             XDSConstants.EventType eventType, XDSOperationType xdsOperationType) {
+
+        String json = buildJson(notificationSenderXDSWrapper);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        NotificationSenderTenantConfigDataHolder.getInstance().getXdsClientService()
+                .publishData(tenantDomain, username, json, eventType, xdsOperationType);
     }
 }

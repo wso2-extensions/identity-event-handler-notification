@@ -24,6 +24,7 @@ import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
+import org.wso2.carbon.identity.xds.client.mgt.XDSClientService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class NotificationSenderTenantConfigDataHolder {
     private ResourceManager resourceManager = null;
     private ClusteringAgent clusteringAgent = null;
     private SMSProviderPayloadTemplateManager smsProviderPayloadTemplateManager = null;
+    private XDSClientService xdsClientService;
     Map<String, ChannelConfigurationHandler> configurationHandlerMap = new HashMap<>();
 
     private NotificationSenderTenantConfigDataHolder() {
@@ -113,5 +115,15 @@ public class NotificationSenderTenantConfigDataHolder {
     public void unregisterConfigurationHandler(ChannelConfigurationHandler handler) {
 
         configurationHandlerMap.remove(handler.getName(), handler);
+    }
+
+    public XDSClientService getXdsClientService() {
+
+        return xdsClientService;
+    }
+
+    public void setXdsClientService(XDSClientService xdsClientService) {
+
+        this.xdsClientService = xdsClientService;
     }
 }

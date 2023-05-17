@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSe
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
+import org.wso2.carbon.identity.xds.client.mgt.XDSClientService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -178,5 +179,21 @@ public class NotificationSenderTenantConfigServiceDS {
         }
 
         NotificationSenderTenantConfigDataHolder.getInstance().unregisterConfigurationHandler(configurationHandler);
+    }
+
+    @Reference(
+            name = "xds.client.service",
+            service = org.wso2.carbon.identity.xds.client.mgt.XDSClientService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetXDSClientService")
+    protected void setXDSClientService(XDSClientService xdsClientService) {
+
+        NotificationSenderTenantConfigDataHolder.getInstance().setXdsClientService(xdsClientService);
+    }
+
+    protected void unsetXDSClientService(XDSClientService xdsClientService) {
+
+        NotificationSenderTenantConfigDataHolder.getInstance().setXdsClientService(null);
     }
 }
