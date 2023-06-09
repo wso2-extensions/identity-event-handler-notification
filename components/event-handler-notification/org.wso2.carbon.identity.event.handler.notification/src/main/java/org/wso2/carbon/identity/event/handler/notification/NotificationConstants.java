@@ -30,6 +30,7 @@ public class NotificationConstants {
     public static final String ARBITRARY_SEND_TO = "send-to";
     public static final String ARBITRARY_BODY = "body";
     public static final String DEFAULT_NOTIFICATION_LOCALE = "en_US";
+    public static final String NOTIFICATION_DEFAULT_LOCALE = "Notification.DefaultLocale";
 
     public static class EmailNotification {
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
