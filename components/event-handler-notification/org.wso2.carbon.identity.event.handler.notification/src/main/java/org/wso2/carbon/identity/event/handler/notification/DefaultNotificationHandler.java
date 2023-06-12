@@ -139,7 +139,7 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             }
 
             // Resolve notification template locale according to the notification channel.
-            String locale = NotificationConstants.EmailNotification.LOCALE_DEFAULT;
+            String locale = NotificationUtil.getNotificationLocale();
             if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel) && userClaims
                     .containsKey(NotificationConstants.SMSNotification.DEFAULT_SMS_NOTIFICATION_LOCALE)) {
                 locale = userClaims.get(NotificationConstants.SMSNotification.DEFAULT_SMS_NOTIFICATION_LOCALE);

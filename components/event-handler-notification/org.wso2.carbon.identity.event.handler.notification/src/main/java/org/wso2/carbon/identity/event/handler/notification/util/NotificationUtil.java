@@ -523,7 +523,7 @@ public class NotificationUtil {
             userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
         }
 
-        String locale = NotificationConstants.EmailNotification.LOCALE_DEFAULT;
+        String locale = getNotificationLocale();
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
         }
@@ -600,6 +600,18 @@ public class NotificationUtil {
             throw new IdentityEventException(e.getMessage(), e);
         }
         return organizationName;
+    }
+
+    /**
+     * Get the notification locale.
+     *
+     * @return Locale
+     */
+    public static String getNotificationLocale() {
+
+        return StringUtils.isNotBlank(IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE))
+                ? IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE)
+                : NotificationConstants.EmailNotification.LOCALE_DEFAULT;
     }
 }
 
