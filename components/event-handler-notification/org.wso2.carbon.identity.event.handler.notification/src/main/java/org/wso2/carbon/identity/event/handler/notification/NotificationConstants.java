@@ -81,6 +81,7 @@ public class NotificationConstants {
         public static final String CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER
                 = "product-url-with-user-tenant";
         public static final String ORGANIZATION_NAME_PLACEHOLDER = "organization-name";
+        public static final String TENANT_DOMAIN_PLACEHOLDER = "tenant-domain";
 
         public static final String ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING = "EnableOrganizationLevelEmailBranding";
         public static final String ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACKS_ELEM
