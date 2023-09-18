@@ -107,4 +107,36 @@ public class NotificationConstants {
         public static final String STREAM_VERSION = "1.0.0";
         public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
     }
+
+    /**
+     * Define logging constants.
+     */
+    public static class LogConstants {
+
+        private LogConstants() {
+        }
+        public static final String NOTIFICATION_HANDLER_SERVICE = "notification-handler-service";
+
+        /**
+         * Define action IDs for diagnostic logs.
+         */
+        public static class ActionIDs {
+
+            private ActionIDs() {
+            }
+
+            public static final String HANDLE_EVENT = "handle-event";
+        }
+
+        /**
+         * Define common and reusable Input keys for diagnostic logs.
+         */
+        public static class InputKeys {
+
+            private InputKeys() {
+            }
+            public static final String EVENT_NAME = "event name";
+            public static final String TENANT_DOMAIN = "tenant domain";
+        }
+    }
 }

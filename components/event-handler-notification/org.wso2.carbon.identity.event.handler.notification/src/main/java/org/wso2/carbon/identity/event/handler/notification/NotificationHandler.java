@@ -21,19 +21,16 @@ package org.wso2.carbon.identity.event.handler.notification;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.event.stream.core.EventStreamService;
-import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.core.handler.InitConfig;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
-import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
-import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.DiagnosticLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +47,7 @@ public class NotificationHandler extends DefaultNotificationHandler {
 
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
+
         //We can set the notification template from the identity-even.properties file as a property of the subscription
         //property. Then it will get the first priority.
         String notificationTemplate = getNotificationTemplate(event);
@@ -63,9 +61,24 @@ public class NotificationHandler extends DefaultNotificationHandler {
                 arbitraryDataMap.put(entry.getKey(), (String) entry.getValue());
             }
         }
+        if (LoggerUtils.isDiagnosticLogsEnabled()) {
+            DiagnosticLog.DiagnosticLogBuilder diagnosticLogBuilder = new DiagnosticLog.DiagnosticLogBuilder(
+                    NotificationConstants.LogConstants.NOTIFICATION_HANDLER_SERVICE,
+                    NotificationConstants.LogConstants.ActionIDs.HANDLE_EVENT);
+            diagnosticLogBuilder
+                    .inputParam(NotificationConstants.LogConstants.InputKeys.EVENT_NAME,
+                            arbitraryDataMap.get(NotificationConstants.TEMPLATE_TYPE))
+                    .inputParam(NotificationConstants.LogConstants.InputKeys.TENANT_DOMAIN,
+                            arbitraryDataMap.get(NotificationConstants.TENANT_DOMAIN))
+                    .resultMessage("Notification will be handled.")
+                    .resultStatus(DiagnosticLog.ResultStatus.SUCCESS)
+                    .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
+            LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
+        }
+
         Notification notification = NotificationUtil.buildNotification(event, arbitraryDataMap);
 
-        //Stream definition will be read from the the identity-even.properties file as a property of the subscription
+        //Stream definition will be read from the identity-even.properties file as a property of the subscription
         //property. Then it will get the first priority.
         String streamDefinitionID = getStreamDefinitionID(event);
         //This stream-id was set to the map to pass to the publishToStream method only to avoid API change.
