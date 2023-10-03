@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2016, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
+ * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -106,5 +106,37 @@ public class NotificationConstants {
         public static final String STREAM_NAME = "id_gov_sms_notify_stream";
         public static final String STREAM_VERSION = "1.0.0";
         public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
+    }
+
+    /**
+     * Define logging constants.
+     */
+    public static class LogConstants {
+
+        private LogConstants() {
+        }
+        public static final String NOTIFICATION_HANDLER_SERVICE = "notification-handler-service";
+
+        /**
+         * Define action IDs for diagnostic logs.
+         */
+        public static class ActionIDs {
+
+            private ActionIDs() {
+            }
+
+            public static final String HANDLE_EVENT = "handle-event";
+        }
+
+        /**
+         * Define common and reusable Input keys for diagnostic logs.
+         */
+        public static class InputKeys {
+
+            private InputKeys() {
+            }
+            public static final String EVENT_NAME = "event name";
+            public static final String TENANT_DOMAIN = "tenant domain";
+        }
     }
 }

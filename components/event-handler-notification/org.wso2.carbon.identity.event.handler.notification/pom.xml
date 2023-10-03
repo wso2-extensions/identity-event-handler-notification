@@ -87,6 +87,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.central.log.mgt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
@@ -175,6 +179,7 @@
                             org.wso2.carbon.event.publisher.core.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.databridge.commons.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.email.mgt.*; version="${identity.event.handler.notification.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.central.log.mgt.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.governance.*; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.identity.branding.preference.management.core.*; version="${identity.branding.preference.management.version.range}",
                             org.wso2.carbon.identity.organization.management.service;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
