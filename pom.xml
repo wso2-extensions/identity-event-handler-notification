@@ -392,7 +392,7 @@
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
-        <identity.branding.preference.management.version>1.0.4</identity.branding.preference.management.version>
+        <identity.branding.preference.management.version>1.0.8</identity.branding.preference.management.version>
         <identity.branding.preference.management.version.range>[1.0.1, 2.0.0)</identity.branding.preference.management.version.range>
 
         <!--Orbit Version-->

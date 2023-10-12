@@ -96,6 +96,10 @@ public class NotificationConstants {
         public static final String BRANDING_PREFERENCES_LOGO_URL_PATH = "/images/logo/imgURL";
         public static final String BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH = "/images/logo/altText";
         public static final String BRANDING_PREFERENCES_LIGHT_THEME = "LIGHT";
+        public static final String CUSTOM_TEXT_COMMON_SCREEN = "common";
+        public static final String ORGANIZATION_COPYRIGHT_PLACEHOLDER = "organization.copyright.text";
+        public static final String CUSTOM_TEXT_COPYRIGHT_PATH = "/text/copyright";
+        public static final String CUSTOM_TEXT_COPYRIGHT_YEAR_KEY = "{{currentYear}}";
 
     }
 
