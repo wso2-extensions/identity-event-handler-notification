@@ -39,6 +39,7 @@ import org.wso2.carbon.identity.branding.preference.management.core.BrandingPref
 import org.wso2.carbon.identity.branding.preference.management.core.constant.BrandingPreferenceMgtConstants;
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
+import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -73,7 +74,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,6 +86,10 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COMMON_SCREEN;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_YEAR_KEY;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
@@ -256,6 +260,16 @@ public class NotificationUtil {
                 }
             }
         }
+
+        // Setting copyright text placeholder according to custom text preferences if branding is enabled.
+        if (brandingPreferences != null && placeHolderData.containsKey(ORGANIZATION_COPYRIGHT_PLACEHOLDER)) {
+            String copyrightPlaceholder = getCopyrightPlaceholderValueFromCustomTexts(
+                    placeHolderData.get(TENANT_DOMAIN), emailTemplate.getLocale());
+            if (StringUtils.isNotBlank(copyrightPlaceholder)) {
+                placeHolderData.put(ORGANIZATION_COPYRIGHT_PLACEHOLDER, copyrightPlaceholder);
+            }
+        }
+
         // Building the server url.
         String serverURL;
         String carbonUrlWithUserTenant;
@@ -277,6 +291,64 @@ public class NotificationUtil {
         placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
         placeHolderData.put(CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER, carbonUrlWithUserTenant);
         return placeHolderData;
+    }
+
+    /**
+     * Return copyright placeholder value for email templates from custom text preferences.
+     *
+     * @param tenantDomain Tenant domain.
+     * @param locale       Locale of the email template.
+     * @return Copyright text placeholder value.
+     */
+    public static String getCopyrightPlaceholderValueFromCustomTexts(String tenantDomain, String locale) {
+
+        if (!Boolean.parseBoolean(IdentityUtil.getProperty(
+                NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
+            return null;
+        }
+
+        JsonNode customTextPreference = null;
+        try {
+            BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
+            CustomText responseDTO = brandingPreferenceManager.resolveCustomText(
+                    BrandingPreferenceMgtConstants.ORGANIZATION_TYPE, tenantDomain, CUSTOM_TEXT_COMMON_SCREEN, locale);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(responseDTO.getPreference());
+            customTextPreference = objectMapper.readTree(json);
+        } catch (BrandingPreferenceMgtException e) {
+            if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_CUSTOM_TEXT_PREFERENCE_NOT_EXISTS.getCode()
+                    .equals(e.getErrorCode())) {
+                if (log.isDebugEnabled()) {
+                    String message = "Custom text preferences are not configured for the organization: "
+                            + tenantDomain + " with locale: " + locale;
+                    log.debug(message, e);
+                }
+                customTextPreference = null;
+            } else {
+                if (log.isDebugEnabled()) {
+                    String message = "Error occurred while retrieving custom text preferences for organization "
+                            + tenantDomain;
+                    log.debug(message, e);
+                }
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                String message = "Error occurred while retrieving custom text preferences for organization "
+                        + tenantDomain;
+                log.debug(message, e);
+            }
+        }
+
+        if (customTextPreference != null) {
+            String copyrightValue = customTextPreference.at(CUSTOM_TEXT_COPYRIGHT_PATH).asText();
+            if (StringUtils.isNotBlank(copyrightValue)) {
+                // Replace {{currentYear}} with current year to change the copyright year in the email templates.
+                String currentYear = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
+                return copyrightValue.replace(CUSTOM_TEXT_COPYRIGHT_YEAR_KEY, (currentYear));
+            }
+        }
+        return null;
     }
 
     public static Map<String, String> getConfigFilePlaceholders() {
