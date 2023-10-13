@@ -316,7 +316,6 @@ public class NotificationUtil {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(responseDTO.getPreference());
             customTextPreference = objectMapper.readTree(json);
-
         } catch (BrandingPreferenceMgtException e) {
             if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_CUSTOM_TEXT_PREFERENCE_NOT_EXISTS.getCode()
                     .equals(e.getErrorCode())) {
