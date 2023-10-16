@@ -73,7 +73,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,6 +80,7 @@ import java.util.regex.Pattern;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_DISPLAY_NAME_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_URL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
@@ -447,6 +447,13 @@ public class NotificationUtil {
                         ? brandingPreferences.at(BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH).asText()
                         : brandingFallbacks.get("support_mail");
                 break;
+            case ORGANIZATION_NAME_PLACEHOLDER :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                        brandingPreferences.at(BRANDING_PREFERENCES_DISPLAY_NAME_PATH).asText()))
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_DISPLAY_NAME_PATH).asText()
+                        : null; // Default value is not handled here since the parameter is not passed.
+                                // It will be handled in the caller.
+                break;
             case "organization.color.primary" :
                 value = brandingIsEnabled
                         ? !StringUtils.isBlank(getBrandingPreferenceByTheme(brandingPreferences, theme, "/colors/primary/main"))
@@ -551,11 +558,14 @@ public class NotificationUtil {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         placeHolderData.put("current-year", String.valueOf(currentYear));
 
-        // Resolve human-readable organization name, and add it to "organization-name" placeholder.
-        String organizationName = resolveHumanReadableOrganizationName(tenantDomain);
-        placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
-
         NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
+
+        if (StringUtils.isBlank(placeHolderData.get(ORGANIZATION_NAME_PLACEHOLDER))) {
+            // If the organization display name is not configured with branding,
+            // set "organization-name" placeholder to organization name.
+            String organizationName = resolveHumanReadableOrganizationName(tenantDomain);
+            placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
+        }
 
         Notification.EmailNotificationBuilder builder =
                 new Notification.EmailNotificationBuilder(sendTo);
