@@ -10023,54 +10023,443 @@
         <footer>---</footer>
     </configuration>
     <configuration type="accountActivationSuccess" display="accountActivationSuccess" locale="en_US" emailContentType="text/html">
-        <subject>WSO2 - Account Activation Successful</subject>
-        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
-            <tr>
-            <td style="padding: 30px 30px 20px 30px;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
-                <tr>
-                    <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
-                        <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0"/></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
-                        <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
-                            Account Activation Successful
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 0px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Hi {{user-name}},
-                        </p>
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Please note that your account activation is successfully completed.
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 30px 50px 50px 50px" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            Thanks,<br/>WSO2 Identity Server Team
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
-                        <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy;2020
-                            <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
-                            <br>
-                            787 Castro Street, Mountain View, CA 94041.
-                        </p>
-                    </td>
-                </tr>
+        <subject>Account Activation Successful</subject>
+        <body><![CDATA[<!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <!-- Facebook sharing information tags -->
+
+                <title>Password reset successful</title>
+
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+                <![endif] -->
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+
+            <body class="wso2_body"
+                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                    width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                    style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                valign="top" align="left">Please note that your account {{user-name}}
+                                                                in the organization {{organization-name}} is successfully activated.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                    src="{{organization.logo.img}}"
+                                                                    alt="{{organization.logo.altText}}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <h1
+                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                    Account Activation Successful
+                                                                </h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <table id="u_content_text_1" class="u_content_text"
+                                                                    style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="main-content"
+                                                                                style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                align="left">
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        Hi,
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
+                                                                                        Please note that your account <b>{{user-name}}</b> in the organization <b>{{organization-name}}</b> is successfully activated.
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                        {{organization.copyright.text}}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="footerContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                valign="top" align="left">
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                    <span
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
+                                                                </p>
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                    <span
+                                                                        style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                        mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                        Santa Clara, CA 95054, USA</span>
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- // END BODY -->
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </td>
-            </tr>
-        </table>]]></body>
+                <!-- // END TEMPLATE -->
+            </body>
+
+            </html>]]></body>
         <footer>---</footer>
     </configuration>
     <configuration type="initiateRecovery" display="initiateRecovery" locale="en_US" emailContentType="text/html">
@@ -11887,107 +12276,885 @@
         <footer>---</footer>
     </configuration>
     <configuration type="notifyOnExistingEmailUpdateWithoutVerification" display="notifyOnExistingEmailUpdateWithoutVerification" locale="en_US" emailContentType="text/html">
-        <subject>WSO2 - Request received to update email</subject>
-        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
-            <tr>
-            <td style="padding: 30px 30px 20px 30px;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
-                <tr>
-                    <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
-                        <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0"/></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
-                        <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
-                            Request received to update email
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 0px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Hi {{user.claim.givenname}},
-                        </p>
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{new-email-address}}</b>.<br>
-                            <br>Please contact the system administrator if this is not intentional.<br>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 30px 50px 50px 50px" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            Thanks,<br/>WSO2 Identity Server Team
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
-                        <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2018
-                            <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
-                            <br>
-                            3080 Olcott St., Suite C220, Santa Clara, CA 95054.
-                        </p>
-                    </td>
-                </tr>
+        <subject>Request received to update email</subject>
+        <body><![CDATA[<!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <!-- Facebook sharing information tags -->
+
+                <title>Confirm your email</title>
+
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+                <![endif] -->
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+
+            <body class="wso2_body"
+                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                    width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                    style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                valign="top" align="left">There is a request to update your email
+                                                                address for the below account in the organization {{organization-name}}.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                    src="{{organization.logo.img}}"
+                                                                    alt="{{organization.logo.altText}}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <h1
+                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                    Confirm your email
+                                                                </h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <table id="u_content_text_1" class="u_content_text"
+                                                                    style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="main-content"
+                                                                                style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                align="left">
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        Hi,
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{verification-pending-email}}</b>.<br>
+                                                                                        <br>Please contact the system administrator if this is not intentional.<br>
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                        {{organization.copyright.text}}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="footerContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                valign="top" align="left">
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                    <span
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
+                                                                </p>
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                    <span
+                                                                        style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                        mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                        Santa Clara, CA 95054, USA</span>
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- // END BODY -->
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </td>
-            </tr>
-        </table>]]></body>
+                <!-- // END TEMPLATE -->
+            </body>
+
+            </html>]]></body>
         <footer>---</footer>
     </configuration>
     <configuration type="notifyOnExistingEmailUpdate" display="notifyOnExistingEmailUpdate" locale="en_US" emailContentType="text/html">
-        <subject>WSO2 - Request received to update email</subject>
-        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
-            <tr>
-            <td style="padding: 30px 30px 20px 30px;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
-                <tr>
-                    <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
-                        <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0"/></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
-                        <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
-                            Request received to update email
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 0px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Hi {{user.claim.givenname}},
-                        </p>
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{verification-pending-email}}</b>.<br>
-                            <br>A confirmation email has been sent to the new email address specified.<br>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 30px 50px 50px 50px" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            Thanks,<br/>WSO2 Identity Server Team
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
-                        <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; 2018
-                            <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
-                            <br>
-                            3080 Olcott St., Suite C220, Santa Clara, CA 95054.
-                        </p>
-                    </td>
-                </tr>
+        <subject>Request received to update email</subject>
+        <body><![CDATA[<!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <!-- Facebook sharing information tags -->
+
+                <title>Confirm your email</title>
+
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+                <![endif] -->
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+
+            <body class="wso2_body"
+                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                    width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                    style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                valign="top" align="left">There is a request to update your email
+                                                                address for the below account in the organization {{organization-name}}.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                    src="{{organization.logo.img}}"
+                                                                    alt="{{organization.logo.altText}}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <h1
+                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                    Confirm your email
+                                                                </h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <table id="u_content_text_1" class="u_content_text"
+                                                                    style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="main-content"
+                                                                                style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                align="left">
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        Hi,
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{verification-pending-email}}</b>.<br>
+                                                                                        <br>A confirmation email has been sent to the new email address specified.<br>
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                        {{organization.copyright.text}}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="footerContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                valign="top" align="left">
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                    <span
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
+                                                                </p>
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                    <span
+                                                                        style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                        mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                        Santa Clara, CA 95054, USA</span>
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- // END BODY -->
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </td>
-            </tr>
-        </table>]]></body>
+                <!-- // END TEMPLATE -->
+            </body>
+
+            </html>]]></body>
         <footer>---</footer>
     </configuration>
     <configuration type="totp" display="TOTP" locale="en_US" emailContentType="text/html">
@@ -12439,76 +13606,462 @@
     </configuration>
     <configuration type="tenantRegistrationConfirmation" display="TenantRegistrationConfirmation" locale="en_US"
                    emailContentType="text/html">
-        <subject>WSO2 - TenantAdminEmailconfirm</subject>
-        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
-            <tr>
-            <td style="padding: 30px 30px 20px 30px;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
-                <tr>
-                    <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
-                        <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
-                        <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
-                            You're almost there
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Hi {{user.claim.givenname}},
-                        </p>
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            It's amazing to get you on-board. Please click the button below to create a password for your account.<br/>Username : {{url:user-name}}
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 0px 50px 0px 50px; text-align: left;">
-                        <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
-                            <tr>
-                                <td style="border-radius: 6px;  padding: 14px 0px;">
-                                    <a href="{{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console"
-                                       target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Set Password</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
-                            <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
-                               href="{{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console">
-                                {{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console</a>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 30px 50px 50px 50px" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            Thanks,<br/>WSO2 Identity Server Team.
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
-                        <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; {{current-year}}
-                            <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
-                            <br>
-                            3080 Olcott St., Suite C220, Santa Clara, CA 95054.
-                        </p>
-                    </td>
-                </tr>
+        <subject>Tenant admin email confirm</subject>
+        <body><![CDATA[<!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <!-- Facebook sharing information tags -->
+
+                <title>Confirm your email</title>
+
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+                <![endif] -->
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+
+            <body class="wso2_body"
+                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                    width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                    style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                valign="top" align="left">You're almost there
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                    src="{{organization.logo.img}}"
+                                                                    alt="{{organization.logo.altText}}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <h1
+                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                    It's amazing to get you on-board.
+                                                                </h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <table id="u_content_text_1" class="u_content_text"
+                                                                    style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="main-content"
+                                                                                style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                align="left">
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        Hi,
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        It's amazing to get you on-board. Please click the button below to create a password for your account.<br/>Username : {{url:user-name}}
+                                                                                    </p>
+                                                                                    <table align="center" cellpadding="0"
+                                                                                        cellspacing="0" border="0" width="100%"
+                                                                                        style="vertical-align:top;border-collapse:collapse;line-height:inherit;background-color:{{organization.theme.background.color}};">
+                                                                                        <tbody style="line-height:inherit">
+                                                                                            <tr
+                                                                                                style="vertical-align:top;border-collapse:collapse;line-height:inherit">
+                                                                                                <td style="float:left;border-collapse:collapse;line-height:inherit;padding: 10px 0 15px;"
+                                                                                                    valign="top" align="center">
+                                                                                                    <a class="ctaorange"
+                                                                                                        href="{{product-url-with-user-tenant}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/console"
+                                                                                                        style="box-sizing:border-box;display:inline-block;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;text-decoration:none;font-size: 14px; line-height: 24px; font-weight:600; text-align:center;color:{{organization.button.font.color}};background-color:{{organization.color.primary}};border-radius:6px;width:auto;max-width:100%;word-break:break-word;word-wrap:break-word;line-height:inherit"
+                                                                                                        target="_blank"><span
+                                                                                                            style="display:block;line-height:120%;padding:14px 24px"><span
+                                                                                                                style="font-size:14px;line-height:16.8px">Confirm
+                                                                                                            </span></span></a><br
+                                                                                                        style="line-height:inherit">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                        {{organization.copyright.text}}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="footerContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                valign="top" align="left">
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                    <span
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
+                                                                </p>
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                    <span
+                                                                        style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                        mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                        Santa Clara, CA 95054, USA</span>
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- // END BODY -->
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </td>
-            </tr>
-        </table>]]></body>
+                <!-- // END TEMPLATE -->
+            </body>
+
+            </html>]]></body>
         <footer>---</footer>
     </configuration>
     <configuration type="liteUserEmailConfirmation" display="LiteUserEmailConfirmation" locale="en_US" emailContentType="text/html">
@@ -13449,78 +15002,471 @@
         <footer>---</footer>
     </configuration>
     <configuration type="resendVerifyEmailOnUpdate" display="ResendVerifyEmailOnUpdate" locale="en_US" emailContentType="text/html">
-        <subject>WSO2 - Resend Email Confirmation</subject>
-        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
-            <tr>
-            <td style="padding: 30px 30px 20px 30px;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
-                <tr>
-                    <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
-                        <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
-                        <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
-                            Resend Email Confirmation
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Hi {{user.claim.givenname}},
-                        </p>
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
-                            Your email address has been updated for the account with the following user name. <br>
-                            User Name: <b>{{user-name}}</b><br>
-                            Please click the button below to verify your updated email address.
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 0px 50px 0px 50px; text-align: left;">
-                        <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
-                            <tr>
-                                <td style="border-radius: 6px;  padding: 14px 0px;">
-                                    <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}"
-                                       target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Confirm</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
-                            <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
-                               href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}">
-                                {{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}</a>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left; padding: 30px 50px 50px 50px;" valign="top">
-                        <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
-                            Thanks,<br/>WSO2 Identity Server Team
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
-                        <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
-                            &copy; {{current-year}}
-                            <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
-                            <br>
-                            3080 Olcott St., Suite C220, Santa Clara, CA 95054.
-                        </p>
-                    </td>
-                </tr>
+        <subject>Confirm your email</subject>
+        <body><![CDATA[<!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <!-- Facebook sharing information tags -->
+
+                <title>Confirm your email</title>
+
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+                <![endif] -->
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+
+            <body class="wso2_body"
+                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                    width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                    style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                    style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                valign="top" align="left">There is a request to update your email
+                                                                address for the below account in the organization {{organization-name}}.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                    src="{{organization.logo.img}}"
+                                                                    alt="{{organization.logo.altText}}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <h1
+                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                    Confirm your email
+                                                                </h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="bodyContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                valign="top" align="left">
+                                                                <table id="u_content_text_1" class="u_content_text"
+                                                                    style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="main-content"
+                                                                                style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                align="left">
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        Hi,
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        There is a request to update your email
+                                                                                        address for the below account in the
+                                                                                        organization <b>{{organization-name}}</b>.<br>
+                                                                                        Username: <b>{{user-name}}</b>
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
+                                                                                        Please click the following button to confirm
+                                                                                        your updated email address:
+                                                                                    </p>
+                                                                                    <table align="center" cellpadding="0"
+                                                                                        cellspacing="0" border="0" width="100%"
+                                                                                        style="vertical-align:top;border-collapse:collapse;line-height:inherit;background-color:{{organization.theme.background.color}};">
+                                                                                        <tbody style="line-height:inherit">
+                                                                                            <tr
+                                                                                                style="vertical-align:top;border-collapse:collapse;line-height:inherit">
+                                                                                                <td style="float:left;border-collapse:collapse;line-height:inherit;padding: 10px 0 15px;"
+                                                                                                    valign="top" align="center">
+                                                                                                    <a class="ctaorange"
+                                                                                                        href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}"
+                                                                                                        style="box-sizing:border-box;display:inline-block;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;text-decoration:none;font-size: 14px; line-height: 24px; font-weight:600; text-align:center;color:{{organization.button.font.color}};background-color:{{organization.color.primary}};border-radius:6px;width:auto;max-width:100%;word-break:break-word;word-wrap:break-word;line-height:inherit"
+                                                                                                        target="_blank"><span
+                                                                                                            style="display:block;line-height:120%;padding:14px 24px"><span
+                                                                                                                style="font-size:14px;line-height:16.8px">Confirm
+                                                                                                            </span></span></a><br
+                                                                                                        style="line-height:inherit">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                                <div class="v-text-align"
+                                                                                    style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                        {{organization.copyright.text}}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                    style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                    width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="footerContent"
+                                                                style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                valign="top" align="left">
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                    <span
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
+                                                                </p>
+                                                                <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                    <span
+                                                                        style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                        mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                        Santa Clara, CA 95054, USA</span>
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- // END BODY -->
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </td>
-            </tr>
-        </table>]]></body>
+                <!-- // END TEMPLATE -->
+            </body>
+
+            </html>]]></body>
         <footer>---</footer>
     </configuration>
     <configuration type="selfSignUpSuccess" display="selfSignUpSuccess" locale="en_US" emailContentType="text/html">
