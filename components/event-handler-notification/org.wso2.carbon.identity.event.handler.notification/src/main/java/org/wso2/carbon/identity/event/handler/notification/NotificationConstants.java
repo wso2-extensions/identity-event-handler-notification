@@ -93,6 +93,7 @@ public class NotificationConstants {
         public static final String BRANDING_PREFERENCES_IS_ENABLED_PATH = "/configs/isBrandingEnabled";
         public static final String BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH = "/organizationDetails/copyrightText";
         public static final String BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH = "/organizationDetails/supportEmail";
+        public static final String BRANDING_PREFERENCES_DISPLAY_NAME_PATH = "/organizationDetails/displayName";
         public static final String BRANDING_PREFERENCES_LOGO_URL_PATH = "/images/logo/imgURL";
         public static final String BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH = "/images/logo/altText";
         public static final String BRANDING_PREFERENCES_LIGHT_THEME = "LIGHT";
