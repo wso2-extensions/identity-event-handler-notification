@@ -16980,29 +16980,6 @@
                                                                                                     valign="top"
                                                                                                     align="center"
                                                                                                 >
-                                                                                                    <p
-                                                                                                        style="
-                                                                                                            font-family: {{organization.font}},
-                                                                                                                Roboto, Verdana,
-                                                                                                                Helvetica,
-                                                                                                                sans-serif;
-                                                                                                            font-size: 14px;
-                                                                                                            font-weight: normal;
-                                                                                                            letter-spacing: normal;
-                                                                                                            line-height: 24px;
-                                                                                                            margin: 0;
-                                                                                                            padding-bottom: 0;
-                                                                                                            text-align: left;
-                                                                                                        "
-                                                                                                    >
-                                                                                                        If the button doesn't work, copy and paste the link below to your browser:
-                                                                                                        {{carbon.product-url}}/commonauth?mlt={{magicToken}}
-                                                                                                    </p>
-                                                                                                    <br
-                                                                                                        style="
-                                                                                                            line-height: inherit;
-                                                                                                        "
-                                                                                                    />
                                                                                                      <p
                                                                                                         style="
                                                                                                             font-family: {{organization.font}}, Roboto,
@@ -17018,46 +16995,10 @@
                                                                                                     >
                                                                                                         Please note that the link expires in {{expiry-time}} and you can only use it once.
                                                                                                     </p>
-                                                                                                    <br
-                                                                                                        style="
-                                                                                                            line-height: inherit;
-                                                                                                        "
-                                                                                                    />
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
                                                                                     </table>
-                                                                                    <p
-                                                                                        style="
-                                                                                            font-family: {{organization.font}}, Roboto,
-                                                                                                Verdana, Helvetica, sans-serif;
-                                                                                            font-size: 14px;
-                                                                                            font-weight: normal;
-                                                                                            letter-spacing: normal;
-                                                                                            line-height: 24px;
-                                                                                            margin: 0;
-                                                                                            padding-bottom: 0px;
-                                                                                            text-align: left;
-                                                                                        "
-                                                                                    >
-                                                                                        Thanks,
-                                                                                    </p>
-                                                                                    <p
-                                                                                        style="
-                                                                                            font-family: {{organization.font}}, Roboto,
-                                                                                                Verdana, Helvetica, sans-serif;
-                                                                                            font-size: 14px;
-                                                                                            font-weight: 600;
-                                                                                            letter-spacing: normal;
-                                                                                            line-height: 24px;
-                                                                                            margin: 0;
-                                                                                            padding-bottom: 5px;
-                                                                                            padding-top: 0px;
-                                                                                            text-align: left;
-                                                                                        "
-                                                                                    >
-                                                                                        Team Asgardeo
-                                                                                    </p>
                                                                                 </div>
                                                                                 <div
                                                                                     class="v-text-align"
@@ -17148,22 +17089,13 @@
                                                             >
                                                                 <p style="font-size: 14px; line-height: 140%; padding-top: 8px">
                                                                     <span
-                                                                        style="
-                                                                            font-size: 12px;
-                                                                            line-height: 16.8px;
-                                                                            color: #808080;
-                                                                        "
-                                                                        >You're receiving this email because you have registered
-                                                                        in Asgardeo. If this wasn't you, or you believe this
-                                                                        email was sent to you in error, please let us know at
-                                                                        <a
-                                                                            class="wso2_orange3"
-                                                                            href="mailto:{{organization.support.mail}}"
-                                                                            style="color: #808080"
-                                                                            target="_blank"
-                                                                            >{{organization.support.mail}}</a
-                                                                        >.</span
-                                                                    >
+                                                                        style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                        received this email because you have an account in the
+                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                        you may contact us at <a
+                                                                            class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                            style="color:#808080;"
+                                                                            target="_blank">{{organization.support.mail}}</a>.</span>
                                                                 </p>
                                                                 <p style="font-size: 14px; line-height: 140%; padding-top: 2px">
                                                                     <span
