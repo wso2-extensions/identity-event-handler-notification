@@ -46,6 +46,7 @@ import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResource
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -148,12 +149,15 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
     public void deleteNotificationSender(String senderName) throws NotificationSenderManagementException {
 
         try {
-            NotificationSenderTenantConfigDataHolder.getInstance().getResourceManager()
-                    .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, senderName);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())) {
+                NotificationSenderTenantConfigDataHolder.getInstance().getResourceManager()
+                        .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, senderName);
+            }
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .deleteResource(PUBLISHER_RESOURCE_TYPE, senderName);
-            sendEventPublisherClusterDeleteMessage(senderName);
 
+            sendEventPublisherClusterDeleteMessage(senderName);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER, senderName);
         } catch (TenantResourceManagementException e) {
