@@ -274,12 +274,13 @@ public class NotificationUtil {
         // Building the server url.
         String serverURL;
         String carbonUrlWithUserTenant;
-        String accountRecoveryEndpointURL = ConfigurationFacade.getInstance().getAccountRecoveryEndpointPath();
-        String authenticationEndpointURL = ConfigurationFacade.getInstance().getAuthenticationEndpointURL();
+        String accountRecoveryEndpointURL = ConfigurationFacade.getInstance().getAccountRecoveryEndpointAbsolutePath();
+        String authenticationEndpointURL = ConfigurationFacade.getInstance().getAuthenticationEndpointAbsoluteURL();
         try {
             serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
             carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
-            if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
+            if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled() && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equalsIgnoreCase(placeHolderData.get(TENANT_DOMAIN))) {
                 carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t" +
                         "/" + placeHolderData.get(TENANT_DOMAIN);
             }
