@@ -319,7 +319,9 @@ public class NotificationSenderUtils {
         to.setAttributeNode(eventAdapterTypeAttr);
         // Take adapter properties to a map.
         Map<String, String> adapterProperties = new HashMap<>();
-        adapterProperties.put(HTTP_URL_PROPERTY, smsSender.getProviderURL());
+        if (StringUtils.isNotBlank(smsSender.getProviderURL())) {
+            adapterProperties.put(HTTP_URL_PROPERTY, smsSender.getProviderURL());
+        }
         // Default client method is httpPost. Can be changed by configuring properties.
         adapterProperties.put(CLIENT_HTTP_METHOD_PROPERTY, CONSTANT_HTTP_POST);
         for (Map.Entry<String, String> property : properties.entrySet()) {
