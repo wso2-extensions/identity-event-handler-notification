@@ -78,6 +78,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.identity.core.util.IdentityTenantUtil.isSuperTenantRequiredInUrl;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_COPYRIGHT_TEXT_PATH;
@@ -94,6 +95,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
+import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
 public class NotificationUtil {
 
@@ -279,12 +281,17 @@ public class NotificationUtil {
         // Building the server url.
         String serverURL;
         String carbonUrlWithUserTenant;
-        String accountRecoveryEndpointURL = ConfigurationFacade.getInstance().getAccountRecoveryEndpointPath();
-        String authenticationEndpointURL = ConfigurationFacade.getInstance().getAuthenticationEndpointURL();
+        String accountRecoveryEndpointURL = ConfigurationFacade.getInstance().getAccountRecoveryEndpointAbsolutePath();
+        String authenticationEndpointURL = ConfigurationFacade.getInstance().getAuthenticationEndpointAbsoluteURL();
         try {
             serverURL = ServiceURLBuilder.create().build().getAbsolutePublicURL();
             carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath();
-            if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
+
+            if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled() &&
+                    (isSuperTenantRequiredInUrl()
+                            || !SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(placeHolderData.get(TENANT_DOMAIN)))) {
+                // If tenant domain is carbon.super, and super tenant is not required in the URL,
+                // then the tenant domain should not be appended.
                 carbonUrlWithUserTenant = ServiceURLBuilder.create().build().getAbsolutePublicUrlWithoutPath() + "/t" +
                         "/" + placeHolderData.get(TENANT_DOMAIN);
             }
@@ -680,7 +687,7 @@ public class NotificationUtil {
 
         String organizationName = tenantDomain;
         try {
-            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 return organizationName;
             }
             RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();

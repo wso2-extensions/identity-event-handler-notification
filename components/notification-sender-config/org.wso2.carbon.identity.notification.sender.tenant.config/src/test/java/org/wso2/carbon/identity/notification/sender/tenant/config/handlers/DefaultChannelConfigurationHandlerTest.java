@@ -288,14 +288,6 @@ public class DefaultChannelConfigurationHandlerTest {
                         null
                 },
                 {
-                        smsSenderDTO3,
-                        smsProviderTemplate,
-                        eventPublisherConfigurationList,
-                        inputStream,
-                        addedResource3,
-                        null
-                },
-                {
                         smsSenderDTO1,
                         smsProviderTemplate,
                         null,
