@@ -100,6 +100,11 @@ public class NotificationUtil {
     private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
+    public static final String EMAIL_TYPE_PLACEHOLDER = "EMAIL_TYPE";
+    public static final String CALLER_PATH_PLACEHOLDER = "caller.path";
+    public static final String MAGIC_LINK = "magicLink";
+    public static final String CALLBACK_URL = "callbackUrl";
+    public static final String IS_API_BASED_AUTHENTICATION_SUPPORTED = "isAPIBasedAuthenticationSupported";
 
     public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
 
@@ -289,7 +294,22 @@ public class NotificationUtil {
 
         placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
-        placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
+        String emailType = placeHolderData.get(EMAIL_TYPE_PLACEHOLDER);
+
+        if (MAGIC_LINK.equals(emailType)) {
+            String redirectUrl = placeHolderData.get(CALLBACK_URL);
+            String isAPIBasedAuthenticationFlow = placeHolderData.get(IS_API_BASED_AUTHENTICATION_SUPPORTED);
+
+            if (Boolean.parseBoolean(isAPIBasedAuthenticationFlow) && StringUtils.isNotEmpty(redirectUrl)) {
+                placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, redirectUrl);
+                placeHolderData.put(CALLER_PATH_PLACEHOLDER, "");
+            } else {
+                placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
+                placeHolderData.put(CALLER_PATH_PLACEHOLDER, "/commonauth");
+            }
+        } else {
+            placeHolderData.put(CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER, serverURL);
+        }
         placeHolderData.put(CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER, carbonUrlWithUserTenant);
         return placeHolderData;
     }

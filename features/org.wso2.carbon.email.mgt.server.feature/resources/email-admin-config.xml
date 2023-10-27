@@ -16922,7 +16922,7 @@
                                                                                                 >
                                                                                                     <a
                                                                                                         class="ctaorange"
-                                                                                                        href="{{carbon.product-url}}/commonauth?mlt={{magicToken}}"
+                                                                                                        href="{{carbon.product-url}}{{caller.path}}?mlt={{magicToken}}"
                                                                                                         style="
                                                                                                             box-sizing: border-box;
                                                                                                             display: inline-block;
