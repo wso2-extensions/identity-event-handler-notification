@@ -65,6 +65,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
@@ -635,8 +636,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 throw handleApplicationMgtException(e, ERROR_CODE_VALIDATING_CONNECTED_APPS,
                         senderName);
             } catch (ConfigurationManagementException e) {
-                if (e instanceof ConfigurationManagementClientException &&
-                        ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode())) {
+                if (e instanceof ConfigurationManagementClientException && (
+                        ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode())
+                                || ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()))) {
                     return true;
                 }
                 throw handleConfigurationMgtException(e, ERROR_CODE_VALIDATING_CONNECTED_APPS,
