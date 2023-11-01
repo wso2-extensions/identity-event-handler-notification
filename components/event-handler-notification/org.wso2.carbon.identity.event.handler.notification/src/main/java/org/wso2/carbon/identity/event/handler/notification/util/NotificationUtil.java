@@ -102,11 +102,11 @@ public class NotificationUtil {
     private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
-    public static final String EMAIL_TYPE_PLACEHOLDER = "EMAIL_TYPE";
     public static final String CALLER_PATH_PLACEHOLDER = "caller.path";
     public static final String MAGIC_LINK = "magicLink";
     public static final String CALLBACK_URL = "callbackUrl";
     public static final String IS_API_BASED_AUTHENTICATION_SUPPORTED = "isAPIBasedAuthenticationSupported";
+    public static final String TEMPLATE_TYPE = "TEMPLATE_TYPE";
 
     public static Map<String, String> getUserClaimValues(String userName, UserStoreManager userStoreManager) {
 
@@ -301,7 +301,7 @@ public class NotificationUtil {
 
         placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
-        String emailType = placeHolderData.get(EMAIL_TYPE_PLACEHOLDER);
+        String emailType = placeHolderData.get(TEMPLATE_TYPE);
 
         if (MAGIC_LINK.equals(emailType)) {
             String redirectUrl = placeHolderData.get(CALLBACK_URL);
