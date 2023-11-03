@@ -91,6 +91,8 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COMMON_SCREEN;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_YEAR_KEY;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_HTML;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
@@ -373,7 +375,9 @@ public class NotificationUtil {
             if (StringUtils.isNotBlank(copyrightValue)) {
                 // Replace {{currentYear}} with current year to change the copyright year in the email templates.
                 String currentYear = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
-                return copyrightValue.replace(CUSTOM_TEXT_COPYRIGHT_YEAR_KEY, (currentYear));
+                copyrightValue = copyrightValue.replace(CUSTOM_TEXT_COPYRIGHT_YEAR_KEY, (currentYear));
+                // Replace "\n" with Html new line character "<br>".
+                return copyrightValue.replace(NEW_LINE_CHARACTER_STRING, NEW_LINE_CHARACTER_HTML);
             }
         }
         return null;

@@ -101,6 +101,8 @@ public class NotificationConstants {
         public static final String ORGANIZATION_COPYRIGHT_PLACEHOLDER = "organization.copyright.text";
         public static final String CUSTOM_TEXT_COPYRIGHT_PATH = "/text/copyright";
         public static final String CUSTOM_TEXT_COPYRIGHT_YEAR_KEY = "{{currentYear}}";
+        public static final String NEW_LINE_CHARACTER_STRING = "\\n";
+        public static final String NEW_LINE_CHARACTER_HTML = "<br>";
 
     }
 
