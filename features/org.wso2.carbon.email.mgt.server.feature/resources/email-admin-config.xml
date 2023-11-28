@@ -485,7 +485,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendPasswordReset" display="resendPasswordReset" locale="en_US" emailContentType="text/html">
         <subject>Reset your password</subject>
@@ -949,7 +948,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="emailConfirm" display="EmailConfirm" locale="en_US" emailContentType="text/html">
         <subject>Confirm your email</subject>
@@ -1417,7 +1415,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountIdRecovery" display="AccountIdRecovery" locale="en_US" emailContentType="text/html">
         <subject>Recover your account</subject>
@@ -1864,7 +1861,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountConfirmation" display="AccountConfirmation" locale="en_US" emailContentType="text/html">
         <subject>Confirm your account</subject>
@@ -2332,7 +2328,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendAccountConfirmation" display="ResendAccountConfirmation" locale="en_US" emailContentType="text/html">
         <subject>Confirm your account</subject>
@@ -2800,7 +2795,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="temporaryPassword" display="TemporaryPassword" locale="en_US" emailContentType="text/html">
         <subject>Here is your temporary password</subject>
@@ -3248,7 +3242,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="otp" display="OneTimePassword" locale="en_US" emailContentType="text/html">
         <subject>Here is your one-time password (OTP)</subject>
@@ -3693,7 +3686,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="EmailOTP" display="EmailOTP" locale="en_US" emailContentType="text/html">
         <subject>Here is your email OTP for login</subject>
@@ -4138,7 +4130,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="askPassword" display="AskPassword" locale="en_US" emailContentType="text/html">
         <subject>Here is your new account in the organization {{organization-name}}</subject>
@@ -4606,7 +4597,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendAskPassword" display="resendAskPassword" locale="en_US" emailContentType="text/html">
         <subject>Here is your new account in the organization {{organization-name}}</subject>
@@ -5074,7 +5064,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="adminforcedpasswordreset" display="AdminForcedPasswordReset" locale="en_US" emailContentType="text/html">
         <subject>Password reset is required</subject>
@@ -5545,7 +5534,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendAdminForcedPasswordReset" display="resendAdminForcedPasswordReset" locale="en_US"
                    emailContentType="text/html">
@@ -6017,7 +6005,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="adminforcedpasswordresetwithotp" display="AdminForcedPasswordResetWithOTP" locale="en_US" emailContentType="text/html">
         <subject>Password reset is required</subject>
@@ -6470,7 +6457,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendAdminForcedPasswordResetWithOTP" display="resendAdminForcedPasswordResetWithOTP" locale="en_US" emailContentType="text/html">
         <subject>Password reset is required</subject>
@@ -6923,7 +6909,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountUnlockAdmin" display="AccountUnlockAdmin" locale="en_US" emailContentType="text/html">
         <subject>Your account is unlocked</subject>
@@ -7365,7 +7350,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountUnlockTimeBased" display="AccountUnlockTimeBased" locale="en_US"
                    emailContentType="text/html">
@@ -7808,7 +7792,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountLockFailedAttempt" display="AccountLockFailedAttempt" locale="en_US"
                    emailContentType="text/html">
@@ -8258,7 +8241,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountLockAdmin" display="AccountLockAdmin" locale="en_US" emailContentType="text/html">
         <subject>Your account is locked</subject>
@@ -8700,7 +8682,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountEnable" display="AccountEnable" locale="en_US" emailContentType="text/html">
         <subject>Your account is enabled</subject>
@@ -9140,7 +9121,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountDisable" display="AccountDisable" locale="en_US" emailContentType="text/html">
         <subject>Your account is disabled</subject>
@@ -9580,7 +9560,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="passwordResetSucess" display="passwordResetSucess" locale="en_US" emailContentType="text/html">
         <subject>Password reset successful</subject>
@@ -10020,7 +9999,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="accountActivationSuccess" display="accountActivationSuccess" locale="en_US" emailContentType="text/html">
         <subject>Account Activation Successful</subject>
@@ -10460,7 +10438,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="initiateRecovery" display="initiateRecovery" locale="en_US" emailContentType="text/html">
         <subject>Password reset initiated</subject>
@@ -10910,7 +10887,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="idleAccountReminder" display="idleAccountReminder" locale="en_US" emailContentType="text/html">
         <subject>Keep your account active</subject>
@@ -11354,7 +11330,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="UnseenDeviceLogin" display="UnseenDeviceLogin" locale="en_US" emailContentType="text/html">
         <subject>Login from a new device</subject>
@@ -11805,7 +11780,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="verifyEmailOnUpdate" display="VerifyEmailOnUpdate" locale="en_US" emailContentType="text/html">
         <subject>Confirm your email</subject>
@@ -12273,7 +12247,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="notifyOnExistingEmailUpdateWithoutVerification" display="notifyOnExistingEmailUpdateWithoutVerification" locale="en_US" emailContentType="text/html">
         <subject>Request received to update email</subject>
@@ -12714,7 +12687,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="notifyOnExistingEmailUpdate" display="notifyOnExistingEmailUpdate" locale="en_US" emailContentType="text/html">
         <subject>Request received to update email</subject>
@@ -13155,7 +13127,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="totp" display="TOTP" locale="en_US" emailContentType="text/html">
         <targetEpr></targetEpr>
@@ -13602,7 +13573,6 @@
 
             </html>]]></body>
         <redirectPath></redirectPath>
-        <footer>---</footer>
     </configuration>
     <configuration type="tenantRegistrationConfirmation" display="TenantRegistrationConfirmation" locale="en_US"
                    emailContentType="text/html">
@@ -14062,7 +14032,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="liteUserEmailConfirmation" display="LiteUserEmailConfirmation" locale="en_US" emailContentType="text/html">
         <subject>Confirm your account</subject>
@@ -14530,7 +14499,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendLiteUserEmailConfirmation" display="ResendLiteUserEmailConfirmation" locale="en_US"
                    emailContentType="text/html">
@@ -14999,7 +14967,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="resendVerifyEmailOnUpdate" display="ResendVerifyEmailOnUpdate" locale="en_US" emailContentType="text/html">
         <subject>Confirm your email</subject>
@@ -15467,7 +15434,6 @@
             </body>
 
             </html>]]></body>
-        <footer>---</footer>
     </configuration>
     <configuration type="selfSignUpSuccess" display="selfSignUpSuccess" locale="en_US" emailContentType="text/html">
         <subject>Your account is ready</subject>
@@ -15916,7 +15882,6 @@
             </body>
             </html>]]>
         </body>
-        <footer>---</footer>
     </configuration>
     <configuration type="selfSignUpNotify" display="selfSignUpNotify" locale="en_US" emailContentType="text/html">
         <subject>Your account is ready</subject>
@@ -16357,7 +16322,6 @@
             </body>
             </html>]]>
         </body>
-        <footer>---</footer>
     </configuration>
     <configuration type="magicLink" display="magicLink" locale="en_US" emailContentType="text/html">
         <subject>Sign in to {{application-name}}</subject>
@@ -17125,7 +17089,6 @@
             </body>
         </html>]]>
         </body>
-        <footer>---</footer>
     </configuration>
     <configuration type="OrganizationUserInvitation" display="OrganizationUserInvitation" locale="en_US" emailContentType="text/html">
         <subject>Invitation to join the {{organization-name}} organization</subject>
@@ -17586,6 +17549,5 @@
                     </body>
                 </html>]]>
         </body>
-        <footer>---</footer>
     </configuration>
 </configurations>
