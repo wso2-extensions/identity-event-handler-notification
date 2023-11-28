@@ -782,7 +782,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                         I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getMessage());
             }
         } else {
-            if (StringUtils.isBlank(subject) || StringUtils.isBlank(body) || StringUtils.isBlank(footer)) {
+            if (StringUtils.isBlank(subject) || StringUtils.isBlank(body)) {
                 String errorCode =
                         I18nEmailUtil.prependOperationScenarioToErrorCode(
                                 I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_EMAIL_TEMPLATE.getCode(),
