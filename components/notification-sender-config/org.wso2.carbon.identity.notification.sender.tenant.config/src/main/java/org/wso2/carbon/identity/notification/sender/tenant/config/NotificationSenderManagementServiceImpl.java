@@ -48,6 +48,9 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
 import org.wso2.carbon.idp.mgt.model.ConnectedAppsResult;
@@ -61,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -236,9 +240,23 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public List<SMSSenderDTO> getSMSSenders() throws NotificationSenderManagementException {
 
         try {
-            Resources publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
-                    .getConfigurationManager()
-                    .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
+            Resources publisherResources;
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
+                        .getOrganizationManager();
+                String orgId = organizationManager.resolveOrganizationId(tenantDomain);
+                String parentOrgId = organizationManager.getParentOrganizationId(orgId);
+                int parentOrgTenantId = Integer.parseInt(organizationManager.resolveTenantId(parentOrgId));
+                publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
+                        .getConfigurationManager()
+                        .getResourcesByType(parentOrgTenantId, PUBLISHER_RESOURCE_TYPE);
+            } else {
+                publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
+                        .getConfigurationManager()
+                        .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
+            }
+
             List<Resource> smsPublisherResources = publisherResources.getResources().stream().filter(resource ->
                     resource.getAttributes().stream().anyMatch(attribute ->
                             PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
@@ -248,6 +266,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE,
                     SMS_PUBLISHER_TYPE);
+        } catch (OrganizationManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+                    e.getMessage(), e);
         }
     }
 
