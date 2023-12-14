@@ -46,6 +46,22 @@
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
+            <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.configuration.mgt.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.core</artifactId>
+        </dependency>
         <!--Test dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
@@ -114,15 +130,28 @@
 
                             org.wso2.carbon.idp.mgt.model; version="${carbon.identity.framework.imp.pkg.version.range}",
 
-                            org.wso2.carbon.identity.configuration.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.configuration.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.configuration.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.configuration.mgt.core.constant; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.configuration.mgt.core;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.configuration.mgt.core.exception;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.configuration.mgt.core.model;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.configuration.mgt.core.constant;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.core.util;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
 
                             org.wso2.carbon.identity.tenant.resource.manager.core; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.identity.tenant.resource.manager.exception; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.identity.tenant.resource.manager.util; version="${identity.governance.imp.pkg.version.range}",
-                            org.wso2.carbon.utils; version="${carbon.kernel.imp.pkg.version.range}"
+                            org.wso2.carbon.utils; version="${carbon.kernel.imp.pkg.version.range}",
+
+                            org.wso2.carbon.identity.organization.management.service;
+                            version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.management.service.util;
+                            version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.management.service.exception;
+                            version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>

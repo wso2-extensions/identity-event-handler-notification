@@ -38,6 +38,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
@@ -207,7 +208,12 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
-    public SMSSenderDTO getSMSSender(String senderName) throws NotificationSenderManagementException {
+    public SMSSenderDTO getSMSSender(String senderName, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        if (inheritTenantSettings) {
+            return getSMSSender(senderName);
+        }
 
         Optional<Resource> resourceOptional = getPublisherResource(senderName);
         if (!resourceOptional.isPresent()) {
@@ -215,6 +221,29 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
         Resource resource = resourceOptional.get();
         return buildSmsSenderFromResource(resource);
+    }
+
+    @Override
+    public SMSSenderDTO getSMSSender(String senderName) throws NotificationSenderManagementException {
+
+        try {
+            Optional<Resource> resourceOptional = getPublisherResource(senderName);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if (!OrganizationManagementUtil.isOrganization(tenantDomain) && !resourceOptional.isPresent()) {
+                throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+            }
+            if (OrganizationManagementUtil.isOrganization(tenantDomain) && !resourceOptional.isPresent()) {
+                resourceOptional = getPublisherResource(getPrimaryTenantId(tenantDomain), senderName);
+                if (!resourceOptional.isPresent()) {
+                    throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+                }
+            }
+            Resource resource = resourceOptional.get();
+            return buildSmsSenderFromResource(resource);
+        } catch (OrganizationManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+                    e.getMessage(), e);
+        }
     }
 
     @Override
@@ -237,32 +266,25 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
+    public List<SMSSenderDTO> getSMSSenders(boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        return retrieveSMSSenders(inheritTenantSettings);
+    }
+
+    @Override
     public List<SMSSenderDTO> getSMSSenders() throws NotificationSenderManagementException {
 
-        try {
-            Resources publisherResources;
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
-                        .getOrganizationManager();
-                String orgId = organizationManager.resolveOrganizationId(tenantDomain);
-                String parentOrgId = organizationManager.getParentOrganizationId(orgId);
-                int parentOrgTenantId = Integer.parseInt(organizationManager.resolveTenantId(parentOrgId));
-                publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
-                        .getConfigurationManager()
-                        .getResourcesByType(parentOrgTenantId, PUBLISHER_RESOURCE_TYPE);
-            } else {
-                publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
-                        .getConfigurationManager()
-                        .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
-            }
+        return retrieveSMSSenders(true);
+    }
 
-            List<Resource> smsPublisherResources = publisherResources.getResources().stream().filter(resource ->
-                    resource.getAttributes().stream().anyMatch(attribute ->
-                            PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
-                                    SMS_PUBLISHER_TYPE.equals(attribute.getValue()))).collect(Collectors.toList());
-            return smsPublisherResources.stream().map(NotificationSenderUtils::buildSmsSenderFromResource).collect(
-                    Collectors.toList());
+    private List<SMSSenderDTO> retrieveSMSSenders(boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        try {
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            Resources publisherResources = getPublisherResources(tenantDomain, inheritTenantSettings);
+            return extractSMSSenders(publisherResources);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE,
                     SMS_PUBLISHER_TYPE);
@@ -270,6 +292,31 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
                     e.getMessage(), e);
         }
+    }
+
+    private Resources getPublisherResources(String tenantDomain, boolean inheritTenantSettings)
+            throws ConfigurationManagementException, OrganizationManagementException {
+
+        Resources publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
+                .getConfigurationManager()
+                .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
+
+        if (inheritTenantSettings && OrganizationManagementUtil.isOrganization(tenantDomain) &&
+                publisherResources.getResources().isEmpty()) {
+            publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
+                    .getConfigurationManager()
+                    .getResourcesByType(getPrimaryTenantId(tenantDomain), PUBLISHER_RESOURCE_TYPE);
+        }
+        return publisherResources;
+    }
+
+    private List<SMSSenderDTO> extractSMSSenders(Resources publisherResources) {
+        return publisherResources.getResources().stream()
+                .filter(resource -> resource.getAttributes().stream()
+                        .anyMatch(attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
+                                SMS_PUBLISHER_TYPE.equals(attribute.getValue())))
+                .map(NotificationSenderUtils::buildSmsSenderFromResource)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -323,6 +370,22 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
+    }
+
+    private Optional<Resource> getPublisherResource(int tenantId, String resourceName)
+            throws NotificationSenderManagementException {
+
+        try {
+            return Optional.ofNullable(NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .getResourceByTenantId(tenantId, PUBLISHER_RESOURCE_TYPE, resourceName));
+
+        } catch (ConfigurationManagementException e) {
+            // If the resource not exists handling it as null and throw different error code.
+            if (!RESOURCE_NOT_EXISTS_ERROR_CODE.equals(e.getErrorCode())) {
+                throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER, resourceName);
+            }
+        }
+        return Optional.empty();
     }
 
     private Optional<Resource> getPublisherResource(String resourceName) throws NotificationSenderManagementException {
@@ -667,5 +730,22 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
         }
         return true;
+    }
+
+    /**
+     * Get the primary tenant id of the given tenant domain.
+     *
+     * @param tenantDomain Tenant domain.
+     * @return Primary tenant id.
+     * @throws OrganizationManagementException If an error occurred while getting the primary tenant id.
+     */
+    private int getPrimaryTenantId(String tenantDomain) throws OrganizationManagementException {
+
+        OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
+                .getOrganizationManager();
+        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
+        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
+        String primaryTenantDomain = organizationManager.resolveTenantDomain(primaryOrgId);
+        return IdentityTenantUtil.getTenantId(primaryTenantDomain);
     }
 }
