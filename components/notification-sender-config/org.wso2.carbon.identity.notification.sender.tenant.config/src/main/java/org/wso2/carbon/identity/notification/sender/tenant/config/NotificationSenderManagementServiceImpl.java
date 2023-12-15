@@ -306,7 +306,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 publisherResources.getResources().isEmpty()) {
             publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
                     .getConfigurationManager()
-                    .getResourcesByType(getPrimaryTenantId(tenantDomain), PUBLISHER_RESOURCE_TYPE);
+                    .getResourcesByType(getPrimaryTenantId(), PUBLISHER_RESOURCE_TYPE);
         }
         return publisherResources;
     }
@@ -736,7 +736,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     /**
      * Get the primary tenant id of the given tenant domain.
      *
-     * @param tenantDomain Tenant domain.
      * @return Primary tenant id.
      * @throws OrganizationManagementException If an error occurred while getting the primary tenant id.
      */
