@@ -229,17 +229,18 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         try {
             Optional<Resource> resourceOptional = getPublisherResource(senderName);
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (!OrganizationManagementUtil.isOrganization(tenantDomain) && !resourceOptional.isPresent()) {
-                throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+            if (resourceOptional.isPresent()) {
+                Resource resource = resourceOptional.get();
+                return buildSmsSenderFromResource(resource);
             }
-            if (OrganizationManagementUtil.isOrganization(tenantDomain) && !resourceOptional.isPresent()) {
-                resourceOptional = getPublisherResource(getPrimaryTenantId(tenantDomain), senderName);
-                if (!resourceOptional.isPresent()) {
-                    throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                resourceOptional = getPublisherResource(getPrimaryTenantId(), senderName);
+                if (resourceOptional.isPresent()) {
+                    Resource resource = resourceOptional.get();
+                    return buildSmsSenderFromResource(resource);
                 }
             }
-            Resource resource = resourceOptional.get();
-            return buildSmsSenderFromResource(resource);
+            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         } catch (OrganizationManagementException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
                     e.getMessage(), e);
@@ -282,8 +283,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throws NotificationSenderManagementException {
 
         try {
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            Resources publisherResources = getPublisherResources(tenantDomain, inheritTenantSettings);
+            Resources publisherResources = getPublisherResources(inheritTenantSettings);
             return extractSMSSenders(publisherResources);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE,
@@ -294,13 +294,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
     }
 
-    private Resources getPublisherResources(String tenantDomain, boolean inheritTenantSettings)
+    private Resources getPublisherResources(boolean inheritTenantSettings)
             throws ConfigurationManagementException, OrganizationManagementException {
 
         Resources publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
                 .getConfigurationManager()
                 .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
 
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (inheritTenantSettings && OrganizationManagementUtil.isOrganization(tenantDomain) &&
                 publisherResources.getResources().isEmpty()) {
             publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
@@ -739,8 +740,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
      * @return Primary tenant id.
      * @throws OrganizationManagementException If an error occurred while getting the primary tenant id.
      */
-    private int getPrimaryTenantId(String tenantDomain) throws OrganizationManagementException {
+    private int getPrimaryTenantId() throws OrganizationManagementException {
 
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
                 .getOrganizationManager();
         String orgId = organizationManager.resolveOrganizationId(tenantDomain);
