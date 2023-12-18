@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSe
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -114,6 +115,22 @@ public class NotificationSenderTenantConfigServiceDS {
             log.debug("Un Setting theCarbonEventPublisherService Service");
         }
         NotificationSenderTenantConfigDataHolder.getInstance().setConfigurationManager(null);
+    }
+
+    @Reference(
+            name = "organization.management.service",
+            service = OrganizationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrganizationManager")
+    protected void setOrganizationManager(OrganizationManager organizationManager) {
+
+        NotificationSenderTenantConfigDataHolder.getInstance().setOrganizationManager(organizationManager);
+    }
+
+    protected void unsetOrganizationManager(OrganizationManager organizationManager) {
+
+        NotificationSenderTenantConfigDataHolder.getInstance().setOrganizationManager(null);
     }
 
     @Reference(name = "config.context.service",

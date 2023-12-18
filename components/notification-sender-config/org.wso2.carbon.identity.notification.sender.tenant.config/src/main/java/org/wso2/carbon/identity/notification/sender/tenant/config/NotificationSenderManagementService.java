@@ -74,6 +74,23 @@ public interface NotificationSenderManagementService {
     SMSSenderDTO getSMSSender(String senderName) throws NotificationSenderManagementException;
 
     /**
+     * Retrieve the sms sender details by name for the current organization with an option to exclude inherited
+     * tenant settings.
+     * When the 'inheritTenantSettings' flag is set to true, the method includes configurations from the parent tenant.
+     * When set to false, it retrieves only the configurations explicitly set for the current tenant.
+     *
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @param senderName SMS sender's name.
+     * @return SMS sender.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default SMSSenderDTO getSMSSender(String senderName, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        return getSMSSender(senderName);
+    }
+
+    /**
      * Retrieve all email senders of the tenant.
      *
      * @return Email senders of the tenant.
@@ -88,6 +105,21 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     List<SMSSenderDTO> getSMSSenders() throws NotificationSenderManagementException;
+
+    /**
+     * Retrieves all SMS senders configured for the current tenant with an option to exclude inherited tenant settings.
+     * When the 'inheritTenantSettings' flag is set to true, the method includes configurations from the parent tenant.
+     * When set to false, it retrieves only the configurations explicitly set for the current tenant.
+     *
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @return SMS senders of the tenant.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default List<SMSSenderDTO> getSMSSenders(boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        return getSMSSenders();
+    }
 
     /**
      * Update email sender details.
