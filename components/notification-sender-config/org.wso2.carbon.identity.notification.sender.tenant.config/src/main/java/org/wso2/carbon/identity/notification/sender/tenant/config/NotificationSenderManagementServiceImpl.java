@@ -312,6 +312,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     private List<SMSSenderDTO> extractSMSSenders(Resources publisherResources) {
+
         return publisherResources.getResources().stream()
                 .filter(resource -> resource.getAttributes().stream()
                         .anyMatch(attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
