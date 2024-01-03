@@ -31,7 +31,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Reset your password</title>
 
@@ -495,7 +494,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Reset your password</title>
 
@@ -959,7 +957,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -1427,7 +1424,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Recover your account</title>
 
@@ -1874,7 +1870,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your account</title>
 
@@ -2342,7 +2337,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your account</title>
 
@@ -2810,7 +2804,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your temporary password</title>
 
@@ -3258,7 +3251,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your one-time password (OTP)</title>
 
@@ -3703,7 +3695,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your email OTP for login</title>
 
@@ -4148,7 +4139,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your new account in the organization {{organization-name}}</title>
 
@@ -4616,7 +4606,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your new account in the organization {{organization-name}}</title>
 
@@ -5084,7 +5073,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset is required</title>
 
@@ -5556,7 +5544,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset is required</title>
 
@@ -6027,7 +6014,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset is required</title>
 
@@ -6480,7 +6466,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset is required</title>
 
@@ -6933,7 +6918,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is unlocked</title>
 
@@ -7376,7 +7360,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is unlocked</title>
 
@@ -7819,7 +7802,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is locked</title>
 
@@ -8268,7 +8250,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is locked</title>
 
@@ -8710,7 +8691,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is enabled</title>
 
@@ -9150,7 +9130,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is disabled</title>
 
@@ -9590,7 +9569,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset successful</title>
 
@@ -10030,7 +10008,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset successful</title>
 
@@ -10470,7 +10447,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Password reset initiated</title>
 
@@ -10920,7 +10896,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Keep your account active</title>
 
@@ -11364,7 +11339,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Login from a new device</title>
 
@@ -11815,7 +11789,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -12283,7 +12256,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -12724,7 +12696,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -13166,7 +13137,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Here is your time-based one-time passcode (TOTP)</title>
 
@@ -13613,7 +13583,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -14072,7 +14041,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your account</title>
 
@@ -14541,7 +14509,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your account</title>
 
@@ -15009,7 +14976,6 @@
 
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Confirm your email</title>
 
@@ -15475,7 +15441,6 @@
             <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is ready</title>
 
@@ -15924,7 +15889,6 @@
             <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Your account is ready</title>
 
@@ -16365,7 +16329,6 @@
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
 
                 <title>Sign in to {{application-name}}</title>
 
@@ -17133,7 +17096,6 @@
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                <!-- Facebook sharing information tags -->
                 <title>Invitation to join the {{organization-name}} organization</title>
                 <!-- [if mso]>
                 <style type="text/css">
