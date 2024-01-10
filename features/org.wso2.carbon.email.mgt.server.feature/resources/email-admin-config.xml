@@ -12230,7 +12230,7 @@
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-                <title>Confirm your email</title>
+                <title>Request received to update email</title>
 
                 <!-- [if mso]>
                 <style type="text/css">
@@ -12568,7 +12568,7 @@
                                                                 valign="top" align="left">
                                                                 <h1
                                                                     style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
-                                                                    Confirm your email
+                                                                    Request received to update email
                                                                 </h1>
                                                             </td>
                                                         </tr>
@@ -12592,7 +12592,7 @@
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{verification-pending-email}}</b>.<br>
+                                                                                        We have received a request to change the email address for the account with the username, <b>{{user-name}}</b> to <b>{{new-email-address}}</b>.<br>
                                                                                         <br>Please contact the system administrator if this is not intentional.<br>
                                                                                     </p>
                                                                                 </div>
@@ -12669,7 +12669,7 @@
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-                <title>Confirm your email</title>
+                <title>Request received to update email</title>
 
                 <!-- [if mso]>
                 <style type="text/css">
@@ -13007,7 +13007,7 @@
                                                                 valign="top" align="left">
                                                                 <h1
                                                                     style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
-                                                                    Confirm your email
+                                                                    Request received to update email
                                                                 </h1>
                                                             </td>
                                                         </tr>
