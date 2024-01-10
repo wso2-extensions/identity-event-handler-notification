@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.32-SNAPSHOT</version>
+    <version>1.7.32</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -33,7 +33,7 @@
         <url>https://github.com/wso2-extensions/identity-event-handler-notification.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-event-handler-notification.git</connection>
-        <tag>HEAD</tag>
+        <tag>v1.7.32</tag>
     </scm>
 
     <modules>
