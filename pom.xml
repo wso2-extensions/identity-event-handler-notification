@@ -434,7 +434,7 @@
 
         <!--Carbon Identity Framework Version-->
         <carbon.identity.framework.version>5.25.617</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 7.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
