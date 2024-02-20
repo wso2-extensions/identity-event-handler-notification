@@ -17,21 +17,21 @@
   -->
 <configurations>
     <configuration provider="Vonage">
-        <body>{"from" : "$sender", "text" : "{{body}}", "to" : "{{mobile}}", "api_key" = "$key", "api_secret" = "$secret"}
+        <body>{"from" : "$sender", "text" : "{{body}}", "to" : "{{send-to}}", "api_key" = "$key", "api_secret" = "$secret"}
         </body>
     </configuration>
     <configuration provider="Twilio">
-        <body>Body={{body}},To={{mobile}},From=$sender</body>
+        <body>Body={{body}},To={{send-to}},From=$sender</body>
     </configuration>
     <configuration provider="Bulksms">
-        <body>[{ "from": $sender, "to": {{mobile}}, "body": {{body}} }]
+        <body>[{ "from": $sender, "to": {{send-to}}, "body": {{body}} }]
         </body>
     </configuration>
     <configuration provider="Plivo">
-        <body>{"src": $sender, "dst": {{mobile}}, "text": {{body}}}</body>
+        <body>{"src": $sender, "dst": {{send-to}}, "text": {{body}}}</body>
     </configuration>
     <configuration provider="Clickatell">
-        <body>{"text": {{body}}, "to": [{{mobile}}]}</body>
+        <body>{"text": {{body}}, "to": [{{send-to}}]}</body>
     </configuration>
 </configurations>
 
