@@ -58,6 +58,9 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
     private static final String STREAM_DEFINITION_ID = "stream" ;
     private static final String NOTIFICATION_TEMPLATE_TYPE = "notification_template" ;
     private static final String DEFAULT_STREAM_ID = "id_gov_notify_stream:1.0.0";
+    private static final String NOTIFICATION_TYPE_VERIFY_MOBILE_ON_UPDATE = "verifyMobileOnUpdate";
+    private static final String SEND_TO = "send-to";
+    private static final String MOBILE = "mobile";
 
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
@@ -185,6 +188,14 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
         }
         Map<String, String> arbitraryDataFromProperties = getArbitraryDataFromProperties(event);
         arbitraryDataMap.putAll(arbitraryDataFromProperties);
+
+        /* During the verify mobile number on update scenario, the otp needs to send to the 'send-to' number.
+        (new mobile number). So use the 'send-to' attribute value as 'mobile' number. */
+        if (StringUtils.equalsIgnoreCase(NOTIFICATION_TYPE_VERIFY_MOBILE_ON_UPDATE, notificationTemplateName)) {
+            if (arbitraryDataMap.containsKey(SEND_TO) && StringUtils.isNotBlank(arbitraryDataMap.get(SEND_TO))) {
+                arbitraryDataMap.put(MOBILE, arbitraryDataMap.get(SEND_TO));
+            }
+        }
         return arbitraryDataMap ;
     }
 
