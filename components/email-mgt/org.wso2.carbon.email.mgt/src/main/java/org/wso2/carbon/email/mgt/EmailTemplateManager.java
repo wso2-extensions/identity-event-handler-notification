@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,21 @@ public interface EmailTemplateManager {
     }
 
     /**
+     * Get all email templates of a specific template type for an application, from tenant registry.
+     *
+     * @param templateDisplayName Email template type displace name.
+     * @param tenantDomain Tenant domain.
+     * @param applicationUuid Application UUID.
+     * @return A list of email templates that matches to the provided template type.
+     * @throws I18nEmailMgtException if an error occurred.
+     */
+    default List<EmailTemplate> getEmailTemplateType(
+            String templateDisplayName, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("Method not implemented");
+    }
+
+    /**
      * Get all available email templates in a tenant's registry.
      *
      * @param tenantDomain
@@ -148,5 +163,63 @@ public interface EmailTemplateManager {
             throws I18nEmailMgtException {
 
         throw new I18nEmailMgtException("Method not yet supported");
+    }
+
+    /**
+     * Add an application email template to tenant registry.
+     *
+     * @param emailTemplate Email template to be added.
+     * @param tenantDomain Tenant domain.
+     * @param applicationUuid Application UUID.
+     * @throws I18nEmailMgtException If an error occurred while adding the email template.
+     */
+    void addEmailTemplate(EmailTemplate emailTemplate,
+                          String tenantDomain,
+                          String applicationUuid) throws I18nEmailMgtException;
+
+    /**
+     * Delete an application email template from the tenant registry. Email template is identified with the
+     * templateTypeName, localeCode and application UUID.
+     *
+     * @param templateTypeName Email template type name.
+     * @param localeCode Locale code of the email template.
+     * @param tenantDomain Tenant domain.
+     * @param applicationUuid Application UUID.
+     * @throws I18nEmailMgtException If an error occurred while deleting the email template.
+     */
+    void deleteEmailTemplate(String templateTypeName,
+                             String localeCode,
+                             String tenantDomain,
+                             String applicationUuid) throws I18nEmailMgtException;
+
+    /**
+     * Get an email template from tenant registry with application UUID.
+     *
+     * @param templateType Email template type.
+     * @param locale Locale of the email template.
+     * @param tenantDomain Tenant domain.
+     * @param applicationUuid Application UUID.
+     * @return Email template of the application with fallback to organization template.
+     * @throws I18nEmailMgtException If an error occurred while getting the email template.
+     */
+    EmailTemplate getEmailTemplate(String templateType,
+                                   String locale,
+                                   String tenantDomain,
+                                   String applicationUuid) throws I18nEmailMgtException;
+
+    /**
+     * Check whether the given email template type exists for the application.
+     *
+     * @param templateTypeDisplayName Display name of the template type.
+     * @param locale                  Locale of the email template
+     * @param tenantDomain            Tenant Domain
+     * @param applicationUuid         Application UUID
+     * @return True if the template type exists, false otherwise.
+     * @throws I18nEmailMgtException If an error occurred while checking the existence of the email template.
+     */
+    default boolean isEmailTemplateExists(String templateTypeDisplayName, String locale,
+                                          String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("Method not implemented");
     }
 }

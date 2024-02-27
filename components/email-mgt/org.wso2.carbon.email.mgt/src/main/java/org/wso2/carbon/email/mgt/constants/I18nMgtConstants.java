@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -31,6 +31,7 @@ public class I18nMgtConstants {
     private I18nMgtConstants() {}
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
+    public static final String APP_TEMPLATE_PATH = "/apps";
     public static final String SMS_TEMPLATE_PATH = "/identity/sms";
     public static final String EMAIL_CONF_DIRECTORY = "email";
     public static final String SMS_CONF_DIRECTORY = "sms";
