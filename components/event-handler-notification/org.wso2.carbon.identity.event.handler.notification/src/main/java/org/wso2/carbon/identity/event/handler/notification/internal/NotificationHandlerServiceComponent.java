@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.DefaultNotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
@@ -211,6 +212,27 @@ public class NotificationHandlerServiceComponent {
     protected void unsetOrganizationManager(OrganizationManager organizationManager) {
 
         NotificationHandlerDataHolder.getInstance().setOrganizationManager(null);
+    }
+
+    @Reference(name = "application.mgt.service",
+            service = ApplicationManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApplicationManagementService")
+    protected void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Application Management Service.");
+        }
+        NotificationHandlerDataHolder.getInstance().setApplicationManagementService(applicationManagementService);
+    }
+
+    protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Un-setting the Application Management Service.");
+        }
+        NotificationHandlerDataHolder.getInstance().setApplicationManagementService(null);
     }
 }
 

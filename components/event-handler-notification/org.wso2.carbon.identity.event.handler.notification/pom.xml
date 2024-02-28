@@ -178,6 +178,8 @@
                             org.wso2.carbon.identity.event.event; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.event.handler; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.config; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.mgt;version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.common.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.event.output.adapter.core.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.event.stream.core.*; version="${carbon.analytics.common.version.range}",
                             org.wso2.carbon.event.publisher.core.*; version="${carbon.analytics.common.version.range}",
