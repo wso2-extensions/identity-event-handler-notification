@@ -321,6 +321,8 @@ public class NotificationSenderUtils {
         Map<String, String> adapterProperties = new HashMap<>();
         if (StringUtils.isNotBlank(smsSender.getProviderURL())) {
             adapterProperties.put(HTTP_URL_PROPERTY, smsSender.getProviderURL());
+        } else {
+            adapterProperties.put(HTTP_URL_PROPERTY, StringUtils.EMPTY);
         }
         // Default client method is httpPost. Can be changed by configuring properties.
         adapterProperties.put(CLIENT_HTTP_METHOD_PROPERTY, CONSTANT_HTTP_POST);
