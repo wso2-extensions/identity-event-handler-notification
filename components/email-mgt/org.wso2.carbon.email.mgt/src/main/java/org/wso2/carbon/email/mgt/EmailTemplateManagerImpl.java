@@ -819,6 +819,12 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
     }
 
+    /**
+     * Build application template path from application UUID or return empty string if application UUID is null.
+     *
+     * @param applicationUuid Application UUID.
+     * @return Application template path.
+     */
     private String getApplicationPath(String applicationUuid) {
 
         if (StringUtils.isNotBlank(applicationUuid)) {
@@ -949,6 +955,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
         for (String template : templateType.getChildren()) {
             Resource templateResource = resourceMgtService.getIdentityResource(template, tenantDomain);
+            // Exclude the app templates for organization template requests.
             if (templateResource != null && (templateTypeRegistryPath.contains(APP_TEMPLATE_PATH)
                     || !templateResource.getPath().contains(APP_TEMPLATE_PATH))) {
                 try {
@@ -1050,21 +1057,21 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     /**
      * Build the template type root directory path.
      *
-     * @param type                Template type
-     * @param notificationChannel Notification channel (SMS or EMAIL)
+     * @param templateType          Template type
+     * @param notificationChannel   Notification channel (SMS or EMAIL)
      * @return Root directory path
      */
-    private String buildTemplateRootDirectoryPath(String type, String notificationChannel) {
+    private String buildTemplateRootDirectoryPath(String templateType, String notificationChannel) {
 
-        return buildTemplateRootDirectoryPath(type, notificationChannel, null);
+        return buildTemplateRootDirectoryPath(templateType, notificationChannel, null);
     }
 
-    private String buildTemplateRootDirectoryPath(String type, String notificationChannel, String applicationUuid) {
+    private String buildTemplateRootDirectoryPath(String templateType, String notificationChannel, String applicationUuid) {
 
         if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return SMS_TEMPLATE_PATH + PATH_SEPARATOR + type;
+            return SMS_TEMPLATE_PATH + PATH_SEPARATOR + templateType;
         }
-        return EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + type + getApplicationPath(applicationUuid);
+        return EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType + getApplicationPath(applicationUuid);
     }
 
     /**

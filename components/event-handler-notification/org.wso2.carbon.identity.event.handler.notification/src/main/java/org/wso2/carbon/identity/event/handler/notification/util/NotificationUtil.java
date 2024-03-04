@@ -104,6 +104,7 @@ public class NotificationUtil {
     private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
+    private static final String SERVICE_PROVIDER_NAME = "serviceProviderName";
     public static final String CALLER_PATH_PLACEHOLDER = "caller.path";
     public static final String MAGIC_LINK = "magicLink";
     public static final String CALLBACK_URL = "callbackUrl";
@@ -674,13 +675,15 @@ public class NotificationUtil {
         EmailTemplate emailTemplate;
         String applicationUuid = null;
         try {
-            if (event.getEventProperties().containsKey("serviceProviderName")) {
-                String applicationName = event.getEventProperties().get("serviceProviderName").toString();
+            if (event.getEventProperties().containsKey(SERVICE_PROVIDER_NAME)) {
+                String applicationName = event.getEventProperties().get(SERVICE_PROVIDER_NAME).toString();
                 try {
                     applicationUuid = NotificationHandlerDataHolder.getInstance().getApplicationManagementService()
                             .getApplicationBasicInfoByName(applicationName, tenantDomain).getApplicationResourceId();
                 } catch (IdentityApplicationManagementException e) {
                     // Fallback to organization preference if application is not found.
+                    log.warn("Fallback to organization preference. Cannot get application id for application name: " +
+                            applicationName, e);
                 }
             }
             if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
