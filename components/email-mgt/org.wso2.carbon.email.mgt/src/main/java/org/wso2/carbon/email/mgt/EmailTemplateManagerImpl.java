@@ -562,6 +562,52 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     @Override
+    public void deleteEmailTemplates(String templateTypeName, String tenantDomain) throws I18nEmailMgtException {
+
+        validateTemplateType(templateTypeName, tenantDomain);
+
+        String templateType = I18nEmailUtil.getNormalizedName(templateTypeName);
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType;
+
+        try {
+            Collection templates = (Collection) resourceMgtService.getIdentityResource(path, tenantDomain);
+            for (String subPath : templates.getChildren()) {
+                // Exclude the app templates.
+                if (!subPath.contains(APP_TEMPLATE_PATH)) {
+                    resourceMgtService.deleteIdentityResource(subPath, tenantDomain);
+                }
+            }
+        } catch (IdentityRuntimeException | RegistryException ex) {
+            String errorMsg = String.format
+                    ("Error deleting email template type %s from %s tenant.", templateType, tenantDomain);
+            handleServerException(errorMsg, ex);
+        }
+    }
+
+    @Override
+    public void deleteEmailTemplates(String templateTypeName, String tenantDomain, String applicationUuid)
+            throws I18nEmailMgtException {
+
+        validateTemplateType(templateTypeName, tenantDomain);
+
+        String templateType = I18nEmailUtil.getNormalizedName(templateTypeName);
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType + APP_TEMPLATE_PATH +
+                PATH_SEPARATOR + applicationUuid;
+
+        try {
+            if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
+                // No templates found for the given application UUID.
+                return;
+            }
+            resourceMgtService.deleteIdentityResource(path, tenantDomain);
+        } catch (IdentityRuntimeException ex) {
+            String errorMsg = String.format("Error deleting email template type %s from %s tenant for application %s.",
+                    templateType, tenantDomain, applicationUuid);
+            handleServerException(errorMsg, ex);
+        }
+    }
+
+    @Override
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
 
         try {

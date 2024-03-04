@@ -77,6 +77,29 @@ public interface EmailTemplateManager {
                              String localeCode,
                              String tenantDomain) throws I18nEmailMgtException;
 
+    /**
+     * Delete all email templates from the tenant registry. Email templates are identified with the templateTypeName and
+     * localeCode.
+     *
+     * @param templateTypeName Email template type name.
+     * @param tenantDomain Tenant domain.
+     * @throws I18nEmailMgtException If an error occurred while deleting the email templates.
+     */
+    void deleteEmailTemplates(String templateTypeName, String tenantDomain) throws I18nEmailMgtException;
+
+    /**
+     * Delete all email templates from the tenant registry. Email templates are identified with the templateTypeName,
+     * localeCode and application UUID.
+     *
+     * @param templateTypeName Email template type name.
+     * @param tenantDomain Tenant domain.
+     * @param applicationUuid Application UUID.
+     * @throws I18nEmailMgtException If an error occurred while deleting the email templates.
+     */
+    void deleteEmailTemplates(String templateTypeName,
+                              String tenantDomain,
+                              String applicationUuid) throws I18nEmailMgtException;
+
 
     /**
      * Get an email template from tenant registry.
