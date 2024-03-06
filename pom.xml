@@ -392,7 +392,7 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.5.77</identity.governance.version>
+        <identity.governance.version>1.9.8</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
@@ -402,7 +402,7 @@
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
-        <identity.branding.preference.management.version>1.0.8</identity.branding.preference.management.version>
+        <identity.branding.preference.management.version>1.1.5</identity.branding.preference.management.version>
         <identity.branding.preference.management.version.range>[1.0.1, 2.0.0)</identity.branding.preference.management.version.range>
 
         <!--Orbit Version-->
