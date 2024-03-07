@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package org.wso2.carbon.email.mgt;
 
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
@@ -26,8 +24,6 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
@@ -70,7 +66,7 @@ import javax.xml.stream.XMLStreamReader;
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
 @PrepareForTest({ IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class})
-public class EmailTemplateManagerImplTest extends PowerMockTestCase {
+public class OrganizationEmailTemplateTest extends PowerMockTestCase {
 
     private EmailTemplateManagerImpl emailTemplateManager;
 

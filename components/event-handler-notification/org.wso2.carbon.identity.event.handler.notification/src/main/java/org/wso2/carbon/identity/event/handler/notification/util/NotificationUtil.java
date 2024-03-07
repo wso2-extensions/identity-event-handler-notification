@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -34,6 +34,7 @@ import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfiguratio
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManager;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManagerImpl;
 import org.wso2.carbon.identity.branding.preference.management.core.constant.BrandingPreferenceMgtConstants;
@@ -63,7 +64,6 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -104,6 +104,7 @@ public class NotificationUtil {
     private static final Log log = LogFactory.getLog(NotificationUtil.class);
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
+    private static final String SERVICE_PROVIDER_NAME = "serviceProviderName";
     public static final String CALLER_PATH_PLACEHOLDER = "caller.path";
     public static final String MAGIC_LINK = "magicLink";
     public static final String CALLBACK_URL = "callbackUrl";
@@ -181,7 +182,23 @@ public class NotificationUtil {
      * @return Place holder data
      */
     public static Map<String, String> getPlaceholderValues(EmailTemplate emailTemplate,
-                                                           Map<String, String> placeHolderData, Map<String, String> userClaims) {
+                                                           Map<String, String> placeHolderData,
+                                                           Map<String, String> userClaims) {
+
+        return getPlaceholderValues(emailTemplate, placeHolderData, userClaims, null);
+    }
+
+    /**
+     * Set placeholder values for email templates with app level branding.
+     *
+     * @param emailTemplate   {@link org.wso2.carbon.email.mgt.model.EmailTemplate}
+     * @param placeHolderData List of placeholder data
+     * @param userClaims      List of user claims
+     * @return Place holder data
+     */
+    public static Map<String, String> getPlaceholderValues(EmailTemplate emailTemplate,
+                                                           Map<String, String> placeHolderData,
+                                                           Map<String, String> userClaims, String applicationUuid) {
 
         Map<String, String> configFilePlaceholders = getConfigFilePlaceholders();
 
@@ -192,11 +209,16 @@ public class NotificationUtil {
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
                 BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
-                BrandingPreference responseDTO = brandingPreferenceManager.resolveBrandingPreference(
-                        BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
-                        placeHolderData.get(TENANT_DOMAIN),
-                        BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
-
+                BrandingPreference responseDTO;
+                if (StringUtils.isNotBlank(applicationUuid)) {
+                    responseDTO = brandingPreferenceManager.resolveApplicationBrandingPreference(applicationUuid,
+                            BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
+                } else {
+                    responseDTO = brandingPreferenceManager.resolveBrandingPreference(
+                            BrandingPreferenceMgtConstants.ORGANIZATION_TYPE,
+                            placeHolderData.get(TENANT_DOMAIN),
+                            BrandingPreferenceMgtConstants.DEFAULT_LOCALE);
+                }
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(responseDTO.getPreference());
                 brandingPreferences = objectMapper.readTree(json);
@@ -651,8 +673,28 @@ public class NotificationUtil {
         }
 
         EmailTemplate emailTemplate;
+        String applicationUuid = null;
         try {
-            emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().getEmailTemplate(notificationEvent, locale, tenantDomain);
+            if (event.getEventProperties().containsKey(SERVICE_PROVIDER_NAME)) {
+                String applicationName = event.getEventProperties().get(SERVICE_PROVIDER_NAME).toString();
+                try {
+                    applicationUuid = NotificationHandlerDataHolder.getInstance().getApplicationManagementService()
+                            .getApplicationBasicInfoByName(applicationName, tenantDomain).getApplicationResourceId();
+                } catch (IdentityApplicationManagementException e) {
+                    // Fallback to organization preference if application is not found.
+                    log.warn("Fallback to organization preference. Cannot get application id for application name: " +
+                            applicationName, e);
+                }
+            }
+            if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
+                    notificationEvent, locale, tenantDomain, applicationUuid)) {
+                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
+                        .getEmailTemplate(notificationEvent, locale, tenantDomain, applicationUuid);
+            } else {
+                // Fallback to organization level email template if application level template is not found.
+                emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
+                        .getEmailTemplate(notificationEvent, locale, tenantDomain);
+            }
         } catch (I18nEmailMgtException e) {
             String message = "Error when retrieving template from tenant registry.";
             throw NotificationRuntimeException.error(message, e);
@@ -662,7 +704,7 @@ public class NotificationUtil {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         placeHolderData.put("current-year", String.valueOf(currentYear));
 
-        NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims);
+        NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims, applicationUuid);
 
         if (StringUtils.isBlank(placeHolderData.get(ORGANIZATION_NAME_PLACEHOLDER))) {
             // If the organization display name is not configured with branding,
