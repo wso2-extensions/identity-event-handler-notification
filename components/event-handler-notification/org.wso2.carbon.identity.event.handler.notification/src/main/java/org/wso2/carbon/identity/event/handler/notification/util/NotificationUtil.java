@@ -649,6 +649,7 @@ public class NotificationUtil {
         String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
         String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
+        String appDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
 
         if (StringUtils.isNotBlank(username) && userStoreManager != null) {
             userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
@@ -675,25 +676,26 @@ public class NotificationUtil {
         EmailTemplate emailTemplate;
         String applicationUuid = null;
         try {
+            String applicationDomain = StringUtils.isNotBlank(appDomain) ? appDomain : tenantDomain;
             if (event.getEventProperties().containsKey(SERVICE_PROVIDER_NAME)) {
                 String applicationName = event.getEventProperties().get(SERVICE_PROVIDER_NAME).toString();
                 try {
                     applicationUuid = NotificationHandlerDataHolder.getInstance().getApplicationManagementService()
-                            .getApplicationBasicInfoByName(applicationName, tenantDomain).getApplicationResourceId();
-                } catch (IdentityApplicationManagementException e) {
+                            .getApplicationBasicInfoByName(applicationName, applicationDomain).getApplicationResourceId();
+                } catch (IdentityApplicationManagementException | NullPointerException e) {
                     // Fallback to organization preference if application is not found.
                     log.warn("Fallback to organization preference. Cannot get application id for application name: " +
                             applicationName, e);
                 }
             }
             if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
-                    notificationEvent, locale, tenantDomain, applicationUuid)) {
+                    notificationEvent, locale, applicationDomain, applicationUuid)) {
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
-                        .getEmailTemplate(notificationEvent, locale, tenantDomain, applicationUuid);
+                        .getEmailTemplate(notificationEvent, locale, applicationDomain, applicationUuid);
             } else {
                 // Fallback to organization level email template if application level template is not found.
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
-                        .getEmailTemplate(notificationEvent, locale, tenantDomain);
+                        .getEmailTemplate(notificationEvent, locale, applicationDomain);
             }
         } catch (I18nEmailMgtException e) {
             String message = "Error when retrieving template from tenant registry.";
