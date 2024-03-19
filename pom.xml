@@ -250,6 +250,11 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.utils</groupId>
+                <artifactId>org.wso2.carbon.database.utils</artifactId>
+                <version>${org.wso2.carbon.database.utils.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -427,6 +432,10 @@
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
         <carbon.kernel.carbon.base.pkg.version>[1.0.0, 2.0.0)</carbon.kernel.carbon.base.pkg.version>
         <axis2.osgi.version.range>[1.6.1, 2.0.0)</axis2.osgi.version.range>
+
+        <!--Carbon Database Utils Version-->
+        <org.wso2.carbon.database.utils.version>2.1.0</org.wso2.carbon.database.utils.version>
+        <org.wso2.carbon.database.utils.version.range>[2.0.0,2.2.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Commons Version-->
         <carbon.commons.version>4.7.11</carbon.commons.version>

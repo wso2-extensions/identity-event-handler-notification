@@ -27,13 +27,16 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
-import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.email.mgt.model.NotificationTemplate;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -70,7 +73,7 @@ public class I18nEmailUtil {
     @Deprecated
     public static List<EmailTemplate> getDefaultEmailTemplates() {
 
-        List<NotificationTemplate> defaultEmailTemplates = I18nMgtDataHolder.getInstance().getDefaultEmailTemplates();
+        List<org.wso2.carbon.identity.governance.model.NotificationTemplate> defaultEmailTemplates = I18nMgtDataHolder.getInstance().getDefaultEmailTemplates();
         List<EmailTemplate> mailTemplates = new ArrayList<>();
         defaultEmailTemplates.forEach(notificationTemplate ->
                 mailTemplates.add(buildEmailTemplate(notificationTemplate)));
@@ -85,7 +88,7 @@ public class I18nEmailUtil {
      *                             object
      * @return {@link org.wso2.carbon.email.mgt.model.EmailTemplate} object
      */
-    public static EmailTemplate buildEmailTemplate(NotificationTemplate notificationTemplate) {
+    public static EmailTemplate buildEmailTemplate(org.wso2.carbon.identity.governance.model.NotificationTemplate notificationTemplate) {
 
         // Build an email template using SMS template data.
         EmailTemplate emailTemplate = new EmailTemplate();
@@ -231,5 +234,47 @@ public class I18nEmailUtil {
             }
         }
         return exceptionErrorCode;
+    }
+
+    public static int getTenantId(String tenantDomain) throws I18nEmailMgtException {
+
+        int tenantId;
+        try {
+            RealmService realmService = I18nMgtDataHolder.getInstance().getRealmService();
+            tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            throw new I18nEmailMgtException("ERROR_CODE_RETRIEVE_TENANT_ID", "Error while retrieving tenant id");
+        }
+
+        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            throw new I18nEmailMgtException("ERROR_CODE_INVALID_TENANT_DOMAIN");
+        }
+        return tenantId;
+    }
+
+    public static NotificationTemplate convertToNotificationTemplate(EmailTemplate emailTemplate) {
+        return new NotificationTemplate(emailTemplate.getSubject(), emailTemplate.getBody(), emailTemplate.getFooter(),
+                emailTemplate.getEmailContentType(), emailTemplate.getLocale(), emailTemplate.getTemplateType());
+    }
+
+    public static EmailTemplate convertToEmailTemplate(NotificationTemplate notificationTemplate) {
+        EmailTemplate emailTemplate = new EmailTemplate();
+        emailTemplate.setSubject(notificationTemplate.getSubject());
+        emailTemplate.setBody(notificationTemplate.getBody());
+        emailTemplate.setFooter(notificationTemplate.getFooter());
+        emailTemplate.setEmailContentType(notificationTemplate.getContentType());
+        emailTemplate.setLocale(notificationTemplate.getLocale());
+        //TODO: check whether this is correct
+        emailTemplate.setTemplateDisplayName(notificationTemplate.getScenarioType());
+        emailTemplate.setTemplateType(notificationTemplate.getScenarioType());
+        return emailTemplate;
+    }
+
+    public static List<EmailTemplate> convertToEmailTemplates(List<NotificationTemplate> notificationTemplates) {
+        List<EmailTemplate> emailTemplates = new ArrayList<>();
+        for (NotificationTemplate notificationTemplate : notificationTemplates) {
+            emailTemplates.add(convertToEmailTemplate(notificationTemplate));
+        }
+        return emailTemplates;
     }
 }

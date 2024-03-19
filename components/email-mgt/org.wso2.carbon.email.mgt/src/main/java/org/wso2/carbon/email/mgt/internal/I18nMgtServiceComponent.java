@@ -26,10 +26,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.EmailTemplateManager;
-import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
-import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
-import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.*;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
@@ -86,7 +83,7 @@ public class I18nMgtServiceComponent {
             BundleContext bundleCtx = context.getBundleContext();
 
             // Register Email Mgt Service as an OSGi service.
-            EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
+            EmailTemplateManagerImpl emailTemplateManager = new DBBasedEmailTemplateManager();
             ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
                     emailTemplateManager, null);
             if (emailTemplateSR != null) {
