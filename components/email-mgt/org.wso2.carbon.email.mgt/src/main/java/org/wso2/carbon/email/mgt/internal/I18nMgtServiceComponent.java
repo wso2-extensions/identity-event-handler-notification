@@ -83,7 +83,7 @@ public class I18nMgtServiceComponent {
             BundleContext bundleCtx = context.getBundleContext();
 
             // Register Email Mgt Service as an OSGi service.
-            EmailTemplateManagerImpl emailTemplateManager = new DBBasedEmailTemplateManager();
+            EmailTemplateManager emailTemplateManager = new DBBasedEmailTemplateManager();
             ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
                     emailTemplateManager, null);
             if (emailTemplateSR != null) {
@@ -94,9 +94,10 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering Email Template Mgt Service.");
             }
 
+            NotificationTemplateManager notificationManager = new EmailTemplateManagerImpl();
             // Register EmailTemplateManagerImpl.
             ServiceRegistration notificationManagerSR = bundleCtx
-                    .registerService(NotificationTemplateManager.class.getName(), emailTemplateManager, null);
+                    .registerService(NotificationTemplateManager.class.getName(), notificationManager, null);
             if (notificationManagerSR != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Notification Template Mgt Service registered.");
@@ -150,7 +151,7 @@ public class I18nMgtServiceComponent {
     private void loadDefaultEmailTemplates() {
         // Load email template configuration on server startup if they don't already exist.
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
+        EmailTemplateManager emailTemplateManager = new DBBasedEmailTemplateManager();
         try {
             emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
         } catch (I18nEmailMgtException e) {

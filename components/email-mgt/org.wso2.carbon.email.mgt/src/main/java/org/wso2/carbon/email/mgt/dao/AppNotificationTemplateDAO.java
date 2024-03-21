@@ -32,7 +32,7 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
  */
 public class AppNotificationTemplateDAO {
 
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid, int tenantId) throws Exception {
+    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -42,9 +42,11 @@ public class AppNotificationTemplateDAO {
                 preparedStatement.setString(3, notificationTemplate.getBody());
                 preparedStatement.setString(4, notificationTemplate.getFooter());
                 preparedStatement.setString(5, notificationTemplate.getContentType());
-                preparedStatement.setInt(6, resolveScenarioId(notificationTemplate.getScenarioType()));
-                preparedStatement.setString(7, applicationUuid);
+                preparedStatement.setString(6, notificationTemplate.getScenarioType());
+                preparedStatement.setString(7, channelName);
                 preparedStatement.setInt(8, tenantId);
+                preparedStatement.setString(9, applicationUuid);
+                preparedStatement.setInt(10, tenantId);
             }), notificationTemplate, false);
         } catch (DataAccessException e) {
             // todo: handle exception
@@ -52,7 +54,7 @@ public class AppNotificationTemplateDAO {
         }
     }
 
-    public NotificationTemplate getNotificationTemplate(String locale, String scenarioName, String applicationUuid, int tenantId) throws Exception {
+    public NotificationTemplate getNotificationTemplate(String locale, String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         NotificationTemplate notificationTemplate;
@@ -64,9 +66,11 @@ public class AppNotificationTemplateDAO {
                             resultSet.getString(4), locale, scenarioName),
                     preparedStatement -> {
                         preparedStatement.setString(1, locale);
-                        preparedStatement.setInt(2, resolveScenarioId(scenarioName));
-                        preparedStatement.setString(3, applicationUuid);
+                        preparedStatement.setString(2, scenarioName);
+                        preparedStatement.setString(3, channelName);
                         preparedStatement.setInt(4, tenantId);
+                        preparedStatement.setString(5, applicationUuid);
+                        preparedStatement.setInt(6, tenantId);
                     });
         } catch (DataAccessException e) {
             // todo: handle exception
@@ -76,7 +80,7 @@ public class AppNotificationTemplateDAO {
         return notificationTemplate;
     }
 
-    public List<NotificationTemplate> listNotificationTemplates(String scenarioName, String applicationUuid, int tenantId) throws Exception {
+    public List<NotificationTemplate> listNotificationTemplates(String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<NotificationTemplate> notificationTemplates;
@@ -87,9 +91,11 @@ public class AppNotificationTemplateDAO {
                             resultSet.getString(2), resultSet.getString(3),
                             resultSet.getString(4), resultSet.getString(5), scenarioName),
                     preparedStatement -> {
-                        preparedStatement.setInt(1, resolveScenarioId(scenarioName));
-                        preparedStatement.setString(2, applicationUuid);
+                        preparedStatement.setString(1, scenarioName);
+                        preparedStatement.setString(2, channelName);
                         preparedStatement.setInt(3, tenantId);
+                        preparedStatement.setString(4, applicationUuid);
+                        preparedStatement.setInt(5, tenantId);
                     });
         } catch (DataAccessException e) {
             // todo: handle exception
@@ -99,20 +105,22 @@ public class AppNotificationTemplateDAO {
         return notificationTemplates;
     }
 
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String scenarioName, String applicationUuid, int tenantId) throws Exception {
+    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeUpdate(UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL,
+            jdbcTemplate.executeUpdate(UPDATE_APP_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
                         preparedStatement.setString(1, notificationTemplate.getSubject());
                         preparedStatement.setString(2, notificationTemplate.getBody());
                         preparedStatement.setString(3, notificationTemplate.getFooter());
                         preparedStatement.setString(4, notificationTemplate.getContentType());
                         preparedStatement.setString(5, notificationTemplate.getLocale());
-                        preparedStatement.setInt(6, resolveScenarioId(scenarioName));
-                        preparedStatement.setString(7, applicationUuid);
+                        preparedStatement.setString(6, scenarioName);
+                        preparedStatement.setString(7, channelName);
                         preparedStatement.setInt(8, tenantId);
+                        preparedStatement.setString(9, applicationUuid);
+                        preparedStatement.setInt(10, tenantId);
                     });
         } catch (DataAccessException e) {
             // todo: handle exception
@@ -121,16 +129,18 @@ public class AppNotificationTemplateDAO {
 
     }
 
-    public void removeNotificationTemplate(String locale, String scenarioName, String applicationUuid, int tenantId) throws Exception {
+    public void removeNotificationTemplate(String locale, String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeUpdate(DELETE_ORG_NOTIFICATION_TEMPLATE_SQL,
+            jdbcTemplate.executeUpdate(DELETE_APP_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
                         preparedStatement.setString(1, locale);
-                        preparedStatement.setInt(1, resolveScenarioId(scenarioName));
-                        preparedStatement.setString(2, applicationUuid);
-                        preparedStatement.setInt(3, tenantId);
+                        preparedStatement.setString(2, scenarioName);
+                        preparedStatement.setString(3, channelName);
+                        preparedStatement.setInt(4, tenantId);
+                        preparedStatement.setString(5, applicationUuid);
+                        preparedStatement.setInt(6, tenantId);
                     });
         } catch (DataAccessException e) {
             // todo: handle exception
@@ -138,7 +148,21 @@ public class AppNotificationTemplateDAO {
         }
     }
 
-    private int resolveScenarioId(String scenarioType) {
-        return -1234;
+    public void removeNotificationTemplates(String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.executeUpdate(DELETE_APP_NOTIFICATION_TEMPLATES_BY_SCENARIO_SQL,
+                    preparedStatement -> {
+                        preparedStatement.setString(1, scenarioName);
+                        preparedStatement.setString(2, channelName);
+                        preparedStatement.setInt(3, tenantId);
+                        preparedStatement.setString(4, applicationUuid);
+                        preparedStatement.setInt(5, tenantId);
+                    });
+        } catch (DataAccessException e) {
+            // todo: handle exception
+            throw new Exception("Error while delete notification templates for scenario", e);
+        }
     }
 }
