@@ -126,7 +126,7 @@ public class OrgNotificationTemplateDAO {
         return notificationTemplates;
     }
 
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, int tenantId) throws Exception {
+    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -144,7 +144,7 @@ public class OrgNotificationTemplateDAO {
                     });
         } catch (DataAccessException e) {
             // todo: handle exception
-            throw new Exception("Error while update notification template", e);
+            throw new NotificationTemplateManagerServerException("Error while update notification template", e);
         }
 
     }

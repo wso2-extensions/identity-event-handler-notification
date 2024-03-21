@@ -57,13 +57,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test addEmailTemplateType(): " + emailTemplateTypeDisplayName);
 
-        try {
-            //TODO: Check this can be moved to the API layer
-            validateDisplayNameOfTemplateType(emailTemplateTypeDisplayName);
-            I18nEmailUtil.getNormalizedName(emailTemplateTypeDisplayName);
-        } catch (NotificationTemplateManagerClientException e) {
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(emailTemplateTypeDisplayName);
 
         if (isEmailTemplateTypeExists(emailTemplateTypeDisplayName, tenantDomain)) {
             String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_TEMPLATE_TYPE.getMessage(), emailTemplateTypeDisplayName, tenantDomain);
@@ -82,13 +77,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test type isEmailTemplateTypeExists(): " + templateTypeDisplayName);
 
-//        try {
-            //TODO: Check this can be moved to the API layer
-//            EmailTemplateManagerImpl.validateDisplayNameOfTemplateType(templateTypeDisplayName);
-//        } catch (NotificationTemplateManagerClientException e) {
-//            throw new I18nEmailMgtClientException(e.getMessage(), e);
-//        }
-        I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayName(templateTypeDisplayName);
 
         try {
             String scenarioName = notificationScenarioDAO.getNotificationScenario(templateTypeDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
@@ -115,14 +105,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test type deleteEmailTemplateType(): " + templateDisplayName);
 
-        try {
-            //TODO: Check this can be moved to the API layer
-            validateDisplayNameOfTemplateType(templateDisplayName);
-            I18nEmailUtil.getNormalizedName(templateDisplayName);
-        } catch (NotificationTemplateManagerClientException e) {
-            //TODO: error handling is different from the registry based impl
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
 
         try {
             notificationScenarioDAO.removeNotificationScenario(templateDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
@@ -137,23 +121,14 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         log.info("Test org addEmailTemplate(): " + emailTemplate.getTemplateDisplayName() + " locale: " + emailTemplate.getLocale());
 
         NotificationTemplate notificationTemplate = buildNotificationTemplateFromEmailTemplate(emailTemplate);
-        try {
-            //TODO: Check this can be moved to the API layer
-            validateNotificationTemplate(notificationTemplate);
-            I18nEmailUtil.getNormalizedName(notificationTemplate.getDisplayName());
-        } catch (NotificationTemplateManagerClientException e) {
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+
+        //TODO: Check this can be moved to the API layer
+        validateNotificationTemplateAndHandleErrors(notificationTemplate);
 
         // TODO: Registry impl creates template type if not exists
 
         if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain)) {
-            String locale = notificationTemplate.getLocale();
-            String scenarioName = notificationTemplate.getDisplayName();
-            String channel = notificationTemplate.getNotificationChannel();
-            // TODO: Check with the registry impl, it doesn't have a error here.
-            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_ORG_TEMPLATE.getMessage(), locale, scenarioName, channel, tenantDomain);
-            throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_ALREADY_EXISTS, message);
+            handleTemplateAlreadyExists(tenantDomain, notificationTemplate);
         }
 
         try {
@@ -168,18 +143,11 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test org getEmailTemplate(): " + templateTypeDisplayName + " locale: " + locale);
 
-        try {
-            validateTemplateLocale(locale);
-            validateDisplayNameOfTemplateType(templateTypeDisplayName);
-        } catch (NotificationTemplateManagerClientException e) {
-            //TODO: ERROR_CODE_EMPTY_LOCALE & ERROR_CODE_EMPTY_TEMPLATE_NAME error codes are not handled in registry impl
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+        validateLocaleAndTemplateTypeDisplayName(templateTypeDisplayName, locale);
 
-        String notificationChannel = EMAIL_CHANNEL;
         NotificationTemplate notificationTemplate;
         try {
-            notificationTemplate = orgNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeDisplayName, notificationChannel, getTenantId(tenantDomain));
+            notificationTemplate = orgNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
         } catch (NotificationTemplateManagerServerException e) {
             throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
@@ -187,28 +155,11 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         // TODO: Check why its only SMS here in registry impl
         // Handle not having the requested SMS template type in required locale for this tenantDomain.
         if (notificationTemplate == null) {
-            String defaultLocale = getDefaultNotificationLocale(notificationChannel);
-            if (StringUtils.equalsIgnoreCase(defaultLocale, locale)) {
-                // Template is not available in the default locale. Therefore, breaking the flow at the consuming side to avoid NPE.
-                String error = String.format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_TEMPLATE_FOUND.getMessage(), templateTypeDisplayName, locale, tenantDomain);
-                throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND, error);
-            } else {
-                if (log.isDebugEnabled()) {
-                    String message = String.format("'%s' template in '%s' locale was not found in '%s' tenant. Trying to return the template in default locale : '%s'", templateTypeDisplayName, locale, tenantDomain, DEFAULT_EMAIL_LOCALE);
-                    log.debug(message);
-                }
-                // Try to get the template type in default locale.
-                return getEmailTemplate(templateTypeDisplayName, defaultLocale, tenantDomain);
-            }
+            return getDefaultTemplate(templateTypeDisplayName, locale, tenantDomain);
         }
 
         // TODO: Remove following as its not needed when retrieving, but registry impl has it
-        if (StringUtils.isBlank(notificationTemplate.getBody())) {
-            String error = String.format(IdentityMgtConstants.ErrorMessages.
-                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getMessage(), templateTypeDisplayName, locale);
-            throw new I18nEmailMgtClientException(IdentityMgtConstants.ErrorMessages.
-                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getCode(), error);
-        }
+        validateContent(templateTypeDisplayName, locale, notificationTemplate);
         return buildEmailTemplate(notificationTemplate);
     }
 
@@ -218,13 +169,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test org isEmailTemplateExists(): " + templateTypeDisplayName + " locale: " + locale);
 
-//        try {
         //TODO: Check this can be moved to the API layer
-//            EmailTemplateManagerImpl.validateDisplayNameOfTemplateType(templateTypeDisplayName);
-//        } catch (NotificationTemplateManagerClientException e) {
-//            throw new I18nEmailMgtClientException(e.getMessage(), e);
-//        }
-        I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+        validateTemplateTypeDisplayName(templateTypeDisplayName);
 
         try {
             NotificationTemplate notificationTemplate = orgNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
@@ -240,19 +186,14 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test org getEmailTemplate(): " + templateDisplayName);
 
-        try {
-            //TODO: Check this can be moved to the API layer
-            validateDisplayNameOfTemplateType(templateDisplayName);
-            I18nEmailUtil.getNormalizedName(templateDisplayName);
-        } catch (NotificationTemplateManagerClientException e) {
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
 
         try {
             List<NotificationTemplate> notificationTemplates = orgNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
             return convertToEmailTemplates(notificationTemplates);
         } catch (NotificationTemplateManagerServerException e) {
-            throw new I18nEmailMgtServerException("Error while listing the templates", e);
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -263,13 +204,7 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         //TODO: Check this can be moved to the API layer
         // Validate the name and locale code.
-        if (StringUtils.isBlank(templateTypeDisplayName)) {
-            throw new I18nEmailMgtClientException("Cannot Delete template. Email displayName cannot be null.");
-        }
-        if (StringUtils.isBlank(locale)) {
-            throw new I18nEmailMgtClientException("Cannot Delete template. Email locale cannot be null.");
-        }
-        I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+        validateNameAndLocaleWithNormalized(templateTypeDisplayName, locale);
 
         try {
             orgNotificationTemplateDAO.removeNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
@@ -283,14 +218,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
 
         log.info("Test org deleteEmailTemplates(): " + templateDisplayName);
 
-        try {
-            //TODO: Check this can be moved to the API layer
-            validateDisplayNameOfTemplateType(templateDisplayName);
-            I18nEmailUtil.getNormalizedName(templateDisplayName);
-        } catch (NotificationTemplateManagerClientException e) {
-            //TODO: error handling is different from the registry based impl
-            throw new I18nEmailMgtClientException(e.getMessage(), e);
-        }
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
 
         try {
             orgNotificationTemplateDAO.removeNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
@@ -303,35 +232,63 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     public void addEmailTemplate(EmailTemplate emailTemplate, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
         log.info("Test app addEmailTemplate(): " + emailTemplate.getTemplateDisplayName() + " locale: " + emailTemplate.getLocale());
+        
+        NotificationTemplate notificationTemplate = buildNotificationTemplateFromEmailTemplate(emailTemplate);
+
+        //TODO: Check this can be moved to the API layer
+        validateNotificationTemplateAndHandleErrors(notificationTemplate);
+
+        // TODO: Registry impl creates template type if not exists
+
+        if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain, applicationUuid)) {
+            handleTemplateAlreadyExists(tenantDomain, notificationTemplate);
+        }
+
         try {
-            NotificationTemplate notificationTemplate = buildNotificationTemplateFromEmailTemplate(emailTemplate);
             appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while adding the app template", e);
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
     @Override
-    public EmailTemplate getEmailTemplate(String templateDisplayName, String locale, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
+    public EmailTemplate getEmailTemplate(String templateTypeDisplayName, String locale, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
-        log.info("Test app getEmailTemplate(): " + templateDisplayName);
+        log.info("Test app getEmailTemplate(): " + templateTypeDisplayName);
+
+        validateLocaleAndTemplateTypeDisplayName(templateTypeDisplayName, locale);
+
+        NotificationTemplate notificationTemplate;
         try {
-            NotificationTemplate notificationTemplate = appNotificationTemplateDAO.getNotificationTemplate(locale, templateDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
-            return buildEmailTemplate(notificationTemplate);
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while retrieving the app template", e);
+            notificationTemplate = appNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
+
+        // TODO: Check why its only SMS here in registry impl
+        // Handle not having the requested SMS template type in required locale for this tenantDomain.
+        if (notificationTemplate == null) {
+            return getDefaultTemplate(templateTypeDisplayName, locale, tenantDomain);
+        }
+
+        // TODO: Remove following as its not needed when retrieving, but registry impl has it
+        validateContent(templateTypeDisplayName, locale, notificationTemplate);
+        return buildEmailTemplate(notificationTemplate);
     }
 
     @Override
     public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
         log.info("Test app isEmailTemplateExists(): " + templateTypeDisplayName + " locale: " + locale);
+
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayName(templateTypeDisplayName);
+
         try {
             NotificationTemplate notificationTemplate = appNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
             return notificationTemplate != null;
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while checking the existence of the app template", e);
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -344,11 +301,15 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         }
 
         log.info("Test app getEmailTemplateType() -> ie listEmailTemplates(): " + templateDisplayName);
+
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
+
         try {
             List<NotificationTemplate> notificationTemplates = appNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
             return convertToEmailTemplates(notificationTemplates);
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while listing the templates", e);
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -356,10 +317,15 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     public void deleteEmailTemplate(String templateTypeDisplayName, String locale, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
         log.info("Test app deleteEmailTemplates(): " + templateTypeDisplayName + " locale: " + locale);
+
+        //TODO: Check this can be moved to the API layer
+        // Validate the name and locale code.
+        validateNameAndLocaleWithNormalized(templateTypeDisplayName, locale);
+
         try {
             appNotificationTemplateDAO.removeNotificationTemplate(locale, templateTypeDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while deleting the app templates", e);
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -367,10 +333,14 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     public void deleteEmailTemplates(String templateDisplayName, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
         log.info("Test app deleteEmailTemplates(): " + templateDisplayName);
+
+        //TODO: Check this can be moved to the API layer
+        validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
+
         try {
             appNotificationTemplateDAO.removeNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
-        } catch (Exception e) {
-            throw new I18nEmailMgtServerException("Error while deleting the app templates", e);
+        } catch (NotificationTemplateManagerServerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -395,5 +365,87 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
                 log.error("Error while adding default email templates for the tenant : " + tenantDomain, e);
             }
         });
+    }
+
+    private static void handleTemplateAlreadyExists(String tenantDomain, NotificationTemplate notificationTemplate) throws I18nEmailMgtInternalException {
+        String locale = notificationTemplate.getLocale();
+        String scenarioName = notificationTemplate.getDisplayName();
+        String channel = notificationTemplate.getNotificationChannel();
+        // TODO: Registry impl simply doing a put here. So it may not return a duplicate error. Verify this.
+        String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_ORG_TEMPLATE.getMessage(), locale, scenarioName, channel, tenantDomain);
+        throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_ALREADY_EXISTS, message);
+    }
+
+    private static void validateNotificationTemplateAndHandleErrors(NotificationTemplate notificationTemplate) throws I18nEmailMgtClientException {
+        try {
+            validateNotificationTemplate(notificationTemplate);
+            I18nEmailUtil.getNormalizedName(notificationTemplate.getDisplayName());
+        } catch (NotificationTemplateManagerClientException e) {
+            throw new I18nEmailMgtClientException(e.getMessage(), e);
+        }
+    }
+
+    private static void validateLocaleAndTemplateTypeDisplayName(String templateTypeDisplayName, String locale) throws I18nEmailMgtClientException {
+        try {
+            validateTemplateLocale(locale);
+            validateDisplayNameOfTemplateType(templateTypeDisplayName);
+        } catch (NotificationTemplateManagerClientException e) {
+            //TODO: ERROR_CODE_EMPTY_LOCALE & ERROR_CODE_EMPTY_TEMPLATE_NAME error codes are not handled in registry impl
+            throw new I18nEmailMgtClientException(e.getMessage(), e);
+        }
+    }
+
+    private EmailTemplate getDefaultTemplate(String templateTypeDisplayName, String locale, String tenantDomain) throws I18nEmailMgtException {
+        String defaultLocale = getDefaultNotificationLocale(EMAIL_CHANNEL);
+        if (StringUtils.equalsIgnoreCase(defaultLocale, locale)) {
+            // Template is not available in the default locale. Therefore, breaking the flow at the consuming side to avoid NPE.
+            String error = String.format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_TEMPLATE_FOUND.getMessage(), templateTypeDisplayName, locale, tenantDomain);
+            throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND, error);
+        } else {
+            if (log.isDebugEnabled()) {
+                String message = String.format("'%s' template in '%s' locale was not found in '%s' tenant. Trying to return the template in default locale : '%s'", templateTypeDisplayName, locale, tenantDomain, DEFAULT_EMAIL_LOCALE);
+                log.debug(message);
+            }
+            // Try to get the template type in default locale.
+            return getEmailTemplate(templateTypeDisplayName, defaultLocale, tenantDomain);
+        }
+    }
+
+    private static void validateContent(String templateTypeDisplayName, String locale, NotificationTemplate notificationTemplate) throws I18nEmailMgtClientException {
+        if (StringUtils.isBlank(notificationTemplate.getBody())) {
+            String error = String.format(IdentityMgtConstants.ErrorMessages.
+                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getMessage(), templateTypeDisplayName, locale);
+            throw new I18nEmailMgtClientException(IdentityMgtConstants.ErrorMessages.
+                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getCode(), error);
+        }
+    }
+
+    private static void validateTemplateTypeDisplayName(String templateTypeDisplayName) {
+
+//        try {
+//            EmailTemplateManagerImpl.validateDisplayNameOfTemplateType(templateTypeDisplayName);
+//        } catch (NotificationTemplateManagerClientException e) {
+//            throw new I18nEmailMgtClientException(e.getMessage(), e);
+//        }
+        I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
+    }
+
+    private static void validateTemplateTypeDisplayNameWithNormalization(String templateDisplayName) throws I18nEmailMgtClientException {
+        try {
+            validateDisplayNameOfTemplateType(templateDisplayName);
+            I18nEmailUtil.getNormalizedName(templateDisplayName);
+        } catch (NotificationTemplateManagerClientException e) {
+            throw new I18nEmailMgtClientException(e.getMessage(), e);
+        }
+    }
+
+    private static void validateNameAndLocaleWithNormalized(String templateTypeDisplayName, String locale) throws I18nEmailMgtClientException {
+        if (StringUtils.isBlank(templateTypeDisplayName)) {
+            throw new I18nEmailMgtClientException("Cannot Delete template. Email displayName cannot be null.");
+        }
+        if (StringUtils.isBlank(locale)) {
+            throw new I18nEmailMgtClientException("Cannot Delete template. Email locale cannot be null.");
+        }
+        I18nEmailUtil.getNormalizedName(templateTypeDisplayName);
     }
 }
