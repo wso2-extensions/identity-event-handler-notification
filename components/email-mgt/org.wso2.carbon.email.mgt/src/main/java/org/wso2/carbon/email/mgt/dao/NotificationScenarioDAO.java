@@ -20,7 +20,11 @@ package org.wso2.carbon.email.mgt.dao;
 
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 
 import java.util.List;
 
@@ -31,23 +35,24 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
  */
 public class NotificationScenarioDAO {
 
-    public void addNotificationScenario(String UUID, String scenarioName, String channelName, int tenantId) throws Exception {
+    public void addNotificationScenario(String uuid, String scenarioName, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
             jdbcTemplate.executeInsert(INSERT_NOTIFICATION_SCENARIO_SQL, (preparedStatement -> {
-                preparedStatement.setString(1, UUID);
+                preparedStatement.setString(1, uuid);
                 preparedStatement.setString(2, scenarioName);
                 preparedStatement.setString(3, channelName);
                 preparedStatement.setInt(4, tenantId);
             }), scenarioName, false);
         } catch (DataAccessException e) {
-            // todo: handle exception
-            throw new Exception("Error while adding notification scenario", e);
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(), uuid, tenantId);
+            throw new NotificationTemplateManagerServerException(code, message);
         }
     }
 
-    public String getNotificationScenario(String scenarioId, String channelName, int tenantId) throws Exception {
+    public String getNotificationScenario(String uuid, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         String scenarioName;
@@ -56,19 +61,19 @@ public class NotificationScenarioDAO {
             scenarioName = jdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_SCENARIO_SQL,
                     (resultSet, rowNumber) -> resultSet.getString(1),
                     preparedStatement -> {
-                        preparedStatement.setString(1, scenarioId);
+                        preparedStatement.setString(1, uuid);
                         preparedStatement.setString(2, channelName);
                         preparedStatement.setInt(3, tenantId);
                     });
         } catch (DataAccessException e) {
-            // todo: handle exception
-            throw new Exception("Error while retrieving notification scenario", e);
+            String error = String.format("Error while checking the existence of the template type %s for channel %s of %s tenant.", uuid, channelName, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
         }
 
         return scenarioName;
     }
 
-    public List<String> listNotificationScenarios(String channelName, int tenantId) throws Exception {
+    public List<String> listNotificationScenarios(String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<String> scenarioNames;
@@ -81,14 +86,14 @@ public class NotificationScenarioDAO {
                         preparedStatement.setInt(2, tenantId);
                     });
         } catch (DataAccessException e) {
-            // todo: handle exception
-            throw new Exception("Error while listing notification scenario", e);
+            String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantId);
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
         }
 
         return scenarioNames;
     }
 
-    public void removeNotificationScenario(String uuid, String channelName, int tenantId) throws Exception {
+    public void removeNotificationScenario(String uuid, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -99,8 +104,8 @@ public class NotificationScenarioDAO {
                         preparedStatement.setInt(3, tenantId);
                     });
         } catch (DataAccessException e) {
-            // todo: handle exception
-            throw new Exception("Error while delete notification scenario", e);
+            String errorMsg = String.format("Error deleting email template type %s for channel %s from %s tenant.", uuid, channelName, tenantId);
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
         }
     }
 }

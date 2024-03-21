@@ -20,15 +20,15 @@ package org.wso2.carbon.email.mgt.dao;
 
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
-import org.wso2.carbon.email.mgt.model.NotificationTemplate;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
+import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
 
 /**
- * This class is to perform CRUD operations for OrgNotificationTemplate.
+ * This class is to perform CRUD operations for Org NotificationTemplates.
  */
 public class OrgNotificationTemplateDAO {
 
@@ -42,7 +42,7 @@ public class OrgNotificationTemplateDAO {
                 preparedStatement.setString(3, notificationTemplate.getBody());
                 preparedStatement.setString(4, notificationTemplate.getFooter());
                 preparedStatement.setString(5, notificationTemplate.getContentType());
-                preparedStatement.setString(6, notificationTemplate.getScenarioType());
+                preparedStatement.setString(6, notificationTemplate.getDisplayName());
                 preparedStatement.setString(7, channelName);
                 preparedStatement.setInt(8, tenantId);
                 preparedStatement.setInt(9, tenantId);
@@ -60,9 +60,17 @@ public class OrgNotificationTemplateDAO {
 
         try {
             notificationTemplate = jdbcTemplate.fetchSingleRecord(GET_ORG_NOTIFICATION_TEMPLATE_SQL,
-                    (resultSet, rowNumber) -> new NotificationTemplate(resultSet.getString(1),
-                            resultSet.getString(2), resultSet.getString(3),
-                            resultSet.getString(4), locale, scenarioName),
+                    (resultSet, rowNumber) -> {
+                        NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setSubject(resultSet.getString(1));
+                        notificationTemplateResult.setBody(resultSet.getString(2));
+                        notificationTemplateResult.setFooter(resultSet.getString(3));
+                        notificationTemplateResult.setContentType(resultSet.getString(4));
+                        notificationTemplateResult.setLocale(locale);
+                        notificationTemplateResult.setType(scenarioName);
+                        notificationTemplateResult.setDisplayName(scenarioName);
+                        return notificationTemplateResult;
+                    },
                     preparedStatement -> {
                         preparedStatement.setString(1, locale);
                         preparedStatement.setString(2, scenarioName);
@@ -85,9 +93,17 @@ public class OrgNotificationTemplateDAO {
 
         try {
             notificationTemplates = jdbcTemplate.executeQuery(LIST_ORG_NOTIFICATION_TEMPLATES_BY_SCENARIO_SQL,
-                    (resultSet, rowNumber) -> new NotificationTemplate(resultSet.getString(1),
-                            resultSet.getString(2), resultSet.getString(3),
-                            resultSet.getString(4), resultSet.getString(5), scenarioName),
+                    (resultSet, rowNumber) -> {
+                        NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setSubject(resultSet.getString(1));
+                        notificationTemplateResult.setBody(resultSet.getString(2));
+                        notificationTemplateResult.setFooter(resultSet.getString(3));
+                        notificationTemplateResult.setContentType(resultSet.getString(4));
+                        notificationTemplateResult.setLocale(resultSet.getString(5));
+                        notificationTemplateResult.setType(scenarioName);
+                        notificationTemplateResult.setDisplayName(scenarioName);
+                        return notificationTemplateResult;
+                    },
                     preparedStatement -> {
                         preparedStatement.setString(1, scenarioName);
                         preparedStatement.setString(2, channelName);
@@ -113,7 +129,7 @@ public class OrgNotificationTemplateDAO {
                         preparedStatement.setString(3, notificationTemplate.getFooter());
                         preparedStatement.setString(4, notificationTemplate.getContentType());
                         preparedStatement.setString(5, notificationTemplate.getLocale());
-                        preparedStatement.setString(6, notificationTemplate.getScenarioType());
+                        preparedStatement.setString(6, notificationTemplate.getDisplayName());
                         preparedStatement.setString(7, channelName);
                         preparedStatement.setInt(8, tenantId);
                         preparedStatement.setInt(9, tenantId);

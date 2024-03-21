@@ -62,6 +62,10 @@ public class I18nMgtConstants {
             "conf", "sms",SMS_PROVIDER_POST_BODY_TEMPLATES_FILE);
     public static final String SMS_PROVIDER= "provider";
 
+    public static final String EMAIL_CHANNEL = "EMAIL";
+    public static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
+    public static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
+
     public static class ErrorMsg {
         private ErrorMsg() {
 

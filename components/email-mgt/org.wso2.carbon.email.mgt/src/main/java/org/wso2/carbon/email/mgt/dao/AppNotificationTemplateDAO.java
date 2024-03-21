@@ -20,7 +20,7 @@ package org.wso2.carbon.email.mgt.dao;
 
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
-import org.wso2.carbon.email.mgt.model.NotificationTemplate;
+import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
 
 /**
- * This class is to perform CRUD operations for AppNotificationTemplate.
+ * This class is to perform CRUD operations for Application NotificationTemplates.
  */
 public class AppNotificationTemplateDAO {
 
@@ -42,7 +42,7 @@ public class AppNotificationTemplateDAO {
                 preparedStatement.setString(3, notificationTemplate.getBody());
                 preparedStatement.setString(4, notificationTemplate.getFooter());
                 preparedStatement.setString(5, notificationTemplate.getContentType());
-                preparedStatement.setString(6, notificationTemplate.getScenarioType());
+                preparedStatement.setString(6, notificationTemplate.getDisplayName());
                 preparedStatement.setString(7, channelName);
                 preparedStatement.setInt(8, tenantId);
                 preparedStatement.setString(9, applicationUuid);
@@ -61,9 +61,17 @@ public class AppNotificationTemplateDAO {
 
         try {
             notificationTemplate = jdbcTemplate.fetchSingleRecord(GET_APP_NOTIFICATION_TEMPLATE_SQL,
-                    (resultSet, rowNumber) -> new NotificationTemplate(resultSet.getString(1),
-                            resultSet.getString(2), resultSet.getString(3),
-                            resultSet.getString(4), locale, scenarioName),
+                    (resultSet, rowNumber) -> {
+                        NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setSubject(resultSet.getString(1));
+                        notificationTemplateResult.setBody(resultSet.getString(2));
+                        notificationTemplateResult.setFooter(resultSet.getString(3));
+                        notificationTemplateResult.setContentType(resultSet.getString(4));
+                        notificationTemplateResult.setLocale(locale);
+                        notificationTemplateResult.setType(scenarioName);
+                        notificationTemplateResult.setDisplayName(scenarioName);
+                        return notificationTemplateResult;
+                    },
                     preparedStatement -> {
                         preparedStatement.setString(1, locale);
                         preparedStatement.setString(2, scenarioName);
@@ -87,9 +95,17 @@ public class AppNotificationTemplateDAO {
 
         try {
             notificationTemplates = jdbcTemplate.executeQuery(LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL,
-                    (resultSet, rowNumber) -> new NotificationTemplate(resultSet.getString(1),
-                            resultSet.getString(2), resultSet.getString(3),
-                            resultSet.getString(4), resultSet.getString(5), scenarioName),
+                    (resultSet, rowNumber) -> {
+                        NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setSubject(resultSet.getString(1));
+                        notificationTemplateResult.setBody(resultSet.getString(2));
+                        notificationTemplateResult.setFooter(resultSet.getString(3));
+                        notificationTemplateResult.setContentType(resultSet.getString(4));
+                        notificationTemplateResult.setLocale(resultSet.getString(5));
+                        notificationTemplateResult.setType(scenarioName);
+                        notificationTemplateResult.setDisplayName(scenarioName);
+                        return notificationTemplateResult;
+                    },
                     preparedStatement -> {
                         preparedStatement.setString(1, scenarioName);
                         preparedStatement.setString(2, channelName);
@@ -105,7 +121,7 @@ public class AppNotificationTemplateDAO {
         return notificationTemplates;
     }
 
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String scenarioName, String channelName, String applicationUuid, int tenantId) throws Exception {
+    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, String applicationUuid, int tenantId) throws Exception {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -116,7 +132,7 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setString(3, notificationTemplate.getFooter());
                         preparedStatement.setString(4, notificationTemplate.getContentType());
                         preparedStatement.setString(5, notificationTemplate.getLocale());
-                        preparedStatement.setString(6, scenarioName);
+                        preparedStatement.setString(6, notificationTemplate.getDisplayName());
                         preparedStatement.setString(7, channelName);
                         preparedStatement.setInt(8, tenantId);
                         preparedStatement.setString(9, applicationUuid);
