@@ -236,21 +236,6 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
     }
 
-    /**
-     * Get default notification template locale for a given notification channel.
-     *
-     * @param notificationChannel Notification channel
-     * @return Default locale
-     */
-    private String getDefaultNotificationLocale(String notificationChannel) {
-
-        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return DEFAULT_SMS_NOTIFICATION_LOCALE;
-        } else {
-            return DEFAULT_EMAIL_LOCALE;
-        }
-    }
-
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
             String tenantDomain) throws NotificationTemplateManagerException {

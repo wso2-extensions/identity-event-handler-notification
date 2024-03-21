@@ -47,8 +47,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.REGISTRY_INVALID_CHARS;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_REGEX_KEY;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.*;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
 
 public class I18nEmailUtil {
 
@@ -258,22 +258,10 @@ public class I18nEmailUtil {
         return tenantId;
     }
 
-    public static EmailTemplate convertToEmailTemplate(NotificationTemplate notificationTemplate) {
-        EmailTemplate emailTemplate = new EmailTemplate();
-        emailTemplate.setSubject(notificationTemplate.getSubject());
-        emailTemplate.setBody(notificationTemplate.getBody());
-        emailTemplate.setFooter(notificationTemplate.getFooter());
-        emailTemplate.setEmailContentType(notificationTemplate.getContentType());
-        emailTemplate.setLocale(notificationTemplate.getLocale());
-        emailTemplate.setTemplateDisplayName(notificationTemplate.getDisplayName());
-        emailTemplate.setTemplateType(notificationTemplate.getType());
-        return emailTemplate;
-    }
-
     public static List<EmailTemplate> convertToEmailTemplates(List<NotificationTemplate> notificationTemplates) {
         List<EmailTemplate> emailTemplates = new ArrayList<>();
         for (NotificationTemplate notificationTemplate : notificationTemplates) {
-            emailTemplates.add(convertToEmailTemplate(notificationTemplate));
+            emailTemplates.add(buildEmailTemplate(notificationTemplate));
         }
         return emailTemplates;
     }
@@ -429,5 +417,20 @@ public class I18nEmailUtil {
         notificationTemplate.setLocale(emailTemplate.getLocale());
         notificationTemplate.setContentType(emailTemplate.getEmailContentType());
         return notificationTemplate;
+    }
+
+    /**
+     * Get default notification template locale for a given notification channel.
+     *
+     * @param notificationChannel Notification channel
+     * @return Default locale
+     */
+    public static String getDefaultNotificationLocale(String notificationChannel) {
+
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return DEFAULT_SMS_NOTIFICATION_LOCALE;
+        } else {
+            return DEFAULT_EMAIL_LOCALE;
+        }
     }
 }
