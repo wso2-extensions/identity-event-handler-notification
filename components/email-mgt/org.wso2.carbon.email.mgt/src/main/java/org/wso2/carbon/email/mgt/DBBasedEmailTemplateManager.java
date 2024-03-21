@@ -40,7 +40,6 @@ import org.wso2.carbon.identity.governance.service.notification.NotificationChan
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_CHANNEL;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.*;
 
 /**
@@ -52,6 +51,7 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     private final NotificationScenarioDAO notificationScenarioDAO = new NotificationScenarioDAO();
     private final OrgNotificationTemplateDAO orgNotificationTemplateDAO = new OrgNotificationTemplateDAO();
     private final AppNotificationTemplateDAO appNotificationTemplateDAO = new AppNotificationTemplateDAO();
+    private static final String EMAIL_CHANNEL = NotificationChannels.EMAIL_CHANNEL.getChannelType();
     @Override
     public void addEmailTemplateType(String emailTemplateTypeDisplayName, String tenantDomain) throws I18nEmailMgtException {
 

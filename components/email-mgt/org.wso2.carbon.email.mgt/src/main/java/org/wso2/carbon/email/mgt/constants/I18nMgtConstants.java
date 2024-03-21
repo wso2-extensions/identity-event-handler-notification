@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.email.mgt.constants;
 
+import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.file.Path;
@@ -61,8 +62,6 @@ public class I18nMgtConstants {
             SMS_PROVIDER_POST_BODY_TEMPLATES_DIR_PATH = Paths.get(CarbonUtils.getCarbonHome(), "repository",
             "conf", "sms",SMS_PROVIDER_POST_BODY_TEMPLATES_FILE);
     public static final String SMS_PROVIDER= "provider";
-
-    public static final String EMAIL_CHANNEL = "EMAIL";
     public static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
     public static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
 
