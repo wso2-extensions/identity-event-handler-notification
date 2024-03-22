@@ -19,7 +19,7 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -55,7 +55,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 /**
  * Unit tests for {@link NotificationSenderManagementServiceImpl}.
  */
-public class NotificationSenderManagementServiceImplTest {
+public class NotificationSenderManagementServiceImplTest extends PowerMockTestCase {
 
     private NotificationSenderManagementServiceImpl notificationSenderManagementService;
 
@@ -71,8 +71,6 @@ public class NotificationSenderManagementServiceImplTest {
 
     @BeforeMethod
     public void setup() {
-
-        MockitoAnnotations.openMocks(this);
 
         setCarbonHome();
         setCarbonContextForTenant();

@@ -1,16 +1,13 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config.handlers;
 
-
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -35,13 +32,6 @@ import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
-import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockStatic;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,14 +42,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 
 /**
  * Unit tests for {@link DefaultChannelConfigurationHandler}.
  */
-public class DefaultChannelConfigurationHandlerTest {
+@PrepareForTest({NotificationSenderUtils.class, PrivilegedCarbonContext.class})
+public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
 
     private DefaultChannelConfigurationHandler defaultChannelConfigurationHandler;
     @Mock
@@ -72,52 +70,13 @@ public class DefaultChannelConfigurationHandlerTest {
     private ClusteringAgent clusteringAgent;
     @Mock
     private ResourceManager resourceManager;
-    private MockedStatic<ResourceUtils> mockedResourceUtils;
-    private MockedStatic<NotificationSenderUtils> mockedNotificationSenderUtils;
-
-    @BeforeClass
-    public void beforeTest() {
-
-        mockIdentityTenantUtil();
-        mockNotificationSenderUtils();
-    }
-
-    @AfterClass
-    public void afterTest() {
-
-        closeMockedIdentityTenantUtil();
-        closeNotificationSenderUtils();
-    }
-
-    public void mockIdentityTenantUtil() {
-
-        mockedResourceUtils = mockStatic(ResourceUtils.class);
-
-    }
-
-    public void closeMockedIdentityTenantUtil() {
-
-        mockedResourceUtils.close();
-    }
-
-    public void mockNotificationSenderUtils() {
-
-        mockedNotificationSenderUtils = mockStatic(NotificationSenderUtils.class);
-    }
-
-    public void closeNotificationSenderUtils() {
-
-        mockedNotificationSenderUtils.close();
-    }
 
     @BeforeMethod
     public void setUp() {
 
-        MockitoAnnotations.openMocks(this);
-
         setCarbonHome();
         setCarbonContextForTenant();
-
+        mockStatic(NotificationSenderUtils.class);
         defaultChannelConfigurationHandler = new DefaultChannelConfigurationHandler();
 
         NotificationSenderTenantConfigDataHolder.getInstance()
@@ -141,7 +100,6 @@ public class DefaultChannelConfigurationHandlerTest {
     @Test(dataProvider = "addSMSSenderDataProvider")
     public void testAddSMSSender(String name, String providerName, String inlineBodyProperty, String providerUrl)
             throws Exception {
-
 
         SMSSenderDTO smsSenderDTO = constructSMSSenderDTO(name, providerName, inlineBodyProperty, providerUrl);
         SMSProviderTemplate smsProviderTemplate = constructSMSProviderTemplate();
@@ -171,8 +129,7 @@ public class DefaultChannelConfigurationHandlerTest {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        mockedNotificationSenderUtils.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
-                .thenReturn(smsSenderDTO);
+        when(NotificationSenderUtils.buildSmsSenderFromResource(any())).thenReturn(smsSenderDTO);
 
         SMSSenderDTO response = defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
 
@@ -197,33 +154,31 @@ public class DefaultChannelConfigurationHandlerTest {
         };
     }
 
-
-    @Test(dataProvider = "addSMSSenderDataProviderForException",
-            expectedExceptions = NotificationSenderManagementException.class)
-    public void testAddSMSSenderExceptions(SMSSenderDTO smsSenderDTO, SMSProviderTemplate smsProviderTemplate,
-                                           List<EventPublisherConfiguration> eventPublisherConfigurationList,
-                                           InputStream inputStream, Resource addedResource,
-                                           Resource existingSMSPublisherResource) throws Exception {
+    @Test(dataProvider = "addSMSSenderDataProviderForException")
+    public void testAddSMSSenderExceptions(Object smsSenderDTO, Object smsProviderTemplate,
+                                           Object eventPublisherConfigurationList,
+                                           Object inputStream, Object addedResource,
+                                           Object existingSMSPublisherResource) throws Exception {
 
         when(smsProviderPayloadTemplateManager
-                .getSMSProviderPayloadTemplateByProvider(smsSenderDTO.getProvider()))
-                .thenReturn(smsProviderTemplate);
+                .getSMSProviderPayloadTemplateByProvider(((SMSSenderDTO) smsSenderDTO).getProvider()))
+                .thenReturn((SMSProviderTemplate) smsProviderTemplate);
         when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
-                .thenReturn(existingSMSPublisherResource);
+                .thenReturn((Resource) existingSMSPublisherResource);
         when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
-                .thenReturn(eventPublisherConfigurationList);
+                .thenReturn((List<EventPublisherConfiguration>) eventPublisherConfigurationList);
 
         when(NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
-                .thenReturn(inputStream);
+                .thenReturn((InputStream) inputStream);
 
         when(configurationManager.addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class)))
-                .thenReturn(addedResource);
+                .thenReturn((Resource) addedResource);
 
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
-
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.addSMSSender((SMSSenderDTO) smsSenderDTO));
     }
 
     @DataProvider(name = "addSMSSenderDataProviderForException")
@@ -234,13 +189,11 @@ public class DefaultChannelConfigurationHandlerTest {
         eventPublisherConfigurationList.add(constructEventPublisherConfiguration("SMSPublisher"));
         InputStream inputStream = constructInputStream();
 
-
         SMSSenderDTO smsSenderDTO1 = constructSMSSenderDTO("SMSPublisher",
                 "Twilio",
                 "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
                         + "{{otp-expiry-time}} minutes",
                 "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
-
 
         Resource addedResource1 = constructResource(inputStream, smsSenderDTO1);
 
@@ -266,7 +219,6 @@ public class DefaultChannelConfigurationHandlerTest {
                 null);
 
         Resource addedResource4 = constructResource(inputStream, smsSenderDTO4);
-
 
 //        smsSenderDTO, smsProviderTemplate, eventPublisherConfigurationList, inputStream, addedResource,
 //        existingSMSPublisherResource
@@ -314,9 +266,10 @@ public class DefaultChannelConfigurationHandlerTest {
         };
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testAddSMSSenderConfigurationManagementException() throws ConfigurationManagementException,
             EventPublisherConfigurationException, NotificationSenderManagementException {
+
         SMSSenderDTO smsSenderDTO = constructSMSSenderDTO("SMSPublisher",
                 "Twilio",
                 "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
@@ -334,13 +287,14 @@ public class DefaultChannelConfigurationHandlerTest {
         doThrow(ConfigurationManagementException.class).when(configurationManager)
                 .addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class));
 
-        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
-
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO));
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testAddSMSSenderEventPublisherConfigurationException() throws ConfigurationManagementException,
             EventPublisherConfigurationException, NotificationSenderManagementException {
+
         SMSSenderDTO smsSenderDTO = constructSMSSenderDTO("SMSPublisher",
                 "Twilio",
                 "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
@@ -352,7 +306,8 @@ public class DefaultChannelConfigurationHandlerTest {
         doThrow(EventPublisherConfigurationException.class).when(carbonEventPublisherService)
                 .getAllActiveEventPublisherConfigurations();
 
-        defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO));
 
     }
 
@@ -363,63 +318,67 @@ public class DefaultChannelConfigurationHandlerTest {
         defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testDeleteNotificationSenderTenantResourceManagementClientException() throws
             NotificationSenderManagementException, TenantResourceManagementException {
 
         doThrow(TenantResourceManagementClientException.class).when(resourceManager)
                 .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
-        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher"));
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testDeleteNotificationSenderTenantResourceManagementServerException() throws
             NotificationSenderManagementException, TenantResourceManagementException {
 
         doThrow(TenantResourceManagementServerException.class).when(resourceManager)
                 .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
-        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher"));
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
-    public void testDeleteNotificationSenderTenantManagementServerException() throws
-            NotificationSenderManagementException, TenantResourceManagementException {
+    @Test
+    public void testDeleteNotificationSenderTenantManagementServerException() throws TenantResourceManagementException {
 
         doThrow(TenantResourceManagementException.class).when(resourceManager)
                 .removeEventPublisherConfiguration(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
-        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher"));
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testDeleteNotificationSenderConfigurationManagementClientException() throws
             NotificationSenderManagementException, ConfigurationManagementException {
 
         doThrow(ConfigurationManagementClientException.class).when(configurationManager)
                 .deleteResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
-        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher"));
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testDeleteNotificationSenderConfigurationManagementServerException() throws
             NotificationSenderManagementException, ConfigurationManagementException {
 
         doThrow(ConfigurationManagementServerException.class).when(configurationManager)
                 .deleteResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher");
-        defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher");
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.deleteNotificationSender("SMSPublisher"));
     }
 
     @Test
     public void testUpdateSMSSender() throws EventPublisherConfigurationException, ConfigurationManagementException,
             TenantResourceManagementException, ClusteringFault, NotificationSenderManagementException {
 
+        mockStatic(NotificationSenderUtils.class);
         SMSSenderDTO smsSenderDTORequestObject = constructSMSSenderDTO(
                 "SMSPublisher",
                 "Twilio",
                 "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
                         + "{{otp-expiry-time}} minutes",
                 "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json"
-
-        );
+                                                                      );
 
         List<EventPublisherConfiguration> eventPublisherConfigurationList =
                 new ArrayList<>();
@@ -432,8 +391,7 @@ public class DefaultChannelConfigurationHandlerTest {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        mockedNotificationSenderUtils.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
-                .thenReturn(smsSenderDTORequestObject);
+        when(NotificationSenderUtils.buildSmsSenderFromResource(any())).thenReturn(smsSenderDTORequestObject);
 
         SMSSenderDTO smsSenderDTOResponseObject = defaultChannelConfigurationHandler
                 .updateSMSSender(smsSenderDTORequestObject);
@@ -442,7 +400,7 @@ public class DefaultChannelConfigurationHandlerTest {
         Assert.assertEquals(smsSenderDTOResponseObject.getProvider(), smsSenderDTORequestObject.getProvider());
     }
 
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    @Test
     public void testUpdateSMSSenderException() throws EventPublisherConfigurationException,
             ConfigurationManagementException, NotificationSenderManagementException {
 
@@ -453,7 +411,7 @@ public class DefaultChannelConfigurationHandlerTest {
                         + "{{otp-expiry-time}} minutes",
                 "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json"
 
-        );
+                                                                      );
 
         List<EventPublisherConfiguration> eventPublisherConfigurationList =
                 new ArrayList<>();
@@ -464,7 +422,8 @@ public class DefaultChannelConfigurationHandlerTest {
         doThrow(ConfigurationManagementException.class).when(configurationManager)
                 .replaceResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class));
 
-        defaultChannelConfigurationHandler.updateSMSSender(smsSenderDTORequestObject);
+        assertThrows(NotificationSenderManagementException.class,
+                () -> defaultChannelConfigurationHandler.updateSMSSender(smsSenderDTORequestObject));
     }
 
     private SMSSenderDTO constructSMSSenderDTO(String name, String providerName, String inLineBodyProperty,
@@ -541,8 +500,10 @@ public class DefaultChannelConfigurationHandlerTest {
 
     private void setCarbonContextForTenant() {
 
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+        mockStatic(PrivilegedCarbonContext.class);
+        PrivilegedCarbonContext privilegedCarbonContext = mock(PrivilegedCarbonContext.class);
+        when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        when(privilegedCarbonContext.getTenantDomain()).thenReturn("tenant");
+        when(privilegedCarbonContext.getTenantId()).thenReturn(1);
     }
 }

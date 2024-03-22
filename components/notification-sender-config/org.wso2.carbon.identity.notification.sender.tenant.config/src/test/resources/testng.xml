@@ -18,7 +18,7 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="WebSubHubEventAdapterTestSuite">
+<suite name="WebSubHubEventAdapterTestSuite" object-factory="org.powermock.modules.testng.PowerMockObjectFactory">
 
     <test name="NotificationSenderTenantConfigTest" preserve-order="true" parallel="false">
         <classes>
