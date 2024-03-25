@@ -40,6 +40,7 @@ import org.wso2.carbon.identity.governance.service.notification.NotificationChan
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.*;
 
 /**
@@ -125,14 +126,18 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         //TODO: Check this can be moved to the API layer
         validateNotificationTemplateAndHandleErrors(notificationTemplate);
 
-        // TODO: Registry impl creates template type if not exists
-
-        if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain)) {
-            handleTemplateAlreadyExists(tenantDomain, notificationTemplate);
+        // Registry impl creates template type if not exists
+        if (!isEmailTemplateTypeExists(emailTemplate.getTemplateDisplayName(), tenantDomain)) {
+            addEmailTemplateType(emailTemplate.getTemplateDisplayName(), tenantDomain);
         }
 
         try {
-            orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, getTenantId(tenantDomain));
+            if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain)) {
+                // Registry impl updates the template if exists
+                orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, getTenantId(tenantDomain));
+            } else {
+                orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, getTenantId(tenantDomain));
+            }
         } catch (NotificationTemplateManagerServerException e) {
             throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
@@ -189,11 +194,16 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         //TODO: Check this can be moved to the API layer
         validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
 
-        try {
-            List<NotificationTemplate> notificationTemplates = orgNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
-            return convertToEmailTemplates(notificationTemplates);
-        } catch (NotificationTemplateManagerServerException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
+        if (isEmailTemplateTypeExists(templateDisplayName, tenantDomain)) {
+            try {
+                List<NotificationTemplate> notificationTemplates = orgNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, getTenantId(tenantDomain));
+                return convertToEmailTemplates(notificationTemplates);
+            } catch (NotificationTemplateManagerServerException e) {
+                throw new I18nEmailMgtServerException(e.getMessage(), e);
+            }
+        } else {
+            String message = String.format("Email Template Type: %s not found in %s tenant registry.", templateDisplayName, tenantDomain);
+            throw new I18nEmailMgtClientException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
         }
     }
 
@@ -238,14 +248,18 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         //TODO: Check this can be moved to the API layer
         validateNotificationTemplateAndHandleErrors(notificationTemplate);
 
-        // TODO: Registry impl creates template type if not exists
-
-        if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain, applicationUuid)) {
-            handleTemplateAlreadyExists(tenantDomain, notificationTemplate);
+        // Registry impl creates template type if not exists
+        if (!isEmailTemplateTypeExists(emailTemplate.getTemplateDisplayName(), tenantDomain)) {
+            addEmailTemplateType(emailTemplate.getTemplateDisplayName(), tenantDomain);
         }
 
         try {
-            appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
+            if (isEmailTemplateExists(emailTemplate.getTemplateDisplayName(), emailTemplate.getLocale(), tenantDomain, applicationUuid)) {
+                // Registry impl updates the template if exists
+                appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
+            } else {
+                appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
+            }
         } catch (NotificationTemplateManagerServerException e) {
             throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
@@ -365,15 +379,6 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
                 log.error("Error while adding default email templates for the tenant : " + tenantDomain, e);
             }
         });
-    }
-
-    private static void handleTemplateAlreadyExists(String tenantDomain, NotificationTemplate notificationTemplate) throws I18nEmailMgtInternalException {
-        String locale = notificationTemplate.getLocale();
-        String scenarioName = notificationTemplate.getDisplayName();
-        String channel = notificationTemplate.getNotificationChannel();
-        // TODO: Registry impl simply doing a put here. So it may not return a duplicate error. Verify this.
-        String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_ORG_TEMPLATE.getMessage(), locale, scenarioName, channel, tenantDomain);
-        throw new I18nEmailMgtInternalException(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_ALREADY_EXISTS, message);
     }
 
     private static void validateNotificationTemplateAndHandleErrors(NotificationTemplate notificationTemplate) throws I18nEmailMgtClientException {

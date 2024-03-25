@@ -57,7 +57,7 @@ public class OrgNotificationTemplateDAO {
         } catch (DataAccessException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
             String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(), displayName, locale, tenantId);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
@@ -128,6 +128,9 @@ public class OrgNotificationTemplateDAO {
 
     public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
 
+        String displayName = notificationTemplate.getDisplayName();
+        String locale = notificationTemplate.getLocale();
+
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
             jdbcTemplate.executeUpdate(UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL,
@@ -136,15 +139,17 @@ public class OrgNotificationTemplateDAO {
                         preparedStatement.setString(2, notificationTemplate.getBody());
                         preparedStatement.setString(3, notificationTemplate.getFooter());
                         preparedStatement.setString(4, notificationTemplate.getContentType());
-                        preparedStatement.setString(5, notificationTemplate.getLocale());
-                        preparedStatement.setString(6, notificationTemplate.getDisplayName());
+                        preparedStatement.setString(5, locale);
+                        preparedStatement.setString(6, displayName);
                         preparedStatement.setString(7, channelName);
                         preparedStatement.setInt(8, tenantId);
                         preparedStatement.setInt(9, tenantId);
                     });
         } catch (DataAccessException e) {
-            // todo: handle exception
-            throw new NotificationTemplateManagerServerException("Error while update notification template", e);
+            // TODO: Verify the error code (kept add error code due to backward compatibility)
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(), displayName, locale, tenantId);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
 
     }
