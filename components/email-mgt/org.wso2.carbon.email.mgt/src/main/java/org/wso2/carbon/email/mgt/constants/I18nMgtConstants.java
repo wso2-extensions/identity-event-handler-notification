@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.email.mgt.constants;
 
-import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.file.Path;

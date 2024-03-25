@@ -53,9 +53,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.*;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.APP_TEMPLATE_PATH;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_NAME;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_PATH;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_REGEX;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
-import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.*;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.REGISTRY_INVALID_CHARS;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_PATH;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_REGEX_KEY;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getDefaultNotificationLocale;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateDisplayNameOfTemplateType;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateNotificationTemplate;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateTemplateLocale;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
 import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 
@@ -68,6 +81,9 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     private RegistryResourceMgtService resourceMgtService = dataHolder.getRegistryResourceMgtService();
 
     private static final Log log = LogFactory.getLog(EmailTemplateManagerImpl.class);
+
+    private static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
+    private static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
 
     static {
         IdentityValidationUtil.addPattern(TEMPLATE_REGEX_KEY, EMAIL_TEMPLATE_TYPE_REGEX);
