@@ -60,9 +60,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLAT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_REGEX;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.REGISTRY_INVALID_CHARS;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_PATH;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_REGEX_KEY;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getDefaultNotificationLocale;

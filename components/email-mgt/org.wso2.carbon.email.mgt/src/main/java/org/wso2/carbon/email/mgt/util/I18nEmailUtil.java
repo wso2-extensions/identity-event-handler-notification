@@ -47,14 +47,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.*;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_NAME;
 
 public class I18nEmailUtil {
 
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
     public static final String CHARSET_CONSTANT = "charset";
     public static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
+    public static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
+    public static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
 
     private I18nEmailUtil() {
     }
@@ -213,7 +216,7 @@ public class I18nEmailUtil {
      */
     public static Collection createTemplateType(String normalizedTemplateName, String templateDisplayName) {
         Collection collection = new CollectionImpl();
-        collection.addProperty(I18nMgtConstants.EMAIL_TEMPLATE_NAME, normalizedTemplateName);
+        collection.addProperty(EMAIL_TEMPLATE_NAME, normalizedTemplateName);
         collection.addProperty(I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME, templateDisplayName);
         return collection;
     }
