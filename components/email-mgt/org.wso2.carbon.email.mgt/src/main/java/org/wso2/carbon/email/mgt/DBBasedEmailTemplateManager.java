@@ -381,7 +381,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
                 }
                 addEmailTemplate(emailTemplate, tenantDomain);
             } catch (I18nEmailMgtException e) {
-                log.error("Error while adding default email templates for the tenant : " + tenantDomain, e);
+                // TODO: Handle errors
+                log.error("Error while adding default email templates for the tenant: " + tenantDomain, e);
             }
         });
     }
