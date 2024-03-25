@@ -35,7 +35,8 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
  */
 public class NotificationScenarioDAO {
 
-    public void addNotificationScenario(String uuid, String scenarioName, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
+    public void addNotificationScenario(String uuid, String scenarioName, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -46,13 +47,18 @@ public class NotificationScenarioDAO {
                 preparedStatement.setInt(4, tenantId);
             }), scenarioName, false);
         } catch (DataAccessException e) {
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
-            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(), uuid, tenantId);
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(),
+                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message =
+                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(), uuid,
+                            tenantId);
             throw new NotificationTemplateManagerServerException(code, message);
         }
     }
 
-    public String getNotificationScenario(String uuid, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
+    public String getNotificationScenario(String uuid, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         String scenarioName;
@@ -66,14 +72,17 @@ public class NotificationScenarioDAO {
                         preparedStatement.setInt(3, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = String.format("Error while checking the existence of the template type %s for channel %s of %s tenant.", uuid, channelName, tenantId);
+            String error = String.format(
+                    "Error while checking the existence of the template type %s for channel %s of %s tenant.", uuid,
+                    channelName, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         }
 
         return scenarioName;
     }
 
-    public List<String> listNotificationScenarios(String channelName, int tenantId) throws NotificationTemplateManagerServerException {
+    public List<String> listNotificationScenarios(String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<String> scenarioNames;
@@ -93,7 +102,8 @@ public class NotificationScenarioDAO {
         return scenarioNames;
     }
 
-    public void removeNotificationScenario(String uuid, String channelName, int tenantId) throws NotificationTemplateManagerServerException {
+    public void removeNotificationScenario(String uuid, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -104,7 +114,9 @@ public class NotificationScenarioDAO {
                         preparedStatement.setInt(3, tenantId);
                     });
         } catch (DataAccessException e) {
-            String errorMsg = String.format("Error deleting email template type %s for channel %s from %s tenant.", uuid, channelName, tenantId);
+            String errorMsg =
+                    String.format("Error deleting email template type %s for channel %s from %s tenant.", uuid,
+                            channelName, tenantId);
             throw new NotificationTemplateManagerServerException(errorMsg, e);
         }
     }

@@ -22,6 +22,7 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getTenantId;
  * This class is to manage the notification templates.
  */
 public class DBBasedNotificationTemplateManager implements NotificationTemplateManager {
+
     private static final Log log = LogFactory.getLog(DBBasedNotificationTemplateManager.class);
 
     private final NotificationScenarioDAO notificationScenarioDAO = new NotificationScenarioDAO();
@@ -29,11 +30,14 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     private final AppNotificationTemplateDAO appNotificationTemplateDAO = new AppNotificationTemplateDAO();
 
     @Override
-    public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain) throws NotificationTemplateManagerException {
+    public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerException {
+
         log.info("Test addNotificationTemplateType(): " + displayName);
 
         try {
-            notificationScenarioDAO.addNotificationScenario(displayName, displayName, notificationChannel, getTenantId(tenantDomain));
+            notificationScenarioDAO.addNotificationScenario(displayName, displayName, notificationChannel,
+                    getTenantId(tenantDomain));
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
         } catch (I18nEmailMgtException e) {
@@ -42,18 +46,21 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain, String applicationUuid) throws NotificationTemplateManagerException {
+    public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain,
+                                            String applicationUuid) throws NotificationTemplateManagerException {
 
         log.info("Test addNotificationTemplateType(): " + displayName);
         addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
     }
 
-    private boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain) throws NotificationTemplateManagerException {
+    private boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel,
+                                                     String tenantDomain) throws NotificationTemplateManagerException {
 
         log.info("Test type isNotificationTemplateTypeExists(): " + displayName);
 
         try {
-            String scenarioName = notificationScenarioDAO.getNotificationScenario(displayName, notificationChannel, getTenantId(tenantDomain));
+            String scenarioName = notificationScenarioDAO.getNotificationScenario(displayName, notificationChannel,
+                    getTenantId(tenantDomain));
             return StringUtils.isNotBlank(scenarioName);
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
@@ -63,9 +70,11 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain) throws NotificationTemplateManagerException {
+    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain)
+            throws NotificationTemplateManagerException {
 
-        log.info("Test org addNotificationTemplate(): " + notificationTemplate.getDisplayName() + " locale: " + notificationTemplate.getLocale());
+        log.info("Test org addNotificationTemplate(): " + notificationTemplate.getDisplayName() + " locale: " +
+                notificationTemplate.getLocale());
 
         // Registry impl creates template type if not exists
 //        if (!isEmailTemplateTypeExists(emailTemplate.getTemplateDisplayName(), tenantDomain)) {
@@ -77,7 +86,8 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
 //                // Registry impl updates the template if exists
 //                orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, notificationTemplate.getNotificationChannel(), getTenantId(tenantDomain));
 //            } else {
-                orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, notificationTemplate.getNotificationChannel(), getTenantId(tenantDomain));
+            orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate,
+                    notificationTemplate.getNotificationChannel(), getTenantId(tenantDomain));
 //            }
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
@@ -87,13 +97,17 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale, String tenantDomain) throws NotificationTemplateManagerException {
+    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
+                                                        String tenantDomain)
+            throws NotificationTemplateManagerException {
 
         log.info("Test org getNotificationTemplate(): " + templateType + " locale: " + locale);
 
         NotificationTemplate notificationTemplate;
         try {
-            notificationTemplate = orgNotificationTemplateDAO.getNotificationTemplate(locale, templateType, notificationChannel, getTenantId(tenantDomain));
+            notificationTemplate =
+                    orgNotificationTemplateDAO.getNotificationTemplate(locale, templateType, notificationChannel,
+                            getTenantId(tenantDomain));
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
         } catch (I18nEmailMgtException e) {
@@ -112,9 +126,11 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain, String applicationUuid) throws NotificationTemplateManagerException {
+    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain,
+                                        String applicationUuid) throws NotificationTemplateManagerException {
 
-        log.info("Test app addNotificationTemplate(): " + notificationTemplate.getDisplayName() + " locale: " + notificationTemplate.getLocale());
+        log.info("Test app addNotificationTemplate(): " + notificationTemplate.getDisplayName() + " locale: " +
+                notificationTemplate.getLocale());
 
         // Registry impl creates template type if not exists
 //        if (!isEmailTemplateTypeExists(emailTemplate.getTemplateDisplayName(), tenantDomain)) {
@@ -126,7 +142,8 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
 //                // Registry impl updates the template if exists
 //                appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
 //            } else {
-                appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, notificationTemplate.getNotificationChannel(), applicationUuid, getTenantId(tenantDomain));
+            appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate,
+                    notificationTemplate.getNotificationChannel(), applicationUuid, getTenantId(tenantDomain));
 //            }
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
@@ -136,13 +153,17 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale, String tenantDomain, String applicationUuid) throws NotificationTemplateManagerException {
+    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
+                                                        String tenantDomain, String applicationUuid)
+            throws NotificationTemplateManagerException {
 
         log.info("Test app getNotificationTemplate(): " + templateType);
 
         NotificationTemplate notificationTemplate;
         try {
-            notificationTemplate = appNotificationTemplateDAO.getNotificationTemplate(locale, templateType, notificationChannel, applicationUuid, getTenantId(tenantDomain));
+            notificationTemplate =
+                    appNotificationTemplateDAO.getNotificationTemplate(locale, templateType, notificationChannel,
+                            applicationUuid, getTenantId(tenantDomain));
         } catch (NotificationTemplateManagerServerException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
         } catch (I18nEmailMgtException e) {
@@ -161,18 +182,22 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     }
 
     @Override
-    public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain) throws NotificationTemplateManagerException {
+    public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerException {
 
         log.info(">>>>>>>>>>>>>>>> addDefaultNotificationTemplates()");
         getDefaultNotificationTemplates(notificationChannel).forEach(notificationTemplate -> {
             try {
-                if (!isNotificationTemplateTypeExists(notificationTemplate.getDisplayName(), notificationChannel, tenantDomain)) {
-                    addNotificationTemplateType(notificationTemplate.getDisplayName(), notificationChannel, tenantDomain);
+                if (!isNotificationTemplateTypeExists(notificationTemplate.getDisplayName(), notificationChannel,
+                        tenantDomain)) {
+                    addNotificationTemplateType(notificationTemplate.getDisplayName(), notificationChannel,
+                            tenantDomain);
                 }
                 addNotificationTemplate(notificationTemplate, tenantDomain);
             } catch (NotificationTemplateManagerException e) {
                 // TODO: Handle errors
-                log.error("Error while adding default notification templates for channel: " + notificationChannel + " the tenant: " + tenantDomain, e);
+                log.error("Error while adding default notification templates for channel: " + notificationChannel +
+                        " the tenant: " + tenantDomain, e);
             }
         });
     }

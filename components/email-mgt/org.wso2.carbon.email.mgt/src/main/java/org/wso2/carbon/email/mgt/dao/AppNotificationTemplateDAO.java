@@ -36,7 +36,9 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
  */
 public class AppNotificationTemplateDAO {
 
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String channelName,
+                                        String applicationUuid, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
@@ -56,13 +58,19 @@ public class AppNotificationTemplateDAO {
                 preparedStatement.setInt(10, tenantId);
             }), notificationTemplate, false);
         } catch (DataAccessException e) {
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
-            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(), displayName, locale, tenantId);
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(),
+                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message =
+                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
+                            displayName, locale, tenantId);
             throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
-    public NotificationTemplate getNotificationTemplate(String locale, String scenarioName, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public NotificationTemplate getNotificationTemplate(String locale, String scenarioName, String channelName,
+                                                        String applicationUuid, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         NotificationTemplate notificationTemplate;
@@ -89,14 +97,20 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(6, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = String.format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getMessage(), scenarioName, locale, tenantId);
-            throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getCode(), error, e);
+            String error = String.format(
+                    IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getMessage(),
+                    scenarioName, locale, tenantId);
+            throw new NotificationTemplateManagerServerException(
+                    IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getCode(),
+                    error, e);
         }
 
         return notificationTemplate;
     }
 
-    public List<NotificationTemplate> listNotificationTemplates(String scenarioName, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public List<NotificationTemplate> listNotificationTemplates(String scenarioName, String channelName,
+                                                                String applicationUuid, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<NotificationTemplate> notificationTemplates;
@@ -129,7 +143,9 @@ public class AppNotificationTemplateDAO {
         return notificationTemplates;
     }
 
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName,
+                                           String applicationUuid, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
@@ -151,14 +167,20 @@ public class AppNotificationTemplateDAO {
                     });
         } catch (DataAccessException e) {
             // TODO: Verify the error code (kept add error code due to backward compatibility)
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(), I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
-            String message = String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(), displayName, locale, tenantId);
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(),
+                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message =
+                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
+                            displayName, locale, tenantId);
             throw new NotificationTemplateManagerServerException(code, message, e);
         }
 
     }
 
-    public void removeNotificationTemplate(String locale, String scenarioName, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public void removeNotificationTemplate(String locale, String scenarioName, String channelName,
+                                           String applicationUuid, int tenantId)
+            throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -172,12 +194,14 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(6, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = String.format("Error deleting %s:%s template from %s tenant registry.", scenarioName, locale, tenantId);
+            String error = String.format("Error deleting %s:%s template from %s tenant registry.", scenarioName, locale,
+                    tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }
 
-    public void removeNotificationTemplates(String scenarioName, String channelName, String applicationUuid, int tenantId) throws NotificationTemplateManagerServerException {
+    public void removeNotificationTemplates(String scenarioName, String channelName, String applicationUuid,
+                                            int tenantId) throws NotificationTemplateManagerServerException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -190,7 +214,8 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(5, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = String.format("Error deleting email template type %s from %s tenant.", scenarioName, tenantId);
+            String error =
+                    String.format("Error deleting email template type %s from %s tenant.", scenarioName, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }
