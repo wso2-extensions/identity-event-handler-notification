@@ -319,11 +319,16 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         //TODO: Check this can be moved to the API layer
         validateTemplateTypeDisplayNameWithNormalization(templateDisplayName);
 
-        try {
-            List<NotificationTemplate> notificationTemplates = appNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
-            return convertToEmailTemplates(notificationTemplates);
-        } catch (NotificationTemplateManagerServerException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
+        if (isEmailTemplateTypeExists(templateDisplayName, tenantDomain)) {
+            try {
+                List<NotificationTemplate> notificationTemplates = appNotificationTemplateDAO.listNotificationTemplates(templateDisplayName, EMAIL_CHANNEL, applicationUuid, getTenantId(tenantDomain));
+                return convertToEmailTemplates(notificationTemplates);
+            } catch (NotificationTemplateManagerServerException e) {
+                throw new I18nEmailMgtServerException(e.getMessage(), e);
+            }
+        } else {
+            String message = String.format("Email Template Type: %s not found in %s tenant registry.", templateDisplayName, tenantDomain);
+            throw new I18nEmailMgtClientException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
         }
     }
 
