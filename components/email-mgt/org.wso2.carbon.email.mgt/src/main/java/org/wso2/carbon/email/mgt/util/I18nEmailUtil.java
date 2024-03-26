@@ -245,22 +245,6 @@ public class I18nEmailUtil {
         return exceptionErrorCode;
     }
 
-    public static int getTenantId(String tenantDomain) throws I18nEmailMgtException {
-
-        int tenantId;
-        try {
-            RealmService realmService = I18nMgtDataHolder.getInstance().getRealmService();
-            tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            throw new I18nEmailMgtException("ERROR_CODE_RETRIEVE_TENANT_ID", "Error while retrieving tenant id");
-        }
-
-        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            throw new I18nEmailMgtException("ERROR_CODE_INVALID_TENANT_DOMAIN");
-        }
-        return tenantId;
-    }
-
     public static List<EmailTemplate> convertToEmailTemplates(List<NotificationTemplate> notificationTemplates) {
         List<EmailTemplate> emailTemplates = new ArrayList<>();
         for (NotificationTemplate notificationTemplate : notificationTemplates) {
