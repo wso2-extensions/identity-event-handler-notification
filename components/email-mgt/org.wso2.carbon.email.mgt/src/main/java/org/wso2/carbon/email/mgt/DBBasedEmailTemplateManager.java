@@ -303,6 +303,11 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     public void addEmailTemplate(EmailTemplate emailTemplate, String tenantDomain, String applicationUuid)
             throws I18nEmailMgtException {
 
+        if (StringUtils.isBlank(applicationUuid)) {
+            addEmailTemplate(emailTemplate, tenantDomain);
+            return;
+        }
+
         NotificationTemplate notificationTemplate = buildNotificationTemplateFromEmailTemplate(emailTemplate);
 
         validateNotificationTemplateAndHandleErrors(notificationTemplate);
@@ -345,6 +350,10 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     public EmailTemplate getEmailTemplate(String templateTypeDisplayName, String locale, String tenantDomain,
                                           String applicationUuid) throws I18nEmailMgtException {
 
+        if (StringUtils.isBlank(applicationUuid)) {
+            return getEmailTemplate(templateTypeDisplayName, locale, tenantDomain);
+        }
+
         validateLocaleAndTemplateTypeDisplayName(templateTypeDisplayName, locale);
 
         NotificationTemplate notificationTemplate;
@@ -372,6 +381,10 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     @Override
     public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain,
                                          String applicationUuid) throws I18nEmailMgtException {
+
+        if (StringUtils.isBlank(applicationUuid)) {
+            return isEmailTemplateExists(templateTypeDisplayName, locale, tenantDomain);
+        }
 
         validateTemplateTypeDisplayName(templateTypeDisplayName);
 
@@ -428,6 +441,11 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
     @Override
     public void deleteEmailTemplate(String templateTypeDisplayName, String locale, String tenantDomain,
                                     String applicationUuid) throws I18nEmailMgtException {
+
+        if (StringUtils.isBlank(applicationUuid)) {
+            deleteEmailTemplate(templateTypeDisplayName, locale, tenantDomain);
+            return;
+        }
 
         validateNameAndLocaleWithNormalized(templateTypeDisplayName, locale);
 

@@ -184,6 +184,11 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain,
                                         String applicationUuid) throws NotificationTemplateManagerException {
 
+        if (StringUtils.isBlank(applicationUuid)) {
+            addNotificationTemplate(notificationTemplate, tenantDomain);
+            return;
+        }
+
         validateNotificationTemplate(notificationTemplate);
 
         String templateDisplayName = notificationTemplate.getDisplayName();
@@ -222,6 +227,10 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
                                                         String tenantDomain, String applicationUuid)
             throws NotificationTemplateManagerException {
+
+        if (StringUtils.isBlank(applicationUuid)) {
+            return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain);
+        }
 
         validateTemplateLocale(locale);
         validateDisplayNameOfTemplateType(templateType);
