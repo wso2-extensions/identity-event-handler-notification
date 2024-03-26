@@ -105,8 +105,6 @@ public class I18nMgtConstants {
                 "in tenant registry: %s"),
         ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT("60009", "SMS template cannot have a subject or footer"),
         ERROR_CODE_EMPTY_TEMPLATE_CHANNEL("60010", "Notification template channel cannot be empty"),
-        ERROR_CODE_DUPLICATE_ORG_TEMPLATE("60011", "Notification template : %s for scenario : %s for " +
-                "channel : %s already exists in tenant registry: %s"),
         ERROR_CODE_ERROR_CREATING_REGISTRY_RESOURCE("65001", "Error creating a registry resource " +
                 "from template : %s in locale : %s"),
         ERROR_CODE_ERROR_ADDING_TEMPLATE("65002", "Error when adding template : %s to tenant : %s"),

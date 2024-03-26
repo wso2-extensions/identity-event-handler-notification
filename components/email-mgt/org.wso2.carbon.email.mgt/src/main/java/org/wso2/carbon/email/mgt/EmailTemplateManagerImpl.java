@@ -64,6 +64,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getDefaultNotificationLocale;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.resolveNotificationChannel;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateDisplayNameOfTemplateType;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateNotificationTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateTemplateLocale;
@@ -420,29 +421,6 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_OBJECT_FROM_REGISTRY.getMessage();
             throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
                     ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_OBJECT_FROM_REGISTRY.getCode(), error, exception);
-        }
-    }
-
-    /**
-     * Resolve notification channel to a server supported notification channel.
-     *
-     * @param notificationChannel Notification channel
-     * @return Notification channel (EMAIL or SMS)
-     */
-    private String resolveNotificationChannel(String notificationChannel) {
-
-        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return notificationChannel;
-        } else if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return notificationChannel;
-        } else {
-            if (log.isDebugEnabled()) {
-                String message = String.format("Notification channel : %s is not supported by the server. "
-                                + "Notification channel changed to : %s", notificationChannel,
-                        IdentityGovernanceUtil.getDefaultNotificationChannel());
-                log.debug(message);
-            }
-            return IdentityGovernanceUtil.getDefaultNotificationChannel();
         }
     }
 

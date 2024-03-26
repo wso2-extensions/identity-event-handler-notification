@@ -42,6 +42,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getDefaultNotificationLocale;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.resolveNotificationChannel;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateDisplayNameOfTemplateType;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateNotificationTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.validateTemplateLocale;
@@ -235,7 +236,6 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
         validateTemplateLocale(locale);
         validateDisplayNameOfTemplateType(templateType);
 
-        // TODO
         notificationChannel = resolveNotificationChannel(notificationChannel);
 
         NotificationTemplate notificationTemplate =
@@ -322,25 +322,6 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
             log.debug(String.format("Default %s templates successfully listed.", notificationChannel));
         }
         return notificationTemplates;
-    }
-
-    private String resolveNotificationChannel(String notificationChannel) {
-
-        // TODO: Remove duplicate code
-
-        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return notificationChannel;
-        } else if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            return notificationChannel;
-        } else {
-            if (log.isDebugEnabled()) {
-                String message = String.format("Notification channel : %s is not supported by the server. "
-                                + "Notification channel changed to : %s", notificationChannel,
-                        IdentityGovernanceUtil.getDefaultNotificationChannel());
-                log.debug(message);
-            }
-            return IdentityGovernanceUtil.getDefaultNotificationChannel();
-        }
     }
 
     private NotificationTemplate getDefaultTemplate(String notificationChannel, String templateType, String locale,

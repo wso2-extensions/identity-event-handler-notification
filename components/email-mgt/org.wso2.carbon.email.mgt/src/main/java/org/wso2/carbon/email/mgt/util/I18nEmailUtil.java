@@ -28,6 +28,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
+import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
@@ -418,6 +419,29 @@ public class I18nEmailUtil {
             return DEFAULT_SMS_NOTIFICATION_LOCALE;
         } else {
             return DEFAULT_EMAIL_LOCALE;
+        }
+    }
+
+    /**
+     * Resolve notification channel to a server supported notification channel.
+     *
+     * @param notificationChannel Notification channel
+     * @return Notification channel (EMAIL or SMS)
+     */
+    public static String resolveNotificationChannel(String notificationChannel) {
+
+        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return notificationChannel;
+        } else if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return notificationChannel;
+        } else {
+            if (log.isDebugEnabled()) {
+                String message = String.format("Notification channel : %s is not supported by the server. "
+                                + "Notification channel changed to : %s", notificationChannel,
+                        IdentityGovernanceUtil.getDefaultNotificationChannel());
+                log.debug(message);
+            }
+            return IdentityGovernanceUtil.getDefaultNotificationChannel();
         }
     }
 }
