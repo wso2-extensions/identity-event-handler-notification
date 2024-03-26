@@ -308,7 +308,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                     String message = String
                             .format("'%s' template in '%s' locale was not found in '%s' tenant. Trying to return the "
                                             + "template in default locale : '%s'", templateType, locale, tenantDomain,
-                                    DEFAULT_SMS_NOTIFICATION_LOCALE);
+                                    defaultLocale);
                     log.debug(message);
                 }
                 // Try to get the template type in default locale.
