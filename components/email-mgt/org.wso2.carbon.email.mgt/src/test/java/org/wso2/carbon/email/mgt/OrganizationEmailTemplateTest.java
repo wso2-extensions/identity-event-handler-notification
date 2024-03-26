@@ -15,10 +15,6 @@
  */
 package org.wso2.carbon.email.mgt;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -32,10 +28,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.*;
-
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.internal.I18nMgtServiceComponent;
@@ -58,14 +50,22 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 /**
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
-@PrepareForTest({ IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class})
+@PrepareForTest({IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class})
 public class OrganizationEmailTemplateTest extends PowerMockTestCase {
 
     private EmailTemplateManagerImpl emailTemplateManager;
@@ -113,7 +113,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
      */
     @Test(dataProvider = "notificationTemplateDataProvider")
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
-            String contentType, byte[] content) throws Exception {
+                                            String contentType, byte[] content) throws Exception {
 
         mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
         mockIsValidTemplate(true, true);
@@ -151,8 +151,9 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
      */
     @Test(dataProvider = "invalidNotificationTemplateDataProvider")
     public void testGetNotificationTemplateErrors(String notificationChannel, String displayName, String type,
-            String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
-            String expectedErrorCode, byte[] content) throws Exception {
+                                                  String locale, String contentType, boolean isValidTemplate,
+                                                  boolean isValidLocale, String errorMsg,
+                                                  String expectedErrorCode, byte[] content) throws Exception {
 
         mockIsValidTemplate(isValidTemplate, isValidLocale);
         try {
@@ -250,7 +251,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
 
         int numberOfDefaultTemplates = getNumberOfDefaultTemplates(notificationChannel, baseDirectoryPath);
         mockNotificationChannelConfigPath(baseDirectoryPath);
-        I18nMgtServiceComponent component =  new I18nMgtServiceComponent();
+        I18nMgtServiceComponent component = new I18nMgtServiceComponent();
         List<NotificationTemplate> defaultNotificationTemplates =
                 component.loadDefaultTemplatesFromFile(notificationChannel);
         assertEquals(defaultNotificationTemplates.size(), numberOfDefaultTemplates, message);
@@ -390,7 +391,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
      * @throws Exception Error mocking notification template
      */
     private void mockRegistryResource(String notificationChannel, String displayName, String templateType,
-            String locale, String contentType, byte[] templateContent) throws Exception {
+                                      String locale, String contentType, byte[] templateContent) throws Exception {
 
         when(resourceMgtService.getIdentityResource(Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(resource);
@@ -448,11 +449,11 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
         String notificationChannel2 = NotificationChannels.EMAIL_CHANNEL.getChannelType();
         byte[] templateContent2 = "[\"subject\",\"body\",\"footer\"]".getBytes(charsetName);
 
-        return new Object[][] {
-                { notificationChannel1, notificationTemplateType, notificationTemplateType, locale,
-                        templateContentType1, templateContent1 },
-                { notificationChannel2, notificationTemplateType, notificationTemplateType, locale,
-                  contentType, templateContent2}
+        return new Object[][]{
+                {notificationChannel1, notificationTemplateType, notificationTemplateType, locale,
+                        templateContentType1, templateContent1},
+                {notificationChannel2, notificationTemplateType, notificationTemplateType, locale,
+                        contentType, templateContent2}
         };
     }
 
@@ -462,7 +463,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
      * @return Object[][]
      */
     @DataProvider(name = "invalidNotificationTemplateDataProvider")
-    private Object[][] invalidNotificationTemplateDataProvider() throws Exception{
+    private Object[][] invalidNotificationTemplateDataProvider() throws Exception {
 
         String locale = "en_US";
         String notificationTemplateType = "accountconfirmation";
@@ -499,17 +500,17 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
         String expectedErrorCode5 = IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_CONTENT_IN_TEMPLATE
                 .getCode();
 
-        return new Object[][] {
-                { StringUtils.EMPTY, notificationTemplateType, notificationTemplateType, locale,
-                  StringUtils.EMPTY, false, true, errorMsg1, expectedErrorCode1, null },
-                { StringUtils.EMPTY, notificationTemplateType, notificationTemplateType, locale,
-                  StringUtils.EMPTY, true, false, errorMsg2, expectedErrorCode2, null },
-                { notificationChannel1, notificationTemplateType, notificationTemplateType, locale,
-                  StringUtils.EMPTY, true, true, StringUtils.EMPTY, expectedErrorCode3, templateContent1 },
-                { notificationChannel2, notificationTemplateType, notificationTemplateType, locale,
-                  contentType, true, true, StringUtils.EMPTY, expectedErrorCode4, templateContent2 },
-                { notificationChannel3, notificationTemplateType, notificationTemplateType, locale,
-                  contentType, true, true, StringUtils.EMPTY, expectedErrorCode5, null
+        return new Object[][]{
+                {StringUtils.EMPTY, notificationTemplateType, notificationTemplateType, locale,
+                        StringUtils.EMPTY, false, true, errorMsg1, expectedErrorCode1, null},
+                {StringUtils.EMPTY, notificationTemplateType, notificationTemplateType, locale,
+                        StringUtils.EMPTY, true, false, errorMsg2, expectedErrorCode2, null},
+                {notificationChannel1, notificationTemplateType, notificationTemplateType, locale,
+                        StringUtils.EMPTY, true, true, StringUtils.EMPTY, expectedErrorCode3, templateContent1},
+                {notificationChannel2, notificationTemplateType, notificationTemplateType, locale,
+                        contentType, true, true, StringUtils.EMPTY, expectedErrorCode4, templateContent2},
+                {notificationChannel3, notificationTemplateType, notificationTemplateType, locale,
+                        contentType, true, true, StringUtils.EMPTY, expectedErrorCode5, null
                 }
         };
     }
