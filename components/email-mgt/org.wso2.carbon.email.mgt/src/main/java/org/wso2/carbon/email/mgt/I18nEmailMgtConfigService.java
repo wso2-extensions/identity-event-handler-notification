@@ -34,7 +34,7 @@ import java.util.List;
 public class I18nEmailMgtConfigService {
 
     private static final Log log = LogFactory.getLog(I18nEmailMgtConfigService.class);
-    private EmailTemplateManager templateManager = new DBBasedEmailTemplateManager();
+    private EmailTemplateManager templateManager = new EmailTemplateManagerImpl();
 
     /**
      * Add a new email template type for a tenant.

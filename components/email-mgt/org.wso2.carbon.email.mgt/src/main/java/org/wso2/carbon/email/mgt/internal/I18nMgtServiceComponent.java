@@ -26,7 +26,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.email.mgt.DBBasedEmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
@@ -87,7 +86,7 @@ public class I18nMgtServiceComponent {
             BundleContext bundleCtx = context.getBundleContext();
 
             // Register Email Mgt Service as an OSGi service.
-            EmailTemplateManager emailTemplateManager = new DBBasedEmailTemplateManager();
+            EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
             ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
                     emailTemplateManager, null);
             if (emailTemplateSR != null) {
@@ -155,7 +154,7 @@ public class I18nMgtServiceComponent {
     private void loadDefaultEmailTemplates() {
         // Load email template configuration on server startup if they don't already exist.
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        EmailTemplateManager emailTemplateManager = new DBBasedEmailTemplateManager();
+        EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
         try {
             emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
         } catch (I18nEmailMgtException e) {

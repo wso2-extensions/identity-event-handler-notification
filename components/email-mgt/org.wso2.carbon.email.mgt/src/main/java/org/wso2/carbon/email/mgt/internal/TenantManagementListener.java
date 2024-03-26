@@ -20,7 +20,6 @@ package org.wso2.carbon.email.mgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.email.mgt.DBBasedEmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -44,7 +43,7 @@ public class TenantManagementListener implements TenantMgtListener {
     public void onTenantCreate(TenantInfoBean tenantInfo) throws StratosException {
         //Load email template configuration on tenant creation.
         String tenantDomain = tenantInfo.getTenantDomain();
-        EmailTemplateManager templateManager = new DBBasedEmailTemplateManager();
+        EmailTemplateManager templateManager = new EmailTemplateManagerImpl();
         try {
             templateManager.addDefaultEmailTemplates(tenantDomain);
         } catch (I18nEmailMgtException e) {
