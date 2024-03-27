@@ -37,8 +37,8 @@ public class I18nMgtConstants {
     public static final String SMS_CONF_DIRECTORY = "sms";
     public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
     public static final String SMS_TEMPLAE_ADMIN_CONF_FILE = "sms-templates-admin-config.xml";
-    public static final String DEFAULT_EMAIL_LOCALE = "en_us";
-    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_us";
+    public static final String DEFAULT_EMAIL_LOCALE = "en_US";
+    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
 
     public static final String EMAIL_TEMPLATE_NAME = "templateName";
     public static final String EMAIL_TEMPLATE_TYPE_DISPLAY_NAME = "templateDisplayName";
