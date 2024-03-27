@@ -41,11 +41,12 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_ORG_NOTIFI
  */
 public class OrgNotificationTemplateDAO {
 
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, int tenantId)
+    public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
+        String channelName = notificationTemplate.getNotificationChannel();
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -143,11 +144,12 @@ public class OrgNotificationTemplateDAO {
         return notificationTemplates;
     }
 
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String channelName, int tenantId)
+    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
+        String channelName = notificationTemplate.getNotificationChannel();
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {

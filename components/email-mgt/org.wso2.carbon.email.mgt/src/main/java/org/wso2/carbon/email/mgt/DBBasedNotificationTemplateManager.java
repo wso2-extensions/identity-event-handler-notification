@@ -27,7 +27,6 @@ import org.wso2.carbon.email.mgt.dao.NotificationScenarioDAO;
 import org.wso2.carbon.email.mgt.dao.OrgNotificationTemplateDAO;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
-import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerInternalException;
@@ -121,16 +120,14 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
 
         if (isNotificationTemplateExists(locale, templateDisplayName, notificationChannel, tenantDomain)) {
             // Registry impl updates the template if exists
-            orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, notificationChannel,
-                    getTenantId(tenantDomain));
+            orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, getTenantId(tenantDomain));
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "Org %s template with locale: %s for scenario: %s for tenant: %s successfully updated.",
                         notificationChannel, locale, templateDisplayName, tenantDomain));
             }
         } else {
-            orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, notificationChannel,
-                    getTenantId(tenantDomain));
+            orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, getTenantId(tenantDomain));
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "Org %s template with locale: %s for scenario: %s for tenant: %s successfully added.",
@@ -204,8 +201,8 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
         if (isNotificationTemplateExists(locale, templateDisplayName, notificationChannel,
                 tenantDomain, applicationUuid)) {
             // Registry impl updates the template if exists
-            appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate,
-                    notificationTemplate.getNotificationChannel(), applicationUuid, getTenantId(tenantDomain));
+            appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, applicationUuid,
+                    getTenantId(tenantDomain));
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "App %s template with locale: %s for scenario: %s for application: %s for tenant: %s " +
@@ -213,8 +210,8 @@ public class DBBasedNotificationTemplateManager implements NotificationTemplateM
                         notificationChannel, locale, templateDisplayName, applicationUuid, tenantDomain));
             }
         } else {
-            appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate,
-                    notificationChannel, applicationUuid, getTenantId(tenantDomain));
+            appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, applicationUuid,
+                    getTenantId(tenantDomain));
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "App %s template with locale: %s for scenario: %s for application: %s for tenant: %s " +

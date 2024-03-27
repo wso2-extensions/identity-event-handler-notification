@@ -165,16 +165,14 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         try {
             if (isEmailTemplateExists(templateDisplayName, locale, tenantDomain)) {
                 // Registry impl updates the template if exists
-                orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, EMAIL_CHANNEL,
-                        getTenantId(tenantDomain));
+                orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, getTenantId(tenantDomain));
                 if (log.isDebugEnabled()) {
                     log.debug(String.format(
                             "Org email template with locale: %s for scenario: %s for tenant: %s successfully updated.",
                             locale, templateDisplayName, tenantDomain));
                 }
             } else {
-                orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL,
-                        getTenantId(tenantDomain));
+                orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, getTenantId(tenantDomain));
                 if (log.isDebugEnabled()) {
                     log.debug(String.format(
                             "Org email template with locale: %s for scenario: %s for tenant: %s successfully added.",
@@ -323,8 +321,8 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
         try {
             if (isEmailTemplateExists(templateDisplayName, locale, tenantDomain, applicationUuid)) {
                 // Registry impl updates the template if exists
-                appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, EMAIL_CHANNEL,
-                        applicationUuid, getTenantId(tenantDomain));
+                appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, applicationUuid,
+                        getTenantId(tenantDomain));
                 if (log.isDebugEnabled()) {
                     log.debug(String.format(
                             "App email template with locale: %s for scenario: %s for application: %s tenant: %s " +
@@ -332,7 +330,7 @@ public class DBBasedEmailTemplateManager implements EmailTemplateManager {
                             locale, templateDisplayName, applicationUuid, tenantDomain));
                 }
             } else {
-                appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, EMAIL_CHANNEL, applicationUuid,
+                appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, applicationUuid,
                         getTenantId(tenantDomain));
                 if (log.isDebugEnabled()) {
                     log.debug(String.format(
