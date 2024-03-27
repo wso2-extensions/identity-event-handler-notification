@@ -30,7 +30,7 @@ public class I18nMgtConstants {
 
     private I18nMgtConstants() {}
 
-    public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
+    public static final String EMAIL_TEMPLATE_PATH = "/_system/config/identity/email";
     public static final String APP_TEMPLATE_PATH = "/apps";
     public static final String SMS_TEMPLATE_PATH = "/identity/sms";
     public static final String EMAIL_CONF_DIRECTORY = "email";

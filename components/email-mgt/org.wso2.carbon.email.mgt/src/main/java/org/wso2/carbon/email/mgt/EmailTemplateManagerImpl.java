@@ -29,6 +29,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.service.NotificationTemplateService;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
@@ -58,7 +59,6 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_PATH;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_REGEX;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_TEMPLATE_PATH;
@@ -78,6 +78,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
     private static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
     private static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
+    private final NotificationTemplateService notificationTemplateService = new NotificationTemplateService();
 
     static {
         IdentityValidationUtil.addPattern(TEMPLATE_REGEX_KEY, EMAIL_TEMPLATE_TYPE_REGEX);
@@ -167,27 +168,17 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     /**
-     * @param tenantDomain
-     * @return
-     * @throws I18nEmailMgtServerException
+     * @param tenantDomain Tenant domain.
+     * @return List of email template types.
+     * @throws I18nEmailMgtServerException Error when retrieving email template types of the tenant.
      */
     @Override
     public List<String> getAvailableTemplateTypes(String tenantDomain) throws I18nEmailMgtServerException {
 
         try {
-            List<String> templateTypeList = new ArrayList<>();
-            Collection collection = (Collection) resourceMgtService.getIdentityResource(EMAIL_TEMPLATE_PATH,
-                    tenantDomain);
-
-            for (String templatePath : collection.getChildren()) {
-                Resource templateTypeResource = resourceMgtService.getIdentityResource(templatePath, tenantDomain);
-                if (templateTypeResource != null) {
-                    String emailTemplateType = templateTypeResource.getProperty(EMAIL_TEMPLATE_TYPE_DISPLAY_NAME);
-                    templateTypeList.add(emailTemplateType);
-                }
-            }
-            return templateTypeList;
-        } catch (IdentityRuntimeException | RegistryException ex) {
+            return notificationTemplateService.getNotificationTemplateTypes(
+                    NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
+        } catch (IdentityRuntimeException | NotificationTemplateManagerException ex) {
             String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(errorMsg, ex);
         }
