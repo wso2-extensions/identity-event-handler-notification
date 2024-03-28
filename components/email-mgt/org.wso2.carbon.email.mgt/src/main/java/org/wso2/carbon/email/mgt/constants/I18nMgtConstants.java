@@ -37,8 +37,8 @@ public class I18nMgtConstants {
     public static final String SMS_CONF_DIRECTORY = "sms";
     public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
     public static final String SMS_TEMPLAE_ADMIN_CONF_FILE = "sms-templates-admin-config.xml";
-    public static final String DEFAULT_EMAIL_LOCALE = "en_us";
-    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_us";
+    public static final String DEFAULT_EMAIL_LOCALE = "en_US";
+    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
 
     public static final String EMAIL_TEMPLATE_NAME = "templateName";
     public static final String EMAIL_TEMPLATE_TYPE_DISPLAY_NAME = "templateDisplayName";
@@ -134,5 +134,24 @@ public class I18nMgtConstants {
 
             return code + " - " + message;
         }
+    }
+
+    /**
+     * Grouping of constants related to database table names.
+     */
+    public static class NotificationTableColumns {
+
+        public static final String ID = "ID";
+        public static final String UUID = "UUID";
+        public static final String NAME = "NAME";
+        public static final String CHANNEL = "CHANNEL";
+        public static final String TENANT_ID = "TENANT_ID";
+        public static final String LOCALE = "LOCALE";
+        public static final String SUBJECT = "SUBJECT";
+        public static final String BODY = "BODY";
+        public static final String FOOTER = "FOOTER";
+        public static final String CONTENT_TYPE = "CONTENT_TYPE";
+        public static final String SCENARIO_ID = "SCENARIO_ID";
+        public static final String APP_ID = "APP_ID";
     }
 }

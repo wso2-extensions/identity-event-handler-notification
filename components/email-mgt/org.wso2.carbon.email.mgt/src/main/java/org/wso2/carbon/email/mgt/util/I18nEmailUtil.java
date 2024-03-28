@@ -27,13 +27,20 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.base.IdentityValidationUtil;
+import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -41,11 +48,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_EMAIL_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_NAME;
+
 public class I18nEmailUtil {
 
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
     public static final String CHARSET_CONSTANT = "charset";
     public static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
+    public static final String TEMPLATE_REGEX_KEY = I18nMgtConstants.class.getName() + "_" + EMAIL_TEMPLATE_NAME;
+    public static final String REGISTRY_INVALID_CHARS = I18nMgtConstants.class.getName() + "_" + "registryInvalidChar";
 
     private I18nEmailUtil() {
     }
@@ -204,7 +217,7 @@ public class I18nEmailUtil {
      */
     public static Collection createTemplateType(String normalizedTemplateName, String templateDisplayName) {
         Collection collection = new CollectionImpl();
-        collection.addProperty(I18nMgtConstants.EMAIL_TEMPLATE_NAME, normalizedTemplateName);
+        collection.addProperty(EMAIL_TEMPLATE_NAME, normalizedTemplateName);
         collection.addProperty(I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME, templateDisplayName);
         return collection;
     }
@@ -231,5 +244,204 @@ public class I18nEmailUtil {
             }
         }
         return exceptionErrorCode;
+    }
+
+    public static List<EmailTemplate> convertToEmailTemplates(List<NotificationTemplate> notificationTemplates) {
+        List<EmailTemplate> emailTemplates = new ArrayList<>();
+        for (NotificationTemplate notificationTemplate : notificationTemplates) {
+            emailTemplates.add(buildEmailTemplate(notificationTemplate));
+        }
+        return emailTemplates;
+    }
+
+    /**
+     * Validate the attributes of a notification template.
+     *
+     * @param notificationTemplate Notification template
+     * @throws NotificationTemplateManagerClientException Invalid notification template.
+     */
+    public static void validateNotificationTemplate(NotificationTemplate notificationTemplate)
+            throws NotificationTemplateManagerClientException {
+
+        if (notificationTemplate == null) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_NULL_TEMPLATE_OBJECT.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            throw new NotificationTemplateManagerClientException(errorCode,
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_NULL_TEMPLATE_OBJECT.getMessage());
+        }
+        String displayName = notificationTemplate.getDisplayName();
+        validateDisplayNameOfTemplateType(displayName);
+        String normalizedDisplayName = I18nEmailUtil.getNormalizedName(displayName);
+        if (!StringUtils.equalsIgnoreCase(normalizedDisplayName, notificationTemplate.getType())) {
+            if (log.isDebugEnabled()) {
+                String message = String.format("In the template normalizedDisplayName : %s is not equal to the " +
+                                "template type : %s. Therefore template type is sent to : %s", normalizedDisplayName,
+                        notificationTemplate.getType(), normalizedDisplayName);
+                log.debug(message);
+            }
+            notificationTemplate.setType(normalizedDisplayName);
+        }
+        validateTemplateLocale(notificationTemplate.getLocale());
+        String body = notificationTemplate.getBody();
+        String subject = notificationTemplate.getSubject();
+        String footer = notificationTemplate.getFooter();
+        if (StringUtils.isBlank(notificationTemplate.getNotificationChannel())) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_CHANNEL.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            throw new NotificationTemplateManagerClientException(errorCode,
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_CHANNEL.getMessage());
+        }
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationTemplate.getNotificationChannel())) {
+            if (StringUtils.isBlank(body)) {
+                String errorCode =
+                        I18nEmailUtil.prependOperationScenarioToErrorCode(
+                                I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE.getCode(),
+                                I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+                throw new NotificationTemplateManagerClientException(errorCode,
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE.getMessage());
+            }
+            if (StringUtils.isNotBlank(subject) || StringUtils.isNotBlank(footer)) {
+                String errorCode =
+                        I18nEmailUtil.prependOperationScenarioToErrorCode(
+                                I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getCode(),
+                                I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+                throw new NotificationTemplateManagerClientException(errorCode,
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getMessage());
+            }
+        } else {
+            if (StringUtils.isBlank(subject) || StringUtils.isBlank(body)) {
+                String errorCode =
+                        I18nEmailUtil.prependOperationScenarioToErrorCode(
+                                I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_EMAIL_TEMPLATE.getCode(),
+                                I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+                throw new NotificationTemplateManagerClientException(errorCode,
+                        I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_EMAIL_TEMPLATE.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Validate the display name of the notification template.
+     *
+     * @param displayName Display name
+     * @throws NotificationTemplateManagerClientException Invalid notification template name
+     */
+    public static void validateDisplayNameOfTemplateType(String displayName)
+            throws NotificationTemplateManagerClientException {
+
+        if (StringUtils.isBlank(displayName)) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_NAME.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            throw new NotificationTemplateManagerClientException(errorCode,
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_NAME.getMessage());
+        }
+        /*Template name can contain only alphanumeric characters and spaces, it can't contain registry invalid
+        characters*/
+        String[] whiteListPatterns = {TEMPLATE_REGEX_KEY};
+        String[] blackListPatterns = {REGISTRY_INVALID_CHARS};
+        if (!IdentityValidationUtil.isValid(displayName, whiteListPatterns, blackListPatterns)) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message =
+                    String.format(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME.getMessage(),
+                            displayName);
+            throw new NotificationTemplateManagerClientException(errorCode, message);
+        }
+    }
+
+    /**
+     * Validates the locale code of a notification template.
+     *
+     * @param locale Locale code
+     * @throws NotificationTemplateManagerClientException Invalid notification template
+     */
+    public static void validateTemplateLocale(String locale) throws NotificationTemplateManagerClientException {
+
+        if (StringUtils.isBlank(locale)) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_LOCALE.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            throw new NotificationTemplateManagerClientException(errorCode,
+                    I18nMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_LOCALE.getMessage());
+        }
+        // Regex check for registry invalid chars.
+        if (!IdentityValidationUtil.isValidOverBlackListPatterns(locale, REGISTRY_INVALID_CHARS)) {
+            String errorCode =
+                    I18nEmailUtil.prependOperationScenarioToErrorCode(
+                            I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE.getCode(),
+                            I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
+            String message =
+                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_LOCALE.getMessage(),
+                            locale);
+            throw new NotificationTemplateManagerClientException(errorCode, message);
+        }
+    }
+
+    /**
+     * Build notification template model from the email template attributes.
+     *
+     * @param emailTemplate EmailTemplate
+     * @return NotificationTemplate
+     */
+    public static NotificationTemplate buildNotificationTemplateFromEmailTemplate(EmailTemplate emailTemplate) {
+
+        NotificationTemplate notificationTemplate = new NotificationTemplate();
+        notificationTemplate.setNotificationChannel(NotificationChannels.EMAIL_CHANNEL.getChannelType());
+        notificationTemplate.setSubject(emailTemplate.getSubject());
+        notificationTemplate.setBody(emailTemplate.getBody());
+        notificationTemplate.setFooter(emailTemplate.getFooter());
+        notificationTemplate.setType(emailTemplate.getTemplateType());
+        notificationTemplate.setDisplayName(emailTemplate.getTemplateDisplayName());
+        notificationTemplate.setLocale(emailTemplate.getLocale());
+        notificationTemplate.setContentType(emailTemplate.getEmailContentType());
+        return notificationTemplate;
+    }
+
+    /**
+     * Get default notification template locale for a given notification channel.
+     *
+     * @param notificationChannel Notification channel
+     * @return Default locale
+     */
+    public static String getDefaultNotificationLocale(String notificationChannel) {
+
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return DEFAULT_SMS_NOTIFICATION_LOCALE;
+        } else {
+            return DEFAULT_EMAIL_LOCALE;
+        }
+    }
+
+    /**
+     * Resolve notification channel to a server supported notification channel.
+     *
+     * @param notificationChannel Notification channel
+     * @return Notification channel (EMAIL or SMS)
+     */
+    public static String resolveNotificationChannel(String notificationChannel) {
+
+        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return notificationChannel;
+        } else if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            return notificationChannel;
+        } else {
+            if (log.isDebugEnabled()) {
+                String message = String.format("Notification channel : %s is not supported by the server. "
+                                + "Notification channel changed to : %s", notificationChannel,
+                        IdentityGovernanceUtil.getDefaultNotificationChannel());
+                log.debug(message);
+            }
+            return IdentityGovernanceUtil.getDefaultNotificationChannel();
+        }
     }
 }
