@@ -18,17 +18,23 @@
 
 package org.wso2.carbon.email.mgt.dao;
 
-import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
+import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 
 import java.util.List;
 
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.*;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.NAME;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.UUID;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_NOTIFICATION_SCENARIO_BY_ID_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_SCENARIO_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_NOTIFICATION_SCENARIO_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_NOTIFICATION_SCENARIOS_SQL;
 
 /**
  * This class is to perform CRUD operations for NotificationScenario.
@@ -38,13 +44,13 @@ public class NotificationScenarioDAO {
     public void addNotificationScenario(String uuid, String scenarioName, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.executeInsert(INSERT_NOTIFICATION_SCENARIO_SQL, (preparedStatement -> {
-                preparedStatement.setString(1, uuid);
-                preparedStatement.setString(2, scenarioName);
-                preparedStatement.setString(3, channelName);
-                preparedStatement.setInt(4, tenantId);
+            namedJdbcTemplate.executeInsert(INSERT_NOTIFICATION_SCENARIO_SQL, (preparedStatement -> {
+                preparedStatement.setString(UUID, uuid);
+                preparedStatement.setString(NAME, scenarioName);
+                preparedStatement.setString(CHANNEL, channelName);
+                preparedStatement.setInt(TENANT_ID, tenantId);
             }), scenarioName, false);
         } catch (DataAccessException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -60,16 +66,16 @@ public class NotificationScenarioDAO {
     public String getNotificationScenario(String uuid, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         String scenarioName;
 
         try {
-            scenarioName = jdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_SCENARIO_SQL,
+            scenarioName = namedJdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_SCENARIO_SQL,
                     (resultSet, rowNumber) -> resultSet.getString(1),
                     preparedStatement -> {
-                        preparedStatement.setString(1, uuid);
-                        preparedStatement.setString(2, channelName);
-                        preparedStatement.setInt(3, tenantId);
+                        preparedStatement.setString(UUID, uuid);
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
             String error = String.format(
@@ -84,15 +90,15 @@ public class NotificationScenarioDAO {
     public List<String> listNotificationScenarios(String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         List<String> scenarioNames;
 
         try {
-            scenarioNames = jdbcTemplate.executeQuery(LIST_NOTIFICATION_SCENARIOS_SQL,
+            scenarioNames = namedJdbcTemplate.executeQuery(LIST_NOTIFICATION_SCENARIOS_SQL,
                     (resultSet, rowNumber) -> resultSet.getString(1),
                     preparedStatement -> {
-                        preparedStatement.setString(1, channelName);
-                        preparedStatement.setInt(2, tenantId);
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
             String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantId);
@@ -105,13 +111,13 @@ public class NotificationScenarioDAO {
     public void removeNotificationScenario(String uuid, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.executeUpdate(DELETE_NOTIFICATION_SCENARIO_BY_ID_SQL,
+            namedJdbcTemplate.executeUpdate(DELETE_NOTIFICATION_SCENARIO_BY_ID_SQL,
                     preparedStatement -> {
-                        preparedStatement.setString(1, uuid);
-                        preparedStatement.setString(2, channelName);
-                        preparedStatement.setInt(3, tenantId);
+                        preparedStatement.setString(UUID, uuid);
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
             String errorMsg =
