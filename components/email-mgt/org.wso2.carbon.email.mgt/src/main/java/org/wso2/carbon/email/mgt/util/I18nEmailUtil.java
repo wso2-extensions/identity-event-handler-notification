@@ -28,6 +28,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -97,6 +98,26 @@ public class I18nEmailUtil {
         emailTemplate.setFooter(notificationTemplate.getFooter());
         emailTemplate.setEmailContentType(notificationTemplate.getContentType());
         return emailTemplate;
+    }
+
+    /**
+     * Build notification template model from the email template attributes.
+     *
+     * @param emailTemplate EmailTemplate
+     * @return NotificationTemplate
+     */
+    public static NotificationTemplate buildNotificationTemplateFromEmailTemplate(EmailTemplate emailTemplate) {
+
+        NotificationTemplate notificationTemplate = new NotificationTemplate();
+        notificationTemplate.setNotificationChannel(NotificationChannels.EMAIL_CHANNEL.getChannelType());
+        notificationTemplate.setSubject(emailTemplate.getSubject());
+        notificationTemplate.setBody(emailTemplate.getBody());
+        notificationTemplate.setFooter(emailTemplate.getFooter());
+        notificationTemplate.setType(emailTemplate.getTemplateType());
+        notificationTemplate.setDisplayName(emailTemplate.getTemplateDisplayName());
+        notificationTemplate.setLocale(emailTemplate.getLocale());
+        notificationTemplate.setContentType(emailTemplate.getEmailContentType());
+        return notificationTemplate;
     }
 
     /**
