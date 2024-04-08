@@ -126,7 +126,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             String message =
                     String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(),
                             displayName, tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
@@ -325,7 +325,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             String message =
                     String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
                             displayName, locale, tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
