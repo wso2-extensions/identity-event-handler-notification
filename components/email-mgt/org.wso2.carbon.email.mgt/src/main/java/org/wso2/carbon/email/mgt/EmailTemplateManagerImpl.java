@@ -126,7 +126,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             String message =
                     String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(),
                             displayName, tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
@@ -325,7 +325,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             String message =
                     String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
                             displayName, locale, tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerServerException(code, message, e);
         }
     }
 
@@ -686,9 +686,9 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
         /*Template name can contain only alphanumeric characters and spaces, it can't contain registry invalid
         characters*/
-        String[] whiteListPatterns = {TEMPLATE_REGEX_KEY};
-        String[] blackListPatterns = {REGISTRY_INVALID_CHARS};
-        if (!IdentityValidationUtil.isValid(displayName, whiteListPatterns, blackListPatterns)) {
+        String[] allowListPatterns = {TEMPLATE_REGEX_KEY};
+        String[] denyListPatterns = {REGISTRY_INVALID_CHARS};
+        if (!IdentityValidationUtil.isValid(displayName, allowListPatterns, denyListPatterns)) {
             String errorCode =
                     I18nEmailUtil.prependOperationScenarioToErrorCode(
                             I18nMgtConstants.ErrorMessages.ERROR_CODE_INVALID_CHARACTERS_IN_TEMPLATE_NAME.getCode(),
