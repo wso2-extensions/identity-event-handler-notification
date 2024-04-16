@@ -168,10 +168,9 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
 
         boolean isNotificationTemplateExists;
         if (StringUtils.isBlank(applicationUuid)) {
-            NotificationTemplate notificationTemplate =
-                    orgNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeKey, notificationChannel,
-                            tenantId);
-            isNotificationTemplateExists = notificationTemplate != null;
+            isNotificationTemplateExists =
+                    orgNotificationTemplateDAO.isNotificationTemplateExists(locale, templateTypeKey,
+                            notificationChannel, tenantId);
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
@@ -179,10 +178,9 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                         notificationChannel, locale, displayName, tenantDomain, isNotificationTemplateExists));
             }
         } else {
-            NotificationTemplate notificationTemplate =
-                    appNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeKey, notificationChannel,
+            isNotificationTemplateExists =
+                    appNotificationTemplateDAO.isNotificationTemplateExists(locale, templateTypeKey, notificationChannel,
                             applicationUuid, tenantId);
-            isNotificationTemplateExists = notificationTemplate != null;
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format("App %s template with locale: %s for type: %s for application: %s " +
