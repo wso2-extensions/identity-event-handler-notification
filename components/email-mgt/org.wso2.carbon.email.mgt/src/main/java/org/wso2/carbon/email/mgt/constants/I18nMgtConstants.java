@@ -135,4 +135,22 @@ public class I18nMgtConstants {
             return code + " - " + message;
         }
     }
+
+    /**
+     * Grouping of constants related to database table names.
+     */
+    public static class NotificationTableColumns {
+
+        public static final String TYPE_KEY = "TYPE_KEY";
+        public static final String NAME = "NAME";
+        public static final String CHANNEL = "CHANNEL";
+        public static final String TENANT_ID = "TENANT_ID";
+        public static final String TEMPLATE_KEY = "TEMPLATE_KEY";
+        public static final String LOCALE = "LOCALE";
+        public static final String SUBJECT = "SUBJECT";
+        public static final String BODY = "BODY";
+        public static final String FOOTER = "FOOTER";
+        public static final String CONTENT_TYPE = "CONTENT_TYPE";
+        public static final String APP_ID = "APP_ID";
+    }
 }
