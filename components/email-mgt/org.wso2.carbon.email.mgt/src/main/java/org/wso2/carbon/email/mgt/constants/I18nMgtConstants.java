@@ -62,6 +62,8 @@ public class I18nMgtConstants {
             "conf", "sms",SMS_PROVIDER_POST_BODY_TEMPLATES_FILE);
     public static final String SMS_PROVIDER= "provider";
 
+    public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
+
     public static class ErrorMsg {
         private ErrorMsg() {
 
