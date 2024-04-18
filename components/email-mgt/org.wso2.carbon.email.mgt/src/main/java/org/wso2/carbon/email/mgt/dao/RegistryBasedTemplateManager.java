@@ -104,6 +104,10 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             String path = buildTemplateRootDirectoryPath(notificationChannel);
             Collection collection = (Collection) resourceMgtService.getIdentityResource(path, tenantDomain);
 
+            if (collection == null) {
+                return templateTypeList;
+            }
+
             for (String templatePath : collection.getChildren()) {
                 Resource templateTypeResource = resourceMgtService.getIdentityResource(templatePath, tenantDomain);
                 if (templateTypeResource != null) {

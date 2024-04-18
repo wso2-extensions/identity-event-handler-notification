@@ -141,6 +141,7 @@ public class I18nMgtConstants {
      */
     public static class NotificationTableColumns {
 
+        public static final String ID = "ID";
         public static final String TYPE_KEY = "TYPE_KEY";
         public static final String NAME = "NAME";
         public static final String CHANNEL = "CHANNEL";
@@ -151,6 +152,7 @@ public class I18nMgtConstants {
         public static final String BODY = "BODY";
         public static final String FOOTER = "FOOTER";
         public static final String CONTENT_TYPE = "CONTENT_TYPE";
+        public static final String TYPE_ID = "TYPE_ID";
         public static final String APP_ID = "APP_ID";
     }
 }

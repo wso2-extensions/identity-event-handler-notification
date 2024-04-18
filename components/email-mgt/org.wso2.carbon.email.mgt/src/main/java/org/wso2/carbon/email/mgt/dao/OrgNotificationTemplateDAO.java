@@ -30,15 +30,19 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.FOOTER;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TEMPLATE_KEY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.SUBJECT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_ID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_ORG_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL;
 
@@ -111,6 +115,48 @@ public class OrgNotificationTemplateDAO {
         }
 
         return notificationTemplate;
+    }
+
+    public boolean isNotificationTemplateExists(String locale, String templateType, String channelName,
+                                                        int tenantId)
+            throws NotificationTemplateManagerServerException {
+
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
+
+        try {
+            Integer typeId = namedJdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_TYPE_ID_SQL,
+                    (resultSet, rowNumber) -> {
+                        Integer typeID = resultSet.getInt(ID);
+                        return typeID;
+                    },
+                    preparedStatement -> {
+                        preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                    });
+
+            if (typeId == null) {
+                return false;
+            }
+
+            Integer templateId = namedJdbcTemplate.fetchSingleRecord(IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL,
+                    (resultSet, rowNumber) -> {
+                        Integer templateID = resultSet.getInt(ID);
+                        return templateID;
+                    },
+                    preparedStatement -> {
+                        preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
+                        preparedStatement.setInt(TYPE_ID, typeId);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                    });
+
+            return templateId != null;
+        } catch (DataAccessException e) {
+            String error =
+                    String.format("Error while checking the existence of %s template %s of type %s from %s tenant.",
+                            channelName, locale, templateType, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
+        }
     }
 
     public List<NotificationTemplate> listNotificationTemplates(String templateType, String channelName, int tenantId)
