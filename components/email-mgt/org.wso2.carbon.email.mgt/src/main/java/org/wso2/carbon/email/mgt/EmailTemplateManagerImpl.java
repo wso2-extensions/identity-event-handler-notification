@@ -806,6 +806,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         return organizationManager.resolveTenantDomain(primaryOrgId);
     }
 
+    /**
+     * Get the main application id for the given shared application.
+     *
+     * @param applicationUuid Shared application id.
+     * @param tenantDomain    Shared app's tenant domain.
+     * @return Main application id.
+     * @throws OrganizationManagementException If an error occurred while getting the main application id.
+     */
     private String getMainApplicationIdForGivenSharedApp(String applicationUuid, String tenantDomain)
             throws OrganizationManagementException {
 
