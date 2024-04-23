@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.email.mgt;
@@ -40,6 +42,10 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,11 +161,17 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<String> getAvailableTemplateTypes(String tenantDomain) throws I18nEmailMgtServerException {
 
         try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                // Return the root organization's email template types.
+                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+            }
             return templatePersistenceManager.listNotificationTemplateTypes(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
         } catch (NotificationTemplateManagerServerException ex) {
             String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(errorMsg, ex);
+        } catch (OrganizationManagementException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -167,12 +179,18 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<EmailTemplate> getAllEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
 
         try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                // Return the root organization's email templates.
+                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+            }
             List<NotificationTemplate> notificationTemplates = templatePersistenceManager.listAllNotificationTemplates(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
             return getEmailTemplateList(notificationTemplates);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(error, e);
+        } catch (OrganizationManagementException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -180,14 +198,30 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public EmailTemplate getEmailTemplate(String templateDisplayName, String locale, String tenantDomain)
             throws I18nEmailMgtException {
 
-        return getEmailTemplate(templateDisplayName, locale, tenantDomain, null);
+        try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                // Return the root organization's email template.
+                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+            }
+            return getEmailTemplate(templateDisplayName, locale, tenantDomain, null);
+        } catch (OrganizationManagementException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
+        }
     }
 
     @Override
     public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain)
             throws I18nEmailMgtException {
 
-        return getEmailTemplateType(templateDisplayName, tenantDomain, null);
+        try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                // Return the root organization's email template type.
+                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+            }
+            return getEmailTemplateType(templateDisplayName, tenantDomain, null);
+        } catch (OrganizationManagementException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -241,6 +275,18 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
                                                         String tenantDomain, String applicationUuid) throws NotificationTemplateManagerException {
 
+        try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                // Return the root organization's notification template.
+                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+                // If it's application specific template is required, get the root organization's application.
+                if (StringUtils.isNotBlank(applicationUuid)) {
+                    applicationUuid = getMainApplicationIdForGivenSharedApp(applicationUuid, tenantDomain);
+                }
+            }
+        } catch (OrganizationManagementException e) {
+            throw new NotificationTemplateManagerException(e.getMessage(), e);
+        }
         // Resolve channel to either SMS or EMAIL.
         notificationChannel = resolveNotificationChannel(notificationChannel);
         validateTemplateLocale(locale);
@@ -744,5 +790,36 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             emailTemplates.add(emailTemplate);
         }
         return emailTemplates;
+    }
+
+    /**
+     * Get the root organization's tenantDomain matching to the given tenant domain.
+     *
+     * @return Root organization tenant domain.
+     * @throws OrganizationManagementException If an error occurred while getting the root organization tenant domain.
+     */
+    private String getRootOrgTenantDomain(String tenantDomain) throws OrganizationManagementException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
+        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
+        return organizationManager.resolveTenantDomain(primaryOrgId);
+    }
+
+    /**
+     * Get the main application id for the given shared application.
+     *
+     * @param applicationUuid Shared application id.
+     * @param tenantDomain    Shared app's tenant domain.
+     * @return Main application id.
+     * @throws OrganizationManagementException If an error occurred while getting the main application id.
+     */
+    private String getMainApplicationIdForGivenSharedApp(String applicationUuid, String tenantDomain)
+            throws OrganizationManagementException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String sharedOrgId = organizationManager.resolveOrganizationId(tenantDomain);
+        OrgApplicationManager sharedAppManager = I18nMgtDataHolder.getInstance().getSharedAppManager();
+        return sharedAppManager.getMainApplicationIdForGivenSharedApp(applicationUuid, sharedOrgId);
     }
 }

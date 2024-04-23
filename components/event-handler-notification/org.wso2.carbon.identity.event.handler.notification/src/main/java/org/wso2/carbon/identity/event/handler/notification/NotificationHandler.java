@@ -30,6 +30,8 @@ import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.utils.DiagnosticLog;
 
 import java.util.HashMap;
@@ -74,6 +76,20 @@ public class NotificationHandler extends DefaultNotificationHandler {
                     .resultStatus(DiagnosticLog.ResultStatus.SUCCESS)
                     .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
             LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
+        }
+
+        String tenantDomain = arbitraryDataMap.get(NotificationConstants.TENANT_DOMAIN);
+        try {
+            if (StringUtils.isNotBlank(tenantDomain)) {
+                // Resolve the organization id and add to attribute data map.
+                OrganizationManager organizationManager =
+                        NotificationHandlerDataHolder.getInstance().getOrganizationManager();
+                String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+                arbitraryDataMap.put(NotificationConstants.EmailNotification.ORGANIZATION_ID_PLACEHOLDER,
+                        organizationId);
+            }
+        } catch (OrganizationManagementException e) {
+            throw new IdentityEventException(e.getMessage(), e);
         }
 
         Notification notification = NotificationUtil.buildNotification(event, arbitraryDataMap);
