@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.email.mgt.dao;
+package org.wso2.carbon.email.mgt.store.dao;
 
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;

@@ -16,12 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.email.mgt.dao;
+package org.wso2.carbon.email.mgt.store;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
+import org.wso2.carbon.email.mgt.store.dao.NotificationTypeDAO;
+import org.wso2.carbon.email.mgt.store.dao.OrgNotificationTemplateDAO;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.user.api.UserStoreException;
