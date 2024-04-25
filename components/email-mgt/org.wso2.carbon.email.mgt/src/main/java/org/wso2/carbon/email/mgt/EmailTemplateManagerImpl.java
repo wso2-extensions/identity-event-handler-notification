@@ -22,8 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.dao.RegistryBasedTemplateManager;
 import org.wso2.carbon.email.mgt.dao.TemplatePersistenceManager;
+import org.wso2.carbon.email.mgt.dao.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtInternalException;
@@ -64,7 +64,7 @@ import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPatt
  */
 public class EmailTemplateManagerImpl implements EmailTemplateManager, NotificationTemplateManager {
 
-    private TemplatePersistenceManager templatePersistenceManager = new RegistryBasedTemplateManager();
+    private TemplatePersistenceManager templatePersistenceManager;
 
     private static final Log log = LogFactory.getLog(EmailTemplateManagerImpl.class);
 
@@ -74,6 +74,11 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     static {
         IdentityValidationUtil.addPattern(TEMPLATE_REGEX_KEY, EMAIL_TEMPLATE_TYPE_REGEX);
         IdentityValidationUtil.addPattern(REGISTRY_INVALID_CHARS, REGISTRY_INVALID_CHARS_EXISTS.getRegex());
+    }
+
+    public EmailTemplateManagerImpl() {
+        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
+        templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
     }
 
     @Override

@@ -23,6 +23,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Matchers;
@@ -42,6 +43,7 @@ import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
@@ -54,7 +56,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
 @PrepareForTest({IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class,
-        OrganizationManagementUtil.class})
+        OrganizationManagementUtil.class, IdentityUtil.class})
 public class ApplicationEmailTemplateTest extends PowerMockTestCase {
 
     private EmailTemplateManagerImpl emailTemplateManager;
@@ -83,6 +85,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         mockStatic(I18nMgtDataHolder.class);
         i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
         when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+
+        mockStatic(IdentityUtil.class);
+        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
 
         // Mock RegistryResourceMgtService.
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
