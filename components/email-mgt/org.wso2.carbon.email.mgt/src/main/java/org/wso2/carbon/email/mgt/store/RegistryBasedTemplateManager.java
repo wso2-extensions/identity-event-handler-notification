@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.email.mgt.dao;
+package org.wso2.carbon.email.mgt.store;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
