@@ -35,6 +35,7 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManager;
 import org.wso2.carbon.identity.branding.preference.management.core.BrandingPreferenceManagerImpl;
 import org.wso2.carbon.identity.branding.preference.management.core.constant.BrandingPreferenceMgtConstants;
@@ -651,11 +652,22 @@ public class NotificationUtil {
         String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
 
-        if (StringUtils.isNotBlank(username) && userStoreManager != null) {
-            userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
-        } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
-                StringUtils.isNotBlank(tenantDomain)) {
-            userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
+        // If the user is federated, use the federated user claims provided in the event properties.
+        if (event.getEventProperties().containsKey(NotificationConstants.IS_FEDERATED_USER) &&
+                (Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
+                event.getEventProperties().containsKey(NotificationConstants.FEDERATED_USER_CLAIMS)) {
+            Map<String, String> fedUserClaims = new HashMap<>();
+            ((Map<ClaimMapping, String>) event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS))
+                    .forEach((claimMapping, value) ->
+                            fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
+            userClaims.putAll(fedUserClaims);
+        } else {
+            if (StringUtils.isNotBlank(username) && userStoreManager != null) {
+                userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
+            } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
+                    StringUtils.isNotBlank(tenantDomain)) {
+                userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
+            }
         }
 
         String locale = getNotificationLocale();
