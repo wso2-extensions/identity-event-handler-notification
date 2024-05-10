@@ -653,7 +653,8 @@ public class NotificationUtil {
         String appDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
 
         // If the user is federated, use the federated user claims provided in the event properties.
-        if ((Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
+        if (event.getEventProperties().containsKey(NotificationConstants.IS_FEDERATED_USER) &&
+                (Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
                 event.getEventProperties().containsKey(NotificationConstants.FEDERATED_USER_CLAIMS)) {
             Map<String, String> fedUserClaims = new HashMap<>();
             ((Map<ClaimMapping, String>) event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS))
