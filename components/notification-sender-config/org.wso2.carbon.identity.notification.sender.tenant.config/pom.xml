@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.8.17</version>
+        <version>1.8.18-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
