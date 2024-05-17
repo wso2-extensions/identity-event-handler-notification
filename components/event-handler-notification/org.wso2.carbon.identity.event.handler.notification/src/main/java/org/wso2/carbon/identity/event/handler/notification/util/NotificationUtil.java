@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
@@ -710,6 +711,18 @@ public class NotificationUtil {
                         .getEmailTemplate(notificationEvent, locale, applicationDomain);
             }
         } catch (I18nEmailMgtException e) {
+            // If the email template is not found and the property IGNORE_IF_TEMPLATE_NOT_FOUND is set to true,
+            // ignore the event.
+            if (e.getErrorCode().equals(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND)
+                    && event.getEventProperties().containsKey(NotificationConstants.IGNORE_IF_TEMPLATE_NOT_FOUND)
+                    && (Boolean) event.getEventProperties().get(NotificationConstants.IGNORE_IF_TEMPLATE_NOT_FOUND)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Email template not found for event: " + notificationEvent + " in locale: " + locale +
+                            " for tenant: " + tenantDomain + ". Ignoring the event since the property " +
+                            NotificationConstants.IGNORE_IF_TEMPLATE_NOT_FOUND + " is set to true.");
+                }
+                return null;
+            }
             String message = "Error when retrieving template from tenant registry.";
             throw NotificationRuntimeException.error(message, e);
         }

@@ -94,6 +94,14 @@ public class NotificationHandler extends DefaultNotificationHandler {
 
         Notification notification = NotificationUtil.buildNotification(event, arbitraryDataMap);
 
+        if (notification == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Notification is null. Hence returning without sending the notification." +
+                        " Event : " + event.getEventName());
+            }
+            return;
+        }
+
         //Stream definition will be read from the identity-even.properties file as a property of the subscription
         //property. Then it will get the first priority.
         String streamDefinitionID = getStreamDefinitionID(event);
