@@ -107,6 +107,7 @@ public class NotificationUtil {
 
     private static final String USER_IDENTITY_CLAIMS = "UserIdentityClaims";
     private static final String SERVICE_PROVIDER_NAME = "serviceProviderName";
+    private static final String SERVICE_PROVIDER_UUID = "serviceProviderUUID";
     public static final String CALLER_PATH_PLACEHOLDER = "caller.path";
     public static final String MAGIC_LINK = "magicLink";
     public static final String CALLBACK_URL = "callbackUrl";
@@ -688,19 +689,25 @@ public class NotificationUtil {
 
         EmailTemplate emailTemplate;
         String applicationUuid = null;
+        String applicationName = null;
         try {
             String applicationDomain = StringUtils.isNotBlank(appDomain) ? appDomain : tenantDomain;
-            if (event.getEventProperties().containsKey(SERVICE_PROVIDER_NAME)) {
-                String applicationName = event.getEventProperties().get(SERVICE_PROVIDER_NAME).toString();
+
+            if (event.getEventProperties().get(SERVICE_PROVIDER_UUID) != null) {
+                applicationUuid = event.getEventProperties().get(SERVICE_PROVIDER_UUID).toString();
+            } else if (event.getEventProperties().get(SERVICE_PROVIDER_NAME) != null) {
+                applicationName = event.getEventProperties().get(SERVICE_PROVIDER_NAME).toString();
                 try {
                     applicationUuid = NotificationHandlerDataHolder.getInstance().getApplicationManagementService()
-                            .getApplicationBasicInfoByName(applicationName, applicationDomain).getApplicationResourceId();
+                            .getApplicationBasicInfoByName(applicationName, applicationDomain)
+                            .getApplicationResourceId();
                 } catch (IdentityApplicationManagementException | NullPointerException e) {
-                    // Fallback to organization preference if application is not found.
-                    log.warn("Fallback to organization preference. Cannot get application id for application name: " +
-                            applicationName, e);
+                    log.debug("Fallback to organization preference. Error fetching application id for application name: " + applicationName, e);
                 }
+            } else {
+                log.debug("Fallback to organization preference. Cannot get application id or application name from the event");
             }
+
             if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
                     notificationEvent, locale, applicationDomain, applicationUuid)) {
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
