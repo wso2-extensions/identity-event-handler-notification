@@ -57,6 +57,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLAT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NOT_FOUND;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.normalizeLocaleFormat;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
 
 /**
@@ -295,6 +296,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         // Resolve channel to either SMS or EMAIL.
         notificationChannel = resolveNotificationChannel(notificationChannel);
         validateTemplateLocale(locale);
+        locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
         NotificationTemplate notificationTemplate = templatePersistenceManager.getNotificationTemplate(templateType,
                 locale, notificationChannel, applicationUuid, tenantDomain);
@@ -365,7 +367,10 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
-
+        locale = normalizeLocaleFormat(locale);
+        if (notificationTemplate.getLocale() != null && !notificationTemplate.getLocale().equals(locale)) {
+            notificationTemplate.setLocale(locale);
+        }
         try {
             templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
                     tenantDomain);
@@ -512,6 +517,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                                          String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
         try {
+            locale = normalizeLocaleFormat(locale);
             return templatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
@@ -568,7 +574,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         if (StringUtils.isBlank(localeCode)) {
             throw new I18nEmailMgtClientException("Cannot Delete template. Email locale cannot be null.");
         }
-
+        localeCode = normalizeLocaleFormat(localeCode);
         try {
             templatePersistenceManager.deleteNotificationTemplate(templateTypeName, localeCode,
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
@@ -583,6 +589,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public EmailTemplate getEmailTemplate(String templateType, String locale, String tenantDomain,
                                           String applicationUuid) throws I18nEmailMgtException {
 
+        locale = normalizeLocaleFormat(locale);
         try {
             NotificationTemplate notificationTemplate = getNotificationTemplate(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), templateType, locale,

@@ -41,12 +41,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class I18nEmailUtil {
 
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
     public static final String CHARSET_CONSTANT = "charset";
     public static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
+    private static final String HYPHEN = "-";
+    private static final String UNDERSCORE = "_";
 
     private I18nEmailUtil() {
     }
@@ -252,5 +255,11 @@ public class I18nEmailUtil {
             }
         }
         return exceptionErrorCode;
+    }
+
+    public static String normalizeLocaleFormat(String localeString) {
+
+        Locale locale = Locale.forLanguageTag(localeString.replace(UNDERSCORE, HYPHEN).toLowerCase());
+        return locale.toString();
     }
 }
