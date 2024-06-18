@@ -680,6 +680,12 @@ public class NotificationUtil {
             if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL)) {
                 sendTo = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_EMAIL);
             }
+            // If OIDC dialect is used, claim URI for user email address will be "email".
+            // Hence, if sendTo is still empty, check whether "email" claim is available.
+            if (StringUtils.isEmpty(sendTo) &&
+                    userClaims.containsKey(NotificationConstants.EmailNotification.OIDC_CLAIM_URI_EMAIL)) {
+                sendTo = userClaims.get(NotificationConstants.EmailNotification.OIDC_CLAIM_URI_EMAIL);
+            }
             if (StringUtils.isEmpty(sendTo)) {
                 throw new IdentityEventException("Email notification sending failed. " +
                         "Sending email address is not configured for the user.");
