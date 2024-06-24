@@ -449,7 +449,7 @@
         <org.wso2.carbon.database.utils.version.range>[2.1.0,2.2.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>7.3.14</carbon.identity.framework.version>
+        <carbon.identity.framework.version>7.1.0</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[7.1.0, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
