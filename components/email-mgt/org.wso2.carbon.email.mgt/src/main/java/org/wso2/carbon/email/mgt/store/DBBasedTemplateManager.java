@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
+import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedAppNotificationTemplateDAO;
 import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedNotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.NotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.OrgNotificationTemplateDAO;
@@ -45,7 +46,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
 
     private final NotificationTypeDAO notificationTypeDAO = new CacheBackedNotificationTypeDAO();
     private final OrgNotificationTemplateDAO orgNotificationTemplateDAO = new CacheBackedOrgNotificationTemplateDAO();
-    private final AppNotificationTemplateDAO appNotificationTemplateDAO = new AppNotificationTemplateDAO();
+    private final AppNotificationTemplateDAO appNotificationTemplateDAO = new CacheBackedAppNotificationTemplateDAO();
 
     @Override
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)

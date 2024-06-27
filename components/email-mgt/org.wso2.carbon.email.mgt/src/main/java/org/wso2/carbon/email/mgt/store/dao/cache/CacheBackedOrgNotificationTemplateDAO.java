@@ -81,7 +81,6 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
             return true;
         }
 
-        // TODO: Not caching the state here. Revisit
         return super.isNotificationTemplateExists(locale, templateType, channelName, tenantId);
     }
 
@@ -137,7 +136,6 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
 
         super.removeNotificationTemplates(templateType, channelName, tenantId);
 
-        //TODO: Revisit for more precise invalidation logic
         orgNotificationTemplateCache.clear(tenantId);
 
         OrgNotificationTemplateListCacheKey listCacheKey =

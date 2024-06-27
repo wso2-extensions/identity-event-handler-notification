@@ -22,20 +22,21 @@ import org.wso2.carbon.identity.core.cache.BaseCache;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 /**
- * Cache implementation for OrgNotificationTemplates.
+ * Cache implementation for AppNotificationTemplates.
  */
-public class OrgNotificationTemplateCache extends BaseCache<OrgNotificationTemplateCacheKey, NotificationTemplate> {
+public class AppNotificationTemplateCache extends BaseCache<AppNotificationTemplateCacheKey, NotificationTemplate> {
 
-    private static final String CACHE_NAME = "OrgNotificationTemplateCache";
-    private static final OrgNotificationTemplateCache instance = new OrgNotificationTemplateCache();
+    private static final String CACHE_NAME = "AppNotificationTemplateCache";
+    private static final AppNotificationTemplateCache instance = new AppNotificationTemplateCache();
 
-    private OrgNotificationTemplateCache() {
+    private AppNotificationTemplateCache() {
 
         super(CACHE_NAME);
     }
 
-    public static OrgNotificationTemplateCache getInstance() {
+    public static AppNotificationTemplateCache getInstance() {
 
         return instance;
     }
+
 }

@@ -21,20 +21,23 @@ package org.wso2.carbon.email.mgt.cache;
 import org.wso2.carbon.identity.core.cache.BaseCache;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
+import java.util.ArrayList;
+
 /**
- * Cache implementation for OrgNotificationTemplates.
+ * Cache implementation for OrgNotificationTemplates lists.
  */
-public class OrgNotificationTemplateCache extends BaseCache<OrgNotificationTemplateCacheKey, NotificationTemplate> {
+public class AppNotificationTemplateListCache
+        extends BaseCache<AppNotificationTemplateListCacheKey, ArrayList<NotificationTemplate>> {
 
-    private static final String CACHE_NAME = "OrgNotificationTemplateCache";
-    private static final OrgNotificationTemplateCache instance = new OrgNotificationTemplateCache();
+    private static final String CACHE_NAME = "AppNotificationTemplateListCache";
+    private static final AppNotificationTemplateListCache instance = new AppNotificationTemplateListCache();
 
-    private OrgNotificationTemplateCache() {
+    private AppNotificationTemplateListCache() {
 
         super(CACHE_NAME);
     }
 
-    public static OrgNotificationTemplateCache getInstance() {
+    public static AppNotificationTemplateListCache getInstance() {
 
         return instance;
     }

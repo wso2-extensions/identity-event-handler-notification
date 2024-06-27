@@ -18,24 +18,20 @@
 
 package org.wso2.carbon.email.mgt.cache;
 
-import org.wso2.carbon.identity.core.cache.BaseCache;
-import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import java.io.Serializable;
 
 /**
- * Cache implementation for OrgNotificationTemplates.
+ * This class represent cache key for {@link AppNotificationTemplateListCache}.
  */
-public class OrgNotificationTemplateCache extends BaseCache<OrgNotificationTemplateCacheKey, NotificationTemplate> {
+public class AppNotificationTemplateListCacheKey implements Serializable {
 
-    private static final String CACHE_NAME = "OrgNotificationTemplateCache";
-    private static final OrgNotificationTemplateCache instance = new OrgNotificationTemplateCache();
+    private String templateType;
+    private String channelName;
+    private String applicationUuid;
 
-    private OrgNotificationTemplateCache() {
-
-        super(CACHE_NAME);
-    }
-
-    public static OrgNotificationTemplateCache getInstance() {
-
-        return instance;
+    public AppNotificationTemplateListCacheKey(String templateType, String channelName, String applicationUuid) {
+        this.templateType = templateType;
+        this.channelName = channelName;
+        this.applicationUuid = applicationUuid;
     }
 }
