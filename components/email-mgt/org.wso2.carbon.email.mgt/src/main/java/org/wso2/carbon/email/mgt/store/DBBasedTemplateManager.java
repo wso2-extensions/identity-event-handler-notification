@@ -26,6 +26,7 @@ import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
 import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedNotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.NotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.OrgNotificationTemplateDAO;
+import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedOrgNotificationTemplateDAO;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -43,7 +44,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     private static final Log log = LogFactory.getLog(DBBasedTemplateManager.class);
 
     private final NotificationTypeDAO notificationTypeDAO = new CacheBackedNotificationTypeDAO();
-    private final OrgNotificationTemplateDAO orgNotificationTemplateDAO = new OrgNotificationTemplateDAO();
+    private final OrgNotificationTemplateDAO orgNotificationTemplateDAO = new CacheBackedOrgNotificationTemplateDAO();
     private final AppNotificationTemplateDAO appNotificationTemplateDAO = new AppNotificationTemplateDAO();
 
     @Override

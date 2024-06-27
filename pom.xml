@@ -404,7 +404,7 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.9.8</identity.governance.version>
+        <identity.governance.version>1.10.0</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
