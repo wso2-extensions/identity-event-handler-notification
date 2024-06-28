@@ -290,7 +290,9 @@ public class NotificationUtil {
                     if (StringUtils.isNotEmpty(userClaim)) {
                         placeHolderData.put(placeHolder, userClaim);
                     } else {
-                        placeHolderData.put(placeHolder, "");
+                        if (placeHolderData.get(placeHolder) == null) {
+                            placeHolderData.put(placeHolder, "");
+                        }
                     }
                 }
             }
