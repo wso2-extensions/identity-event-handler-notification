@@ -24,9 +24,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+
+import java.nio.file.Paths;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -48,6 +51,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
 
     @BeforeMethod
     public void setUp() {
+
+        setUpCarbonHome();
 
         initMocks(this);
         mockStatic(I18nMgtDataHolder.class);
@@ -111,5 +116,13 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+    }
+
+    private static void setUpCarbonHome() {
+
+        String carbonHome = Paths.get(System.getProperty("user.dir"), "target", "test-classes").toString();
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, carbonHome);
+        System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome,
+                "repository/conf").toString());
     }
 }
