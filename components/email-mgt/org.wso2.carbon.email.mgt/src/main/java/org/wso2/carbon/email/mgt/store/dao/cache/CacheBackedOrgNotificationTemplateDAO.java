@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.email.mgt.store.dao.cache;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateCache;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateCacheKey;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCache;
@@ -34,6 +36,7 @@ import java.util.List;
  */
 public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTemplateDAO {
 
+    private static final Log log = LogFactory.getLog(CacheBackedOrgNotificationTemplateDAO.class);
     private final OrgNotificationTemplateCache orgNotificationTemplateCache =
             OrgNotificationTemplateCache.getInstance();
     private final OrgNotificationTemplateListCache templateListCache = OrgNotificationTemplateListCache.getInstance();
@@ -62,7 +65,16 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         NotificationTemplate orgNotificationTemplate = orgNotificationTemplateCache.getValueFromCache(key, tenantId);
 
         if (orgNotificationTemplate != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                        templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return orgNotificationTemplate;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                    templateType + " in channel: " + channelName + " for tenant: " + tenantId);
         }
 
         orgNotificationTemplate = super.getNotificationTemplate(locale, templateType, channelName, tenantId);
@@ -78,7 +90,16 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         NotificationTemplate orgNotificationTemplate = orgNotificationTemplateCache.getValueFromCache(key, tenantId);
 
         if (orgNotificationTemplate != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                        templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return true;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                    templateType + " in channel: " + channelName + " for tenant: " + tenantId);
         }
 
         return super.isNotificationTemplateExists(locale, templateType, channelName, tenantId);
@@ -91,7 +112,16 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         List<NotificationTemplate> notificationTemplates = templateListCache.getValueFromCache(key, tenantId);
 
         if (notificationTemplates != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in OrgNotificationTemplateListCache for template type: " + templateType +
+                        " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return notificationTemplates;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in OrgNotificationTemplateListCache for template type: " + templateType +
+                    " in channel: " + channelName + " for tenant: " + tenantId);
         }
 
         notificationTemplates = super.listNotificationTemplates(templateType, channelName, tenantId);

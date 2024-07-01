@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.email.mgt.store.dao.cache;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeCache;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeCacheKey;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeListCache;
@@ -32,6 +34,7 @@ import java.util.List;
  */
 public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
 
+    private static final Log log = LogFactory.getLog(CacheBackedNotificationTypeDAO.class);
     private final NotificationTypeCache notificationTypeCache = NotificationTypeCache.getInstance();
     private final NotificationTypeListCache notificationTypeListCache = NotificationTypeListCache.getInstance();
 
@@ -52,7 +55,16 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         String templateTypeDisplayName = notificationTypeCache.getValueFromCache(cacheKey, tenantId);
 
         if (templateTypeDisplayName != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in NotificationTypeCache for template type: " + type + " in channel: " +
+                        channelName + " for tenant: " + tenantId);
+            }
             return templateTypeDisplayName;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in NotificationTypeCache for template type: " + type + " in channel: " +
+                    channelName + " for tenant: " + tenantId);
         }
 
         templateTypeDisplayName = super.getNotificationTemplateType(type, channelName, tenantId);
@@ -67,7 +79,16 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         List<String> templateTypes = notificationTypeListCache.getValueFromCache(channelName, tenantId);
 
         if (templateTypes != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in NotificationTypeListCache for template types in channel: " + channelName +
+                        " for tenant: " + tenantId);
+            }
             return templateTypes;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in NotificationTypeListCache for template types in channel: " + channelName +
+                    " for tenant: " + tenantId);
         }
 
         templateTypes = super.listNotificationTemplateTypes(channelName, tenantId);

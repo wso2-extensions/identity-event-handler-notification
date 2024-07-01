@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.email.mgt.store.dao.cache;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCache;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCacheKey;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCache;
@@ -34,6 +36,7 @@ import java.util.List;
  */
 public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTemplateDAO {
 
+    private static final Log log = LogFactory.getLog(CacheBackedAppNotificationTemplateDAO.class);
     private final AppNotificationTemplateCache appNotificationTemplateCache =
             AppNotificationTemplateCache.getInstance();
     private final AppNotificationTemplateListCache templateListCache = AppNotificationTemplateListCache.getInstance();
@@ -65,7 +68,18 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         NotificationTemplate appNotificationTemplate = appNotificationTemplateCache.getValueFromCache(key, tenantId);
 
         if (appNotificationTemplate != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in AppNotificationTemplateCache for application: " + applicationUuid +
+                        ", locale: " + locale + ", template type: " + templateType + " in channel: " + channelName +
+                        " for tenant: " + tenantId);
+            }
             return appNotificationTemplate;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in AppNotificationTemplateCache for application: " + applicationUuid + ", locale: " +
+                    locale + ", template type: " + templateType + " in channel: " + channelName + " for tenant: " +
+                    tenantId);
         }
 
         appNotificationTemplate =
@@ -84,7 +98,18 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         NotificationTemplate appNotificationTemplate = appNotificationTemplateCache.getValueFromCache(key, tenantId);
 
         if (appNotificationTemplate != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in AppNotificationTemplateCache for application: " + applicationUuid +
+                        ", locale: " + locale + ", template type: " + templateType + " in channel: " + channelName +
+                        " for tenant: " + tenantId);
+            }
             return true;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in AppNotificationTemplateCache for application: " + applicationUuid + ", locale: " +
+                    locale + ", template type: " + templateType + " in channel: " + channelName + " for tenant: " +
+                    tenantId);
         }
 
         return super.isNotificationTemplateExists(locale, templateType, channelName, applicationUuid, tenantId);
@@ -99,7 +124,16 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         List<NotificationTemplate> notificationTemplates = templateListCache.getValueFromCache(key, tenantId);
 
         if (notificationTemplates != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache hit in AppNotificationTemplateListCache for application: " + applicationUuid +
+                        ", template type: " + templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return notificationTemplates;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cache miss in AppNotificationTemplateListCache for application: " + applicationUuid +
+                    ", template type: " + templateType + " in channel: " + channelName + " for tenant: " + tenantId);
         }
 
         notificationTemplates = super.listNotificationTemplates(templateType, channelName, applicationUuid, tenantId);
