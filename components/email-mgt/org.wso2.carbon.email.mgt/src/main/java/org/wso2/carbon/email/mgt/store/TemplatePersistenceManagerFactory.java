@@ -52,9 +52,11 @@ public class TemplatePersistenceManagerFactory {
             switch (notificationTemplatesStorageType) {
                 case "hybrid":
                     persistenceManager = new HybridTemplateManager();
+                    log.info("Hybrid template persistent manager initialized.");
                     break;
                 case "registry":
                     persistenceManager = new RegistryBasedTemplateManager();
+                    log.warn("Registry based template persistent manager initialized.");
                     break;
             }
         }
