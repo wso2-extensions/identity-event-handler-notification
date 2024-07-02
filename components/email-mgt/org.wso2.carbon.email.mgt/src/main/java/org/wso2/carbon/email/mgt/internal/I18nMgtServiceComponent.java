@@ -28,6 +28,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
+import org.wso2.carbon.email.mgt.NotificationTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
@@ -60,6 +61,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +99,20 @@ public class I18nMgtServiceComponent {
                 }
             } else {
                 log.error("Error registering Email Template Mgt Service.");
+            }
+
+            // Register Notification Template Mgt Service as an OSGi service.
+            NotificationTemplateManagerImpl notificationTemplateManager = new NotificationTemplateManagerImpl();
+            Hashtable<String, String> serviceProperties = new Hashtable<>();
+            serviceProperties.put("service.name", "NotificationTemplateManager");
+            ServiceRegistration notificationTemplateSR = bundleCtx.registerService(
+                    NotificationTemplateManager.class.getName(), notificationTemplateManager, serviceProperties);
+            if (notificationTemplateSR != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Notification Template Mgt Service registered.");
+                }
+            } else {
+                log.error("Error registering Notification Template Mgt Service.");
             }
 
             // Register EmailTemplateManagerImpl.
