@@ -24,7 +24,7 @@ import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import java.util.ArrayList;
 
 /**
- * Cache implementation for OrgNotificationTemplates lists.
+ * Cache implementation for AppNotificationTemplates lists.
  */
 public class AppNotificationTemplateListCache
         extends BaseCache<AppNotificationTemplateListCacheKey, ArrayList<NotificationTemplate>> {
