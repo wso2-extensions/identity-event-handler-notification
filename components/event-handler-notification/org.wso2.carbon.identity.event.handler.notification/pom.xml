@@ -181,6 +181,15 @@
                             org.wso2.carbon.identity.organization.management.service.constant;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.exception;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.registry.core.service.RegistryService,
+                            osgi.service;objectClass=org.wso2.carbon.user.core.service.RealmService,
+                            osgi.service;objectClass=org.wso2.carbon.event.stream.core.EventStreamService,
+                            osgi.service;objectClass=org.wso2.carbon.event.publisher.core.EventPublisherService,
+                            osgi.service;objectClass=org.wso2.carbon.email.mgt.EmailTemplateManager,
+                            osgi.service;objectClass=org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager,
+                            osgi.service;objectClass=org.wso2.carbon.identity.organization.management.service.OrganizationManager
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

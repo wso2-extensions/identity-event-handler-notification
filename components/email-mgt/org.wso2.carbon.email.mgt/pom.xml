@@ -144,6 +144,11 @@
                             org.wso2.carbon.identity.base; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.governance.*;version="${identity.governance.imp.pkg.version.range}"
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService,
+                            osgi.service;objectClass=org.wso2.carbon.user.core.service.RealmService,
+                            osgi.service;objectClass=org.wso2.carbon.registry.core.service.RegistryService
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
