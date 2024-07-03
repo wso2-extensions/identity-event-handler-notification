@@ -113,6 +113,11 @@
                             org.wso2.carbon.identity.tenant.resource.manager.util; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.utils; version="${carbon.kernel.imp.pkg.version.range}"
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.event.publisher.core.EventPublisherService,
+                            osgi.service;objectClass=org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager,
+                            osgi.service;objectClass=org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
