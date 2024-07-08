@@ -32,7 +32,7 @@ public class OrgNotificationTemplateCacheKey implements Serializable {
 
     public OrgNotificationTemplateCacheKey(String locale, String templateType, String channelName) {
         this.locale = locale;
-        this.templateType = templateType;
+        this.templateType = templateType.toLowerCase();
         this.channelName = channelName;
     }
 

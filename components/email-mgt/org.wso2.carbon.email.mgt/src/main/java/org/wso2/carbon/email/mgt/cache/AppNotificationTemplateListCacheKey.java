@@ -31,7 +31,7 @@ public class AppNotificationTemplateListCacheKey implements Serializable {
     private String applicationUuid;
 
     public AppNotificationTemplateListCacheKey(String templateType, String channelName, String applicationUuid) {
-        this.templateType = templateType;
+        this.templateType = templateType.toLowerCase();
         this.channelName = channelName;
         this.applicationUuid = applicationUuid;
     }
