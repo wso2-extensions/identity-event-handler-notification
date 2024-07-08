@@ -19,6 +19,7 @@
 package org.wso2.carbon.email.mgt.cache;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This class represent cache key for {@link OrgNotificationTemplateCache}.
@@ -33,5 +34,21 @@ public class OrgNotificationTemplateCacheKey implements Serializable {
         this.locale = locale;
         this.templateType = templateType;
         this.channelName = channelName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrgNotificationTemplateCacheKey key = (OrgNotificationTemplateCacheKey) o;
+        return Objects.equals(locale, key.locale) && Objects.equals(templateType, key.templateType) &&
+                Objects.equals(channelName, key.channelName);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(locale, templateType, channelName);
     }
 }

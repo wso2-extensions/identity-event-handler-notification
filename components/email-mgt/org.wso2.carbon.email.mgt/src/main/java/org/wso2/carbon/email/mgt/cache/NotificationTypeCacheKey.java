@@ -37,39 +37,19 @@ public class NotificationTypeCacheKey implements Serializable {
         this.channelName = channelName;
     }
 
-    public String getNotificationType() {
-
-        return notificationType;
-    }
-
-    public String getChannelName() {
-
-        return channelName;
-    }
-
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         NotificationTypeCacheKey that = (NotificationTypeCacheKey) o;
-
-        if (!Objects.equals(notificationType, that.notificationType)) {
-            return false;
-        }
-        return Objects.equals(channelName, that.channelName);
+        return Objects.equals(notificationType, that.notificationType) &&
+                Objects.equals(channelName, that.channelName);
     }
 
     @Override
     public int hashCode() {
 
-        int result = notificationType != null ? notificationType.hashCode() : 0;
-        result = 31 * result + (channelName != null ? channelName.hashCode() : 0);
-        return result;
+        return Objects.hash(notificationType, channelName);
     }
 }
