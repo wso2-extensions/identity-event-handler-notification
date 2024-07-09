@@ -34,7 +34,7 @@ public class AppNotificationTemplateCacheKey implements Serializable {
     public AppNotificationTemplateCacheKey(String locale, String templateType, String channelName,
                                            String applicationUuid) {
         this.locale = locale;
-        this.templateType = templateType;
+        this.templateType = templateType.toLowerCase();
         this.channelName = channelName;
         this.applicationUuid = applicationUuid;
     }

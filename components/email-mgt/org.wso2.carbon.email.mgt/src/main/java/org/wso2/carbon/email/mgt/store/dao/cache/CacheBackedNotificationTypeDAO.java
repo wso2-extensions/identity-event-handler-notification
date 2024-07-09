@@ -20,9 +20,14 @@ package org.wso2.carbon.email.mgt.store.dao.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCache;
+import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCache;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeCache;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeCacheKey;
 import org.wso2.carbon.email.mgt.cache.NotificationTypeListCache;
+import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateCache;
+import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCache;
+import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCacheKey;
 import org.wso2.carbon.email.mgt.store.dao.NotificationTypeDAO;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 
@@ -37,6 +42,14 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
     private static final Log log = LogFactory.getLog(CacheBackedNotificationTypeDAO.class);
     private final NotificationTypeCache notificationTypeCache = NotificationTypeCache.getInstance();
     private final NotificationTypeListCache notificationTypeListCache = NotificationTypeListCache.getInstance();
+    private final OrgNotificationTemplateCache orgNotificationTemplateCache =
+            OrgNotificationTemplateCache.getInstance();
+    private final OrgNotificationTemplateListCache
+            orgNotificationTemplateListCache = OrgNotificationTemplateListCache.getInstance();
+    private final AppNotificationTemplateCache appNotificationTemplateCache =
+            AppNotificationTemplateCache.getInstance();
+    private final AppNotificationTemplateListCache
+            appNotificationTemplateListCache = AppNotificationTemplateListCache.getInstance();
 
     public void addNotificationTemplateType(String type, String displayName, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -103,5 +116,12 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         super.deleteNotificationTemplateType(type, channelName, tenantId);
         notificationTypeCache.clearCacheEntry(new NotificationTypeCacheKey(type, channelName), tenantId);
         notificationTypeListCache.clearCacheEntry(channelName, tenantId);
+
+        orgNotificationTemplateCache.clear(tenantId);
+        orgNotificationTemplateListCache.clearCacheEntry(new OrgNotificationTemplateListCacheKey(type, channelName),
+                tenantId);
+
+        appNotificationTemplateCache.clear(tenantId);
+        appNotificationTemplateListCache.clear(tenantId);
     }
 }

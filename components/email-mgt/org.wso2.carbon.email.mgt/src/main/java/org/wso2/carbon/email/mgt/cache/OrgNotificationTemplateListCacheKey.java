@@ -30,7 +30,7 @@ public class OrgNotificationTemplateListCacheKey implements Serializable {
     private String channelName;
 
     public OrgNotificationTemplateListCacheKey(String templateType, String channelName) {
-        this.templateType = templateType;
+        this.templateType = templateType.toLowerCase();
         this.channelName = channelName;
     }
 
