@@ -646,33 +646,12 @@ public class NotificationUtil {
         //send-to parameter will be set by the event senders. Here it is first read from the request parameter and
         //if it is not there, then assume this sent-to parameter should read from user's email claim only.
         String sendTo = placeHolderData.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO);
-        Map<String, String> userClaims = new HashMap<>();
         String notificationEvent = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
-        String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
-        org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) event.getEventProperties().get(
-                IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
-        String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
         String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
 
-        // If the user is federated, use the federated user claims provided in the event properties.
-        if (event.getEventProperties().containsKey(NotificationConstants.IS_FEDERATED_USER) &&
-                (Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
-                event.getEventProperties().containsKey(NotificationConstants.FEDERATED_USER_CLAIMS)) {
-            Map<String, String> fedUserClaims = new HashMap<>();
-            ((Map<ClaimMapping, String>) event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS))
-                    .forEach((claimMapping, value) ->
-                            fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
-            userClaims.putAll(fedUserClaims);
-        } else {
-            if (StringUtils.isNotBlank(username) && userStoreManager != null) {
-                userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
-            } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
-                    StringUtils.isNotBlank(tenantDomain)) {
-                userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
-            }
-        }
+        Map<String, String> userClaims = resolveUserClaims(event, tenantDomain);
 
         String locale = getNotificationLocale();
         if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
@@ -811,6 +790,52 @@ public class NotificationUtil {
         return StringUtils.isNotBlank(IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE))
                 ? IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE)
                 : NotificationConstants.EmailNotification.LOCALE_DEFAULT;
+    }
+
+    /**
+     * Resolve the locale attribute value for the authenticated user.
+     *
+     * @param event                 Event.
+     * @param tenantDomain          Tenant domain of the user.
+     * @return locale attribute value.
+     */
+    public static Map<String, String> resolveUserClaims(Event event, String tenantDomain)
+            throws IdentityEventException {
+
+        Map<String, String> userClaims = new HashMap<>();
+
+        String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
+        UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) event.getEventProperties().get(
+                IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
+        String userStoreDomainName = (String) event.getEventProperties().get(
+                IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
+
+        if (StringUtils.isNotBlank(username) && userStoreManager != null) {
+            userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
+        } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
+                StringUtils.isNotBlank(tenantDomain)) {
+            userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
+        }
+        // If the user is federated, add the federated claims are missing in local claims.
+        if (event.getEventProperties().containsKey(NotificationConstants.IS_FEDERATED_USER) &&
+                (Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
+                event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS) != null) {
+            try {
+                Map<ClaimMapping, String> fedUserClaims = (Map<ClaimMapping, String>)
+                        event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS);
+
+                for (ClaimMapping claimMapping: fedUserClaims.keySet()) {
+                    if (!userClaims.containsKey(claimMapping.getLocalClaim().getClaimUri())) {
+                        userClaims.put(claimMapping.getLocalClaim().getClaimUri(), fedUserClaims.get(claimMapping));
+                    }
+                }
+            } catch (ClassCastException e) {
+                log.error("The federated user claims from the event properties cannot be classed to the " +
+                        "Map<ClaimMapping, String> format.");
+            }
+        }
+
+        return userClaims;
     }
 }
 
