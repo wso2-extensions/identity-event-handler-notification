@@ -17512,4 +17512,446 @@
                 </html>]]>
         </body>
     </configuration>
+    <configuration type="ImpersonationEmailNotification" display="ImpersonationEmailNotification" locale="en_US" emailContentType="text/html">
+        <subject>User Impersonation Session Started </subject>
+        <body><![CDATA[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+                <title>Invitation to join the {{organization-name}} organization</title>
+                <!-- [if mso]>
+                <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', ;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900') format('Roboto');
+                </style>
+        <![endif] -->
+        <style type="text/css">
+                    @import url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                    @font-face {
+                        font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                        font-style: normal;
+                        font-weight: 400;
+                        src: local('{{organization.font}}'),
+                            local('{{organization.font}}'),
+                            url('https://fonts.googleapis.com/css2?family={{organization.font}}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') format('Roboto');
+                    }
+
+                    #outlook a {
+                        padding: 0;
+                    }
+
+                    .body {
+                        width: 100% !important;
+                        -webkit-text-size-adjust: 100%;
+                        -ms-text-size-adjust: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    .ExternalClass {
+                        width: 100%;
+                    }
+
+                    *[x-apple-data-detectors],
+                    /* iOS */
+                    .unstyle-auto-detected-links *,
+                    .aBn {
+                        border-bottom: 0 !important;
+                        cursor: default !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        font-size: inherit !important;
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    .ExternalClass,
+                    .ExternalClass p,
+                    .ExternalClass span,
+                    .ExternalClass font,
+                    .ExternalClass td,
+                    .ExternalClass div {
+                        line-height: 100%;
+                    }
+
+                    img {
+                        outline: none;
+                        text-decoration: none;
+                        -ms-interpolation-mode: bicubic;
+                    }
+
+                    .wso2_orange a {
+                        color: {{organization.color.primary}};
+                        text-decoration: underline;
+                    }
+
+                    .wso2_orange a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    .Wrap_Border img:hover {
+                        background-color: {{organization.color.primary}} !important;
+                    }
+
+                    a.wso2_orange3:hover {
+                        color: {{organization.color.primary}} !important;
+                        text-decoration: none !important;
+                    }
+
+                    .wso2_grey7 a:hover {
+                        text-decoration: none !important;
+                    }
+
+                    a img {
+                        border: none;
+                    }
+
+                    p {
+                        margin: 1em 0;
+                    }
+
+                    table td {
+                        border-collapse: collapse;
+                    }
+
+                    /* hide unsubscribe from forwards*/
+                    blockquote .original-only,
+                    .WordSection1 .original-only {
+                        display: none !important;
+                    }
+
+                    .fadeimg:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.7 !important;
+                    }
+
+                    .linkname:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.6 !important;
+                    }
+
+                    .linktopic:hover {
+                        transition: 0.3s !important;
+                        opacity: 0.8 !important;
+                    }
+
+                    .linkbody:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none !important;
+                        color: #000000 !important;
+                    }
+
+                    .linkrevbut:hover {
+                        transition: 0.3s !important;
+                        text-decoration: none;
+                        background-color: #092a56;
+                        color: #ffffff !important;
+                    }
+
+                    .ctaorange:hover {
+                        transition: 0.3s !important;
+                        background-color: #000000 !important;
+                    }
+
+                    .ctaorange1:hover {
+                        transition: 0.3s !important;
+                        color: #000000 !important;
+                    }
+
+                    .wso2_center {
+                        text-align: center !important;
+                    }
+
+                    @media only screen and (max-width: 480px) {
+
+                        body,
+                        table,
+                        td,
+                        p,
+                        a,
+                        li,
+                        blockquote {
+                            -webkit-text-size-adjust: none !important;
+                        }
+
+                        /* Prevent Webkit platforms from changing default text sizes */
+                        body {
+                            width: 100% !important;
+                            min-width: 100% !important;
+                        }
+
+                        /* Prevent iOS Mail from adding padding to the body */
+
+                        #bodyCell {
+                            padding: 10px !important;
+                        }
+
+                        #templateContainer {
+                            /* max-width:650px !important; */
+                            width: 100% !important;
+                        }
+
+                        h1 {
+                            font-size: 24px !important;
+                            line-height: 32px !important;
+                            padding-right: 40px !important;
+                        }
+
+                        h2 {
+                            font-size: 20px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h3 {
+                            font-size: 18px !important;
+                            line-height: 100% !important;
+                        }
+
+                        h4 {
+                            font-size: 16px !important;
+                            line-height: 100% !important;
+                        }
+
+                        #templatePreheader {
+                            display: none !important;
+                        }
+
+                        /* Hide the template preheader to save space */
+
+                        .headerContent {
+                            font-size: 20px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .bodyContent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .headercontent {
+                            font-size: 18px !important;
+                            line-height: 125% !important;
+                            padding-right: 0px !important;
+                            padding-left: 0px !important;
+                        }
+
+                        .templateColumnContainer {
+                            display: block !important;
+                            width: 100% !important;
+                        }
+
+                        .columnImage {
+                            height: auto !important;
+                            max-width: 480px !important;
+                            width: 100% !important;
+                        }
+
+                        .leftColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .rightColumnContent {
+                            font-size: 16px !important;
+                            line-height: 125% !important;
+                        }
+
+                        .footerContent {
+                            font-size: 14px !important;
+                            line-height: 115% !important;
+                            padding-right: 10px !important;
+                            padding-left: 10px !important;
+                        }
+
+                        .logobottommobile {
+                            display: none;
+                        }
+
+                        .main-content {
+                            background-size: 100px;
+                            padding-right: 50px !important;
+                            background-repeat: no-repeat;
+                            background-position-x: right;
+                            background-position-y: bottom;
+                        }
+
+                        /* Place footer social and utility links on their own lines, for easier access */
+                    }
+
+                    /* u+.wso2_body .wso2_full_wrap {
+                        width: 100% !important;
+                        width: 100vw !important;
+                    } */
+                </style>
+            </head>
+            <body class="wso2_body"
+                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; height: 100% !important; width: 100% !important; background-color: {{organization.color.background}}; margin: 0; padding: 0;"
+                        data-gr-c-s-loaded="true" bgcolor="#FAFAFA">
+                <table class="wso2_full_wrap"
+                            style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};height: 100% !important;margin: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;padding: 0;"
+                            width="100%" cellspacing="0" cellpadding="0" border="0" align="left">
+                    <tbody>
+                        <tr>
+                            <td id="bodyCell"
+                                        style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin: 0;"
+                                        valign="top" align="left">
+                                <!-- BEGIN TEMPLATE // -->
+                                <table id="templateContainer"
+                                            style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                            width="100%" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <!-- BEGIN PREHEADER // -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;width: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};"
+                                                        valign="top" align="left">
+                                                <table id="templatePreheader"
+                                                            style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;"
+                                                            width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="wso2_orange preheaderContent"
+                                                                        style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
+                                                                        valign="top" align="left">Please click the following button to
+                                                                        securely reset the password of your account in the organization
+                                                                        {{organization-name}}:
+                                                                    </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!-- // END PREHEADER -->
+                                        <tr>
+                                            <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;padding: 40px 0 0;"
+                                                        width="100%" valign="top" align="left">
+                                                <!-- BEGIN BODY // -->
+                                                <table id="templateBody"
+                                                            style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.theme.background.color}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;padding-top: 0p;border-width:1px;border-color: {{organization.theme.border.color}};border-style:solid;"
+                                                            width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="bodyContent" style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: ' {{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align:left;padding: 40px 120px 0px
+                                                                        40px;" valign="top" align="left">
+                                                                <img style="width:200px; margin: 0;"
+                                                                            src="{{organization.logo.img}}"
+                                                                            alt="{{organization.logo.altText}}">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="bodyContent"
+                                                                        style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 10px 120px 0px 40px;"
+                                                                        valign="top" align="left">
+                                                                    <h1
+                                                                            style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
+                                                                            User Impersonation Session Started
+                                                                        </h1>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="bodyContent"
+                                                                        style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;color: #465868;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 16px;line-height: 24px;text-align: center;padding: 0px 20px 0px 40px;"
+                                                                        valign="top" align="left">
+                                                                    <table id="u_content_text_1" class="u_content_text"
+                                                                            style="font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;" role="presentation"
+                                                                            width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td class="main-content"
+                                                                                        style="overflow-wrap:break-word;word-break:break-word;padding: 18px 10px 10px 0px;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;width: 75%; "
+                                                                                        align="left">
+                                                                                    <div class="v-text-align"
+                                                                                            style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                        <p
+                                                                                                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                                Hi {{user-name}},
+                                                                                        </p>
+                                                                                        <p
+                                                                                                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
+                                                                                                We wanted to inform you that an impersonation session for your account {{user-name}} was initiated on {{login-time}} by {{impersonator-user-name}}. If you have any concerns, please contact
+                                                                                                <a
+                                                                                                    class="wso2_orange3"
+                                                                                                    href="mailto:{{organization.support.mail}}"
+                                                                                                    style="color:{{organization.color.primary}}; font-weight: bold;"
+                                                                                                    target="_blank">{{organization.support.mail}}
+                                                                                                   </a>
+                                                                                                immediately.
+                                                                                        </p>
+                                                                                        </div>
+                                                                                        <div class="v-text-align"
+                                                                                            style="color: {{organization.font.color}} !important;; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                                            <p
+                                                                                                style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 13px; font-weight: normal; letter-spacing: normal; line-height: 23px; margin: 20px 0px 20px; padding-bottom:0px; text-align: left;">
+                                                                                                {{organization.copyright.text}}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: {{organization.color.background}};width: 100%;"
+                                                        width="100%" valign="top" align="left">
+                                                        <!-- BEGIN BODY // -->
+                                                        <table id="templateBody"
+                                                            style="width: 100%;max-width: 650px;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: {{organization.color.background}};mso-table-lspace: 0pt;mso-table-rspace: 0pt;margin: auto;"
+                                                            width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td class="footerContent"
+                                                                        style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 10px;line-height: 15px;text-align: left;padding: 10px 40px 25px;"
+                                                                        valign="top" align="left">
+                                                                        <p style="font-size: 14px; line-height: 140%; padding-top: 8px;">
+                                                                            <span
+                                                                                style="font-size: 12px; line-height: 16.8px; color: #808080;">You
+                                                                                received this email because you have an account in the
+                                                                                organization
+                                                                                <b>{{organization-name}}</b>. If you encounter any issues,
+                                                                                you may contact us at
+                                                                                <a
+                                                                                    class="wso2_orange3" href="mailto:{{organization.support.mail}}"
+                                                                                    style="color:#808080;"
+                                                                                    target="_blank">{{organization.support.mail}}</a>.
+                                                                            </span>
+                                                                        </p>
+                                                                        <p style="font-size: 14px; line-height: 140%; padding-top: 2px;">
+                                                                            <span
+                                                                                style="font-size: 11px; line-height: 16.8px; color: #9e9e9e;">This
+                                                                                mail was sent by WSO2 LLC. 3080 Olcott St., Suite C220,
+                                                                                Santa Clara, CA 95054, USA</span>
+                                                                        </p>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- // END BODY -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- // END TEMPLATE -->
+                    </body>
+                </html>]]>
+        </body>
+    </configuration>
 </configurations>
