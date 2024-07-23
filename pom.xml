@@ -491,6 +491,6 @@
         <findsecbugs-plugin.version>1.10.1</findsecbugs-plugin.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude-filter.xml</mavan.findbugsplugin.exclude.file>
 
-        <com.fasterxml.jackson.databind.version>2.13.3</com.fasterxml.jackson.databind.version>
+        <com.fasterxml.jackson.databind.version>2.13.4.2</com.fasterxml.jackson.databind.version>
     </properties>
 </project>
