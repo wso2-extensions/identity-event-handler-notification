@@ -232,7 +232,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 return buildSmsSenderFromResource(resource);
             }
             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                resourceOptional = getPublisherResource(getPrimaryTenantId(), senderName);
+                resourceOptional =
+                        getPublisherResource(NotificationSenderUtils.getPrimaryTenantId(tenantDomain), senderName);
                 if (resourceOptional.isPresent()) {
                     Resource resource = resourceOptional.get();
                     return buildSmsSenderFromResource(resource);
