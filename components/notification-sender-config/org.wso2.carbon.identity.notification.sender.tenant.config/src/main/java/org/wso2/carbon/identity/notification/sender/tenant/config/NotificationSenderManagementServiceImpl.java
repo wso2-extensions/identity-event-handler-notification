@@ -38,7 +38,6 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
@@ -49,7 +48,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
-import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
@@ -234,7 +232,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 return buildSmsSenderFromResource(resource);
             }
             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                resourceOptional = getPublisherResource(getPrimaryTenantId(), senderName);
+                resourceOptional =
+                        getPublisherResource(NotificationSenderUtils.getPrimaryTenantId(tenantDomain), senderName);
                 if (resourceOptional.isPresent()) {
                     Resource resource = resourceOptional.get();
                     return buildSmsSenderFromResource(resource);
@@ -306,7 +305,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 publisherResources.getResources().isEmpty()) {
             publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
                     .getConfigurationManager()
-                    .getResourcesByType(getPrimaryTenantId(), PUBLISHER_RESOURCE_TYPE);
+                    .getResourcesByType(NotificationSenderUtils.getPrimaryTenantId(tenantDomain),
+                            PUBLISHER_RESOURCE_TYPE);
         }
         return publisherResources;
     }
@@ -732,22 +732,5 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
         }
         return true;
-    }
-
-    /**
-     * Get the primary tenant id of the given tenant domain.
-     *
-     * @return Primary tenant id.
-     * @throws OrganizationManagementException If an error occurred while getting the primary tenant id.
-     */
-    private int getPrimaryTenantId() throws OrganizationManagementException {
-
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
-                .getOrganizationManager();
-        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
-        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
-        String primaryTenantDomain = organizationManager.resolveTenantDomain(primaryOrgId);
-        return IdentityTenantUtil.getTenantId(primaryTenantDomain);
     }
 }
