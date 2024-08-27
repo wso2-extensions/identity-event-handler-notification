@@ -87,6 +87,12 @@ public class I18nMgtServiceComponent {
         try {
             BundleContext bundleCtx = context.getBundleContext();
 
+            // Load default notification templates from file
+            I18nMgtDataHolder.getInstance().setDefaultEmailTemplates(
+                    loadDefaultTemplatesFromFile(NotificationChannels.EMAIL_CHANNEL.getChannelType()));
+            I18nMgtDataHolder.getInstance().setDefaultSMSTemplates(
+                    loadDefaultTemplatesFromFile(NotificationChannels.SMS_CHANNEL.getChannelType()));
+
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
             ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),
@@ -134,12 +140,6 @@ public class I18nMgtServiceComponent {
             } else {
                 log.error("Error registering SMS Provider Payload Template Mgt Service.");
             }
-
-            // Load default notification templates from file
-            I18nMgtDataHolder.getInstance().setDefaultEmailTemplates(
-                    loadDefaultTemplatesFromFile(NotificationChannels.EMAIL_CHANNEL.getChannelType()));
-            I18nMgtDataHolder.getInstance().setDefaultSMSTemplates(
-                    loadDefaultTemplatesFromFile(NotificationChannels.SMS_CHANNEL.getChannelType()));
 
             // Load default notification templates.
             loadDefaultEmailTemplates();
