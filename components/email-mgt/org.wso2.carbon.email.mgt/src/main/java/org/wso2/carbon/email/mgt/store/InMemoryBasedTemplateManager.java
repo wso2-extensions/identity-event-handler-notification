@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.email.mgt.store;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
@@ -36,7 +37,7 @@ import java.util.Map;
  * allowing for quick access of templates without migration.
  * Templates are stored in nested maps, where the outer map is keyed by the template display name and the inner map
  * is keyed by locale. This allows for easy retrieval of localized templates.
- * This class used by {@link HybridTemplateManager} as a fallback mechanism.
+ * This class used by {@link DefaultTemplateManager} as a fallback mechanism.
  * This class only supports for tenant specific notification templates.
  */
 public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {
@@ -57,7 +58,7 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        // This method does nothing cause addition is not allowed for in-memory template manager.
+        throw new NotImplementedException();
     }
 
     /**
@@ -73,11 +74,8 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (!StringUtils.isBlank(displayName)) {
-            if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-                return defaultSMSTemplates.containsKey(displayName.toLowerCase());
-            }
-            return defaultEmailTemplates.containsKey(displayName.toLowerCase());
+        if (StringUtils.isNotBlank(displayName)) {
+            return getTemplateMap(notificationChannel).containsKey(displayName.toLowerCase());
         }
         return false;
     }
@@ -109,14 +107,14 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     public void deleteNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        // This method does nothing cause deletion is not allowed for in-memory template manager.
+        throw new NotImplementedException();
     }
 
     @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        // This method does nothing cause modification is not allowed for in-memory template manager.
+        throw new NotImplementedException();
     }
 
     /**

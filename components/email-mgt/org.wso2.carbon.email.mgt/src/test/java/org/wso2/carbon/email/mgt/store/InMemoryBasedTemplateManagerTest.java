@@ -33,10 +33,13 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -104,9 +107,11 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
 
         List<String> displayNames = inMemoryBasedTemplateManager.listNotificationTemplateTypes(
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
+        Set<String> displayNamesSet = new HashSet<>(displayNames);
         assertNotNull(displayNames);
         assertTrue(displayNames.contains(positiveNotificationTemplate.getDisplayName()));
         assertFalse(displayNames.contains(negativeNotificationTemplate.getDisplayName()));
+        assertEquals(displayNamesSet.size(), displayNames.size());
     }
 
     @Test

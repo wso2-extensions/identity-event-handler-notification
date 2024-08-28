@@ -55,9 +55,9 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+        return inMemoryTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                 tenantDomain) ||
-                inMemoryTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                         tenantDomain);
     }
 
@@ -95,9 +95,9 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+        return inMemoryTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain) ||
-                inMemoryTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                         applicationUuid, tenantDomain);
     }
 
@@ -106,10 +106,10 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                                                         String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
-                applicationUuid, tenantDomain)) {
-            return templatePersistenceManager.getNotificationTemplate(displayName, locale, notificationChannel,
-                    applicationUuid, tenantDomain);
+        NotificationTemplate notificationTemplate = templatePersistenceManager.getNotificationTemplate(displayName,
+                locale, notificationChannel, applicationUuid, tenantDomain);
+        if (notificationTemplate != null) {
+            return notificationTemplate;
         } else {
             return inMemoryTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
                     applicationUuid, tenantDomain);
