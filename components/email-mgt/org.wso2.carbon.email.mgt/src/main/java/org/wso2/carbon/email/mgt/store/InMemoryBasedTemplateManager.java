@@ -218,14 +218,14 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
                                            String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        // This method does nothing cause deletion is not allowed for in-memory template manager.
+        throw new NotImplementedException();
     }
 
     @Override
     public void deleteNotificationTemplates(String displayName, String notificationChannel, String applicationUuid,
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        // This method does nothing cause deletion is not allowed for in-memory template manager.
+        throw new NotImplementedException();
     }
 
     /**
