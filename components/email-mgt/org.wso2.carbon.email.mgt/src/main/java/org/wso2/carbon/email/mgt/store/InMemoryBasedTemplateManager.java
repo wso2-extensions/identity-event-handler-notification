@@ -38,7 +38,7 @@ import java.util.Map;
  * Templates are stored in nested maps, where the outer map is keyed by the template display name and the inner map
  * is keyed by locale. This allows for easy retrieval of localized templates.
  * This class used by {@link DefaultTemplateManager} as a fallback mechanism.
- * This class  keeping set of templates that will be commonly used as default templates across all the tenants.
+ * This class keeping set of templates that will be commonly used as default templates across all the tenants.
  */
 public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {
 
