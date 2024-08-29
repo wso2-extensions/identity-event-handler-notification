@@ -406,7 +406,6 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
 
         when(resourceMgtService.getIdentityResource(Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(resource);
-        when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
 
         // Mock Resource properties.
         when(resource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(displayName);
