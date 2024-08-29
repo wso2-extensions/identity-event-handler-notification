@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.email.mgt.store;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
@@ -32,13 +31,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is responsible for storing notification templates from the email-admin-config.xml file.
- * This class is primarily used to provide default notification templates without addition/modification,
- * allowing for quick access of templates without migration.
- * Templates are stored in nested maps, where the outer map is keyed by the template display name and the inner map
- * is keyed by locale. This allows for easy retrieval of localized templates.
- * This class used by {@link DefaultTemplateManager} as a fallback mechanism.
- * This class keeping set of templates that will be commonly used as default templates across all the tenants.
+ * This class is responsible for handling default templates provided by the system.
+ * System default templates are used as default org notification templates in a given tenant and based on the content
+ * of the email-admin-config.xml.
+ * Any modifications to system default templates needs to be done via email-admin-config.xml and any such changes will
+ * be reflected only with the server startup.
+ * This class have support for get, list, exists operations and any invocations to modification operations
+ * throws {@link UnsupportedOperationException}.
+ * This class expected to be use only with conjunction with another {@link TemplatePersistenceManager} implementation
+ * which supports full CRUD operations, hence {@link DefaultTemplateManager} provides that aggregation using this as a
+ * fallback provider.
  */
 public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {
 
@@ -58,7 +60,7 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -107,14 +109,14 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     public void deleteNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -218,14 +220,14 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
                                            String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteNotificationTemplates(String displayName, String notificationChannel, String applicationUuid,
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**
