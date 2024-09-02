@@ -260,4 +260,16 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
         }
         return defaultEmailTemplates;
     }
+
+    /**
+     * Checks if there is a template available as a system default template with the exact same details.
+     * This method is used to avoid managing duplicate templates.
+     *
+     * @param template  Notification template to check.
+     * @return          True if a template with the same details is available, false otherwise.
+     */
+    boolean hasSameTemplate(NotificationTemplate template) {
+
+        return defaultEmailTemplates.containsValue(template);
+    }
 }

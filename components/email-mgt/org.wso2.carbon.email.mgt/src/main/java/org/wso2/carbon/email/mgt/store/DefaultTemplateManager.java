@@ -36,7 +36,7 @@ import java.util.Set;
 public class DefaultTemplateManager implements TemplatePersistenceManager {
 
     private final TemplatePersistenceManager templatePersistenceManager;
-    private final TemplatePersistenceManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
+    private final InMemoryBasedTemplateManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
 
     public DefaultTemplateManager() {
 
@@ -87,7 +87,27 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
+        if (!inMemoryTemplateManager.hasSameTemplate(notificationTemplate)) {
+            templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
+                    tenantDomain);
+        } else {
+            // Template is already managed as a system default template. Handle add or update.
+            String displayName = notificationTemplate.getDisplayName();
+            String locale = notificationTemplate.getLocale();
+            String notificationChannel = notificationTemplate.getNotificationChannel();
+            boolean isExistsInStorage =
+                    templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                            applicationUuid, tenantDomain);
+            if (isExistsInStorage) {
+                // This request is to reset existing template to default content. Hence, delete the existing template.
+                templatePersistenceManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
+                        applicationUuid, tenantDomain);
+            } else {
+                // This request is to add a new template with a same content that is already managed as a system default
+                // template. Storing such templates is redundant. Hence, avoid storing those templates as duplicate
+                // contents to optimize the storage.
+            }
+        }
     }
 
     @Override
