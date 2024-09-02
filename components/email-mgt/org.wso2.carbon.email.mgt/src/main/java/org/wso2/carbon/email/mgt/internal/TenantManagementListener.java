@@ -20,12 +20,6 @@ package org.wso2.carbon.email.mgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.email.mgt.EmailTemplateManager;
-import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
-import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
-import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
-import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
@@ -41,26 +35,7 @@ public class TenantManagementListener implements TenantMgtListener {
      * @param tenantInfo Information about the newly created tenant.
      */
     public void onTenantCreate(TenantInfoBean tenantInfo) throws StratosException {
-        //Load email template configuration on tenant creation.
-        String tenantDomain = tenantInfo.getTenantDomain();
-        EmailTemplateManager templateManager = new EmailTemplateManagerImpl();
-        try {
-            templateManager.addDefaultEmailTemplates(tenantDomain);
-        } catch (I18nEmailMgtException e) {
-            String message = "Error occurred while loading default email templates for the tenant : " + tenantDomain;
-            log.error(message);
-            throw new StratosException(message, e);
-        }
-        try {
-            NotificationTemplateManager notificationTemplateManager = new EmailTemplateManagerImpl();
-            notificationTemplateManager.addDefaultNotificationTemplates(
-                    NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain);
-        } catch (NotificationTemplateManagerException e) {
-            String message = "Error occurred while loading default SMS notification templates for the " +
-                    "tenant : " + tenantDomain;
-            log.error(message);
-            throw new StratosException(message, e);
-        }
+        // It is not required to implement this method as templates are read from db and in-memory.
     }
 
     public void onTenantUpdate(TenantInfoBean tenantInfo) throws StratosException {

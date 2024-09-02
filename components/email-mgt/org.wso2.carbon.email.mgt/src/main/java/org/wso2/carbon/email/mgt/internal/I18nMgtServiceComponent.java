@@ -141,40 +141,11 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering SMS Provider Payload Template Mgt Service.");
             }
 
-            // Load default notification templates.
-            loadDefaultEmailTemplates();
-            loadDefaultSMSTemplates();
             // Load SMS service providers' sms send API payloads.
             loadDefaultSMSProviderPostBodyTemplates();
             log.debug("I18n Management is activated");
         } catch (Throwable e) {
             log.error("Error while activating I18n Management bundle", e);
-        }
-    }
-
-    private void loadDefaultEmailTemplates() {
-        // Load email template configuration on server startup if they don't already exist.
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        EmailTemplateManager emailTemplateManager = new EmailTemplateManagerImpl();
-        try {
-            emailTemplateManager.addDefaultEmailTemplates(tenantDomain);
-        } catch (I18nEmailMgtException e) {
-            log.error("Error occurred while loading default email templates", e);
-        }
-    }
-
-    /**
-     * Load default SMS notification template configurations on server startup if they don't already exist.
-     */
-    private void loadDefaultSMSTemplates() {
-
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        NotificationTemplateManager notificationTemplateManager = new EmailTemplateManagerImpl();
-        try {
-            notificationTemplateManager
-                    .addDefaultNotificationTemplates(NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain);
-        } catch (NotificationTemplateManagerException e) {
-            log.error("Error occurred while loading default SMS templates", e);
         }
     }
 
