@@ -116,17 +116,6 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering Notification Template Mgt Service.");
             }
 
-            TenantManagementListener emailMgtTenantListener = new TenantManagementListener();
-            ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(TenantMgtListener.class.getName(),
-                    emailMgtTenantListener, null);
-            if (tenantMgtListenerSR != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("I18n Management - TenantMgtListener registered");
-                }
-            } else {
-                log.error("I18n Management - TenantMgtListener could not be registered");
-            }
-
             // Register SMSProviderPayloadTemplateManagerImpl.
             SMSProviderPayloadTemplateManagerImpl smsProviderPayloadTemplateManager =
                     new SMSProviderPayloadTemplateManagerImpl();

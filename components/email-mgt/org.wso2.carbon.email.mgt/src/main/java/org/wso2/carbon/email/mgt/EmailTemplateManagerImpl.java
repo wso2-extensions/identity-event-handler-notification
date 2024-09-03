@@ -425,7 +425,24 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     @Deprecated
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
 
-        throw new I18nEmailMgtException("Method not supported");
+        log.warn("Method addDefaultEmailTemplates has been deprecated.");
+
+        try {
+            addDefaultNotificationTemplates(NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
+        } catch (NotificationTemplateManagerClientException e) {
+            throw new I18nEmailMgtClientException(e.getMessage(), e);
+        } catch (NotificationTemplateManagerInternalException e) {
+            if (StringUtils.isNotBlank(e.getErrorCode())) {
+                String errorCode = e.getErrorCode();
+                if (errorCode.contains(I18nMgtConstants.ErrorMessages.ERROR_CODE_DUPLICATE_TEMPLATE_TYPE.getCode())) {
+                    throw new I18nEmailMgtInternalException(
+                            I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_ALREADY_EXISTS, e.getMessage(), e);
+                }
+            }
+            throw new I18nEmailMgtInternalException(e.getMessage(), e);
+        } catch (NotificationTemplateManagerException e) {
+            throw new I18nEmailMgtServerException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -441,7 +458,42 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerException {
 
-        throw new NotificationTemplateManagerException("Method not supported");
+        log.warn("Method addDefaultNotificationTemplates has been deprecated.");
+
+        // Get the list of Default notification templates.
+        List<NotificationTemplate> notificationTemplates =
+                getDefaultNotificationTemplates(notificationChannel);
+        int numberOfAddedTemplates = 0;
+        try {
+            for (NotificationTemplate template : notificationTemplates) {
+                String displayName = template.getDisplayName();
+                String locale = template.getLocale();
+
+            /*Check for existence of each category, since some template may have migrated from earlier version
+            This will also add new template types provided from file, but won't update any existing template*/
+                if (!templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                        null, tenantDomain)) {
+                    try {
+                        addNotificationTemplate(template, tenantDomain);
+                        if (log.isDebugEnabled()) {
+                            String msg = "Default template added to %s tenant registry : %n%s";
+                            log.debug(String.format(msg, tenantDomain, template.toString()));
+                        }
+                        numberOfAddedTemplates++;
+                    } catch (NotificationTemplateManagerInternalException e) {
+                        log.warn("Template : " + displayName + "already exists in the registry. Hence " +
+                                "ignoring addition");
+                    }
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Added %d default %s templates to the tenant registry : %s",
+                        numberOfAddedTemplates, notificationChannel, tenantDomain));
+            }
+        } catch (NotificationTemplateManagerServerException ex) {
+            String error = "Error when tried to check for default email templates in tenant registry : %s";
+            log.error(String.format(error, tenantDomain), ex);
+        }
     }
 
     /**
