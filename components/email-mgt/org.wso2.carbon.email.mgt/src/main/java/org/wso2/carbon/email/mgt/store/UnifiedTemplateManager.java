@@ -36,7 +36,7 @@ import java.util.Set;
 public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
     private final TemplatePersistenceManager templatePersistenceManager;
-    private final InMemoryBasedTemplateManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
+    private final SystemDefaultTemplateManager inMemoryTemplateManager = new SystemDefaultTemplateManager();
 
     public UnifiedTemplateManager(TemplatePersistenceManager persistenceManager) {
 

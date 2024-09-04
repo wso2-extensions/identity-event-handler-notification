@@ -42,7 +42,7 @@ import java.util.Map;
  * which supports full CRUD operations, hence {@link UnifiedTemplateManager} provides that aggregation using this as a
  * fallback provider.
  */
-public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {
+public class SystemDefaultTemplateManager implements TemplatePersistenceManager {
 
     private final Map<String, Map<String, NotificationTemplate>> defaultEmailTemplates;
     private final Map<String, Map<String, NotificationTemplate>> defaultSMSTemplates;
@@ -50,7 +50,7 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     /**
      * Initializes the in-memory template manager by populating default email and SMS templates.
      */
-    public InMemoryBasedTemplateManager() {
+    public SystemDefaultTemplateManager() {
 
         defaultEmailTemplates = populateTemplates(I18nMgtDataHolder.getInstance().getDefaultEmailTemplates());
         defaultSMSTemplates = populateTemplates(I18nMgtDataHolder.getInstance().getDefaultSMSTemplates());
