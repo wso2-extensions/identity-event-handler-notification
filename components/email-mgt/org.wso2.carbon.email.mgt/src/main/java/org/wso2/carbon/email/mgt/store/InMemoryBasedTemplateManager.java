@@ -270,6 +270,12 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
      */
     boolean hasSameTemplate(NotificationTemplate template) {
 
-        return defaultEmailTemplates.containsValue(template);
+        if (template == null) {
+            return false;
+        }
+
+        Map<String, NotificationTemplate> defaultTemplatesForScenario =
+                getTemplateMap(template.getNotificationChannel()).get(template.getDisplayName().toLowerCase());
+        return defaultTemplatesForScenario == null ? false : defaultTemplatesForScenario.containsValue(template);
     }
 }

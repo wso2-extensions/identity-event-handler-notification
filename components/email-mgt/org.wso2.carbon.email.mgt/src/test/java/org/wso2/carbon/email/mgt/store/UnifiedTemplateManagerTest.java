@@ -27,7 +27,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.common.testng.WithCarbonHome;
-import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
@@ -36,9 +35,12 @@ import org.wso2.carbon.utils.CarbonUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
@@ -55,12 +57,15 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     @Mock
     I18nMgtDataHolder i18nMgtDataHolder;
     @Mock
-    RegistryResourceMgtService resourceMgtService;
+    TemplatePersistenceManagerFactory templatePersistenceManagerFactory;
+    @Mock
+    TemplatePersistenceManager templatePersistenceManager;
 
     UnifiedTemplateManager unifiedTemplateManager;
     List<NotificationTemplate> defaultSystemTemplates;
     NotificationTemplate positiveNotificationTemplate;
     NotificationTemplate negativeNotificationTemplate;
+
 
     @BeforeMethod
     public void setUp() {
@@ -71,14 +76,15 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
         mockStatic(I18nMgtDataHolder.class);
         i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
         when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
-        when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
         when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultSystemTemplates);
 
         mockStatic(IdentityUtil.class);
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
-        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
-        unifiedTemplateManager =
-                new UnifiedTemplateManager(templatePersistenceManagerFactory.getTemplatePersistenceManager());
+
+        templatePersistenceManager = PowerMockito.mock(TemplatePersistenceManager.class);
+        unifiedTemplateManager = new UnifiedTemplateManager(templatePersistenceManager);
+        templatePersistenceManagerFactory = PowerMockito.mock(TemplatePersistenceManagerFactory.class);
+        when(templatePersistenceManagerFactory.getTemplatePersistenceManager()).thenReturn(unifiedTemplateManager);
     }
 
     @Test
@@ -107,6 +113,109 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
                 defaultSystemTemplates.get(0).getType(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain);
         assertFalse(templateListForValidScenario.isEmpty());
+    }
+
+    @Test
+    public void testAddOrUpdateNotificationTemplateWhenAddingDefaultTemplate() throws Exception {
+
+        NotificationTemplate notificationTemplate = defaultSystemTemplates.get(0);
+
+        // Mock the behavior to simulate add template -> the template not exists in the persistent storage
+        when(templatePersistenceManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain)).thenReturn(false);
+        unifiedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+
+        // Assert logic
+        verify(templatePersistenceManager, never()).addOrUpdateNotificationTemplate(notificationTemplate, null,
+                tenantDomain);
+        verify(templatePersistenceManager, never()).deleteNotificationTemplate(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+    }
+
+    @Test
+    public void testAddOrUpdateNotificationTemplateWhenUpdatingToDefaultTemplate() throws Exception {
+
+        NotificationTemplate notificationTemplate = defaultSystemTemplates.get(0);
+
+        // Mock the behavior to simulate update template -> the template exists in the persistent storage
+        when(templatePersistenceManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain)).thenReturn(true);
+        unifiedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+
+        // Assert logic
+        verify(templatePersistenceManager, never()).addOrUpdateNotificationTemplate(notificationTemplate, null,
+                tenantDomain);
+        verify(templatePersistenceManager).deleteNotificationTemplate(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+    }
+
+    @Test
+    public void testAddOrUpdateNotificationTemplateWhenAddingCustomTemplate() throws Exception {
+
+        NotificationTemplate notificationTemplate = positiveNotificationTemplate;
+        unifiedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+
+        // Assert logic
+        verify(templatePersistenceManager).addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+        verify(templatePersistenceManager, never()).isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+        verify(templatePersistenceManager, never()).deleteNotificationTemplate(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+    }
+
+    @Test
+    public void testAddOrUpdateNotificationTemplateWhenUpdatingCustomTemplate() throws Exception {
+
+        NotificationTemplate notificationTemplate = positiveNotificationTemplate;
+        unifiedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+
+        // Assert logic
+        verify(templatePersistenceManager).addOrUpdateNotificationTemplate(notificationTemplate, null, tenantDomain);
+        verify(templatePersistenceManager, never()).isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+        verify(templatePersistenceManager, never()).deleteNotificationTemplate(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+    }
+
+    @Test
+    public void testAddOrUpdateNotificationTemplateWhenNullTemplate() throws Exception {
+
+        unifiedTemplateManager.addOrUpdateNotificationTemplate(null, null, tenantDomain);
+
+        // Assert logic
+        verify(templatePersistenceManager).addOrUpdateNotificationTemplate(null, null, tenantDomain);
     }
 
     private void initTestNotificationTemplates() {
