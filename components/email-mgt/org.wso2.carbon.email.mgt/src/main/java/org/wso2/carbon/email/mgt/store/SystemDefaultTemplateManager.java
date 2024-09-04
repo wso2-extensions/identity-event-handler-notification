@@ -39,10 +39,10 @@ import java.util.Map;
  * This class have support for get, list, exists operations and any invocations to modification operations
  * throws {@link UnsupportedOperationException}.
  * This class expected to be use only with conjunction with another {@link TemplatePersistenceManager} implementation
- * which supports full CRUD operations, hence {@link DefaultTemplateManager} provides that aggregation using this as a
+ * which supports full CRUD operations, hence {@link UnifiedTemplateManager} provides that aggregation using this as a
  * fallback provider.
  */
-public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {
+public class SystemDefaultTemplateManager implements TemplatePersistenceManager {
 
     private final Map<String, Map<String, NotificationTemplate>> defaultEmailTemplates;
     private final Map<String, Map<String, NotificationTemplate>> defaultSMSTemplates;
@@ -50,7 +50,7 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
     /**
      * Initializes the in-memory template manager by populating default email and SMS templates.
      */
-    public InMemoryBasedTemplateManager() {
+    public SystemDefaultTemplateManager() {
 
         defaultEmailTemplates = populateTemplates(I18nMgtDataHolder.getInstance().getDefaultEmailTemplates());
         defaultSMSTemplates = populateTemplates(I18nMgtDataHolder.getInstance().getDefaultSMSTemplates());
@@ -259,5 +259,23 @@ public class InMemoryBasedTemplateManager implements TemplatePersistenceManager 
             return defaultSMSTemplates;
         }
         return defaultEmailTemplates;
+    }
+
+    /**
+     * Checks if there is a template available as a system default template with the exact same details.
+     * This method is used to avoid managing duplicate templates.
+     *
+     * @param template  Notification template to check.
+     * @return          True if a template with the same details is available, false otherwise.
+     */
+    boolean hasSameTemplate(NotificationTemplate template) {
+
+        if (template == null) {
+            return false;
+        }
+
+        Map<String, NotificationTemplate> defaultTemplatesForScenario =
+                getTemplateMap(template.getNotificationChannel()).get(template.getDisplayName().toLowerCase());
+        return defaultTemplatesForScenario == null ? false : defaultTemplatesForScenario.containsValue(template);
     }
 }

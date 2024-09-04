@@ -46,10 +46,10 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Class that contains the test cases for {@link InMemoryBasedTemplateManager}.
+ * Class that contains the test cases for {@link SystemDefaultTemplateManager}.
  */
 @PrepareForTest({I18nMgtDataHolder.class, CarbonUtils.class})
-public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
+public class SystemDefaultTemplateManagerTest extends PowerMockTestCase {
 
     private final String baseDirectoryPath = Paths.get(System.getProperty("user.dir"),
             "src", "test", "resources").toString();
@@ -59,7 +59,7 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     private static final String EN_US = "en_US";
     @Mock
     I18nMgtDataHolder i18nMgtDataHolder;
-    InMemoryBasedTemplateManager inMemoryBasedTemplateManager;
+    SystemDefaultTemplateManager systemDefaultTemplateManager;
     NotificationTemplate positiveNotificationTemplate;
     NotificationTemplate negativeNotificationTemplate;
 
@@ -75,7 +75,7 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
                 NotificationChannels.EMAIL_CHANNEL.getChannelType());
         when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultEmailTemplate);
 
-        inMemoryBasedTemplateManager = new InMemoryBasedTemplateManager();
+        systemDefaultTemplateManager = new SystemDefaultTemplateManager();
         initTestNotificationTemplates();
     }
 
@@ -92,12 +92,12 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testIsNotificationTemplateTypeExists() throws Exception {
 
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateTypeExists(StringUtils.EMPTY,
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateTypeExists(StringUtils.EMPTY,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain));
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateTypeExists(
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateTypeExists(
                 negativeNotificationTemplate.getDisplayName(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain));
-        assertTrue(inMemoryBasedTemplateManager.isNotificationTemplateTypeExists(
+        assertTrue(systemDefaultTemplateManager.isNotificationTemplateTypeExists(
                 positiveNotificationTemplate.getDisplayName(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain));
     }
@@ -105,7 +105,7 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testListNotificationTemplateTypes() throws Exception {
 
-        List<String> displayNames = inMemoryBasedTemplateManager.listNotificationTemplateTypes(
+        List<String> displayNames = systemDefaultTemplateManager.listNotificationTemplateTypes(
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
         Set<String> displayNamesSet = new HashSet<>(displayNames);
         assertNotNull(displayNames);
@@ -117,16 +117,16 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testIsNotificationTemplateExists() throws Exception {
 
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateExists(StringUtils.EMPTY, EN_US,
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateExists(StringUtils.EMPTY, EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), dummyAppId, tenantDomain));
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateExists(dummyDisplayName, StringUtils.EMPTY,
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateExists(dummyDisplayName, StringUtils.EMPTY,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), dummyAppId, tenantDomain));
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateExists(dummyDisplayName, EN_US,
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateExists(dummyDisplayName, EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
-        assertFalse(inMemoryBasedTemplateManager.isNotificationTemplateExists(
+        assertFalse(systemDefaultTemplateManager.isNotificationTemplateExists(
                 negativeNotificationTemplate.getDisplayName(), EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
-        assertTrue(inMemoryBasedTemplateManager.isNotificationTemplateExists(
+        assertTrue(systemDefaultTemplateManager.isNotificationTemplateExists(
                 positiveNotificationTemplate.getDisplayName(), EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
     }
@@ -134,16 +134,16 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testGetNotificationTemplate() throws Exception {
 
-        assertNull(inMemoryBasedTemplateManager.getNotificationTemplate(StringUtils.EMPTY, EN_US,
+        assertNull(systemDefaultTemplateManager.getNotificationTemplate(StringUtils.EMPTY, EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), dummyAppId, tenantDomain));
-        assertNull(inMemoryBasedTemplateManager.getNotificationTemplate(dummyDisplayName, StringUtils.EMPTY,
+        assertNull(systemDefaultTemplateManager.getNotificationTemplate(dummyDisplayName, StringUtils.EMPTY,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), dummyAppId, tenantDomain));
-        assertNull(inMemoryBasedTemplateManager.getNotificationTemplate(dummyDisplayName, EN_US,
+        assertNull(systemDefaultTemplateManager.getNotificationTemplate(dummyDisplayName, EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
-        assertNull(inMemoryBasedTemplateManager.getNotificationTemplate(
+        assertNull(systemDefaultTemplateManager.getNotificationTemplate(
                 negativeNotificationTemplate.getDisplayName(), EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
-        assertNotNull(inMemoryBasedTemplateManager.getNotificationTemplate(
+        assertNotNull(systemDefaultTemplateManager.getNotificationTemplate(
                 positiveNotificationTemplate.getDisplayName(), EN_US,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain));
     }
@@ -151,14 +151,14 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testListNotificationTemplates() throws Exception {
 
-        assertTrue(inMemoryBasedTemplateManager.listNotificationTemplates(StringUtils.EMPTY,
+        assertTrue(systemDefaultTemplateManager.listNotificationTemplates(StringUtils.EMPTY,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), dummyAppId, tenantDomain).isEmpty());
-        assertTrue(inMemoryBasedTemplateManager.listNotificationTemplates(dummyDisplayName,
+        assertTrue(systemDefaultTemplateManager.listNotificationTemplates(dummyDisplayName,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain).isEmpty());
-        assertTrue(inMemoryBasedTemplateManager.listNotificationTemplates(
+        assertTrue(systemDefaultTemplateManager.listNotificationTemplates(
                 negativeNotificationTemplate.getDisplayName(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain).isEmpty());
-        assertFalse(inMemoryBasedTemplateManager.listNotificationTemplates(
+        assertFalse(systemDefaultTemplateManager.listNotificationTemplates(
                 positiveNotificationTemplate.getDisplayName(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain).isEmpty());
     }
@@ -166,9 +166,9 @@ public class InMemoryBasedTemplateManagerTest extends PowerMockTestCase {
     @Test
     public void testListAllNotificationTemplates() throws Exception {
 
-        assertFalse(inMemoryBasedTemplateManager.listAllNotificationTemplates(
+        assertFalse(systemDefaultTemplateManager.listAllNotificationTemplates(
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain).isEmpty());
-        assertTrue(inMemoryBasedTemplateManager.listAllNotificationTemplates(
+        assertTrue(systemDefaultTemplateManager.listAllNotificationTemplates(
                 NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain).isEmpty());
     }
 

@@ -22,7 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.store.DefaultTemplateManager;
+import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
+import org.wso2.carbon.email.mgt.store.UnifiedTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -79,7 +80,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
     public EmailTemplateManagerImpl() {
 
-        this.templatePersistenceManager = new DefaultTemplateManager();
+        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
+        this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
     }
 
     @Override

@@ -26,20 +26,24 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.identity.common.testng.WithCarbonHome;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 
+import java.lang.reflect.Field;
 import java.nio.file.Paths;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
 
 /**
  * Class that contains the test cases for {@link TemplatePersistenceManagerFactory}.
  */
+@WithCarbonHome
 @PrepareForTest({I18nMgtDataHolder.class, IdentityUtil.class})
 public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
 
@@ -52,8 +56,6 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @BeforeMethod
     public void setUp() {
 
-        setUpCarbonHome();
-
         initMocks(this);
         mockStatic(I18nMgtDataHolder.class);
         i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
@@ -65,64 +67,73 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     }
 
     @Test
-    public void shouldReturnDBBasedTemplateManagerWhenConfigIsDatabase() {
+    public void shouldUseDBBasedTemplateManagerWhenConfigIsDatabase() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("database");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
     }
 
     @Test
-    public void shouldReturnHybridTemplateManagerWhenConfigIsOnMigration() {
+    public void shouldUseHybridTemplateManagerWhenConfigIsOnMigration() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("hybrid");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof HybridTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, HybridTemplateManager.class);
     }
 
     @Test
-    public void shouldReturnRegistryBasedTemplateManagerWhenConfigIsRegistry() {
+    public void shouldUseRegistryBasedTemplateManagerWhenConfigIsRegistry() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof RegistryBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, RegistryBasedTemplateManager.class);
     }
 
     @Test
-    public void shouldReturnDBBasedTemplateManagerWhenConfigIsInvalid() {
+    public void shouldUseDBBasedTemplateManagerWhenConfigIsInvalid() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("invalid");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
     }
 
     @Test
-    public void shouldReturnDBBasedTemplateManagerWhenConfigIsBlank() {
+    public void shouldUseDBBasedTemplateManagerWhenConfigIsBlank() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
     }
 
     @Test
-    public void shouldReturnDBBasedTemplateManagerWhenConfigIsNull() {
+    public void shouldUseDBBasedTemplateManagerWhenConfigIsNull() {
 
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn(null);
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
     }
 
-    private static void setUpCarbonHome() {
-
-        String carbonHome = Paths.get(System.getProperty("user.dir"), "target", "test-classes").toString();
-        System.setProperty(CarbonBaseConstants.CARBON_HOME, carbonHome);
-        System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome,
-                "repository/conf").toString());
+    private void assertUnderlyingManagerType(TemplatePersistenceManager templatePersistenceManager, Class<?> expectedClass) {
+        try {
+            Field field = UnifiedTemplateManager.class.getDeclaredField("templatePersistenceManager");
+            field.setAccessible(true);
+            Object underlyingManager = field.get(templatePersistenceManager);
+            assertTrue(expectedClass.isInstance(underlyingManager));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Failed to access the underlying TemplatePersistenceManager", e);
+        }
     }
 }

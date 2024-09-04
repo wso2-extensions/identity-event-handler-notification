@@ -64,6 +64,6 @@ public class TemplatePersistenceManagerFactory {
         if (log.isDebugEnabled()) {
             log.debug("Template persistent manager initialized with the type: " + persistenceManager.getClass());
         }
-        return persistenceManager;
+        return new UnifiedTemplateManager(persistenceManager);
     }
 }
