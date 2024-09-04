@@ -39,7 +39,7 @@ import java.util.Map;
  * This class have support for get, list, exists operations and any invocations to modification operations
  * throws {@link UnsupportedOperationException}.
  * This class expected to be use only with conjunction with another {@link TemplatePersistenceManager} implementation
- * which supports full CRUD operations, hence {@link DefaultTemplateManager} provides that aggregation using this as a
+ * which supports full CRUD operations, hence {@link UnifiedTemplateManager} provides that aggregation using this as a
  * fallback provider.
  */
 public class InMemoryBasedTemplateManager implements TemplatePersistenceManager {

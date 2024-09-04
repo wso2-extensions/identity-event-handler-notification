@@ -39,17 +39,16 @@ import java.util.List;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
 
 /**
- * Class that contains the test cases for {@link DefaultTemplateManager}.
+ * Class that contains the test cases for {@link UnifiedTemplateManager}.
  */
 @WithCarbonHome
 @PrepareForTest({I18nMgtDataHolder.class, CarbonUtils.class, IdentityUtil.class})
-public class DefaultTemplateManagerTest extends PowerMockTestCase {
+public class UnifiedTemplateManagerTest extends PowerMockTestCase {
 
     private static final String tenantDomain = "carbon.super";
 
@@ -58,7 +57,7 @@ public class DefaultTemplateManagerTest extends PowerMockTestCase {
     @Mock
     RegistryResourceMgtService resourceMgtService;
 
-    DefaultTemplateManager defaultTemplateManager;
+    UnifiedTemplateManager unifiedTemplateManager;
     List<NotificationTemplate> defaultSystemTemplates;
     NotificationTemplate positiveNotificationTemplate;
     NotificationTemplate negativeNotificationTemplate;
@@ -77,15 +76,17 @@ public class DefaultTemplateManagerTest extends PowerMockTestCase {
 
         mockStatic(IdentityUtil.class);
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
-        defaultTemplateManager = new DefaultTemplateManager();
+        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
+        unifiedTemplateManager =
+                new UnifiedTemplateManager(templatePersistenceManagerFactory.getTemplatePersistenceManager());
     }
 
     @Test
     public void testListAllNotificationTemplates() throws Exception {
 
-        assertFalse(defaultTemplateManager.listAllNotificationTemplates(
+        assertFalse(unifiedTemplateManager.listAllNotificationTemplates(
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain).isEmpty());
-        assertTrue(defaultTemplateManager.listAllNotificationTemplates(
+        assertTrue(unifiedTemplateManager.listAllNotificationTemplates(
                 NotificationChannels.SMS_CHANNEL.getChannelType(), tenantDomain).isEmpty());
     }
 
@@ -93,16 +94,16 @@ public class DefaultTemplateManagerTest extends PowerMockTestCase {
     public void testListNotificationTemplates() throws Exception {
 
         List<NotificationTemplate> templateListForDummyScenario =
-                defaultTemplateManager.listNotificationTemplates(positiveNotificationTemplate.getType(),
+                unifiedTemplateManager.listNotificationTemplates(positiveNotificationTemplate.getType(),
                         NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain);
         assertTrue(templateListForDummyScenario.isEmpty());
 
-        List<NotificationTemplate> templateListForNegativeScenario = defaultTemplateManager.listNotificationTemplates(
+        List<NotificationTemplate> templateListForNegativeScenario = unifiedTemplateManager.listNotificationTemplates(
                 negativeNotificationTemplate.getType(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain);
         assertTrue(templateListForNegativeScenario.isEmpty());
 
-        List<NotificationTemplate> templateListForValidScenario = defaultTemplateManager.listNotificationTemplates(
+        List<NotificationTemplate> templateListForValidScenario = unifiedTemplateManager.listNotificationTemplates(
                 defaultSystemTemplates.get(0).getType(),
                 NotificationChannels.EMAIL_CHANNEL.getChannelType(), StringUtils.EMPTY, tenantDomain);
         assertFalse(templateListForValidScenario.isEmpty());

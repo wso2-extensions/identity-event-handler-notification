@@ -33,15 +33,14 @@ import java.util.Set;
  * to both template persistent manger crafted from the factory  and an in-memory manager.
  * This class will function as a wrapper class for the template manager produced from the factory.
  */
-public class DefaultTemplateManager implements TemplatePersistenceManager {
+public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
     private final TemplatePersistenceManager templatePersistenceManager;
     private final InMemoryBasedTemplateManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
 
-    public DefaultTemplateManager() {
+    public UnifiedTemplateManager(TemplatePersistenceManager persistenceManager) {
 
-        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
-        this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
+        this.templatePersistenceManager = persistenceManager;
     }
 
     @Override
