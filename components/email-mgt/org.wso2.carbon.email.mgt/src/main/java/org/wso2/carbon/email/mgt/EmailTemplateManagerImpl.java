@@ -422,7 +422,10 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     @Override
+    @Deprecated
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
+
+        log.warn("Method addDefaultEmailTemplates has been deprecated.");
 
         try {
             addDefaultNotificationTemplates(NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
@@ -451,8 +454,11 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      * @throws NotificationTemplateManagerException Error adding the default notification templates
      */
     @Override
+    @Deprecated
     public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerException {
+
+        log.warn("Method addDefaultNotificationTemplates has been deprecated.");
 
         // Get the list of Default notification templates.
         List<NotificationTemplate> notificationTemplates =
