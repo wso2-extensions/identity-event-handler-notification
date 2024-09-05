@@ -36,7 +36,7 @@ import java.util.Set;
 public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
     private final TemplatePersistenceManager templatePersistenceManager;
-    private final SystemDefaultTemplateManager inMemoryTemplateManager = new SystemDefaultTemplateManager();
+    private final SystemDefaultTemplateManager systemDefaultTemplateManager = new SystemDefaultTemplateManager();
 
     public UnifiedTemplateManager(TemplatePersistenceManager persistenceManager) {
 
@@ -54,7 +54,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return inMemoryTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+        return systemDefaultTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                 tenantDomain) ||
                 templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                         tenantDomain);
@@ -66,8 +66,8 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
         List<String> dbBasedTemplateTypes = templatePersistenceManager.listNotificationTemplateTypes
                 (notificationChannel, tenantDomain);
-        List<String> inMemoryTemplateTypes = inMemoryTemplateManager.listNotificationTemplateTypes(notificationChannel,
-                tenantDomain);
+        List<String> inMemoryTemplateTypes =
+                systemDefaultTemplateManager.listNotificationTemplateTypes(notificationChannel, tenantDomain);
 
         return mergeAndRemoveDuplicates(dbBasedTemplateTypes, inMemoryTemplateTypes);
     }
@@ -86,7 +86,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        if (!inMemoryTemplateManager.hasSameTemplate(notificationTemplate)) {
+        if (!systemDefaultTemplateManager.hasSameTemplate(notificationTemplate)) {
             templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
                     tenantDomain);
         } else {
@@ -114,7 +114,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return inMemoryTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+        return systemDefaultTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain) ||
                 templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                         applicationUuid, tenantDomain);
@@ -130,7 +130,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
         if (notificationTemplate != null) {
             return notificationTemplate;
         } else {
-            return inMemoryTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
+            return systemDefaultTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
                     applicationUuid, tenantDomain);
         }
     }
@@ -149,10 +149,10 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
         }
 
         List<NotificationTemplate> inMemoryBasedTemplates = new ArrayList<>();
-        if (inMemoryTemplateManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
+        if (systemDefaultTemplateManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
                 tenantDomain)) {
             inMemoryBasedTemplates =
-                    inMemoryTemplateManager.listNotificationTemplates(templateType, notificationChannel,
+                    systemDefaultTemplateManager.listNotificationTemplates(templateType, notificationChannel,
                             applicationUuid, tenantDomain);
         }
 
@@ -166,7 +166,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
         List<NotificationTemplate> dbBasedTemplates =
                 templatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
         List<NotificationTemplate> inMemoryBasedTemplates =
-                inMemoryTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
+                systemDefaultTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
         return mergeAndRemoveDuplicateTemplates(dbBasedTemplates, inMemoryBasedTemplates);
     }
@@ -178,8 +178,8 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
         if (templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
-            templatePersistenceManager.deleteNotificationTemplate(displayName, locale, notificationChannel, applicationUuid,
-                    tenantDomain);
+            templatePersistenceManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
+                    applicationUuid, tenantDomain);
         }
     }
 
