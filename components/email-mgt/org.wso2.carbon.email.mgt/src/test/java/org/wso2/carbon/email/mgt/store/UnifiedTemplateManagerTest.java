@@ -88,6 +88,51 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     }
 
     @Test
+    public void testIsNotificationTemplateExists() throws Exception {
+
+        NotificationTemplate notificationTemplate = defaultSystemTemplates.get(0);
+        assertTrue(unifiedTemplateManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain));
+        verify(templatePersistenceManager, never()).isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain);
+
+        notificationTemplate = positiveNotificationTemplate;
+        when(templatePersistenceManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain)).thenReturn(true);
+        assertTrue(unifiedTemplateManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain));
+
+        when(templatePersistenceManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain)).thenReturn(false);
+        assertFalse(unifiedTemplateManager.isNotificationTemplateExists(
+                notificationTemplate.getDisplayName(),
+                notificationTemplate.getLocale(),
+                notificationTemplate.getNotificationChannel(),
+                null,
+                tenantDomain));
+    }
+
+    @Test
     public void testListAllNotificationTemplates() throws Exception {
 
         assertFalse(unifiedTemplateManager.listAllNotificationTemplates(
