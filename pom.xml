@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.8.28-SNAPSHOT</version>
+    <version>1.9.5-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -313,6 +313,12 @@
                 <version>${mockito.inline.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!-- Common test utility -->
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.testutil</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.jacoco</groupId>
@@ -330,6 +336,16 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+            </dependency>
+                <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -358,6 +374,44 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven.checkstyleplugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                    <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -399,7 +453,26 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
     </build>
 
     <properties>
@@ -492,5 +565,7 @@
         <mavan.findbugsplugin.exclude.file>findbugs-exclude-filter.xml</mavan.findbugsplugin.exclude.file>
 
         <com.fasterxml.jackson.databind.version>2.13.3</com.fasterxml.jackson.databind.version>
+    
+        <jacoco.version>0.8.12</jacoco.version>
     </properties>
 </project>

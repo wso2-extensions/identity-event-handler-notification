@@ -22,8 +22,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
+import org.wso2.carbon.email.mgt.store.UnifiedTemplateManager;
+import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtInternalException;
@@ -78,8 +79,9 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     public EmailTemplateManagerImpl() {
+
         TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
-        templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
+        this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
     }
 
     @Override
@@ -422,7 +424,10 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     }
 
     @Override
+    @Deprecated
     public void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
+
+        log.warn("Method addDefaultEmailTemplates has been deprecated.");
 
         try {
             addDefaultNotificationTemplates(NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
@@ -451,8 +456,11 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
      * @throws NotificationTemplateManagerException Error adding the default notification templates
      */
     @Override
+    @Deprecated
     public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerException {
+
+        log.warn("Method addDefaultNotificationTemplates has been deprecated.");
 
         // Get the list of Default notification templates.
         List<NotificationTemplate> notificationTemplates =
