@@ -21,7 +21,6 @@ package org.wso2.carbon.email.mgt.store;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.email.mgt.constants.TemplateMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
 import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedAppNotificationTemplateDAO;
@@ -161,60 +160,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                     "successfully updated.",
                             notificationChannel, locale, displayName, applicationUuid, tenantDomain));
                 }
-            }
-        }
-    }
-
-    @Override
-    public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
-                                        String tenantDomain) throws NotificationTemplateManagerServerException {
-
-        String displayName = notificationTemplate.getDisplayName();
-        String notificationChannel = notificationTemplate.getNotificationChannel();
-        String locale = notificationTemplate.getLocale();
-        int tenantId = getTenantId(tenantDomain);
-
-        if (StringUtils.isBlank(applicationUuid)) {
-            orgNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Org %s template with locale: %s for type: %s for tenant: %s successfully added.",
-                        notificationChannel, locale, displayName, tenantDomain));
-            }
-        } else {
-            appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, applicationUuid, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "App %s template with locale: %s for type: %s for application: %s for tenant: %s " +
-                                "successfully added.",
-                        notificationChannel, locale, displayName, applicationUuid, tenantDomain));
-            }
-        }
-    }
-
-    @Override
-    public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
-                                        String tenantDomain) throws NotificationTemplateManagerServerException {
-
-        String displayName = notificationTemplate.getDisplayName();
-        String notificationChannel = notificationTemplate.getNotificationChannel();
-        String locale = notificationTemplate.getLocale();
-        int tenantId = getTenantId(tenantDomain);
-
-        if (StringUtils.isBlank(applicationUuid)) {
-            orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Org %s template with locale: %s for type: %s for tenant: %s successfully added.",
-                        notificationChannel, locale, displayName, tenantDomain));
-            }
-        } else {
-            appNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, applicationUuid, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "App %s template with locale: %s for type: %s for application: %s for tenant: %s " +
-                                "successfully added.",
-                        notificationChannel, locale, displayName, applicationUuid, tenantDomain));
             }
         }
     }

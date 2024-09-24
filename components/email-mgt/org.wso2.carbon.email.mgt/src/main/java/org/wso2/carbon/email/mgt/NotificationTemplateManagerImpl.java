@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.TemplateMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
-import org.wso2.carbon.email.mgt.store.DBBasedTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
+import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
@@ -56,7 +56,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
     public NotificationTemplateManagerImpl() {
 
-        templatePersistenceManager = new DBBasedTemplateManager();
+        TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
+        this.templatePersistenceManager = templatePersistenceManagerFactory.getUserDefinedTemplatePersistenceManager();
     }
 
     /**
@@ -320,7 +321,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throw new NotificationTemplateManagerServerException(code, message);
         }
         try {
-            templatePersistenceManager.addNotificationTemplate(notificationTemplate, applicationUuid,
+            templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
                     tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -370,7 +371,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throw new NotificationTemplateManagerServerException(code, message);
         }
         try {
-            templatePersistenceManager.updateNotificationTemplate(notificationTemplate, applicationUuid,
+            templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
                     tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -431,7 +432,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc} todo : remove this function.
      */
     @Override
     public void addDefaultNotificationTemplates(String notificationChannel, String tenantDomain)

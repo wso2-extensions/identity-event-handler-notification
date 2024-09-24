@@ -85,32 +85,6 @@ public interface TemplatePersistenceManager {
                                          String tenantDomain) throws NotificationTemplateManagerServerException;
 
     /**
-     * Add a new template if not exists. Only to be used with DB only use cases.
-     *
-     * @param notificationTemplate  Notification template.
-     * @param applicationUuid       Application UUID.
-     * @param tenantDomain          Tenant domain.
-     * @throws NotificationTemplateManagerServerException If an error occurred while adding the template.
-     */
-    default void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
-                                         String tenantDomain) throws NotificationTemplateManagerServerException {
-        // not implemented
-    }
-
-    /**
-     * Update a template if exists. Only to be used with DB only use cases.
-     *
-     * @param notificationTemplate  Notification template.
-     * @param applicationUuid       Application UUID.
-     * @param tenantDomain          Tenant domain.
-     * @throws NotificationTemplateManagerServerException If an error occurred while updating the template.
-     */
-    default void updateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
-                                         String tenantDomain) throws NotificationTemplateManagerServerException {
-        // not implemented
-    }
-
-    /**
      * Check whether the specified notification template exists.
      *
      * @param displayName           Display Name.
