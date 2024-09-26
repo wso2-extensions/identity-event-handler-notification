@@ -44,6 +44,7 @@ public class TemplateMgtConstants {
         public static final String TEMPLATE_NOT_FOUND = "65004";
         public static final String ERROR_ADDING_TEMPLATE = "65005";
         public static final String ERROR_UPDATING_TEMPLATE = "65006";
+        public static final String ERROR_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED = "65007";
     }
 
     /**
@@ -69,10 +70,16 @@ public class TemplateMgtConstants {
                 " already exists in tenant : %s"),
         ERROR_CODE_TEMPLATE_NOT_FOUND(ErrorCodes.TEMPLATE_NOT_FOUND, "Notification template : %s " +
                 "doesn't exist in tenant : %s"),
+        ERROR_CODE_SYSTEM_TEMPLATE_TYPE_NOT_FOUND(ErrorCodes.TEMPLATE_TYPE_NOT_FOUND,
+                "System notification template type : %s doesn't exist."),
+        ERROR_CODE_SYSTEM_TEMPLATE_NOT_FOUND(ErrorCodes.TEMPLATE_NOT_FOUND, "System notification " +
+                "template : %s doesn't exist"),
         ERROR_CODE_ERROR_ADDING_TEMPLATE(ErrorCodes.ERROR_ADDING_TEMPLATE, "Error when adding template : %s" +
                 " to tenant : %s"),
         ERROR_CODE_ERROR_UPDATING_TEMPLATE(ErrorCodes.ERROR_UPDATING_TEMPLATE, "Error when updating " +
-                "template : %s on tenant : %s");
+                "template : %s on tenant : %s"),
+        ERROR_CODE_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED(ErrorCodes.ERROR_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED,
+                "System resource deletion not allowed. %S");
 
         private final String code;
         private final String message;
