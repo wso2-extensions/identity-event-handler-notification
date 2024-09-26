@@ -59,6 +59,7 @@ import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -142,10 +143,10 @@ public class NotificationUtil {
             String domainNameProperty = getUserStoreDomainName(userStoreManager);
             String message = null;
             if (StringUtils.isNotBlank(domainNameProperty)) {
-                message = "Error occurred while retrieving user claim values for user " + userName + " in user store "
+                message = "Error occurred while retrieving user claim values for user " + LoggerUtils.getMaskedContent(userName) + " in user store "
                         + domainNameProperty + " in tenant " + getTenantDomain(userStoreManager);
             } else {
-                message = "Error occurred while retrieving user claim values for user " + userName + " in tenant "
+                message = "Error occurred while retrieving user claim values for user " + LoggerUtils.getMaskedContent(userName) + " in tenant "
                         + getTenantDomain(userStoreManager);
             }
             log.error(message, e);
