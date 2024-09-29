@@ -22,8 +22,8 @@ public class TemplateMgtConstants {
 
     private TemplateMgtConstants() {}
 
-    public static final String DEFAULT_EMAIL_NOTIFICATION_LOCALE = "en_us";
-    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_us";
+    public static final String DEFAULT_EMAIL_NOTIFICATION_LOCALE = "en_US";
+    public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
 
     /**
      * Class which contains the error scenarios.

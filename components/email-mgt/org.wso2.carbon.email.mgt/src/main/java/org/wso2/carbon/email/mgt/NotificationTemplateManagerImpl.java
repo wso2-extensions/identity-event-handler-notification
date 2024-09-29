@@ -139,6 +139,17 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throws NotificationTemplateManagerException {
 
         validateDisplayNameOfTemplateType(templateDisplayName);
+        assertTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
+        try {
+            userDefinedTemplatePersistenceManager.deleteNotificationTemplateType(
+                    templateDisplayName, notificationChannel, tenantDomain);
+        } catch (NotificationTemplateManagerException ex) {
+            String errorMsg = String.format
+                    ("Error deleting template type %s from %s tenant.", templateDisplayName, tenantDomain);
+            throw handleServerException(errorMsg, ex);
+        }
+        // If delete was executed on a system template type, the type will not be deleted, but the user define
+        // templates will be deleted. Therefore, this needs to be informed.
         if (systemTemplatePersistenceManager.isNotificationTemplateTypeExists(templateDisplayName, notificationChannel,
                 null)) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -146,16 +157,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                     TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED.getMessage(),
-                    "System notification template types are not eligible for deletion.");
+                    "System template type not deleted. User defined templates deleted.");
             throw new NotificationTemplateManagerServerException(code, message);
-        }
-        try {
-            userDefinedTemplatePersistenceManager.deleteNotificationTemplateType(templateDisplayName, notificationChannel,
-                    tenantDomain);
-        } catch (NotificationTemplateManagerException ex) {
-            String errorMsg = String.format
-                    ("Error deleting template type %s from %s tenant.", templateDisplayName, tenantDomain);
-            throw handleServerException(errorMsg, ex);
         }
     }
 
@@ -188,7 +191,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                 // Return the root organization's email templates.
                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
             }
-            return userDefinedTemplatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
+            return userDefinedTemplatePersistenceManager.listAllNotificationTemplates(
+                    notificationChannel, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving templates of %s tenant.", tenantDomain);
             throw handleServerException(error, e);
@@ -221,15 +225,13 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
             }
             assertTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
-            List<NotificationTemplate> notificationTemplates = userDefinedTemplatePersistenceManager.listNotificationTemplates(
-                    templateDisplayName, notificationChannel, applicationUuid, tenantDomain);
+            List<NotificationTemplate> notificationTemplates =
+                    userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+                            notificationChannel, applicationUuid, tenantDomain);
             if (notificationTemplates == null) {
                 notificationTemplates = new ArrayList<>();
             }
             return notificationTemplates;
-        } catch (NotificationTemplateManagerServerException e) {
-            String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
-            throw handleServerException(error, e);
         } catch (OrganizationManagementException e) {
             throw handleServerException(e.getMessage(), e);
         }
@@ -297,6 +299,23 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             }
         }
         return notificationTemplate;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<NotificationTemplate> getAllSystemNotificationTemplatesOfType(String notificationChannel,
+                                              String templateDisplayName) throws NotificationTemplateManagerException {
+
+        assertSystemTemplateTypeExists(templateDisplayName, notificationChannel);
+        List<NotificationTemplate> notificationTemplates =
+                systemTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+                        notificationChannel, null, null);
+        if (notificationTemplates == null) {
+            notificationTemplates = new ArrayList<>();
+        }
+        return notificationTemplates;
     }
 
     /**
