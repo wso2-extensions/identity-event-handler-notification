@@ -63,9 +63,9 @@ public class OrgNotificationTemplateDAO {
             namedJdbcTemplate.executeInsert(INSERT_ORG_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
-                preparedStatement.setNString(3, notificationTemplate.getSubject());
-                preparedStatement.setNString(4, notificationTemplate.getBody());
-                preparedStatement.setNString(5, notificationTemplate.getFooter());
+                preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                preparedStatement.setString(BODY, notificationTemplate.getBody());
+                preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                 preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
@@ -91,9 +91,9 @@ public class OrgNotificationTemplateDAO {
             notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_ORG_NOTIFICATION_TEMPLATE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getNString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getNString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getNString(FOOTER));
+                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                        notificationTemplateResult.setBody(resultSet.getString(BODY));
+                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
                         notificationTemplateResult.setType(templateType);
@@ -169,9 +169,9 @@ public class OrgNotificationTemplateDAO {
             notificationTemplates = namedJdbcTemplate.executeQuery(LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getNString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getNString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getNString(FOOTER));
+                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                        notificationTemplateResult.setBody(resultSet.getString(BODY));
+                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
                         notificationTemplateResult.setType(templateType.toLowerCase());
@@ -205,9 +205,9 @@ public class OrgNotificationTemplateDAO {
         try {
             namedJdbcTemplate.executeUpdate(UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
-                        preparedStatement.setNString(1, notificationTemplate.getSubject());
-                        preparedStatement.setNString(2, notificationTemplate.getBody());
-                        preparedStatement.setNString(3, notificationTemplate.getFooter());
+                        preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                        preparedStatement.setString(BODY, notificationTemplate.getBody());
+                        preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
