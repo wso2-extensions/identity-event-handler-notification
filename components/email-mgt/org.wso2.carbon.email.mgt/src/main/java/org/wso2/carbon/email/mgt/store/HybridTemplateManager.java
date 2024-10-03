@@ -97,8 +97,11 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         if (registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
 
-            registryBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
-                    applicationUuid, tenantDomain);
+//            registryBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
+//                    applicationUuid, tenantDomain);
+            log.info(String.format("Copied %s template: %s for locale: %s in tenant: %s from registry to the database.",
+                    notificationChannel, displayName, locale, tenantDomain));
+
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "Moved %s template: %s for locale: %s in tenant: %s from registry to the database.",
