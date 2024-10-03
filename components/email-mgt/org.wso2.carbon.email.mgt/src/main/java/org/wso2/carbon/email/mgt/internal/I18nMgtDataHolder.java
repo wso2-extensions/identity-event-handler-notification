@@ -36,6 +36,7 @@ public class I18nMgtDataHolder{
     private OrgApplicationManager sharedAppManager;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
+    private List<String> legacyTenants = new ArrayList<>();
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -138,5 +139,25 @@ public class I18nMgtDataHolder{
     public void setSharedAppManager(OrgApplicationManager sharedAppManager) {
 
         this.sharedAppManager = sharedAppManager;
+    }
+
+    /**
+     * Set the list of legacy tenants.
+     *
+     * @param legacyTenants List of legacy tenants.
+     */
+    public void setLegacyTenants(List<String> legacyTenants) {
+
+        this.legacyTenants = legacyTenants;
+    }
+
+    /**
+     * Get the list of legacy tenants.
+     *
+     * @return List of legacy tenants.
+     */
+    public List<String> getLegacyTenants() {
+
+        return legacyTenants;
     }
 }
