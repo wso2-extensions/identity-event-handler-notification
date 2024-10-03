@@ -63,6 +63,7 @@ public class I18nMgtConstants {
     public static final String SMS_PROVIDER= "provider";
 
     public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
+    public static final String NOTIFICATION_TEMPLATES_LEGACY_TENANTS = "NotificationTemplates.LegacyTenants.Tenant";
 
     public static class ErrorMsg {
         private ErrorMsg() {
