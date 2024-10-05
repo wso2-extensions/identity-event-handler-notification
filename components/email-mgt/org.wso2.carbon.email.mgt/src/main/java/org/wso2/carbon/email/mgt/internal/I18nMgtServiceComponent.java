@@ -36,6 +36,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
@@ -71,6 +72,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_LEGACY_TENANTS;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_PROVIDER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SMS_PROVIDER_POST_BODY_TEMPLATES_DIR_PATH;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_BODY;
@@ -94,6 +96,9 @@ public class I18nMgtServiceComponent {
                     loadDefaultTemplatesFromFile(NotificationChannels.EMAIL_CHANNEL.getChannelType()));
             I18nMgtDataHolder.getInstance().setDefaultSMSTemplates(
                     loadDefaultTemplatesFromFile(NotificationChannels.SMS_CHANNEL.getChannelType()));
+
+            List<String> legacyTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_LEGACY_TENANTS);
+            I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
 
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
