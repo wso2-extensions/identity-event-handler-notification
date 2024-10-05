@@ -140,16 +140,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
         validateDisplayNameOfTemplateType(templateDisplayName);
         assertTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
-        try {
-            userDefinedTemplatePersistenceManager.deleteNotificationTemplateType(
-                    templateDisplayName, notificationChannel, tenantDomain);
-        } catch (NotificationTemplateManagerException ex) {
-            String errorMsg = String.format
-                    ("Error deleting template type %s from %s tenant.", templateDisplayName, tenantDomain);
-            throw handleServerException(errorMsg, ex);
-        }
-        // If delete was executed on a system template type, the type will not be deleted, but the user define
-        // templates will be deleted. Therefore, this needs to be informed.
+
+        // System template types are cannot be deleted since these are hard coded values.
         if (systemTemplatePersistenceManager.isNotificationTemplateTypeExists(templateDisplayName, notificationChannel,
                 null)) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -157,8 +149,17 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                     TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED.getMessage(),
-                    "System template type not deleted. User defined templates deleted.");
+                    "System template types are not eligible for deletion.");
             throw new NotificationTemplateManagerServerException(code, message);
+        }
+
+        try {
+            userDefinedTemplatePersistenceManager.deleteNotificationTemplateType(
+                    templateDisplayName, notificationChannel, tenantDomain);
+        } catch (NotificationTemplateManagerException ex) {
+            String errorMsg = String.format
+                    ("Error deleting template type %s from %s tenant.", templateDisplayName, tenantDomain);
+            throw handleServerException(errorMsg, ex);
         }
     }
 
@@ -505,6 +506,22 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String msg = String.format("Error deleting %s:%s template from %s tenant registry.", templateDisplayName,
                     locale, tenantDomain);
             throw handleServerException(msg, ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteCustomizedNotificationTemplates(String notificationChannel, String templateType,
+                                                      String tenantDomain) throws NotificationTemplateManagerException {
+        try {
+            NotificationTemplateManager.super.deleteCustomizedNotificationTemplates(notificationChannel,
+                    templateType, tenantDomain);
+        } catch (NotificationTemplateManagerException e) {
+            String msg = String.format("Error deleting custom templates for %s template type %s from %s .",
+                    notificationChannel, templateType, tenantDomain);
+            throw handleServerException(msg, e);
         }
     }
 
