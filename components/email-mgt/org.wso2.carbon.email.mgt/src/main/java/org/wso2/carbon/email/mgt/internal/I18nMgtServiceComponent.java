@@ -33,13 +33,13 @@ import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
-import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
@@ -387,19 +387,21 @@ public class I18nMgtServiceComponent {
     }
 
     @Reference(
-            name = "organization.application.management.service",
-            service = OrgApplicationManager.class,
+            name = "org.wso2.carbon.identity.application.mgt",
+            service = ApplicationManagementService.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetOrganizationApplicationManager")
-    protected void setOrganizationApplicationManager(OrgApplicationManager orgApplicationManager) {
+            unbind = "unsetApplicationManagementService")
+    protected void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
 
-        dataHolder.getInstance().setSharedAppManager(orgApplicationManager);
+        log.debug("Setting Application Management Service.");
+        dataHolder.setApplicationManagementService(applicationManagementService);
     }
 
-    protected void unsetOrganizationApplicationManager(OrgApplicationManager orgApplicationManager) {
+    protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
 
-        dataHolder.getInstance().setSharedAppManager(null);
+        log.debug("Unsetting Application Management Service.");
+        dataHolder.setApplicationManagementService(null);
     }
 }
 

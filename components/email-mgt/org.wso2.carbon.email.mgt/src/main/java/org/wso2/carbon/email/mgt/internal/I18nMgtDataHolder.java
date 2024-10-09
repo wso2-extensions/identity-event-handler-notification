@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.email.mgt.internal;
 
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
-import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -33,7 +33,7 @@ public class I18nMgtDataHolder{
     private RegistryService registryService;
     private RegistryResourceMgtService registryResourceMgtService;
     private OrganizationManager organizationManager;
-    private OrgApplicationManager sharedAppManager;
+    private ApplicationManagementService applicationManagementService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
@@ -122,26 +122,6 @@ public class I18nMgtDataHolder{
     }
 
     /**
-     * Get the shared application manager.
-     *
-     * @return Shared application manager.
-     */
-    public OrgApplicationManager getSharedAppManager() {
-
-        return sharedAppManager;
-    }
-
-    /**
-     * Set the shared application manager.
-     *
-     * @param sharedAppManager Shared application manager.
-     */
-    public void setSharedAppManager(OrgApplicationManager sharedAppManager) {
-
-        this.sharedAppManager = sharedAppManager;
-    }
-
-    /**
      * Set the list of legacy tenants.
      *
      * @param legacyTenants List of legacy tenants.
@@ -159,5 +139,25 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
+    }
+
+    /**
+     * Get the application management service.
+     *
+     * @return Application management service.
+     */
+    public ApplicationManagementService getApplicationManagementService() {
+
+        return applicationManagementService;
+    }
+
+    /**
+     * Set the application management service.
+     *
+     * @param applicationManagementService Application management service instance.
+     */
+    public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        this.applicationManagementService = applicationManagementService;
     }
 }
