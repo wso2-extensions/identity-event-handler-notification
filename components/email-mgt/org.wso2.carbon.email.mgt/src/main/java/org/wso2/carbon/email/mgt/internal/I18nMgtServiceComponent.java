@@ -311,6 +311,24 @@ public class I18nMgtServiceComponent {
     }
 
     @Reference(
+            name = "org.wso2.carbon.identity.application.mgt",
+            service = ApplicationManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApplicationManagementService")
+    protected void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        log.debug("Setting Application Management Service.");
+        dataHolder.setApplicationManagementService(applicationManagementService);
+    }
+
+    protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        log.debug("Unsetting Application Management Service.");
+        dataHolder.setApplicationManagementService(null);
+    }
+
+    @Reference(
              name = "realm.service", 
              service = org.wso2.carbon.user.core.service.RealmService.class, 
              cardinality = ReferenceCardinality.MANDATORY, 
@@ -384,24 +402,6 @@ public class I18nMgtServiceComponent {
     protected void unsetOrganizationManager(OrganizationManager organizationManager) {
 
         dataHolder.getInstance().setOrganizationManager(null);
-    }
-
-    @Reference(
-            name = "org.wso2.carbon.identity.application.mgt",
-            service = ApplicationManagementService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetApplicationManagementService")
-    protected void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
-
-        log.debug("Setting Application Management Service.");
-        dataHolder.setApplicationManagementService(applicationManagementService);
-    }
-
-    protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
-
-        log.debug("Unsetting Application Management Service.");
-        dataHolder.setApplicationManagementService(null);
     }
 }
 
