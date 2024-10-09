@@ -47,6 +47,26 @@ public class I18nMgtDataHolder{
         return instance;
     }
 
+    /**
+     * Get the application management service.
+     *
+     * @return Application management service.
+     */
+    public ApplicationManagementService getApplicationManagementService() {
+
+        return applicationManagementService;
+    }
+
+    /**
+     * Set the application management service.
+     *
+     * @param applicationManagementService Application management service instance.
+     */
+    public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        this.applicationManagementService = applicationManagementService;
+    }
+
     public RealmService getRealmService() {
         if (realmService == null) {
             throw new RuntimeException("Realm Service has not been set. Component has not initialized properly.");
@@ -139,25 +159,5 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
-    }
-
-    /**
-     * Get the application management service.
-     *
-     * @return Application management service.
-     */
-    public ApplicationManagementService getApplicationManagementService() {
-
-        return applicationManagementService;
-    }
-
-    /**
-     * Set the application management service.
-     *
-     * @param applicationManagementService Application management service instance.
-     */
-    public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
-
-        this.applicationManagementService = applicationManagementService;
     }
 }
