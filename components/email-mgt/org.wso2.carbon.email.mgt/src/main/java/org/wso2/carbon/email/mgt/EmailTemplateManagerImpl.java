@@ -33,6 +33,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -43,8 +44,8 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
-import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 
@@ -60,6 +61,7 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.normalizeLocaleFormat;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
+import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
 
 /**
  * Provides functionality to manage email templates used in notification emails.
@@ -289,11 +291,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
                 // If it's application specific template is required, get the root organization's application.
                 if (StringUtils.isNotBlank(applicationUuid)) {
-                    applicationUuid = getMainApplicationIdForGivenSharedApp(applicationUuid, tenantDomain);
+                    applicationUuid = I18nMgtDataHolder.getInstance().getApplicationManagementService().getMainAppId(applicationUuid);
                 }
             }
         } catch (OrganizationManagementException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
+        } catch (IdentityApplicationManagementException e) {
+            throw new NotificationTemplateManagerException(ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode(),
+                    ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage(), e);
         }
         // Resolve channel to either SMS or EMAIL.
         notificationChannel = resolveNotificationChannel(notificationChannel);
@@ -824,22 +829,5 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         String orgId = organizationManager.resolveOrganizationId(tenantDomain);
         String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
         return organizationManager.resolveTenantDomain(primaryOrgId);
-    }
-
-    /**
-     * Get the main application id for the given shared application.
-     *
-     * @param applicationUuid Shared application id.
-     * @param tenantDomain    Shared app's tenant domain.
-     * @return Main application id.
-     * @throws OrganizationManagementException If an error occurred while getting the main application id.
-     */
-    private String getMainApplicationIdForGivenSharedApp(String applicationUuid, String tenantDomain)
-            throws OrganizationManagementException {
-
-        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
-        String sharedOrgId = organizationManager.resolveOrganizationId(tenantDomain);
-        OrgApplicationManager sharedAppManager = I18nMgtDataHolder.getInstance().getSharedAppManager();
-        return sharedAppManager.getMainApplicationIdForGivenSharedApp(applicationUuid, sharedOrgId);
     }
 }
