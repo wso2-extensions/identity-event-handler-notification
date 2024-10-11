@@ -24,6 +24,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
+import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.ArgumentMatchers;
@@ -41,6 +42,9 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementClientException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
@@ -51,6 +55,7 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -151,6 +156,8 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String primaryOrganizationId = "primary-organization-id";
         mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, tenantDomain,
                 rootApplicationId);
+
+        // Successful scenario for resolving the root application.
         when(OrganizationManagementUtil.isOrganization(ArgumentMatchers.eq(subOrganizationId))).thenReturn(true);
         when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenReturn(
                 rootApplicationId);
@@ -161,6 +168,18 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                 emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
                         applicationUuid);
         validateNotificationTemplate(notificationTemplate, notificationChannel);
+
+        // Error scenario for resolving the root application.
+        notificationTemplate = null;
+        when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenThrow(
+                IdentityApplicationManagementServerException.class);
+        try {
+            notificationTemplate = emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId, applicationUuid);
+        } catch (NotificationTemplateManagerException e) {
+            assertEquals(e.getErrorCode(), ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode());
+            assertEquals(e.getMessage(), ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage());
+        }
+        assertNull(notificationTemplate);
     }
 
     /**

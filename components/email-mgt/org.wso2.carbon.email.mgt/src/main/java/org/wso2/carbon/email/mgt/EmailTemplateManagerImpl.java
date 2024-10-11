@@ -34,6 +34,7 @@ import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -296,7 +297,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             }
         } catch (OrganizationManagementException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
-        } catch (IdentityApplicationManagementException e) {
+        } catch (IdentityApplicationManagementServerException e) {
             throw new NotificationTemplateManagerException(ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode(),
                     ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage(), e);
         }
