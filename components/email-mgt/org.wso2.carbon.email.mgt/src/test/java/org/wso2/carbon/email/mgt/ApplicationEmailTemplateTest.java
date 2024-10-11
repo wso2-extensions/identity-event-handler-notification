@@ -50,6 +50,7 @@ import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -75,6 +76,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     @Mock
     ApplicationManagementService applicationManagementService;
 
+    @Mock
+    OrganizationManager organizationManager;
+
     @ObjectFactory
     public IObjectFactory getObjectFactory() {
 
@@ -96,6 +100,8 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
 
         // Mock RegistryResourceMgtService.
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
+        when(i18nMgtDataHolder.getApplicationManagementService()).thenReturn(applicationManagementService);
+        when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
         emailTemplateManager = new EmailTemplateManagerImpl();
 
         mockStatic(OrganizationManagementUtil.class);
@@ -135,19 +141,24 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
      * @param applicationUuid     The UUID of the application from which the template should be retrieved.
      * @throws Exception Errors occurred while testing getNotificationTemplate implementation.
      */
-    @Test
+    @Test(dataProvider = "notificationTemplateDataProvider")
     public void testGetNotificationTemplateForSharedApps(String notificationChannel, String displayName, String type,
                                                          String locale, String contentType, byte[] content,
                                                          String applicationUuid) throws Exception {
 
         String rootApplicationId = "root-application-id";
+        String subOrganizationId = "sub-organization-id";
+        String primaryOrganizationId = "primary-organization-id";
         mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, tenantDomain,
                 rootApplicationId);
-        when(OrganizationManagementUtil.isOrganization(ArgumentMatchers.eq(tenantDomain))).thenReturn(true);
+        when(OrganizationManagementUtil.isOrganization(ArgumentMatchers.eq(subOrganizationId))).thenReturn(true);
         when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenReturn(
                 rootApplicationId);
+        when(organizationManager.resolveOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(subOrganizationId);
+        when(organizationManager.getPrimaryOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(primaryOrganizationId);
+        when(organizationManager.resolveTenantDomain(ArgumentMatchers.eq(primaryOrganizationId))).thenReturn(tenantDomain);
         NotificationTemplate notificationTemplate =
-                emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, tenantDomain,
+                emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
                         applicationUuid);
         validateNotificationTemplate(notificationTemplate, notificationChannel);
     }
@@ -496,19 +507,17 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                                       String applicationId)
             throws Exception {
 
-        String pathMatcher = ArgumentMatchers.anyString();
-        String tenantDomainMatcher = ArgumentMatchers.anyString();
-
-        if (StringUtils.isNotBlank(tenantDomain)) {
-            tenantDomainMatcher = ArgumentMatchers.eq(tenantDomain);
-
-            if (StringUtils.isNotBlank(applicationId)) {
-                pathMatcher = ArgumentMatchers.contains(applicationId);
-            }
+        if (StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(applicationId) &&
+                StringUtils.equals(notificationChannel, NotificationChannels.EMAIL_CHANNEL.getChannelType())) {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.contains(applicationId),
+                    ArgumentMatchers.eq(tenantDomain), ArgumentMatchers.anyString())).thenReturn(resource);
+        } else if (StringUtils.isNotBlank(tenantDomain)) {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.eq(tenantDomain),
+                    ArgumentMatchers.anyString())).thenReturn(resource);
+        } else {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                    ArgumentMatchers.anyString())).thenReturn(resource);
         }
-
-        when(resourceMgtService.getIdentityResource(pathMatcher, tenantDomainMatcher, Matchers.anyString()))
-                .thenReturn(resource);
 
         // Mock Resource properties.
         when(resource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(displayName);
