@@ -164,6 +164,11 @@
                 <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.application.common</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
 
             <!--Carbon Analytics Common Dependencies-->
             <dependency>
@@ -275,11 +280,6 @@
                 <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
                 <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
                 <version>${identity.organization.management.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.organization.management</groupId>
-                <artifactId>org.wso2.carbon.identity.organization.management.application</artifactId>
-                <version>${identity.organization.management.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->
@@ -527,7 +527,6 @@
 
         <!-- Organization management Version -->
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
-        <identity.organization.management.version>1.4.14</identity.organization.management.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
         <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)

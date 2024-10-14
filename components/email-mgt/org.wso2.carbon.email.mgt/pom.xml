@@ -53,10 +53,6 @@
             <artifactId>org.wso2.carbon.user.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity.organization.management</groupId>
-            <artifactId>org.wso2.carbon.identity.organization.management.application</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>javax.cache.wso2</artifactId>
         </dependency>
@@ -79,6 +75,14 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
@@ -160,6 +164,8 @@
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.identity.base; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.mgt; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.common; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.governance.*;version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.database.utils.*;version="${org.wso2.carbon.database.utils.version.range}",
                             org.wso2.carbon.identity.organization.management.service;
@@ -168,8 +174,6 @@
                             version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.exception;
                             version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.organization.management.application.*;
-                            version="${org.wso2.identity.organization.mgt.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -253,6 +257,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>org/wso2/carbon/email/mgt/internal/I18nMgtServiceComponent.class</exclude>
+                        <exclude>org/wso2/carbon/email/mgt/internal/I18nMgtDataHolder.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
