@@ -45,6 +45,7 @@ public class TemplateMgtConstants {
         public static final String ERROR_ADDING_TEMPLATE = "65005";
         public static final String ERROR_UPDATING_TEMPLATE = "65006";
         public static final String ERROR_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED = "65007";
+        public static final String ERROR_RESOLVING_MAIN_APPLICATION = "65008";
     }
 
     /**
@@ -79,7 +80,9 @@ public class TemplateMgtConstants {
         ERROR_CODE_ERROR_UPDATING_TEMPLATE(ErrorCodes.ERROR_UPDATING_TEMPLATE, "Error when updating " +
                 "template : %s on tenant : %s"),
         ERROR_CODE_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED(ErrorCodes.ERROR_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED,
-                "System resource deletion not allowed. %S");
+                "System resource deletion not allowed. %S"),
+        ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION(ErrorCodes.ERROR_RESOLVING_MAIN_APPLICATION,
+                "Error when resolving main application : %s");
 
         private final String code;
         private final String message;

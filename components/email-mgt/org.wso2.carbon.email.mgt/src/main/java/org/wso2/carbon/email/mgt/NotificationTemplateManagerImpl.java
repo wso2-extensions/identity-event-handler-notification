@@ -26,6 +26,7 @@ import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerInternalException;
@@ -33,7 +34,6 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
-import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
@@ -98,14 +98,15 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
         validateDisplayNameOfTemplateType(displayName);
         try {
-            if (userDefinedTemplatePersistenceManager
+            if (unifiedTemplatePersistenceManager
                     .isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
                 // This error is caught in the catch block below to generate the
                 // NotificationTemplateManagerServerException.
                 throw new NotificationTemplateManagerInternalException(
                         TemplateMgtConstants.ErrorCodes.TEMPLATE_TYPE_ALREADY_EXISTS, StringUtils.EMPTY);
             }
-            userDefinedTemplatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
+            unifiedTemplatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel,
+                    tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(),
@@ -154,8 +155,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         }
 
         try {
-            userDefinedTemplatePersistenceManager.deleteNotificationTemplateType(
-                    templateDisplayName, notificationChannel, tenantDomain);
+            unifiedTemplatePersistenceManager.deleteNotificationTemplateType(templateDisplayName,
+                    notificationChannel, tenantDomain);
         } catch (NotificationTemplateManagerException ex) {
             String errorMsg = String.format
                     ("Error deleting template type %s from %s tenant.", templateDisplayName, tenantDomain);
@@ -209,6 +210,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public List<NotificationTemplate> getNotificationTemplatesOfType(String notificationChannel,
                                                                      String templateDisplayName, String tenantDomain)
             throws NotificationTemplateManagerException {
+
         return getNotificationTemplatesOfType(notificationChannel, templateDisplayName, tenantDomain, null);
     }
 
@@ -258,22 +260,31 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
         try {
             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's notification template.
+                // To return the root organization's notification template.
                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
                 // If it's application specific template is required, get the root organization's application.
                 if (StringUtils.isNotBlank(applicationUuid)) {
-                    applicationUuid = getMainApplicationIdForGivenSharedApp(applicationUuid, tenantDomain);
+                    applicationUuid = I18nMgtDataHolder.getInstance().getApplicationManagementService()
+                            .getMainAppId(applicationUuid);
                 }
             }
         } catch (OrganizationManagementException e) {
             throw new NotificationTemplateManagerException(e.getMessage(), e);
+        } catch (IdentityApplicationManagementServerException e) {
+            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                    TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode(),
+                    TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
+            String message = String.format(
+                    TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage(),
+                    applicationUuid, tenantDomain);
+            throw new NotificationTemplateManagerException(code, message, e);
         }
         validateTemplateLocale(locale);
         locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
         assertTemplateTypeExists(templateType, notificationChannel, tenantDomain);
-        NotificationTemplate notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(templateType,
-                locale, notificationChannel, applicationUuid, tenantDomain);
+        NotificationTemplate notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(
+                templateType, locale, notificationChannel, applicationUuid, tenantDomain);
 
         String defaultLocale = getDefaultNotificationLocale(notificationChannel);
         if (notificationTemplate == null) {
@@ -513,11 +524,13 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
      * {@inheritDoc}
      */
     @Override
-    public void deleteCustomizedNotificationTemplates(String notificationChannel, String templateType,
+    public void resetNotificationTemplateType(String notificationChannel, String templateType,
                                                       String tenantDomain) throws NotificationTemplateManagerException {
         try {
-            NotificationTemplateManager.super.deleteCustomizedNotificationTemplates(notificationChannel,
-                    templateType, tenantDomain);
+            unifiedTemplatePersistenceManager.deleteNotificationTemplateType(templateType, notificationChannel,
+                    tenantDomain);
+            unifiedTemplatePersistenceManager.addNotificationTemplateType(templateType, notificationChannel,
+                    tenantDomain);
         } catch (NotificationTemplateManagerException e) {
             String msg = String.format("Error deleting custom templates for %s template type %s from %s .",
                     notificationChannel, templateType, tenantDomain);
@@ -580,15 +593,6 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
         log.error(errorMsg);
         return new NotificationTemplateManagerServerException(errorMsg, ex);
-    }
-
-    private String getMainApplicationIdForGivenSharedApp(String applicationUuid, String tenantDomain)
-            throws OrganizationManagementException {
-
-        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
-        String sharedOrgId = organizationManager.resolveOrganizationId(tenantDomain);
-        OrgApplicationManager sharedAppManager = I18nMgtDataHolder.getInstance().getSharedAppManager();
-        return sharedAppManager.getMainApplicationIdForGivenSharedApp(applicationUuid, sharedOrgId);
     }
 
     private void validateTemplateLocale(String locale) throws NotificationTemplateManagerClientException {
