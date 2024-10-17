@@ -527,9 +527,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public void resetNotificationTemplateType(String notificationChannel, String templateType,
                                                       String tenantDomain) throws NotificationTemplateManagerException {
         try {
-            unifiedTemplatePersistenceManager.deleteNotificationTemplateType(templateType, notificationChannel,
-                    tenantDomain);
-            unifiedTemplatePersistenceManager.addNotificationTemplateType(templateType, notificationChannel,
+            unifiedTemplatePersistenceManager.deleteAllNotificationTemplates(templateType, notificationChannel,
                     tenantDomain);
         } catch (NotificationTemplateManagerException e) {
             String msg = String.format("Error deleting custom templates for %s template type %s from %s .",

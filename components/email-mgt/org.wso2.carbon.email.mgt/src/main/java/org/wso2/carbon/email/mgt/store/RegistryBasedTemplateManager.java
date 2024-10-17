@@ -297,6 +297,23 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         }
     }
 
+    @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        String templateType = I18nEmailUtil.getNormalizedName(displayName);
+        String path = buildTemplateRootDirectoryPath(templateType, notificationChannel, null);
+
+        try {
+            Collection templates = (Collection) resourceMgtService.getIdentityResource(path, tenantDomain);
+            for (String subPath : templates.getChildren()) {
+                resourceMgtService.deleteIdentityResource(subPath, tenantDomain);
+            }
+        } catch (IdentityRuntimeException | RegistryException e) {
+            throw new NotificationTemplateManagerServerException("Error while deleting notification templates.", e);
+        }
+    }
+
     /**
      * Get the notification template from resource.
      *

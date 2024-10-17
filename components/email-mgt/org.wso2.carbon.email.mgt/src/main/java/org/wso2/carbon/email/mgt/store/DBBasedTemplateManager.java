@@ -328,6 +328,25 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
         }
     }
 
+    @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        String templateTypeKey = displayName.toLowerCase();
+        int tenantId = getTenantId(tenantDomain);
+
+        orgNotificationTemplateDAO.removeNotificationTemplates(templateTypeKey, notificationChannel, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Org %s templates for type: %s for tenant: %s successfully deleted.",
+                    notificationChannel, displayName, tenantDomain));
+        }
+        appNotificationTemplateDAO.removeAllNotificationTemplates(templateTypeKey, notificationChannel, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("App %s templates for type: %s for all applications for tenant: %s " +
+                            "successfully deleted.", notificationChannel, displayName, tenantDomain));
+        }
+    }
+
     /**
      * Get the tenant id of the given tenant domain.
      * @param tenantDomain

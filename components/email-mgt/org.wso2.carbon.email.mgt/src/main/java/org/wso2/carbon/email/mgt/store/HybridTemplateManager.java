@@ -103,6 +103,20 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     }
 
     @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
+            dbBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+
+        if (registryBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                tenantDomain)) {
+            registryBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+    }
+
+    @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 

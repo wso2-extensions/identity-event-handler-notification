@@ -113,6 +113,13 @@ public class SystemDefaultTemplateManager implements TemplatePersistenceManager 
     }
 
     @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
