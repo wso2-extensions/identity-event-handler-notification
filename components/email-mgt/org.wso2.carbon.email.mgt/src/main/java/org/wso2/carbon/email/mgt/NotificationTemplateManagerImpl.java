@@ -524,8 +524,8 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
      * {@inheritDoc}
      */
     @Override
-    public void resetNotificationTemplateType(String notificationChannel, String templateType,
-                                                      String tenantDomain) throws NotificationTemplateManagerException {
+    public void resetNotificationTemplateType(String notificationChannel, String templateType, String tenantDomain)
+            throws NotificationTemplateManagerException {
         try {
             unifiedTemplatePersistenceManager.deleteAllNotificationTemplates(templateType, notificationChannel,
                     tenantDomain);
