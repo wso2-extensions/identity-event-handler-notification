@@ -112,13 +112,13 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering Email Template Mgt Service.");
             }
 
-            // Register Notification Template Mgt Service as an OSGi service.
-            NotificationTemplateManagerImpl notificationTemplateManager = new NotificationTemplateManagerImpl();
-            Hashtable<String, String> serviceProperties = new Hashtable<>();
-            serviceProperties.put("service.name", "NotificationTemplateManager");
-            ServiceRegistration notificationTemplateSR = bundleCtx.registerService(
-                    NotificationTemplateManager.class.getName(), notificationTemplateManager, serviceProperties);
-            if (notificationTemplateSR != null) {
+            // Register EmailTemplateManagerImpl.
+            Hashtable<String, String> emailTemplateManagerServiceProperties = new Hashtable<>();
+            emailTemplateManagerServiceProperties.put("service.name", "EmailTemplateManager");
+            ServiceRegistration notificationManagerSR = bundleCtx
+                    .registerService(NotificationTemplateManager.class.getName(), emailTemplateManager,
+                            emailTemplateManagerServiceProperties);
+            if (notificationManagerSR != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Notification Template Mgt Service registered.");
                 }
@@ -126,10 +126,14 @@ public class I18nMgtServiceComponent {
                 log.error("Error registering Notification Template Mgt Service.");
             }
 
-            // Register EmailTemplateManagerImpl.
-            ServiceRegistration notificationManagerSR = bundleCtx
-                    .registerService(NotificationTemplateManager.class.getName(), emailTemplateManager, null);
-            if (notificationManagerSR != null) {
+            // Register Notification Template Mgt Service as an OSGi service.
+            NotificationTemplateManagerImpl notificationTemplateManager = new NotificationTemplateManagerImpl();
+            Hashtable<String, String> notificationTemplateManagerServiceProperties = new Hashtable<>();
+            notificationTemplateManagerServiceProperties.put("service.name", "NotificationTemplateManager");
+            ServiceRegistration notificationTemplateSR = bundleCtx
+                    .registerService(NotificationTemplateManager.class.getName(), notificationTemplateManager,
+                            notificationTemplateManagerServiceProperties);
+            if (notificationTemplateSR != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Notification Template Mgt Service registered.");
                 }
