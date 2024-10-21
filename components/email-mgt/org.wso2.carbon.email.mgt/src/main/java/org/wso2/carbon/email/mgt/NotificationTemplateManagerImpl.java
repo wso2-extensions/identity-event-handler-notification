@@ -106,7 +106,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                         TemplateMgtConstants.ErrorCodes.TEMPLATE_TYPE_ALREADY_EXISTS, StringUtils.EMPTY);
             }
             unifiedTemplatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel,
-                    tenantDomain);
+                    tenantDomain); 
         } catch (NotificationTemplateManagerServerException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(),
