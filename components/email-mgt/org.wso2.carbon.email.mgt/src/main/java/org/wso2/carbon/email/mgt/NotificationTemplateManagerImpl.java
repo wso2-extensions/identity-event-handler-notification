@@ -54,7 +54,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
 
     private final TemplatePersistenceManager userDefinedTemplatePersistenceManager;
     private final TemplatePersistenceManager systemTemplatePersistenceManager;
-    private final TemplatePersistenceManager unifiedTemplatePersistenceManager;
+    private final TemplatePersistenceManager templatePersistenceManager;
 
     public NotificationTemplateManagerImpl() {
 
@@ -62,7 +62,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         this.userDefinedTemplatePersistenceManager =
                 templatePersistenceManagerFactory.getUserDefinedTemplatePersistenceManager();
         this.systemTemplatePersistenceManager = templatePersistenceManagerFactory.getSystemTemplatePersistenceManager();
-        this.unifiedTemplatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
+        this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
     }
 
     /**
@@ -77,7 +77,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                  // Return the root organization's template types.
                  tenantDomain = getRootOrgTenantDomain(tenantDomain);
              }
-             List<String> templateTypes = unifiedTemplatePersistenceManager
+             List<String> templateTypes = templatePersistenceManager
                      .listNotificationTemplateTypes(notificationChannel, tenantDomain);
              return templateTypes != null ? templateTypes : new ArrayList<>();
          } catch (NotificationTemplateManagerServerException ex) {
@@ -96,17 +96,20 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public void addNotificationTemplateType(String notificationChannel, String displayName, String tenantDomain)
             throws NotificationTemplateManagerException {
 
+        // For new additions display name is trimmed to avoid allowing surrounding white spaces.
+        // This is not done for existing display names for backward compatibility.
+        displayName = displayName.trim();
         validateDisplayNameOfTemplateType(displayName);
         try {
-            if (unifiedTemplatePersistenceManager
+            if (templatePersistenceManager
                     .isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
                 // This error is caught in the catch block below to generate the
                 // NotificationTemplateManagerServerException.
                 throw new NotificationTemplateManagerInternalException(
                         TemplateMgtConstants.ErrorCodes.TEMPLATE_TYPE_ALREADY_EXISTS, StringUtils.EMPTY);
             }
-            unifiedTemplatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel,
-                    tenantDomain); 
+            templatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel,
+                    tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getCode(),
@@ -140,7 +143,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throws NotificationTemplateManagerException {
 
         validateDisplayNameOfTemplateType(templateDisplayName);
-        assertTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
+        verifyTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
 
         // System template types are cannot be deleted since these are hard coded values.
         if (systemTemplatePersistenceManager.isNotificationTemplateTypeExists(templateDisplayName, notificationChannel,
@@ -155,7 +158,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         }
 
         try {
-            unifiedTemplatePersistenceManager.deleteNotificationTemplateType(templateDisplayName,
+            templatePersistenceManager.deleteNotificationTemplateType(templateDisplayName,
                     notificationChannel, tenantDomain);
         } catch (NotificationTemplateManagerException ex) {
             String errorMsg = String.format
@@ -173,7 +176,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throws NotificationTemplateManagerException {
 
         try {
-            return unifiedTemplatePersistenceManager.isNotificationTemplateTypeExists(templateTypeDisplayName,
+            return templatePersistenceManager.isNotificationTemplateTypeExists(templateTypeDisplayName,
                     notificationChannel, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving templates of %s tenant.", tenantDomain);
@@ -227,14 +230,9 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                 // Return the root organization's email templates.
                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
             }
-            assertTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
-            List<NotificationTemplate> notificationTemplates =
-                    userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+            verifyTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
+            return userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
                             notificationChannel, applicationUuid, tenantDomain);
-            if (notificationTemplates == null) {
-                notificationTemplates = new ArrayList<>();
-            }
-            return notificationTemplates;
         } catch (OrganizationManagementException e) {
             throw handleServerException(e.getMessage(), e);
         }
@@ -282,7 +280,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         validateTemplateLocale(locale);
         locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
-        assertTemplateTypeExists(templateType, notificationChannel, tenantDomain);
+        verifyTemplateTypeExists(templateType, notificationChannel, tenantDomain);
         NotificationTemplate notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(
                 templateType, locale, notificationChannel, applicationUuid, tenantDomain);
 
@@ -320,14 +318,9 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public List<NotificationTemplate> getAllSystemNotificationTemplatesOfType(String notificationChannel,
                                               String templateDisplayName) throws NotificationTemplateManagerException {
 
-        assertSystemTemplateTypeExists(templateDisplayName, notificationChannel);
-        List<NotificationTemplate> notificationTemplates =
-                systemTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+        verifySystemTemplateTypeExists(templateDisplayName, notificationChannel);
+        return systemTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
                         notificationChannel, null, null);
-        if (notificationTemplates == null) {
-            notificationTemplates = new ArrayList<>();
-        }
-        return notificationTemplates;
     }
 
     /**
@@ -341,7 +334,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         validateTemplateLocale(locale);
         locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
-        assertSystemTemplateTypeExists(templateType, notificationChannel);
+        verifySystemTemplateTypeExists(templateType, notificationChannel);
         NotificationTemplate notificationTemplate =
                 systemTemplatePersistenceManager.getNotificationTemplate(templateType,locale, notificationChannel,
                         null, null);
@@ -390,6 +383,9 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String tenantDomain,
                                          String applicationUuid) throws NotificationTemplateManagerException {
 
+        // For new additions display name is trimmed to avoid allowing surrounding white spaces.
+        // This is not done for existing display names for backward compatibility.
+        notificationTemplate.setDisplayName(notificationTemplate.getDisplayName().trim());
         validateNotificationTemplate(notificationTemplate);
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
@@ -398,7 +394,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         if (notificationTemplate.getLocale() != null && !notificationTemplate.getLocale().equals(locale)) {
             notificationTemplate.setLocale(locale);
         }
-        assertTemplateTypeExists(displayName, notificationChannel, tenantDomain);
+        verifyTemplateTypeExists(displayName, notificationChannel, tenantDomain);
         if (userDefinedTemplatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -448,7 +444,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         if (notificationTemplate.getLocale() != null && !notificationTemplate.getLocale().equals(locale)) {
             notificationTemplate.setLocale(locale);
         }
-        assertTemplateTypeExists(displayName, notificationChannel, tenantDomain);
+        verifyTemplateTypeExists(displayName, notificationChannel, tenantDomain);
         if (!userDefinedTemplatePersistenceManager.isNotificationTemplateExists(
                 displayName, locale, notificationChannel, applicationUuid, tenantDomain)) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
@@ -526,8 +522,9 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     @Override
     public void resetNotificationTemplateType(String notificationChannel, String templateType, String tenantDomain)
             throws NotificationTemplateManagerException {
+
         try {
-            unifiedTemplatePersistenceManager.deleteAllNotificationTemplates(templateType, notificationChannel,
+            templatePersistenceManager.deleteAllNotificationTemplates(templateType, notificationChannel,
                     tenantDomain);
         } catch (NotificationTemplateManagerException e) {
             String msg = String.format("Error deleting custom templates for %s template type %s from %s .",
@@ -603,8 +600,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throw new NotificationTemplateManagerClientException(errorCode,
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_LOCALE.getMessage());
         }
-        final String LOCAL_REGEX = "^[a-z]{2}_[A-Z]{2}$";
-        if (!locale.matches(LOCAL_REGEX)) {
+        if (!locale.matches("^[a-z]{2}_[A-Z]{2}$")) {
             String errorCode =
                     I18nEmailUtil.prependOperationScenarioToErrorCode(
                             TemplateMgtConstants.ErrorMessages.ERROR_CODE_INVALID_LOCALE.getCode(),
@@ -688,7 +684,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         }
     }
 
-    private void assertSystemTemplateTypeExists(String templateType, String notificationChannel)
+    private void verifySystemTemplateTypeExists(String templateType, String notificationChannel)
             throws NotificationTemplateManagerServerException {
 
         if (!systemTemplatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
@@ -703,10 +699,10 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         }
     }
 
-    private void assertTemplateTypeExists(String templateType, String notificationChannel, String tenantDomain)
+    private void verifyTemplateTypeExists(String templateType, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (!unifiedTemplatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
+        if (!templatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
                 tenantDomain)) {
             String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_NOT_FOUND.getCode(),

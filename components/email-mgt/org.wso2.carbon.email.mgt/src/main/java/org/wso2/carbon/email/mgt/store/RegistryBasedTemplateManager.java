@@ -301,8 +301,8 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
     public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateType = I18nEmailUtil.getNormalizedName(displayName);
-        String path = buildTemplateRootDirectoryPath(templateType, notificationChannel, null);
+        String path = buildTemplateRootDirectoryPath(I18nEmailUtil.getNormalizedName(displayName),
+                notificationChannel, null);
 
         try {
             Collection templates = (Collection) resourceMgtService.getIdentityResource(path, tenantDomain);
