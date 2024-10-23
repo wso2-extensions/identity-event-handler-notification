@@ -38,6 +38,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_SQL;
@@ -272,6 +273,26 @@ public class AppNotificationTemplateDAO {
             String error =
                     String.format("Error while deleting %s templates of type %s from application %s in %s tenant.",
                             channelName, templateType, applicationUuid, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
+        }
+    }
+
+    public void removeAllNotificationTemplates(String templateType, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
+
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
+        try {
+            namedJdbcTemplate.executeUpdate(DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
+                    preparedStatement -> {
+                        preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                    });
+        } catch (DataAccessException e) {
+            String error =
+                    String.format("Error while deleting %s templates of type %s from all applications in %s tenant.",
+                            channelName, templateType, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }

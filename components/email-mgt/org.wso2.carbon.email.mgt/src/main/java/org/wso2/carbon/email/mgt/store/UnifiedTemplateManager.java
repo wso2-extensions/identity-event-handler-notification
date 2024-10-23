@@ -83,6 +83,16 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     }
 
     @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        if (templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                tenantDomain)) {
+            templatePersistenceManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+    }
+
+    @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 

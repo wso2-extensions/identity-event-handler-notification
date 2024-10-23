@@ -20,16 +20,25 @@ package org.wso2.carbon.email.mgt.store.dao.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
+import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCache;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCacheKey;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCache;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCacheKey;
+import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCacheKey;
 import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
+import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 
 /**
  * This class provides the cache backed implementation for {@link AppNotificationTemplateDAO}.
@@ -185,5 +194,16 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         AppNotificationTemplateListCacheKey listCacheKey =
                 new AppNotificationTemplateListCacheKey(templateType, channelName, applicationUuid);
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
+    }
+
+    public void removeAllNotificationTemplates(String templateType, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
+
+        super.removeAllNotificationTemplates(templateType, channelName, tenantId);
+
+        appNotificationTemplateCache.clear(tenantId);
+        // Clearing full template list cache for tenant since it's not possible to remove all entries for a template
+        // type at once.
+        templateListCache.clear(tenantId);
     }
 }

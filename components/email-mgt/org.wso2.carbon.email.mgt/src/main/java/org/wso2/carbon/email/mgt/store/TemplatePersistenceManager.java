@@ -74,6 +74,19 @@ public interface TemplatePersistenceManager {
             throws NotificationTemplateManagerServerException;
 
     /**
+     * Delete both organization level and application level notification templates under a notification template type.
+     *
+     * @param displayName           Display Name.
+     * @param notificationChannel   Notification channel.
+     * @param tenantDomain          Tenant domain.
+     * @throws NotificationTemplateManagerServerException If an error occurred while resetting the template type.
+     */
+    default void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+        // not implemented
+    }
+
+    /**
      * Update the notification template if exists or add a new template if not exists.
      *
      * @param notificationTemplate  Notification template.
