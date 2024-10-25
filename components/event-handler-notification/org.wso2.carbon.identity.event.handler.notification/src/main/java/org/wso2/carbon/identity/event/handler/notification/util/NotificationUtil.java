@@ -699,6 +699,7 @@ public class NotificationUtil {
         EmailTemplate emailTemplate;
         String applicationUuid = null;
         String applicationName = null;
+        boolean emailTemplateExists = false;
         try {
             String applicationDomain = StringUtils.isNotBlank(appDomain) ? appDomain : tenantDomain;
 
@@ -717,8 +718,9 @@ public class NotificationUtil {
                 log.debug("Fallback to organization preference. Cannot get application id or application name from the event");
             }
 
-            if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
-                    notificationEvent, locale, applicationDomain, applicationUuid)) {
+            emailTemplateExists = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
+                    .isEmailTemplateExists(notificationEvent, locale, applicationDomain, applicationUuid);
+            if (emailTemplateExists) {
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
                         .getEmailTemplate(notificationEvent, locale, applicationDomain, applicationUuid);
             } else {
@@ -727,6 +729,12 @@ public class NotificationUtil {
                         .getEmailTemplate(notificationEvent, locale, applicationDomain);
             }
         } catch (I18nEmailMgtException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error when retrieving email template for locale: " + locale + " for scenario: " +
+                        notificationEvent + " for tenant: " + tenantDomain + ".");
+                log.debug("emailTemplateExists: " + emailTemplateExists + " appDomain: " + appDomain +
+                        " applicationUuid: " + applicationUuid);
+            }
             // If the email template is not found and the property IGNORE_IF_TEMPLATE_NOT_FOUND is set to true,
             // ignore the event.
             if (I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND.equals(e.getErrorCode())

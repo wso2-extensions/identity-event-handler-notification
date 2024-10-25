@@ -152,10 +152,6 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
                 // Add new template type with relevant properties.
                 addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
-                if (log.isDebugEnabled()) {
-                    String msg = "Creating template type : %s in tenant registry : %s";
-                    log.debug(String.format(msg, displayName, tenantDomain));
-                }
             }
             resourceMgtService.putIdentityResource(templateResource, path, tenantDomain, locale);
         } catch (IdentityRuntimeException e) {
@@ -179,6 +175,9 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             String error =
                     String.format("Error while checking the existence of the notification template %s in %s tenant.",
                             displayName, tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug(error + " >> path: " + path, e);
+            }
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }
