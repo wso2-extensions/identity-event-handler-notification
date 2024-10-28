@@ -236,16 +236,22 @@ public class NotificationUtil {
                         .equals(e.getErrorCode())) {
                     brandingPreferences = null;
                 } else {
-                    if (log.isDebugEnabled()) {
-                        String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get(TENANT_DOMAIN);
-                        log.debug(message, e);
-                    }
+                    // if (log.isDebugEnabled()) {
+                    //     String message =
+                    //         "Error occurred while retrieving branding preferences for organization " +
+                    //         placeHolderData.get(TENANT_DOMAIN);
+                    //     log.debug(message, e);
+                    // }
+                    // Ignore
                 }
             } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    String message = "Error occurred while retrieving branding preferences for organization " + placeHolderData.get(TENANT_DOMAIN);
-                    log.debug(message, e);
-                }
+                // if (log.isDebugEnabled()) {
+                //    String message =
+                //         "Error occurred while retrieving branding preferences for organization " + placeHolderData
+                //        .get(TENANT_DOMAIN);
+                //     log.debug(message, e);
+                // }
+                // Ignore
             }
         }
 
@@ -377,25 +383,27 @@ public class NotificationUtil {
         } catch (BrandingPreferenceMgtException e) {
             if (BrandingPreferenceMgtConstants.ErrorMessages.ERROR_CODE_CUSTOM_TEXT_PREFERENCE_NOT_EXISTS.getCode()
                     .equals(e.getErrorCode())) {
-                if (log.isDebugEnabled()) {
-                    String message = "Custom text preferences are not configured for the organization: "
-                            + tenantDomain + " with locale: " + locale;
-                    log.debug(message, e);
-                }
+                // if (log.isDebugEnabled()) {
+                //     String message = "Custom text preferences are not configured for the organization: "
+                //             + tenantDomain + " with locale: " + locale;
+                //     log.debug(message, e);
+                // }
                 customTextPreference = null;
             } else {
-                if (log.isDebugEnabled()) {
-                    String message = "Error occurred while retrieving custom text preferences for organization "
-                            + tenantDomain;
-                    log.debug(message, e);
-                }
+                // if (log.isDebugEnabled()) {
+                //     String message = "Error occurred while retrieving custom text preferences for organization "
+                //             + tenantDomain;
+                //     log.debug(message, e);
+                // }
+                // Ignore
             }
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                String message = "Error occurred while retrieving custom text preferences for organization "
-                        + tenantDomain;
-                log.debug(message, e);
-            }
+            // if (log.isDebugEnabled()) {
+            //     String message = "Error occurred while retrieving custom text preferences for organization "
+            //             + tenantDomain;
+            //     log.debug(message, e);
+            // }
+            // Ignore
         }
 
         if (customTextPreference != null) {
@@ -712,10 +720,12 @@ public class NotificationUtil {
                             .getApplicationBasicInfoByName(applicationName, applicationDomain)
                             .getApplicationResourceId();
                 } catch (IdentityApplicationManagementException | NullPointerException e) {
-                    log.debug("Fallback to organization preference. Error fetching application id for application name: " + applicationName, e);
+                    // log.debug("Fallback to organization preference. Error fetching application id for application name: " + applicationName, e);
+                    // ignore
                 }
             } else {
-                log.debug("Fallback to organization preference. Cannot get application id or application name from the event");
+                // log.debug("Fallback to organization preference. Cannot get application id or application name from the event");
+                // ignore
             }
 
             emailTemplateExists = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
