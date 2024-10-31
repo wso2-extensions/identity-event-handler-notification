@@ -27,6 +27,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Collection;
@@ -260,6 +261,22 @@ public class I18nEmailUtil {
     public static String normalizeLocaleFormat(String localeString) {
 
         Locale locale = Locale.forLanguageTag(localeString.replace(UNDERSCORE, HYPHEN).toLowerCase());
-        return locale.toString();
+        String normalizedLocale = locale.toString();
+        if (StringUtils.isNotBlank(normalizedLocale)) {
+            return normalizedLocale;
+        }
+        return getNotificationLocale();
+    }
+
+    /**
+     * Get the notification locale.
+     *
+     * @return Locale
+     */
+    public static String getNotificationLocale() {
+
+        return StringUtils.isNotBlank(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE))
+                ? IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)
+                : I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE;
     }
 }
