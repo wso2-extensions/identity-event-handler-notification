@@ -29,6 +29,7 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -43,6 +44,7 @@ import org.wso2.carbon.identity.branding.preference.management.core.constant.Bra
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -59,7 +61,6 @@ import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
-import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -68,7 +69,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -81,6 +81,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.namespace.QName;
+
 import static org.wso2.carbon.identity.core.util.IdentityTenantUtil.isSuperTenantRequiredInUrl;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
@@ -91,11 +93,11 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COMMON_SCREEN;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_YEAR_KEY;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_HTML;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
@@ -816,9 +818,7 @@ public class NotificationUtil {
      */
     public static String getNotificationLocale() {
 
-        return StringUtils.isNotBlank(IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE))
-                ? IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE)
-                : NotificationConstants.EmailNotification.LOCALE_DEFAULT;
+        return I18nEmailUtil.getNotificationLocale();
     }
 }
 

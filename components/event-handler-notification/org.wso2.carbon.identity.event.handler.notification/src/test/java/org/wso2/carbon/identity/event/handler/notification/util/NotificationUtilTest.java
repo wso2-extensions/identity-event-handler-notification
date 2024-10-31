@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -241,5 +242,12 @@ public class NotificationUtilTest {
             Assert.assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
             Assert.assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
         }
+    }
+
+    @Test
+    public void testGetNotificationLocale() {
+
+        String result = NotificationUtil.getNotificationLocale();
+        Assert.assertEquals(result, I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE);
     }
 }
