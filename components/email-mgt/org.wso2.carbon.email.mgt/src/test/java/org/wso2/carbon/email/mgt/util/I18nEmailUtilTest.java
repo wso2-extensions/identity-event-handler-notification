@@ -18,14 +18,20 @@ package org.wso2.carbon.email.mgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -34,26 +40,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_CONTENT_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME;
 
-@PrepareForTest({LogFactory.class, Resource.class})
+@PrepareForTest({LogFactory.class, Resource.class, IdentityUtil.class})
 public class I18nEmailUtilTest extends PowerMockTestCase {
 
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TYPE = "templateType";
     private static final String CONTENT_TYPE = "text/html";
     private static final String TEMPLATE_CONTENT_TYPE_WITH_UTF_8 = "text/html; charset="
-                                                                   + StandardCharsets.UTF_8.displayName();
+            + StandardCharsets.UTF_8.displayName();
     private static final String LOCALE = "en_US";
-    private static final String CONTENT= "[\"Subject\",\"Body\",\"Footer\"]";
-    private static final String CONTENT_INVALID= "{[\"Subject\",\"Body\",\"Footer\"]}";
-    private static final String CONTENT_INCOMPLETE= "[]";
+    private static final String CONTENT = "[\"Subject\",\"Body\",\"Footer\"]";
+    private static final String CONTENT_INVALID = "{[\"Subject\",\"Body\",\"Footer\"]}";
+    private static final String CONTENT_INCOMPLETE = "[]";
 
     private static final int CASE_1 = 1;
     private static final int CASE_2 = 2;
@@ -67,6 +75,13 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     @Mock
     private Log log;
 
+    @BeforeMethod
+    public void setUp() {
+
+        initMocks(this);
+        mockStatic(IdentityUtil.class);
+    }
+
     @DataProvider(name = "provideTestData")
     public Object[][] provideTestData() {
 
@@ -76,12 +91,12 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
         map1.put(TEMPLATE_CONTENT_TYPE, CONTENT_TYPE);
         map1.put(TEMPLATE_LOCALE, LOCALE);
 
-        return new Object[][] {
-                { map1, CONTENT.getBytes(StandardCharsets.UTF_8), CASE_1},
-                { map1, null, CASE_2},
-                { map1, CONTENT_INVALID.getBytes(StandardCharsets.UTF_8), CASE_3},
-                { map1, CONTENT_INCOMPLETE.getBytes(StandardCharsets.UTF_8), CASE_4},
-                { map1, CONTENT.getBytes(StandardCharsets.UTF_8), CASE_5}
+        return new Object[][]{
+                {map1, CONTENT.getBytes(StandardCharsets.UTF_8), CASE_1},
+                {map1, null, CASE_2},
+                {map1, CONTENT_INVALID.getBytes(StandardCharsets.UTF_8), CASE_3},
+                {map1, CONTENT_INCOMPLETE.getBytes(StandardCharsets.UTF_8), CASE_4},
+                {map1, CONTENT.getBytes(StandardCharsets.UTF_8), CASE_5}
         };
     }
 
@@ -110,13 +125,13 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
         if (caseNo == CASE_1) {
             EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
 
-            Assert.assertEquals(emailTemplate.getTemplateDisplayName(), DISPLAY_NAME);
-            Assert.assertEquals(emailTemplate.getTemplateType(), TYPE);
-            Assert.assertEquals(emailTemplate.getEmailContentType(), TEMPLATE_CONTENT_TYPE_WITH_UTF_8);
-            Assert.assertEquals(emailTemplate.getLocale(), LOCALE);
-            Assert.assertEquals(emailTemplate.getSubject(), "Subject");
-            Assert.assertEquals(emailTemplate.getBody(), "Body");
-            Assert.assertEquals(emailTemplate.getFooter(), "Footer");
+            assertEquals(emailTemplate.getTemplateDisplayName(), DISPLAY_NAME);
+            assertEquals(emailTemplate.getTemplateType(), TYPE);
+            assertEquals(emailTemplate.getEmailContentType(), TEMPLATE_CONTENT_TYPE_WITH_UTF_8);
+            assertEquals(emailTemplate.getLocale(), LOCALE);
+            assertEquals(emailTemplate.getSubject(), "Subject");
+            assertEquals(emailTemplate.getBody(), "Body");
+            assertEquals(emailTemplate.getFooter(), "Footer");
 
         } else if (caseNo == CASE_2) {
             EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
@@ -148,6 +163,34 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
                 Assert.assertTrue(e.getMessage().contains("Error retrieving a template"));
             }
         }
+    }
 
+    @DataProvider(name = "provideLocaleData")
+    public Object[][] provideLocaleData() {
+
+        return new Object[][]{
+                {"en_US", "en_US"},
+                {"en*US", I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE},
+                {"", I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE}
+        };
+    }
+
+    @Test(dataProvider = "provideLocaleData")
+    public void testNormalizeLocaleFormat(String locale, String expectedLocale) {
+
+        String result = I18nEmailUtil.normalizeLocaleFormat(locale);
+        assertEquals(result, expectedLocale);
+    }
+
+    @Test
+    public void testGetNotificationLocale() {
+
+        String customDefaultLocale = "fr-FR";
+        when(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)).thenReturn(customDefaultLocale);
+        String result = I18nEmailUtil.getNotificationLocale();
+        assertEquals(result, customDefaultLocale);
+        when(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)).thenReturn(null);
+        String result2 = I18nEmailUtil.getNotificationLocale();
+        assertEquals(result2, I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE);
     }
 }
