@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.email.mgt.util;
@@ -27,6 +29,7 @@ import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Collection;
@@ -260,6 +263,22 @@ public class I18nEmailUtil {
     public static String normalizeLocaleFormat(String localeString) {
 
         Locale locale = Locale.forLanguageTag(localeString.replace(UNDERSCORE, HYPHEN).toLowerCase());
-        return locale.toString();
+        String normalizedLocale = locale.toString();
+        if (StringUtils.isNotBlank(normalizedLocale)) {
+            return normalizedLocale;
+        }
+        return getNotificationLocale();
+    }
+
+    /**
+     * Get the notification locale.
+     *
+     * @return Locale
+     */
+    public static String getNotificationLocale() {
+
+        return StringUtils.isNotBlank(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE))
+                ? IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)
+                : I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE;
     }
 }

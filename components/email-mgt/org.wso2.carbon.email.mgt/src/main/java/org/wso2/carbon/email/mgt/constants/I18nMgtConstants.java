@@ -68,6 +68,8 @@ public class I18nMgtConstants {
     public static final String SERVICE_PROPERTY_KEY_SERVICE_NAME = "service.name";
     public static final String SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER = "EmailTemplateManager";
     public static final String SERVICE_PROPERTY_VAL_NOTIFICATION_TEMPLATE_MANAGER = "NotificationTemplateManager";
+    public static final String NOTIFICATION_DEFAULT_LOCALE = "Notification.DefaultLocale";
+    public static final String DEFAULT_NOTIFICATION_LOCALE = "en_US";
 
     public static class ErrorMsg {
         private ErrorMsg() {
