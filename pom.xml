@@ -519,7 +519,7 @@
 
         <!--Carbon Database Utils Version-->
         <org.wso2.carbon.database.utils.version>2.1.0</org.wso2.carbon.database.utils.version>
-        <org.wso2.carbon.database.utils.version.range>[2.1.0,2.2.0)</org.wso2.carbon.database.utils.version.range>
+        <org.wso2.carbon.database.utils.version.range>[2.1.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Identity Framework Version-->
         <carbon.identity.framework.version>7.1.0</carbon.identity.framework.version>
