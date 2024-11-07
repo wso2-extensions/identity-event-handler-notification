@@ -20,6 +20,7 @@ package org.wso2.carbon.email.mgt.store.dao;
 
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
@@ -41,15 +42,21 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFI
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_ID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL_UNICODE;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE;
 
 /**
  * This class is to perform CRUD operations for Org NotificationTemplates.
  */
 public class OrgNotificationTemplateDAO {
+
+    private boolean useUnicodeDataTypes = I18nMgtDataHolder.getInstance().isUseUnicodeDataTypes();
 
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -60,12 +67,21 @@ public class OrgNotificationTemplateDAO {
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         try {
-            namedJdbcTemplate.executeInsert(INSERT_ORG_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
+            String insertOrgNotificationTemplateSql =
+                    useUnicodeDataTypes ? INSERT_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE :
+                            INSERT_ORG_NOTIFICATION_TEMPLATE_SQL;
+            namedJdbcTemplate.executeInsert(insertOrgNotificationTemplateSql, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
-                preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                preparedStatement.setString(BODY, notificationTemplate.getBody());
-                preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
+                if (useUnicodeDataTypes) {
+                    preparedStatement.setNString(SUBJECT, notificationTemplate.getSubject());
+                    preparedStatement.setNString(BODY, notificationTemplate.getBody());
+                    preparedStatement.setNString(FOOTER, notificationTemplate.getFooter());
+                } else {
+                    preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                    preparedStatement.setString(BODY, notificationTemplate.getBody());
+                    preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
+                }
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                 preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
@@ -88,12 +104,20 @@ public class OrgNotificationTemplateDAO {
         NotificationTemplate notificationTemplate;
 
         try {
-            notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_ORG_NOTIFICATION_TEMPLATE_SQL,
+            String getOrgNotificationTemplateSql =
+                    useUnicodeDataTypes ? GET_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE : GET_ORG_NOTIFICATION_TEMPLATE_SQL;
+            notificationTemplate = namedJdbcTemplate.fetchSingleRecord(getOrgNotificationTemplateSql,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        if (useUnicodeDataTypes) {
+                            notificationTemplateResult.setSubject(resultSet.getNString(SUBJECT));
+                            notificationTemplateResult.setBody(resultSet.getNString(BODY));
+                            notificationTemplateResult.setFooter(resultSet.getNString(FOOTER));
+                        } else {
+                            notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                            notificationTemplateResult.setBody(resultSet.getString(BODY));
+                            notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        }
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
                         notificationTemplateResult.setType(templateType);
@@ -166,12 +190,21 @@ public class OrgNotificationTemplateDAO {
         List<NotificationTemplate> notificationTemplates;
 
         try {
-            notificationTemplates = namedJdbcTemplate.executeQuery(LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
+            String listOrgNotificationTemplatesByTypeSql =
+                    useUnicodeDataTypes ? LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL_UNICODE :
+                            LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
+            notificationTemplates = namedJdbcTemplate.executeQuery(listOrgNotificationTemplatesByTypeSql,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        if (useUnicodeDataTypes) {
+                            notificationTemplateResult.setSubject(resultSet.getNString(SUBJECT));
+                            notificationTemplateResult.setBody(resultSet.getNString(BODY));
+                            notificationTemplateResult.setFooter(resultSet.getNString(FOOTER));
+                        } else {
+                            notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                            notificationTemplateResult.setBody(resultSet.getString(BODY));
+                            notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        }
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
                         notificationTemplateResult.setType(templateType.toLowerCase());
@@ -203,18 +236,27 @@ public class OrgNotificationTemplateDAO {
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
         try {
-            namedJdbcTemplate.executeUpdate(UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL,
-                    preparedStatement -> {
-                        preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                        preparedStatement.setString(BODY, notificationTemplate.getBody());
-                        preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
-                        preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
-                        preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
-                        preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
-                        preparedStatement.setString(CHANNEL, channelName);
-                        preparedStatement.setInt(TENANT_ID, tenantId);
-                        preparedStatement.setInt(TENANT_ID, tenantId);
-                    });
+            String updateOrgNotificationTemplateSql =
+                    useUnicodeDataTypes ? UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE :
+                            UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL;
+            namedJdbcTemplate.executeUpdate(updateOrgNotificationTemplateSql, preparedStatement -> {
+                if (useUnicodeDataTypes) {
+                    preparedStatement.setNString(SUBJECT, notificationTemplate.getSubject());
+                    preparedStatement.setNString(BODY, notificationTemplate.getBody());
+                    preparedStatement.setNString(FOOTER, notificationTemplate.getFooter());
+                } else {
+                    preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                    preparedStatement.setString(BODY, notificationTemplate.getBody());
+                    preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
+
+                }
+                preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
+                preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
+                preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
+                preparedStatement.setString(CHANNEL, channelName);
+                preparedStatement.setInt(TENANT_ID, tenantId);
+                preparedStatement.setInt(TENANT_ID, tenantId);
+            });
         } catch (DataAccessException e) {
             String error =
                     String.format("Error while updating %s template %s of type %s from %s tenant.", channelName, locale,

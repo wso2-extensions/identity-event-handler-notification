@@ -68,6 +68,27 @@ public class SQLConstants {
             "DELETE FROM IDN_NOTIFICATION_ORG_TEMPLATE WHERE TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
                     ") AND TENANT_ID = :TENANT_ID;";
 
+    // sql constants for org notification template with unicode datatypes
+    public static final String INSERT_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "INSERT INTO IDN_NOTIFICATION_ORG_TEMPLATE " +
+                    "(TEMPLATE_KEY, LOCALE, NSUBJECT, NBODY, NFOOTER, CONTENT_TYPE, TYPE_ID, TENANT_ID) " +
+                    "VALUES (:TEMPLATE_KEY;, :LOCALE;, :SUBJECT;, :BODY;, :FOOTER;, :CONTENT_TYPE;, (" +
+                    GET_NOTIFICATION_TYPE_ID_SQL + "), :TENANT_ID;)";
+    public static final String GET_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "SELECT NSUBJECT AS SUBJECT, NBODY AS BODY, NFOOTER AS FOOTER, CONTENT_TYPE" +
+                    "FROM IDN_NOTIFICATION_ORG_TEMPLATE " +
+                    "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
+                    ") AND TENANT_ID = :TENANT_ID;";
+    public static final String LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL_UNICODE =
+            "SELECT NSUBJECT AS SUBJECT, NBODY AS BODY, NFOOTER AS FOOTER, CONTENT_TYPE, LOCALE " +
+                    "FROM IDN_NOTIFICATION_ORG_TEMPLATE " +
+                    "WHERE TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL + ") AND TENANT_ID = :TENANT_ID;";
+    public static final String UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "UPDATE IDN_NOTIFICATION_ORG_TEMPLATE " +
+                    "SET NSUBJECT = :SUBJECT;, NBODY = :BODY;, NFOOTER = :FOOTER;, CONTENT_TYPE = :CONTENT_TYPE; " +
+                    "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
+                    ") AND TENANT_ID = :TENANT_ID;";
+
     // sql constants for app notification template
     public static final String INSERT_APP_NOTIFICATION_TEMPLATE_SQL =
             "INSERT INTO IDN_NOTIFICATION_APP_TEMPLATE " +
@@ -100,4 +121,26 @@ public class SQLConstants {
     public static final String DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL =
             "DELETE FROM IDN_NOTIFICATION_APP_TEMPLATE WHERE TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
                     ") AND TENANT_ID = :TENANT_ID;";
+
+    // sql constants for org notification template with unicode datatypes
+    public static final String INSERT_APP_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "INSERT INTO IDN_NOTIFICATION_APP_TEMPLATE " +
+                    "(TEMPLATE_KEY, LOCALE, NSUBJECT, NBODY, NFOOTER, CONTENT_TYPE, TYPE_ID, APP_ID, TENANT_ID) " +
+                    "VALUES (:TEMPLATE_KEY;, :LOCALE;, :SUBJECT;, :BODY;, :FOOTER;, :CONTENT_TYPE;, (" +
+                    GET_NOTIFICATION_TYPE_ID_SQL + "), :APP_ID;, :TENANT_ID;)";
+    public static final String GET_APP_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "SELECT NSUBJECT AS SUBJECT, NBODY AS BODY, NFOOTER AS FOOTER, CONTENT_TYPE " +
+                    "FROM IDN_NOTIFICATION_APP_TEMPLATE " +
+                    "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
+                    ") AND APP_ID = :APP_ID; AND TENANT_ID = :TENANT_ID;";
+    public static final String LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL_UNICODE =
+            "SELECT NSUBJECT AS SUBJECT, NBODY AS BODY, NFOOTER AS FOOTER, CONTENT_TYPE, LOCALE " +
+                    "FROM IDN_NOTIFICATION_APP_TEMPLATE " +
+                    "WHERE TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
+                    ") AND APP_ID = :APP_ID; AND TENANT_ID = :TENANT_ID;";
+    public static final String UPDATE_APP_NOTIFICATION_TEMPLATE_SQL_UNICODE =
+            "UPDATE IDN_NOTIFICATION_APP_TEMPLATE " +
+                    "SET NSUBJECT = :SUBJECT;, NBODY = :BODY;, NFOOTER = :FOOTER;, CONTENT_TYPE = :CONTENT_TYPE; " +
+                    "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
+                    ") AND APP_ID = :APP_ID; AND TENANT_ID = :TENANT_ID;";
 }

@@ -37,6 +37,7 @@ public class I18nMgtDataHolder{
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
+    private boolean useUnicodeDataTypes;
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -159,5 +160,25 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
+    }
+
+    /**
+     * Sets whether the database should use native Unicode data types (e.g., NVARCHAR, NCHAR).
+     *
+     * @param useUnicodeDataTypes true to enable Unicode data types, false to disable.
+     */
+    public void setUseUnicodeDataTypes(boolean useUnicodeDataTypes) {
+
+        this.useUnicodeDataTypes = useUnicodeDataTypes;
+    }
+
+    /**
+     * Gets whether the database uses native Unicode data types (e.g., NVARCHAR, NCHAR).
+     *
+     * @return true if the database uses Unicode data types; false otherwise.
+     */
+    public boolean isUseUnicodeDataTypes() {
+
+        return useUnicodeDataTypes;
     }
 }

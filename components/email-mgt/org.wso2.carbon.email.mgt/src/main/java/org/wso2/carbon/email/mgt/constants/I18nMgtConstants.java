@@ -64,6 +64,8 @@ public class I18nMgtConstants {
 
     public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
     public static final String NOTIFICATION_TEMPLATES_LEGACY_TENANTS = "NotificationTemplates.LegacyTenants.Tenant";
+    public static final String NOTIFICATION_TEMPLATES_USE_UNICODE_DATA_TYPES =
+            "NotificationTemplates.UseUnicodeDataTypes";
 
     public static final String SERVICE_PROPERTY_KEY_SERVICE_NAME = "service.name";
     public static final String SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER = "EmailTemplateManager";
