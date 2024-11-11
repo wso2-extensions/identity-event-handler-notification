@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.TemplateMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.store.SystemDefaultTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
@@ -61,7 +62,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
         this.userDefinedTemplatePersistenceManager =
                 templatePersistenceManagerFactory.getUserDefinedTemplatePersistenceManager();
-        this.systemTemplatePersistenceManager = templatePersistenceManagerFactory.getSystemTemplatePersistenceManager();
+        this.systemTemplatePersistenceManager = new SystemDefaultTemplateManager();
         this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
     }
 
