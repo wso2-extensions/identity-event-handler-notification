@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
-import org.wso2.carbon.email.mgt.store.UnifiedTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -454,6 +453,9 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     /**
      * Add the default notification templates which matches the given notification channel to the respective tenants
      * registry.
+     *
+     * @deprecated Adding default templates not needed anymore due to the introduction of
+     * {@link org.wso2.carbon.email.mgt.store.SystemDefaultTemplateManager}.
      *
      * @param notificationChannel Notification channel (Eg: SMS, EMAIL)
      * @param tenantDomain Tenant domain

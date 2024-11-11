@@ -41,7 +41,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -376,7 +375,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             Object content = templateResource.getContent();
             if (content != null) {
                 byte[] templateContentArray = (byte[]) content;
-                String templateContent = new String(templateContentArray, Charset.forName("UTF-8"));
+                String templateContent = new String(templateContentArray, StandardCharsets.UTF_8);
 
                 String[] templateContentElements;
                 try {
