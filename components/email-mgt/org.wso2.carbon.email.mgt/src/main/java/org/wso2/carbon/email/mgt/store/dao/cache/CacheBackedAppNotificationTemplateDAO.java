@@ -20,25 +20,16 @@ package org.wso2.carbon.email.mgt.store.dao.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
-import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCache;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateCacheKey;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCache;
 import org.wso2.carbon.email.mgt.cache.AppNotificationTemplateListCacheKey;
-import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCacheKey;
 import org.wso2.carbon.email.mgt.store.dao.AppNotificationTemplateDAO;
-import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 
 /**
  * This class provides the cache backed implementation for {@link AppNotificationTemplateDAO}.
@@ -50,6 +41,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
             AppNotificationTemplateCache.getInstance();
     private final AppNotificationTemplateListCache templateListCache = AppNotificationTemplateListCache.getInstance();
 
+    @Override
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -68,6 +60,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public NotificationTemplate getNotificationTemplate(String locale, String templateType, String channelName,
                                                         String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -98,6 +91,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return appNotificationTemplate;
     }
 
+    @Override
     public boolean isNotificationTemplateExists(String locale, String templateType, String channelName,
                                                         String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -124,6 +118,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return super.isNotificationTemplateExists(locale, templateType, channelName, applicationUuid, tenantId);
     }
 
+    @Override
     public List<NotificationTemplate> listNotificationTemplates(String templateType, String channelName,
                                                                 String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -151,6 +146,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return notificationTemplates;
     }
 
+    @Override
     public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                            int tenantId) throws NotificationTemplateManagerServerException {
 
@@ -169,6 +165,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeNotificationTemplate(String locale, String templateType, String channelName,
                                            String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -184,6 +181,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeNotificationTemplates(String templateType, String channelName, String applicationUuid,
                                             int tenantId) throws NotificationTemplateManagerServerException {
 
@@ -196,6 +194,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeAllNotificationTemplates(String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 

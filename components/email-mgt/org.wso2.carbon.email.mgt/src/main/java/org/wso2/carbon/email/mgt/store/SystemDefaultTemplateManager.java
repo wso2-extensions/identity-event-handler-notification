@@ -283,6 +283,6 @@ public class SystemDefaultTemplateManager implements TemplatePersistenceManager 
 
         Map<String, NotificationTemplate> defaultTemplatesForScenario =
                 getTemplateMap(template.getNotificationChannel()).get(template.getDisplayName().toLowerCase());
-        return defaultTemplatesForScenario == null ? false : defaultTemplatesForScenario.containsValue(template);
+        return defaultTemplatesForScenario != null && defaultTemplatesForScenario.containsValue(template);
     }
 }

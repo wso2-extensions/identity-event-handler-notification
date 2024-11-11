@@ -41,6 +41,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
             OrgNotificationTemplateCache.getInstance();
     private final OrgNotificationTemplateListCache templateListCache = OrgNotificationTemplateListCache.getInstance();
 
+    @Override
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -57,6 +58,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public NotificationTemplate getNotificationTemplate(String locale, String templateType, String channelName,
                                                         int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -83,6 +85,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         return orgNotificationTemplate;
     }
 
+    @Override
     public boolean isNotificationTemplateExists(String locale, String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -105,6 +108,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         return super.isNotificationTemplateExists(locale, templateType, channelName, tenantId);
     }
 
+    @Override
     public List<NotificationTemplate> listNotificationTemplates(String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -130,6 +134,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         return notificationTemplates;
     }
 
+    @Override
     public void updateNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -146,6 +151,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeNotificationTemplate(String locale, String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -161,6 +167,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
 
     }
 
+    @Override
     public void removeNotificationTemplates(String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 

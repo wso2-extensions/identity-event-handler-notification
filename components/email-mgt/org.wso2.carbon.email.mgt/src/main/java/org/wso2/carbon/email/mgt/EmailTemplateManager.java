@@ -156,6 +156,9 @@ public interface EmailTemplateManager {
     /**
      * Add default email templates to a tenant's registry.
      *
+     * @deprecated Adding default templates not needed anymore due to the introduction of
+     * {@link org.wso2.carbon.email.mgt.store.SystemDefaultTemplateManager}.
+     *
      * @param tenantDomain
      * @throws I18nEmailMgtException
      */
