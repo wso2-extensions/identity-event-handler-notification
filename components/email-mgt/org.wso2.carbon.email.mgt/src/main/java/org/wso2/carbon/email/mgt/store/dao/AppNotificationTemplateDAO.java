@@ -129,10 +129,7 @@ public class AppNotificationTemplateDAO {
 
         try {
             Integer typeId = namedJdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_TYPE_ID_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer typeID = resultSet.getInt(ID);
-                        return typeID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
@@ -144,10 +141,7 @@ public class AppNotificationTemplateDAO {
             }
 
             Integer templateId = namedJdbcTemplate.fetchSingleRecord(IS_APP_NOTIFICATION_TEMPLATE_EXISTS_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer templateID = resultSet.getInt(ID);
-                        return templateID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setInt(TYPE_ID, typeId);
