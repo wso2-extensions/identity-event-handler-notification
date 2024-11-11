@@ -125,10 +125,7 @@ public class OrgNotificationTemplateDAO {
 
         try {
             Integer typeId = namedJdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_TYPE_ID_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer typeID = resultSet.getInt(ID);
-                        return typeID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
@@ -140,10 +137,7 @@ public class OrgNotificationTemplateDAO {
             }
 
             Integer templateId = namedJdbcTemplate.fetchSingleRecord(IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer templateID = resultSet.getInt(ID);
-                        return templateID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setInt(TYPE_ID, typeId);
@@ -186,7 +180,7 @@ public class OrgNotificationTemplateDAO {
                     });
         } catch (DataAccessException e) {
             String error =
-                    String.format("Error while listing %s templates %s of type %s from %s tenant.", channelName,
+                    String.format("Error while listing %s templates of type %s from %s tenant.", channelName,
                             templateType, tenantId);
             throw new NotificationTemplateManagerServerException(String.format(error, templateType, tenantId), e);
         }
