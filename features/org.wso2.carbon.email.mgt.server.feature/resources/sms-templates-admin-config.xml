@@ -25,23 +25,23 @@
         <body>Successful Password Reset</body>
     </configuration>
     <configuration type="accountconfirmation" display="accountconfirmation" locale="en_US">
-        <body>Your One-Time Password is : {{confirmation-code}}</body>
+        <body>{{confirmation-code}}</body>
     </configuration>
     <configuration type="accountIdRecovery" display="accountIdRecovery" locale="en_US">
         <body>
-            Hello, your user name is {{userstore-domain}}/{{user-name}}@{{tenant-domain}}
+            {{userstore-domain}}/{{user-name}}@{{tenant-domain}}
         </body>
     </configuration>
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
-        <body>Your One-Time Password : {{confirmation-code}}</body>
+        <body>{{confirmation-code}}</body>
     </configuration>
     <configuration type="resendPasswordReset" display="resendPasswordReset" locale="en_US">
-        <body>Your One-Time Password : {{confirmation-code}}</body>
+        <body>{{confirmation-code}}</body>
     </configuration>
     <configuration type="verifyMobileOnUpdate" display="verifyMobileOnUpdate" locale="en_US">
-        <body>Your Mobile Number Verification Code : {{confirmation-code}}</body>
+        <body>{{confirmation-code}}</body>
     </configuration>
     <configuration type="SMSOTP" display="SMSOTP" locale="en_US">
-        <body>Your one-time password for the {{application-name}} is {{confirmation-code}}. This expires in {{otp-expiry-time}} minutes.</body>
+        <body>{{confirmation-code}}</body>
     </configuration>
 </configurations>
