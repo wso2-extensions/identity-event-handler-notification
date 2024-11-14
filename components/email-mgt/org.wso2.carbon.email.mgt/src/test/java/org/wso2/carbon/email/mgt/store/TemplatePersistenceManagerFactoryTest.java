@@ -18,24 +18,17 @@
 
 package org.wso2.carbon.email.mgt.store;
 
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.common.testng.WithCarbonHome;
-import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
+import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtServiceImpl;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 
 import java.lang.reflect.Field;
-import java.nio.file.Paths;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mockStatic;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
@@ -44,86 +37,93 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_
  * Class that contains the test cases for {@link TemplatePersistenceManagerFactory}.
  */
 @WithCarbonHome
-@PrepareForTest({I18nMgtDataHolder.class, IdentityUtil.class})
-public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
+public class TemplatePersistenceManagerFactoryTest {
 
-    @Mock
-    RegistryResourceMgtService resourceMgtService;
-    @Mock
-    I18nMgtDataHolder i18nMgtDataHolder;
     private TemplatePersistenceManagerFactory templatePersistenceManagerFactory;
 
     @BeforeMethod
     public void setUp() {
 
-        initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
-        when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
-
-        mockStatic(IdentityUtil.class);
+        RegistryResourceMgtServiceImpl registryResourceMgtService = new RegistryResourceMgtServiceImpl();
+        I18nMgtDataHolder.getInstance().setRegistryResourceMgtService(registryResourceMgtService);
         templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
     }
 
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsDatabase() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("database");
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                    .thenReturn("database");
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        }
     }
 
     @Test
     public void shouldUseHybridTemplateManagerWhenConfigIsOnMigration() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("hybrid");
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, HybridTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                    .thenReturn("hybrid");
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, HybridTemplateManager.class);
+        }
     }
 
     @Test
     public void shouldUseRegistryBasedTemplateManagerWhenConfigIsRegistry() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, RegistryBasedTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                    .thenReturn("registry");
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, RegistryBasedTemplateManager.class);
+        }
     }
 
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsInvalid() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("invalid");
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                    .thenReturn("invalid");
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        }
     }
 
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsBlank() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("");
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("");
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        }
     }
 
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsNull() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn(null);
-        TemplatePersistenceManager templatePersistenceManager =
-                templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
-        assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class)) {
+            identityUtilMock.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                    .thenReturn(null);
+            TemplatePersistenceManager templatePersistenceManager =
+                    templatePersistenceManagerFactory.getTemplatePersistenceManager();
+            assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
+            assertUnderlyingManagerType(templatePersistenceManager, DBBasedTemplateManager.class);
+        }
     }
 
     private void assertUnderlyingManagerType(TemplatePersistenceManager templatePersistenceManager, Class<?> expectedClass) {

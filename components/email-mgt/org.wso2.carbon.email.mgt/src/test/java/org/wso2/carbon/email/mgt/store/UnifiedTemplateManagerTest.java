@@ -20,44 +20,31 @@ package org.wso2.carbon.email.mgt.store;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.internal.I18nMgtServiceComponent;
 import org.wso2.carbon.identity.common.testng.WithCarbonHome;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
 
 /**
  * Class that contains the test cases for {@link UnifiedTemplateManager}.
  */
 @WithCarbonHome
-@PrepareForTest({I18nMgtDataHolder.class, CarbonUtils.class, IdentityUtil.class})
-public class UnifiedTemplateManagerTest extends PowerMockTestCase {
+public class UnifiedTemplateManagerTest {
 
     private static final String tenantDomain = "carbon.super";
 
-    @Mock
-    I18nMgtDataHolder i18nMgtDataHolder;
-    @Mock
-    TemplatePersistenceManagerFactory templatePersistenceManagerFactory;
     @Mock
     TemplatePersistenceManager templatePersistenceManager;
 
@@ -70,21 +57,13 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     @BeforeMethod
     public void setUp() {
 
-        initTestNotificationTemplates();
+        MockitoAnnotations.openMocks(this);
+        defaultSystemTemplates = new I18nMgtServiceComponent().loadDefaultTemplatesFromFile(
+                NotificationChannels.EMAIL_CHANNEL.getChannelType());
+        I18nMgtDataHolder.getInstance().setDefaultEmailTemplates(defaultSystemTemplates);
 
-        initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
-        when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultSystemTemplates);
-
-        mockStatic(IdentityUtil.class);
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
-
-        templatePersistenceManager = PowerMockito.mock(TemplatePersistenceManager.class);
         unifiedTemplateManager = new UnifiedTemplateManager(templatePersistenceManager);
-        templatePersistenceManagerFactory = PowerMockito.mock(TemplatePersistenceManagerFactory.class);
-        when(templatePersistenceManagerFactory.getTemplatePersistenceManager()).thenReturn(unifiedTemplateManager);
+        initTestNotificationTemplates();
     }
 
     @Test
@@ -264,18 +243,6 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     }
 
     private void initTestNotificationTemplates() {
-
-        defaultSystemTemplates = new ArrayList<>();
-        NotificationTemplate defaultNotificationTemplate = new NotificationTemplate();
-        defaultNotificationTemplate.setNotificationChannel(NotificationChannels.EMAIL_CHANNEL.getChannelType());
-        defaultNotificationTemplate.setType("passwordReset");
-        defaultNotificationTemplate.setDisplayName("PasswordReset");
-        defaultNotificationTemplate.setLocale("en_US");
-        defaultNotificationTemplate.setBody("passwordReset_Body");
-        defaultNotificationTemplate.setSubject("passwordReset_Subject");
-        defaultNotificationTemplate.setFooter("passwordReset_Footer");
-        defaultNotificationTemplate.setContentType("text/html");
-        defaultSystemTemplates.add(defaultNotificationTemplate);
 
         positiveNotificationTemplate = new NotificationTemplate();
         positiveNotificationTemplate.setNotificationChannel(NotificationChannels.EMAIL_CHANNEL.getChannelType());
