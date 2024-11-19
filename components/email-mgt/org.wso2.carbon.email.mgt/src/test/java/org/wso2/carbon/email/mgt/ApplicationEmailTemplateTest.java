@@ -17,63 +17,61 @@
  */
 package org.wso2.carbon.email.mgt;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
-import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
-
 import org.apache.commons.lang.StringUtils;
+import org.h2.jdbc.JdbcResultSet;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
-import org.testng.IObjectFactory;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.email.mgt.store.DBBasedTemplateManager;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
-import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
-import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.common.testng.WithCarbonHome;
+import org.wso2.carbon.identity.common.testng.WithH2Database;
+import org.wso2.carbon.identity.common.testng.WithRealmService;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.internal.OrganizationManagementDataHolder;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.utils.CarbonUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
+import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
 
 /**
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
-@PrepareForTest({IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class,
-        OrganizationManagementUtil.class, IdentityUtil.class})
-public class ApplicationEmailTemplateTest extends PowerMockTestCase {
+@WithCarbonHome
+@WithRealmService(injectToSingletons = {I18nMgtDataHolder.class})
+@WithH2Database(jndiName = "jdbc/WSO2IdentityDB", files = {"dbscripts/h2.sql"})
+public class ApplicationEmailTemplateTest {
 
     private EmailTemplateManagerImpl emailTemplateManager;
-
-    @Mock
-    RegistryResourceMgtService resourceMgtService;
-
-    @Mock
-    I18nMgtDataHolder i18nMgtDataHolder;
-
-    @Mock
-    Resource resource;
+    private String tenantDomain = "carbon.super";
 
     @Mock
     ApplicationManagementService applicationManagementService;
@@ -81,32 +79,15 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     @Mock
     OrganizationManager organizationManager;
 
-    @ObjectFactory
-    public IObjectFactory getObjectFactory() {
-
-        return new org.powermock.modules.testng.PowerMockObjectFactory();
-    }
-
-    private String tenantDomain = "carbon.super";
-
     @BeforeMethod
     public void setUp() {
 
-        initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
-
-        mockStatic(IdentityUtil.class);
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
-
-        // Mock RegistryResourceMgtService.
-        when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
-        when(i18nMgtDataHolder.getApplicationManagementService()).thenReturn(applicationManagementService);
-        when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+        MockitoAnnotations.openMocks(this);
+        I18nMgtDataHolder.getInstance().setOrganizationManager(organizationManager);
+        I18nMgtDataHolder.getInstance().setApplicationManagementService(applicationManagementService);
+        OrganizationManagementDataHolder.getInstance()
+                .setRealmService(I18nMgtDataHolder.getInstance().getRealmService());
         emailTemplateManager = new EmailTemplateManagerImpl();
-
-        mockStatic(OrganizationManagementUtil.class);
     }
 
     /**
@@ -124,11 +105,18 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
             String contentType, byte[] content, String applicationUuid) throws Exception {
 
-        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
-        mockIsValidTemplate(true, true);
-        NotificationTemplate notificationTemplate = emailTemplateManager
-                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
-        validateNotificationTemplate(notificationTemplate, notificationChannel);
+        try (MockedConstruction<JdbcResultSet> ignored = Mockito.mockConstruction(JdbcResultSet.class,
+                     (mock, context) -> {
+                         when(mock.next()).thenReturn(true);
+                         when(mock.isClosed()).thenReturn(true);
+                         InputStream contentBinaryStream = content == null ? null : new ByteArrayInputStream(content);
+                         when(mock.getBinaryStream(CONTENT)).thenReturn(contentBinaryStream);
+                     })) {
+
+            NotificationTemplate notificationTemplate = emailTemplateManager
+                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
+            validateNotificationTemplate(notificationTemplate, notificationChannel);
+        }
     }
 
     /**
@@ -151,26 +139,34 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String rootApplicationId = "root-application-id";
         String subOrganizationId = "sub-organization-id";
         String primaryOrganizationId = "primary-organization-id";
-        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, tenantDomain,
-                rootApplicationId);
+        NotificationTemplate notificationTemplate = null;
 
-        // Successful scenario for resolving the root application.
-        when(OrganizationManagementUtil.isOrganization(ArgumentMatchers.eq(subOrganizationId))).thenReturn(true);
-        when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenReturn(
-                rootApplicationId);
-        when(organizationManager.resolveOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(subOrganizationId);
-        when(organizationManager.getPrimaryOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(primaryOrganizationId);
-        when(organizationManager.resolveTenantDomain(ArgumentMatchers.eq(primaryOrganizationId))).thenReturn(tenantDomain);
-        NotificationTemplate notificationTemplate =
-                emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
-                        applicationUuid);
-        validateNotificationTemplate(notificationTemplate, notificationChannel);
+        try (MockedStatic<OrganizationManagementUtil> orgMgtUtil = mockStatic(OrganizationManagementUtil.class);
+             MockedConstruction<JdbcResultSet> ignored = Mockito.mockConstruction(JdbcResultSet.class,
+                     (mock, context) -> {
+                         when(mock.next()).thenReturn(true);
+                         when(mock.isClosed()).thenReturn(true);
+                         InputStream contentBinaryStream = content == null ? null : new ByteArrayInputStream(content);
+                         when(mock.getBinaryStream(CONTENT)).thenReturn(contentBinaryStream);
+                     })) {
 
-        // Error scenario for resolving the root application.
-        notificationTemplate = null;
-        when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenThrow(
-                IdentityApplicationManagementServerException.class);
-        try {
+            orgMgtUtil.when(() -> OrganizationManagementUtil.isOrganization(subOrganizationId)).thenReturn(true);
+
+            // Successful scenario for resolving the root application.
+            when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenReturn(
+                    rootApplicationId);
+            when(organizationManager.resolveOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(subOrganizationId);
+            when(organizationManager.getPrimaryOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(primaryOrganizationId);
+            when(organizationManager.resolveTenantDomain(ArgumentMatchers.eq(primaryOrganizationId))).thenReturn(tenantDomain);
+            notificationTemplate =
+                    emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
+                            applicationUuid);
+            validateNotificationTemplate(notificationTemplate, notificationChannel);
+
+            // Error scenario for resolving the root application.
+            notificationTemplate = null;
+            when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenThrow(
+                    IdentityApplicationManagementServerException.class);
             notificationTemplate = emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId, applicationUuid);
         } catch (NotificationTemplateManagerException e) {
             assertEquals(e.getErrorCode(), ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode());
@@ -199,10 +195,22 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
             String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
             String expectedErrorCode, byte[] content, String applicationUuid) throws Exception {
 
-        when(OrganizationManagementUtil.isOrganization(tenantDomain)).thenReturn(false);
-        mockIsValidTemplate(isValidTemplate, isValidLocale);
-        try {
-            mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
+        try (MockedStatic<IdentityValidationUtil> identityValidationUtil = mockStatic(IdentityValidationUtil.class);
+             MockedConstruction<JdbcResultSet> ignored = Mockito.mockConstruction(JdbcResultSet.class,
+                     (mock, context) -> {
+                         when(mock.next()).thenReturn(true);
+                         InputStream contentBinaryStream = content == null ? null : new ByteArrayInputStream(content);
+                         when(mock.getBinaryStream(CONTENT)).thenReturn(contentBinaryStream);
+                         when(mock.getString(CONTENT_TYPE)).thenReturn(contentType);
+                     })) {
+
+            identityValidationUtil.when(
+                            () -> IdentityValidationUtil.isValid(anyString(), any(String[].class), any(String[].class)))
+                    .thenReturn(isValidTemplate);
+            identityValidationUtil.when(
+                            () -> IdentityValidationUtil.isValidOverBlackListPatterns(anyString(), anyString()))
+                    .thenReturn(isValidLocale);
+
             NotificationTemplate notificationTemplate = emailTemplateManager
                     .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
             assertNull(notificationTemplate, "Cannot return a notificationTemplate");
@@ -231,13 +239,6 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                                                 String errorMessage, int scenarioCode, String applicationUuid) {
 
         try {
-            if (scenarioCode == 2) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
-            }
-            if (scenarioCode == 3) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
-                        .thenThrow(new IdentityRuntimeException("Test Error"));
-            }
             emailTemplateManager
                     .addNotificationTemplateType(templateName, channel, domain, applicationUuid);
         } catch (NotificationTemplateManagerException e) {
@@ -269,8 +270,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
             notificationTemplate = buildSampleNotificationTemplate(templateContent);
         }
         try {
-            when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
-                    .thenThrow(new IdentityRuntimeException("Test Error"));
+            EmailTemplateManagerImpl emailTemplateManager =
+                    getTemplateManagerWithMockedDependencies(errorCode, notificationTemplate, applicationUuid,
+                            tenantDomain);
             emailTemplateManager.addNotificationTemplate(notificationTemplate, tenantDomain, applicationUuid);
             throw new Exception("Exception should be thrown for above testing scenarios");
         } catch (NotificationTemplateManagerException e) {
@@ -281,6 +283,27 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                     I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
             assertEquals(e.getErrorCode(), expectedCode, errorMessage);
         }
+    }
+
+    private EmailTemplateManagerImpl getTemplateManagerWithMockedDependencies(String errorCode,
+                                                                              NotificationTemplate notificationTemplate,
+                                                                              String applicationUuid,
+                                                                              String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        EmailTemplateManagerImpl emailTemplateManager;
+        emailTemplateManager = this.emailTemplateManager;
+        if (I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode().equals(errorCode)) {
+            try (MockedConstruction<DBBasedTemplateManager> dbBasedTemplateManagerMocked = Mockito.mockConstruction(
+                    DBBasedTemplateManager.class)) {
+                emailTemplateManager = new EmailTemplateManagerImpl();
+                DBBasedTemplateManager dbBasedTemplateManager = dbBasedTemplateManagerMocked.constructed().get(0);
+                doThrow(new NotificationTemplateManagerServerException("Error adding template")).when(
+                                dbBasedTemplateManager)
+                        .addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
+            }
+        }
+        return emailTemplateManager;
     }
 
     /**
@@ -361,6 +384,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     private Object[][] addNotificationTemplateTypeProvider() {
 
         String testTemplateName = "Test template";
+        String testTemplateName2 = "App Test template 2";
         String testChannel = "Test Channel";
         String testDomain = "Test Domain";
         String applicationUuid = "test-uuid";
@@ -382,7 +406,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                         applicationUuid},
                 {testTemplateName, testChannel, testDomain, expectedErrorCode2, errorMessage2, testScenario2,
                         applicationUuid},
-                {testTemplateName, testChannel, testDomain, expectedErrorCode3, errorMessage3, testScenario3,
+                {testTemplateName2, testChannel, testDomain, expectedErrorCode3, errorMessage3, testScenario3,
                         applicationUuid}
         };
     }
@@ -503,66 +527,6 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         notificationTemplate.setBody(templateContent[5]);
         notificationTemplate.setSubject(templateContent[6]);
         return notificationTemplate;
-    }
-
-    /**
-     * Mock registry resource for notification template.
-     *
-     * @param notificationChannel Notification channel
-     * @param displayName         Notification template displayName
-     * @param templateType        Notification template type
-     * @param locale              Notification template locale
-     * @param contentType         Notification template content type
-     * @param templateContent     Notification template content (Subject,body,footer etc)
-     * @param tenantDomain        Tenant domain of the notification template.
-     * @param applicationId       Root application id of the notification template.
-     * @throws Exception Error mocking notification template
-     */
-    private void mockRegistryResource(String notificationChannel, String displayName, String templateType,
-                                      String locale, String contentType, byte[] templateContent, String tenantDomain,
-                                      String applicationId)
-            throws Exception {
-
-        if (StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(applicationId) &&
-                StringUtils.equals(notificationChannel, NotificationChannels.EMAIL_CHANNEL.getChannelType())) {
-            when(resourceMgtService.getIdentityResource(ArgumentMatchers.contains(applicationId),
-                    ArgumentMatchers.eq(tenantDomain), ArgumentMatchers.anyString())).thenReturn(resource);
-        } else if (StringUtils.isNotBlank(tenantDomain)) {
-            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.eq(tenantDomain),
-                    ArgumentMatchers.anyString())).thenReturn(resource);
-        } else {
-            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
-                    ArgumentMatchers.anyString())).thenReturn(resource);
-        }
-
-        // Mock Resource properties.
-        when(resource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(displayName);
-        when(resource.getProperty(I18nMgtConstants.TEMPLATE_TYPE)).thenReturn(templateType);
-        when(resource.getProperty(I18nMgtConstants.TEMPLATE_LOCALE)).thenReturn(locale);
-        if (NotificationChannels.EMAIL_CHANNEL.getChannelType().equals(notificationChannel)) {
-            when(resource.getProperty(I18nMgtConstants.TEMPLATE_CONTENT_TYPE)).thenReturn(contentType);
-        }
-        when(resource.getContent()).thenReturn(templateContent);
-    }
-
-    /**
-     * Mocks IdentityValidationUtil template validation methos.
-     *
-     * @param isValidTemplate Whether the template is valid or not
-     * @param isValidLocale   Whether the locate is valid or not
-     */
-    private void mockIsValidTemplate(boolean isValidTemplate, boolean isValidLocale) {
-
-        mockStatic(IdentityValidationUtil.class);
-
-        // Mock methods in validateTemplateType method.
-        when(IdentityValidationUtil
-                .isValid(Matchers.anyString(), Matchers.any(String[].class), Matchers.any(String[].class)))
-                .thenReturn(isValidTemplate);
-
-        // Mock methods in validateLocale method.
-        when(IdentityValidationUtil.isValidOverBlackListPatterns(Matchers.anyString(), Matchers.anyString())).
-                thenReturn(isValidLocale);
     }
 
     /**
