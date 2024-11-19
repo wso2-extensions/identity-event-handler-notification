@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -71,6 +72,19 @@ public abstract class ChannelConfigurationHandler {
             NotificationSenderManagementException;
 
     /**
+     * Method holds the implementation of adding the Push sender configurations.
+     *
+     * @param pushSender contains the configurations of Push sender.
+     * @return persisted Push notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when adding the Push notification sender configurations.
+     */
+    public PushSenderDTO addPushSender(PushSenderDTO pushSender) throws
+            NotificationSenderManagementException {
+
+        throw new UnsupportedOperationException("Push sender configurations are not supported.");
+    };
+
+    /**
      * Method holds the implementation of updating the Email sender configurations.
      * TODO: Adding this since channel support will be added to email notification senders too.
      *
@@ -90,6 +104,20 @@ public abstract class ChannelConfigurationHandler {
      * @throws NotificationSenderManagementException on errors when adding the SMS notification sender configurations.
      */
     public abstract SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException;
+
+    /**
+     * Method holds the implementation of updating the Push sender configurations.
+     *
+     * @param pushSender contains the configurations of Push sender.
+     * @return persisted Push notification sender configuration.
+     * @throws NotificationSenderManagementException on errors when updating the Push notification
+     * sender configurations.
+     */
+    public PushSenderDTO updatePushSender(PushSenderDTO pushSender)
+            throws NotificationSenderManagementException {
+
+        throw new UnsupportedOperationException("Push sender configurations are not supported.");
+    }
 
     /**
      * Method holds the common implementation of deleting the notification sender configurations.

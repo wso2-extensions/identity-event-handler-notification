@@ -31,6 +31,7 @@ import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImpl;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
@@ -214,5 +215,25 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().setApplicationManagementService(null);
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.identity.notification.push.provider",
+            service = PushProvider.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPushProvider"
+    )
+    protected void setPushProvider(PushProvider provider) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("PushProvider: " + provider.getName() + " is registered.");
+        }
+        NotificationSenderTenantConfigDataHolder.getInstance().addPushProvider(provider.getName(), provider);
+    }
+
+    protected void unsetPushProvider(PushProvider provider) {
+
+        NotificationSenderTenantConfigDataHolder.getInstance().removePushProvider(provider.getName());
     }
 }

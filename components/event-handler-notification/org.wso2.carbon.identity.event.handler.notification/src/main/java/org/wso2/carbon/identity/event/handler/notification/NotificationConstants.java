@@ -120,6 +120,79 @@ public class NotificationConstants {
         public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
     }
 
+    public static class PushNotification {
+
+        public static final String PUSH_NOTIFICATION_EVENT = "TRIGGER_PUSH_NOTIFICATION";
+        public static final String PUSH_NOTIFICATION_HANDLER_NAME = "PushNotificationHandler";
+        public static final String PUSH_PUBLISHER_NAME = "PushPublisher";
+        public static final String PUSH_AUTHENTICATION_SCENARIO = "AUTHENTICATION";
+
+        public static final String NOTIFICATION_SCENARIO = "NOTIFICATION_SCENARIO";
+        public static final String NOTIFICATION_PROVIDER = "notificationProvider";
+        public static final String PUSH_ID = "pushId";
+        public static final String DEVICE_TOKEN = "deviceToken";
+        public static final String CHALLENGE = "challenge";
+        public static final String NUMBER_CHALLENGE = "numberChallenge";
+        public static final String HOST_NAME = "hostName";
+        public static final String REQUEST_DEVICE_OS = "deviceOS";
+        public static final String REQUEST_DEVICE_BROWSER = "browser";
+    }
+
+    public enum PushNotificationTemplate {
+
+        AUTHENTICATION(
+                PushNotification.PUSH_AUTHENTICATION_SCENARIO,
+                "Authentication Request",
+                "{{user-name}} from {{organization-name}} is trying to login");
+
+        private String scenario;
+        private String title;
+        private String body;
+
+        PushNotificationTemplate(String scenario, String title, String body) {
+
+            this.scenario = scenario;
+            this.title = title;
+            this.body = body;
+        }
+
+        public String getScenario() {
+
+            return scenario;
+        }
+
+        public String getTitle() {
+
+            return title;
+        }
+
+        public String getBody() {
+
+            return body;
+        }
+    }
+
+    public enum PushNotificationPlaceholder {
+
+        USER_NAME("user-name"),
+        USER_GIVEN_NAME("user.claim.givenname"),
+        USER_STORE_DOMAIN("userstore-domain"),
+        ORGANIZATION_NAME("organization-name"),
+        TENANT_DOMAIN("tenant-domain"),;
+
+        private String placeholder;
+
+        PushNotificationPlaceholder(String placeholder) {
+
+            this.placeholder = placeholder;
+        }
+
+        public String getPlaceholder() {
+
+            return placeholder;
+        }
+    }
+
     /**
      * Define logging constants.
      */

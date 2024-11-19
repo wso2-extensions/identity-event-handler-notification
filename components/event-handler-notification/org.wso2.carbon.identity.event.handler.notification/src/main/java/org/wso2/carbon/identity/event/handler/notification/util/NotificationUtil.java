@@ -791,7 +791,7 @@ public class NotificationUtil {
      * @return Human-readable name related to the represented organization space.
      * @throws IdentityEventException Error while resolving organization name.
      */
-    private static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
+    public static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
 
         String organizationName = tenantDomain;
         try {
