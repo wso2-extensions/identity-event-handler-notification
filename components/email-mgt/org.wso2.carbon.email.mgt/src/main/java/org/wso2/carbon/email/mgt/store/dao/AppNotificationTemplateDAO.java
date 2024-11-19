@@ -49,6 +49,7 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICA
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentStream;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.extractRootExceptionSetDuringSetContent;
 
 /**
  * This class is to perform CRUD operations for Application NotificationTemplates.
@@ -97,6 +98,7 @@ public class AppNotificationTemplateDAO {
             notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_APP_NOTIFICATION_TEMPLATE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setNotificationChannel(channelName);
                         setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
@@ -113,6 +115,7 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
+            extractRootExceptionSetDuringSetContent(e);
             String error =
                     String.format("Error while retrieving %s template %s of type %s from application %s in %s tenant.",
                             channelName, locale, templateType, applicationUuid, tenantId);
@@ -171,6 +174,7 @@ public class AppNotificationTemplateDAO {
             notificationTemplates = namedJdbcTemplate.executeQuery(LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
+                        notificationTemplateResult.setNotificationChannel(channelName);
                         setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
@@ -186,6 +190,7 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
+            extractRootExceptionSetDuringSetContent(e);
             String error =
                     String.format("Error while listing %s templates of type %s from application %s in %s tenant.",
                             channelName, templateType, applicationUuid, tenantId);

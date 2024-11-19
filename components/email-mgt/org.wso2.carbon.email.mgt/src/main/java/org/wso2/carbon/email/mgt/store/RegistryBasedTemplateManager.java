@@ -19,7 +19,6 @@
 package org.wso2.carbon.email.mgt.store;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -345,77 +344,18 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         notificationTemplate.setLocale(locale);
 
         // Process template content.
-        String[] templateContentElements = getTemplateElements(templateResource, notificationChannel, displayName,
-                locale);
-        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            notificationTemplate.setBody(templateContentElements[0]);
-        } else {
-            notificationTemplate.setSubject(templateContentElements[0]);
-            notificationTemplate.setBody(templateContentElements[1]);
-            notificationTemplate.setFooter(templateContentElements[2]);
-        }
         notificationTemplate.setNotificationChannel(notificationChannel);
-        return notificationTemplate;
-    }
-
-    /**
-     * Process template resource content and retrieve template elements.
-     *
-     * @param templateResource    Resource of the template
-     * @param notificationChannel Notification channel
-     * @param displayName         Display name of the template
-     * @param locale              Locale of the template
-     * @return Template content
-     * @throws NotificationTemplateManagerServerException If an error occurred while getting the template content
-     */
-    private String[] getTemplateElements(Resource templateResource, String notificationChannel, String displayName,
-                                         String locale) throws NotificationTemplateManagerServerException {
-
         try {
-            Object content = templateResource.getContent();
-            if (content != null) {
-                byte[] templateContentArray = (byte[]) content;
-                String templateContent = new String(templateContentArray, StandardCharsets.UTF_8);
-
-                String[] templateContentElements;
-                try {
-                    templateContentElements = new Gson().fromJson(templateContent, String[].class);
-                } catch (JsonSyntaxException exception) {
-                    String error = String.format(IdentityMgtConstants.ErrorMessages.
-                            ERROR_CODE_DESERIALIZING_TEMPLATE_FROM_TENANT_REGISTRY.getMessage(), displayName, locale);
-                    throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
-                            ERROR_CODE_DESERIALIZING_TEMPLATE_FROM_TENANT_REGISTRY.getCode(), error, exception);
-                }
-
-                // Validate template content.
-                if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-                    if (templateContentElements == null || templateContentElements.length != 1) {
-                        String errorMsg = String.format(IdentityMgtConstants.ErrorMessages.
-                                ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getMessage(), displayName, locale);
-                        throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
-                                ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getCode(), errorMsg);
-                    }
-                } else {
-                    if (templateContentElements == null || templateContentElements.length != 3) {
-                        String errorMsg = String.format(IdentityMgtConstants.ErrorMessages.
-                                ERROR_CODE_INVALID_EMAIL_TEMPLATE_CONTENT.getMessage(), displayName, locale);
-                        throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
-                                ERROR_CODE_INVALID_EMAIL_TEMPLATE_CONTENT.getCode(), errorMsg);
-                    }
-                }
-                return templateContentElements;
-            } else {
-                String error = String.format(IdentityMgtConstants.ErrorMessages.
-                        ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getMessage(), displayName, locale);
-                throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
-                        ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getCode(), error);
-            }
+            byte[] content = (byte[]) templateResource.getContent();
+            I18nEmailUtil.setTemplateElements(content, notificationChannel, displayName, locale, notificationTemplate);
         } catch (RegistryException exception) {
             String error = IdentityMgtConstants.ErrorMessages.
                     ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_OBJECT_FROM_REGISTRY.getMessage();
             throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
                     ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_OBJECT_FROM_REGISTRY.getCode(), error, exception);
         }
+
+        return notificationTemplate;
     }
 
     /**

@@ -23,6 +23,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
@@ -30,6 +31,8 @@ import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.governance.IdentityMgtConstants;
+import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.registry.core.Collection;
@@ -299,18 +302,94 @@ public class I18nEmailUtil {
             SQLException {
 
         try {
-            byte[] contentByteArray = contentStream.readAllBytes();
-            String content = new String(contentByteArray, StandardCharsets.UTF_8);
-            String[] templateContent = new Gson().fromJson(content, String[].class);
-            if (templateContent != null && templateContent.length == 3) {
-                notificationTemplateResult.setSubject(templateContent[0]);
-                notificationTemplateResult.setBody(templateContent[1]);
-                notificationTemplateResult.setFooter(templateContent[2]);
-            } else {
-                throw new SQLException("Invalid content data.");
-            }
-        } catch (IOException e) {
+            byte[] contentByteArray = contentStream != null ? contentStream.readAllBytes() : null;
+            setTemplateElements(contentByteArray, notificationTemplateResult.getNotificationChannel(),
+                    notificationTemplateResult.getDisplayName(), notificationTemplateResult.getLocale(),
+                    notificationTemplateResult);
+        } catch (IOException | NotificationTemplateManagerServerException e) {
             throw new SQLException("Error while reading content data.", e);
+        }
+    }
+
+    /**
+     * Process template resource content, extract subject, body & footer and set template elements to the provided
+     * notification template.
+     *
+     * @param contentByteArray      Content byte array of the template
+     * @param notificationChannel   Notification channel
+     * @param displayName           Display name of the template
+     * @param locale                Locale of the template
+     * @param notificationTemplate  Notification template
+     * @throws NotificationTemplateManagerServerException
+     */
+    public static void setTemplateElements(byte[] contentByteArray, String notificationChannel, String displayName,
+                                           String locale, NotificationTemplate notificationTemplate)
+            throws NotificationTemplateManagerServerException {
+
+        if (contentByteArray != null) {
+            String templateContent = new String(contentByteArray, StandardCharsets.UTF_8);
+
+            String[] templateContentElements;
+            try {
+                templateContentElements = new Gson().fromJson(templateContent, String[].class);
+            } catch (JsonSyntaxException exception) {
+                String error = String.format(IdentityMgtConstants.ErrorMessages.
+                        ERROR_CODE_DESERIALIZING_TEMPLATE_FROM_TENANT_REGISTRY.getMessage(), displayName, locale);
+                throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
+                        ERROR_CODE_DESERIALIZING_TEMPLATE_FROM_TENANT_REGISTRY.getCode(), error, exception);
+            }
+
+            // Validate template content.
+            if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+                if (templateContentElements == null || templateContentElements.length != 1) {
+                    String errorMsg = String.format(IdentityMgtConstants.ErrorMessages.
+                            ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getMessage(), displayName, locale);
+                    throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
+                            ERROR_CODE_INVALID_SMS_TEMPLATE_CONTENT.getCode(), errorMsg);
+                } else {
+                    notificationTemplate.setBody(templateContentElements[0]);
+                }
+            } else {
+                if (templateContentElements == null || templateContentElements.length != 3) {
+                    String errorMsg = String.format(IdentityMgtConstants.ErrorMessages.
+                            ERROR_CODE_INVALID_EMAIL_TEMPLATE_CONTENT.getMessage(), displayName, locale);
+                    throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
+                            ERROR_CODE_INVALID_EMAIL_TEMPLATE_CONTENT.getCode(), errorMsg);
+                } else {
+                    notificationTemplate.setSubject(templateContentElements[0]);
+                    notificationTemplate.setBody(templateContentElements[1]);
+                    notificationTemplate.setFooter(templateContentElements[2]);
+                }
+            }
+        } else {
+            String error = String.format(IdentityMgtConstants.ErrorMessages.
+                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getMessage(), displayName, locale);
+            throw new NotificationTemplateManagerServerException(IdentityMgtConstants.ErrorMessages.
+                    ERROR_CODE_NO_CONTENT_IN_TEMPLATE.getCode(), error);
+        }
+    }
+
+    /**
+     * Extract NotificationTemplateManagerServerException from DataAccessException and throw it if exists.
+     * This needs to be used in the places that use, I18nEmailUtil.setContent()
+     *
+     * @param e DataAccessException
+     * @throws NotificationTemplateManagerServerException
+     */
+    public static void extractRootExceptionSetDuringSetContent(DataAccessException e)
+            throws NotificationTemplateManagerServerException {
+
+        if (e.getCause() == null) {
+            return;
+        }
+
+        Throwable cause = e.getCause().getCause();
+        if (cause == null) {
+            return;
+        }
+
+        if (cause instanceof NotificationTemplateManagerServerException) {
+            throw (NotificationTemplateManagerServerException) cause;
         }
     }
 }
