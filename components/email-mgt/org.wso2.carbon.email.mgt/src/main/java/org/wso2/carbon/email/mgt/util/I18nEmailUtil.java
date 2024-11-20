@@ -286,13 +286,12 @@ public class I18nEmailUtil {
                 : I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE;
     }
 
-    public static InputStream getContentStream(NotificationTemplate notificationTemplate) {
+    public static byte[] getContentByteArray(NotificationTemplate notificationTemplate) {
 
         String[] templateContent = new String[]{notificationTemplate.getSubject(), notificationTemplate.getBody(),
                 notificationTemplate.getFooter()};
         String content = new Gson().toJson(templateContent);
-        byte[] contentByteArray = content.getBytes(StandardCharsets.UTF_8);
-        return new ByteArrayInputStream(contentByteArray);
+        return content.getBytes(StandardCharsets.UTF_8);
     }
 
     public static void setContent(InputStream contentStream, NotificationTemplate notificationTemplateResult) throws

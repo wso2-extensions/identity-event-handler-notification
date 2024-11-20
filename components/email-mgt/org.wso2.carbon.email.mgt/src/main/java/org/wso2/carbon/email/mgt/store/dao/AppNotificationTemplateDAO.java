@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -47,7 +48,7 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFI
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_APP_NOTIFICATION_TEMPLATE_EXISTS_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentStream;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 
 /**
@@ -63,8 +64,9 @@ public class AppNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        try (InputStream contentStream = getContentStream(notificationTemplate))  {
-            int contentLength = contentStream.available();
+        byte[] contentByteArray = getContentByteArray(notificationTemplate);
+        int contentLength = contentByteArray.length;
+        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             namedJdbcTemplate.executeInsert(INSERT_APP_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
@@ -82,7 +84,7 @@ public class AppNotificationTemplateDAO {
                             channelName, locale, displayName, applicationUuid, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         } catch (IOException e) {
-            throw new NotificationTemplateManagerServerException("Error while closing content stream.", e);
+            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
     }
 
@@ -203,8 +205,9 @@ public class AppNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        try (InputStream contentStream = getContentStream(notificationTemplate))  {
-            int contentLength = contentStream.available();
+        byte[] contentByteArray = getContentByteArray(notificationTemplate);
+        int contentLength = contentByteArray.length;
+        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             namedJdbcTemplate.executeUpdate(UPDATE_APP_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
                         preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
@@ -222,7 +225,7 @@ public class AppNotificationTemplateDAO {
                             channelName, locale, displayName, applicationUuid, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         } catch (IOException e) {
-            throw new NotificationTemplateManagerServerException("Error while closing content stream.", e);
+            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
 
     }
