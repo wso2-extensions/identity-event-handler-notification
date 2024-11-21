@@ -24,18 +24,17 @@ import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.APP_ID;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.BODY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.FOOTER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TEMPLATE_KEY;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.SUBJECT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
@@ -48,8 +47,6 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFI
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_APP_NOTIFICATION_TEMPLATE_EXISTS_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
-import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 
 /**
  * This class is to perform CRUD operations for Application NotificationTemplates.
@@ -64,13 +61,13 @@ public class AppNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        byte[] contentByteArray = getContentByteArray(notificationTemplate);
-        int contentLength = contentByteArray.length;
-        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
+        try {
             namedJdbcTemplate.executeInsert(INSERT_APP_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
-                preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                preparedStatement.setString(BODY, notificationTemplate.getBody());
+                preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                 preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
@@ -83,8 +80,6 @@ public class AppNotificationTemplateDAO {
                     String.format("Error while adding %s template %s of type %s to application %s in %s tenant.",
                             channelName, locale, displayName, applicationUuid, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
-        } catch (IOException e) {
-            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
     }
 
@@ -99,7 +94,9 @@ public class AppNotificationTemplateDAO {
             notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_APP_NOTIFICATION_TEMPLATE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                        notificationTemplateResult.setBody(resultSet.getString(BODY));
+                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
                         notificationTemplateResult.setType(templateType);
@@ -173,7 +170,9 @@ public class AppNotificationTemplateDAO {
             notificationTemplates = namedJdbcTemplate.executeQuery(LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                        notificationTemplateResult.setBody(resultSet.getString(BODY));
+                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
                         notificationTemplateResult.setType(templateType.toLowerCase());
@@ -205,12 +204,12 @@ public class AppNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        byte[] contentByteArray = getContentByteArray(notificationTemplate);
-        int contentLength = contentByteArray.length;
-        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
+        try {
             namedJdbcTemplate.executeUpdate(UPDATE_APP_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
-                        preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                        preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                        preparedStatement.setString(BODY, notificationTemplate.getBody());
+                        preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
@@ -224,8 +223,6 @@ public class AppNotificationTemplateDAO {
                     String.format("Error while updating %s template %s of type %s from application %s in %s tenant.",
                             channelName, locale, displayName, applicationUuid, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
-        } catch (IOException e) {
-            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
 
     }
