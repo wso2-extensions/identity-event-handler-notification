@@ -69,6 +69,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_LEGACY_TENANTS;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_KEY_SERVICE_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_VAL_NOTIFICATION_TEMPLATE_MANAGER;
@@ -98,6 +99,9 @@ public class I18nMgtServiceComponent {
 
             List<String> legacyTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_LEGACY_TENANTS);
             I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
+
+            String enableUnicodeSupport = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT);
+            I18nMgtDataHolder.getInstance().setUnicodeSupport(Boolean.parseBoolean(enableUnicodeSupport));
 
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
