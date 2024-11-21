@@ -286,6 +286,13 @@ public class I18nEmailUtil {
                 : I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE;
     }
 
+    /**
+     * Get the notification template subject, body & footer contents as a byte array.
+     *
+     * @param notificationTemplate  Notification template to get the content
+     * @return                      Byte array of the content
+     */
+    public static byte[] getContentByteArray(NotificationTemplate notificationTemplate) {
     public static byte[] getContentByteArray(NotificationTemplate notificationTemplate) {
 
         String[] templateContent = new String[]{notificationTemplate.getSubject(), notificationTemplate.getBody(),
@@ -294,6 +301,13 @@ public class I18nEmailUtil {
         return content.getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Read the content stream and set the subject, body & footer of the notification template.
+     *
+     * @param contentStream                 InputStream of the content
+     * @param notificationTemplateResult    Notification template to set the content
+     * @throws SQLException
+     */
     public static void setContent(InputStream contentStream, NotificationTemplate notificationTemplateResult) throws
             SQLException {
 
