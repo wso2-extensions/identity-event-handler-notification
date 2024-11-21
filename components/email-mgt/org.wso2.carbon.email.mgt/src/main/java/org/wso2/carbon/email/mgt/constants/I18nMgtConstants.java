@@ -157,9 +157,7 @@ public class I18nMgtConstants {
         public static final String TENANT_ID = "TENANT_ID";
         public static final String TEMPLATE_KEY = "TEMPLATE_KEY";
         public static final String LOCALE = "LOCALE";
-        public static final String SUBJECT = "SUBJECT";
-        public static final String BODY = "BODY";
-        public static final String FOOTER = "FOOTER";
+        public static final String CONTENT = "CONTENT";
         public static final String CONTENT_TYPE = "CONTENT_TYPE";
         public static final String TYPE_ID = "TYPE_ID";
         public static final String APP_ID = "APP_ID";

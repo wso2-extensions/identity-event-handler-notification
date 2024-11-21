@@ -39,9 +39,13 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -280,5 +284,45 @@ public class I18nEmailUtil {
         return StringUtils.isNotBlank(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE))
                 ? IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)
                 : I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE;
+    }
+
+    /**
+     * Get the notification template subject, body & footer contents as a byte array.
+     *
+     * @param notificationTemplate  the notification template to get the content
+     * @return                      the byte array of the content
+     */
+    public static byte[] getContentByteArray(NotificationTemplate notificationTemplate) {
+
+        String[] templateContent = new String[]{notificationTemplate.getSubject(), notificationTemplate.getBody(),
+                notificationTemplate.getFooter()};
+        String content = new Gson().toJson(templateContent);
+        return content.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Read the content stream and set the subject, body & footer of the notification template.
+     *
+     * @param contentStream                 the inputStream of the content
+     * @param notificationTemplateResult    the notification template to set the content
+     * @throws SQLException
+     */
+    public static void setContent(InputStream contentStream, NotificationTemplate notificationTemplateResult) throws
+            SQLException {
+
+        try {
+            byte[] contentByteArray = contentStream.readAllBytes();
+            String content = new String(contentByteArray, StandardCharsets.UTF_8);
+            String[] templateContent = new Gson().fromJson(content, String[].class);
+            if (templateContent != null && templateContent.length == 3) {
+                notificationTemplateResult.setSubject(templateContent[0]);
+                notificationTemplateResult.setBody(templateContent[1]);
+                notificationTemplateResult.setFooter(templateContent[2]);
+            } else {
+                throw new SQLException("Invalid content data.");
+            }
+        } catch (IOException e) {
+            throw new SQLException("Error while reading content data.", e);
+        }
     }
 }
