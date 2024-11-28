@@ -25,8 +25,12 @@ import org.w3c.dom.Element;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
+import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
@@ -35,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,6 +72,10 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_TYPE_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ENABLE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.HTTP_URL_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INLINE;
@@ -419,6 +428,130 @@ public class NotificationSenderUtils {
             }
         });
         return smsSender;
+    }
+
+    /**
+     * Build Resource by Push sender DTO.
+     *
+     * @param pushSender PushSender DTO.
+     * @return Resource object.
+     */
+    public static Resource buildResourceFromPushSender(PushSenderDTO pushSender, PushProvider pushProvider,
+                                                       boolean isProcessProperties)
+            throws NotificationSenderManagementServerException {
+
+        Resource resource = new Resource();
+        resource.setResourceName(pushSender.getName());
+        try {
+            Map<String, String> pushSenderAttributes;
+            if (isProcessProperties) {
+                pushSenderAttributes = pushProvider.preProcessProperties(pushSender);
+            } else {
+                pushSenderAttributes = pushSender.getProperties();
+            }
+            pushSenderAttributes.put(PROVIDER, pushSender.getProvider());
+            List<Attribute> resourceAttributes =
+                    pushSenderAttributes.entrySet().stream()
+                            .filter(attribute -> attribute.getValue() != null && !"null".equals(attribute.getValue()))
+                            .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
+                            .collect(Collectors.toList());
+            resource.setAttributes(resourceAttributes);
+            return resource;
+        } catch (PushProviderException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES,
+                    pushSender.getName(), e);
+        }
+    }
+
+    /**
+     * Build a push sender response from push sender's resource object.
+     *
+     * @param resource Push sender resource object.
+     * @return Push sender response.
+     */
+    public static PushSenderDTO buildPushSenderFromResource(Resource resource, boolean isProcessProperties)
+            throws NotificationSenderManagementServerException {
+
+        PushSenderDTO pushSender = new PushSenderDTO();
+        pushSender.setName(resource.getResourceName());
+        pushSender.setProviderId(resource.getResourceId());
+        Map<String, String> attributesMap =
+                resource.getAttributes().stream()
+                        .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
+                        .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        attributesMap.forEach((key, value) -> {
+            if (key.equals(PROVIDER)) {
+                pushSender.setProvider(value);
+            } else {
+                pushSender.getProperties().put(key, value);
+            }
+        });
+
+        if (!isProcessProperties) {
+            return pushSender;
+        }
+
+        try {
+            PushProvider provider = getPushProvider(pushSender);
+            pushSender.setProperties(provider.retrievePushProviderSecretProperties(pushSender));
+            pushSender.setProperties(provider.postProcessProperties(pushSender));
+        } catch (PushProviderException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES,
+                    pushSender.getName(), e);
+        }
+        return pushSender;
+    }
+
+    /**
+     * Update push sender credentials.
+     *
+     * @param pushSender Push sender DTO.
+     */
+    public static void updatePushSenderCredentials(PushSenderDTO pushSender, PushProvider pushProvider)
+            throws NotificationSenderManagementServerException {
+
+        try {
+            pushProvider.updateCredentials(pushSender);
+        } catch (PushProviderException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES,
+                    pushSender.getName(), e);
+        }
+    }
+
+    /**
+     * Get the push provider for the given push sender.
+     *
+     * @param pushSender Push sender DTO.
+     * @return Push provider.
+     */
+    public static PushProvider getPushProvider(PushSenderDTO pushSender)
+            throws NotificationSenderManagementServerException {
+
+        PushProvider provider = NotificationSenderTenantConfigDataHolder.getInstance()
+                .getPushProvider(pushSender.getProvider());
+        if (provider == null) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND,
+                    pushSender.getName());
+        }
+        return provider;
+    }
+
+    /**
+     * Delete push sender secret properties.
+     *
+     * @param resource Push sender resource object.
+     */
+    public static void deletePushSenderSecretProperties(Resource resource)
+            throws NotificationSenderManagementServerException {
+
+        try {
+            PushSenderDTO pushSender = buildPushSenderFromResource(resource, false);
+            PushProvider pushProvider = getPushProvider(pushSender);
+            pushProvider.deletePushProviderSecretProperties(pushSender);
+        } catch (PushProviderException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS,
+                    e.getMessage(), e);
+        }
     }
 
     /**
