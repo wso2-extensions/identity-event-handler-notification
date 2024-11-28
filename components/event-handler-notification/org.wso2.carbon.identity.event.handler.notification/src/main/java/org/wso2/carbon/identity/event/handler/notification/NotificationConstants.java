@@ -133,7 +133,7 @@ public class NotificationConstants {
         public static final String DEVICE_TOKEN = "deviceToken";
         public static final String CHALLENGE = "challenge";
         public static final String NUMBER_CHALLENGE = "numberChallenge";
-        public static final String HOST_NAME = "hostName";
+        public static final String IP_ADDRESS = "ipAddress";
         public static final String REQUEST_DEVICE_OS = "deviceOS";
         public static final String REQUEST_DEVICE_BROWSER = "browser";
     }

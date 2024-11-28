@@ -31,7 +31,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.CHALLENGE;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_TOKEN;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.HOST_NAME;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.IP_ADDRESS;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NOTIFICATION_PROVIDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NOTIFICATION_SCENARIO;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NUMBER_CHALLENGE;
@@ -179,7 +179,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
         pushNotificationData.setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE));
 
         // Add system related data.
-        pushNotificationData.setHostName((String) eventProperties.get(HOST_NAME));
+        pushNotificationData.setHostName((String) eventProperties.get(IP_ADDRESS));
         pushNotificationData.setDeviceOS((String) eventProperties.get(REQUEST_DEVICE_OS));
         pushNotificationData.setBrowser((String) eventProperties.get(REQUEST_DEVICE_BROWSER));
 
