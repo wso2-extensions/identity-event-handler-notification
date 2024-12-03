@@ -39,7 +39,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -309,6 +308,10 @@ public class I18nEmailUtil {
      */
     public static void setContent(InputStream contentStream, NotificationTemplate notificationTemplateResult) throws
             SQLException {
+
+        if (contentStream == null) {
+            return;
+        }
 
         try {
             byte[] contentByteArray = contentStream.readAllBytes();
