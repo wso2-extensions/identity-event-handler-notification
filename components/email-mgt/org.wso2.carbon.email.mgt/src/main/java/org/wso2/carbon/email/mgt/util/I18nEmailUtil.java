@@ -45,15 +45,22 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
+
+import static java.time.ZoneOffset.UTC;
 
 public class I18nEmailUtil {
 
     private static final Log log = LogFactory.getLog(I18nEmailUtil.class);
     public static final String CHARSET_CONSTANT = "charset";
     public static final String CHARSET_UTF_8 = CHARSET_CONSTANT + "=" + StandardCharsets.UTF_8;
+    public static final Calendar CALENDER = Calendar.getInstance(TimeZone.getTimeZone(UTC));
     private static final String HYPHEN = "-";
     private static final String UNDERSCORE = "_";
 
@@ -327,5 +334,15 @@ public class I18nEmailUtil {
         } catch (IOException e) {
             throw new SQLException("Error while reading content data.", e);
         }
+    }
+
+    /**
+     * Get the current time as a timestamp in UTC.
+     *
+     * @return  the current time as a timestamp
+     */
+    public static Timestamp getCurrentTime() {
+
+        return new Timestamp(new Date().getTime());
     }
 }
