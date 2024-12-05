@@ -541,7 +541,7 @@
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
-        <identity.organization.management.version>1.4.55</identity.organization.management.version>
+        <identity.organization.management.version>1.4.58</identity.organization.management.version>
         <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
