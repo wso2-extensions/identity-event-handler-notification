@@ -144,6 +144,33 @@ public interface EmailTemplateManager {
     }
 
     /**
+     * Retrieves all email templates of a specific type for a given tenant and application UUID.
+     * <p>
+     * This method validates and fetches email templates based on the specified type. The behavior of the method
+     * depends on the {@code resolve} parameter:
+     * <ul>
+     *     <li><b>Resolved Template (resolve = true):</b> Retrieves the templates resolved through the ancestor
+     *     organization hierarchy.</li>
+     *     <li><b>Current org's or app's template (resolve = false):</b> Retrieves the templates specific to the
+     *     current organization or application.</li>
+     * </ul>
+     *
+     * @param templateDisplayName the display name of the email template type (e.g., "Welcome Email").
+     * @param tenantDomain        the tenant domain of the organization to retrieve the template from.
+     * @param applicationUuid     the UUID of the application associated with the template.
+     * @param resolve             a flag indicating whether to retrieve resolved template ({@code true}) or template
+     *                            specific to the current organization or application ({@code false}).
+     * @return a list of {@link EmailTemplate} objects matching the specified type and criteria.
+     * @throws I18nEmailMgtException if any unexpected error occurs while retrieving email templates.
+     */
+    default List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain,
+                                                     String applicationUuid, boolean resolve)
+            throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("getEmailTemplateType method not implemented in " + this.getClass().getName());
+    }
+
+    /**
      * Get all available email templates in a tenant's registry.
      *
      * @param tenantDomain
@@ -233,6 +260,33 @@ public interface EmailTemplateManager {
                                    String locale,
                                    String tenantDomain,
                                    String applicationUuid) throws I18nEmailMgtException;
+
+    /**
+     * Retrieves an email template for a specified type, locale, tenant domain, and application UUID.
+     * <p>
+     * This method resolves and retrieves an email template based on the provided parameters. The behavior is
+     * dependent on the {@code resolve} parameter:
+     * <ul>
+     *     <li><b>Resolved template (resolve = true):</b> Retrieves the template resolved through the ancestor
+     *     organization hierarchy.</li>
+     *     <li><b>Current org's or app's template (resolve = false):</b> Retrieves the template specific to the
+     *     current organization or application only.</li>
+     * </ul>
+     *
+     * @param templateType    the type of the email template.
+     * @param locale          the locale of the email template (e.g., "en_US").
+     * @param tenantDomain    the tenant domain of the organization to retrieve the template from.
+     * @param applicationUuid the UUID of the application associated with the template.
+     * @param resolve         a flag indicating whether to retrieve resolved template ({@code true}) or template
+     *                        specific to the current organization or application ({@code false}).
+     * @return the {@link EmailTemplate} matching the specified criteria.
+     * @throws I18nEmailMgtException if any unexpected error occurs while retrieving email template.
+     */
+    default EmailTemplate getEmailTemplate(String templateType, String locale, String tenantDomain,
+                                           String applicationUuid, boolean resolve) throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("getEmailTemplate method not implemented in " + this.getClass().getName());
+    }
 
     /**
      * Check whether the given email template type exists for the application.

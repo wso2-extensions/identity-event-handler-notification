@@ -22,12 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.TemplateMgtConstants;
-import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.store.SystemDefaultTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
-import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerInternalException;
@@ -35,9 +33,6 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
-import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
-import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
-import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,10 +69,6 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throws NotificationTemplateManagerException {
 
          try {
-             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                 // Return the root organization's template types.
-                 tenantDomain = getRootOrgTenantDomain(tenantDomain);
-             }
              List<String> templateTypes = templatePersistenceManager
                      .listNotificationTemplateTypes(notificationChannel, tenantDomain);
              return templateTypes != null ? templateTypes : new ArrayList<>();
@@ -85,8 +76,6 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
              String errorMsg = String.format("Error when retrieving %s template types of %s tenant.",
                      notificationChannel.toLowerCase(), tenantDomain);
              throw new NotificationTemplateManagerServerException(errorMsg, ex);
-         } catch (OrganizationManagementException e) {
-             throw new NotificationTemplateManagerServerException(e.getMessage(), e);
          }
     }
 
@@ -192,18 +181,26 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     public List<NotificationTemplate> getAllNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerException {
 
+        return getAllNotificationTemplates(notificationChannel, tenantDomain, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<NotificationTemplate> getAllNotificationTemplates(String notificationChannel, String tenantDomain,
+                                                                  boolean resolve)
+            throws NotificationTemplateManagerException {
+
         try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email templates.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
+            if (resolve) {
+                return templatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
             }
             return userDefinedTemplatePersistenceManager.listAllNotificationTemplates(
                     notificationChannel, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving templates of %s tenant.", tenantDomain);
             throw handleServerException(error, e);
-        } catch (OrganizationManagementException e) {
-            throw handleServerException(e.getMessage(), e);
         }
     }
 
@@ -223,27 +220,39 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
      */
     @Override
     public List<NotificationTemplate> getNotificationTemplatesOfType(String notificationChannel,
-                                              String templateDisplayName, String tenantDomain, String applicationUuid)
+                                                                     String templateDisplayName, String tenantDomain,
+                                                                     String applicationUuid)
             throws NotificationTemplateManagerException {
 
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email templates.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-            }
-            verifyTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
-            return userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
-                            notificationChannel, applicationUuid, tenantDomain);
-        } catch (OrganizationManagementException e) {
-            throw handleServerException(e.getMessage(), e);
-        }
+        return getNotificationTemplatesOfType(notificationChannel, templateDisplayName, tenantDomain, applicationUuid,
+                false);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<NotificationTemplate> getNotificationTemplatesOfType(String notificationChannel,
+                                                                     String templateDisplayName, String tenantDomain,
+                                                                     String applicationUuid, boolean resolve)
+            throws NotificationTemplateManagerException {
+
+        verifyTemplateTypeExists(templateDisplayName, notificationChannel, tenantDomain);
+
+        if (resolve) {
+            return templatePersistenceManager.listNotificationTemplates(templateDisplayName, notificationChannel,
+                    applicationUuid, tenantDomain);
+        }
+        return userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+                notificationChannel, applicationUuid, tenantDomain);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
-                                                         String tenantDomain)
+                                                        String tenantDomain)
             throws NotificationTemplateManagerException {
 
         return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, null);
@@ -254,36 +263,33 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
      */
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
-                                                         String tenantDomain, String applicationUuid)
+                                                        String tenantDomain, String applicationUuid)
             throws NotificationTemplateManagerException {
 
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // To return the root organization's notification template.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-                // If it's application specific template is required, get the root organization's application.
-                if (StringUtils.isNotBlank(applicationUuid)) {
-                    applicationUuid = I18nMgtDataHolder.getInstance().getApplicationManagementService()
-                            .getMainAppId(applicationUuid);
-                }
-            }
-        } catch (OrganizationManagementException e) {
-            throw new NotificationTemplateManagerException(e.getMessage(), e);
-        } catch (IdentityApplicationManagementServerException e) {
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
-                    TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode(),
-                    TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
-            String message = String.format(
-                    TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage(),
-                    applicationUuid, tenantDomain);
-            throw new NotificationTemplateManagerException(code, message, e);
-        }
+        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, applicationUuid, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
+                                                        String tenantDomain, String applicationUuid, boolean resolve)
+            throws NotificationTemplateManagerException {
+
         validateTemplateLocale(locale);
         locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
         verifyTemplateTypeExists(templateType, notificationChannel, tenantDomain);
-        NotificationTemplate notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(
-                templateType, locale, notificationChannel, applicationUuid, tenantDomain);
+
+        NotificationTemplate notificationTemplate;
+        if (resolve) {
+            notificationTemplate = templatePersistenceManager.getNotificationTemplate(templateType, locale,
+                    notificationChannel, applicationUuid, tenantDomain);
+        } else {
+            notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(
+                    templateType, locale, notificationChannel, applicationUuid, tenantDomain);
+        }
 
         String defaultLocale = getDefaultNotificationLocale(notificationChannel);
         if (notificationTemplate == null) {
@@ -574,14 +580,6 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             throw new NotificationTemplateManagerClientException(errorCode,
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_EMPTY_TEMPLATE_NAME.getMessage());
         }
-    }
-
-    private String getRootOrgTenantDomain(String tenantDomain) throws OrganizationManagementException {
-
-        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
-        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
-        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
-        return organizationManager.resolveTenantDomain(primaryOrgId);
     }
 
     private NotificationTemplateManagerServerException handleServerException(String errorMsg, Throwable ex)

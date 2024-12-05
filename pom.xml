@@ -262,6 +262,11 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-collections.wso2</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${apache.common.collection.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -280,6 +285,11 @@
                 <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
                 <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
                 <version>${identity.organization.management.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.organization.management</groupId>
+                <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
+                <version>${identity.organization.management.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->
@@ -477,7 +487,7 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.11.11</identity.governance.version>
+        <identity.governance.version>1.11.18</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
@@ -502,6 +512,8 @@
         <commons.logging.imp.pkg.version.range>[1.2,2.0)</commons.logging.imp.pkg.version.range>
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <commons-lang.version.range>[2.6.0,3.0.0)</commons-lang.version.range>
+        <apache.common.collection.version>3.2.0.wso2v1</apache.common.collection.version>
+        <commons-collections.wso2.version.range>[3.2.0,4.0.0)</commons-collections.wso2.version.range>
 
         <!--Carbon Kernel Version-->
         <carbon.kernel.version>4.10.24</carbon.kernel.version>
@@ -529,6 +541,7 @@
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
+        <identity.organization.management.version>1.4.55</identity.organization.management.version>
         <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
