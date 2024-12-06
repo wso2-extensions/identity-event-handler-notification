@@ -192,6 +192,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public EmailTemplate getEmailTemplate(String templateDisplayName, String locale, String tenantDomain)
             throws I18nEmailMgtException {
 
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
         return getEmailTemplate(templateDisplayName, locale, tenantDomain, null, true);
     }
 
@@ -199,14 +201,19 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain)
             throws I18nEmailMgtException {
 
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
         return getEmailTemplateType(templateDisplayName, tenantDomain, null, true);
     }
 
+    @Deprecated
     @Override
     public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain,
                                                     String applicationUuid) throws I18nEmailMgtException {
 
-        return getEmailTemplateType(templateDisplayName, tenantDomain, applicationUuid, false);
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplateType(templateDisplayName, tenantDomain, applicationUuid, true);
     }
 
     @Override
@@ -260,15 +267,20 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                                                         String tenantDomain)
             throws NotificationTemplateManagerException {
 
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
         return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, null, true);
     }
 
+    @Deprecated
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
                                                         String tenantDomain, String applicationUuid)
             throws NotificationTemplateManagerException {
 
-        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, applicationUuid, false);
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, applicationUuid, true);
     }
 
     @Override
@@ -584,11 +596,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
     }
 
+    @Deprecated
     @Override
     public EmailTemplate getEmailTemplate(String templateType, String locale, String tenantDomain,
                                           String applicationUuid) throws I18nEmailMgtException {
 
-        return getEmailTemplate(templateType, locale, tenantDomain, applicationUuid, false);
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplate(templateType, locale, tenantDomain, applicationUuid, true);
     }
 
     @Override

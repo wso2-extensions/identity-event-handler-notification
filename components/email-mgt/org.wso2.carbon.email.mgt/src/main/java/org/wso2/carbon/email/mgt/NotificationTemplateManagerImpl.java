@@ -177,10 +177,13 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public List<NotificationTemplate> getAllNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerException {
 
+        /* When resolve param is not specified, the default behavior results in unresolved templates,
+          maintaining backward compatibility with the previous behavior of the method. */
         return getAllNotificationTemplates(notificationChannel, tenantDomain, false);
     }
 
@@ -218,12 +221,15 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public List<NotificationTemplate> getNotificationTemplatesOfType(String notificationChannel,
                                                                      String templateDisplayName, String tenantDomain,
                                                                      String applicationUuid)
             throws NotificationTemplateManagerException {
 
+        /* When resolve param is not specified, the default behavior results in unresolved templates,
+          maintaining backward compatibility with the previous behavior of the method. */
         return getNotificationTemplatesOfType(notificationChannel, templateDisplayName, tenantDomain, applicationUuid,
                 false);
     }
@@ -261,11 +267,14 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
                                                         String tenantDomain, String applicationUuid)
             throws NotificationTemplateManagerException {
 
+        // When resolve param is not specified, the default behavior results in unresolved template,
+        // maintaining backward compatibility with the previous behavior of the method.
         return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, applicationUuid, false);
     }
 

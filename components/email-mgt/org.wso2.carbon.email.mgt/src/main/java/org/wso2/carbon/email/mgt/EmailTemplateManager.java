@@ -129,6 +129,8 @@ public interface EmailTemplateManager {
     }
 
     /**
+     * @deprecated Use {@link #getEmailTemplateType(String, String, String, boolean)} instead.
+     * <p>
      * Get all email templates of a specific template type for an application, from tenant registry.
      *
      * @param templateDisplayName Email template type displace name.
@@ -137,6 +139,7 @@ public interface EmailTemplateManager {
      * @return A list of email templates that matches to the provided template type.
      * @throws I18nEmailMgtException if an error occurred.
      */
+    @Deprecated
     default List<EmailTemplate> getEmailTemplateType(
             String templateDisplayName, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
@@ -247,6 +250,8 @@ public interface EmailTemplateManager {
                              String applicationUuid) throws I18nEmailMgtException;
 
     /**
+     * @deprecated Use {@link #getEmailTemplate(String, String, String, String, boolean)} instead.
+     * <p>
      * Get an email template from tenant registry with application UUID.
      *
      * @param templateType Email template type.
@@ -256,6 +261,7 @@ public interface EmailTemplateManager {
      * @return Email template of the application with fallback to organization template.
      * @throws I18nEmailMgtException If an error occurred while getting the email template.
      */
+    @Deprecated
     EmailTemplate getEmailTemplate(String templateType,
                                    String locale,
                                    String tenantDomain,
