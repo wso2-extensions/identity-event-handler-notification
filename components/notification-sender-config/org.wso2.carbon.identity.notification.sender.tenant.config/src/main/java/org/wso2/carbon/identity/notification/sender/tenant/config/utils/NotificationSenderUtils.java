@@ -19,14 +19,13 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.xerces.impl.Constants;
-import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
@@ -39,17 +38,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -124,7 +120,7 @@ public class NotificationSenderUtils {
             throws ParserConfigurationException, TransformerException {
 
         Map<String, String> properties = emailSender.getProperties();
-        DocumentBuilderFactory documentFactory = getSecuredDocumentBuilder();
+        DocumentBuilderFactory documentFactory = IdentityUtil.getSecuredDocumentBuilderFactory();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
         // Root element (eventPublisher).
@@ -141,9 +137,7 @@ public class NotificationSenderUtils {
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(outputStream);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        Transformer transformer = transformerFactory.newTransformer();
+        Transformer transformer = IdentityUtil.getSecuredTransformerFactory().newTransformer();
         transformer.transform(xmlSource, outputTarget);
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
@@ -160,7 +154,7 @@ public class NotificationSenderUtils {
             throws ParserConfigurationException, TransformerException {
 
         Map<String, String> properties = smsSender.getProperties();
-        DocumentBuilderFactory documentFactory = getSecuredDocumentBuilder();
+        DocumentBuilderFactory documentFactory = IdentityUtil.getSecuredDocumentBuilderFactory();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
         // Root element (eventPublisher).
@@ -177,9 +171,7 @@ public class NotificationSenderUtils {
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(outputStream);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        Transformer transformer = transformerFactory.newTransformer();
+        Transformer transformer = IdentityUtil.getSecuredTransformerFactory().newTransformer();
         transformer.transform(xmlSource, outputTarget);
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
@@ -443,28 +435,5 @@ public class NotificationSenderUtils {
         String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
         String primaryTenantDomain = organizationManager.resolveTenantDomain(primaryOrgId);
         return IdentityTenantUtil.getTenantId(primaryTenantDomain);
-    }
-
-    private static DocumentBuilderFactory getSecuredDocumentBuilder() {
-
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        dbf.setXIncludeAware(false);
-        dbf.setExpandEntityReferences(false);
-        try {
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
-        } catch (ParserConfigurationException e) {
-            logger.log(Level.SEVERE, "Failed to load XML Processor Feature " +
-                    Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or " +
-                    Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE);
-        }
-
-        org.apache.xerces.util.SecurityManager securityManager = new SecurityManager();
-        securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
-        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
-
-        return dbf;
     }
 }
