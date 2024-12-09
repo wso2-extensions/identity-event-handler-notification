@@ -119,12 +119,6 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
 
         if(StringUtils.isNotEmpty(notificationTemplateName)) {
 
-            String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
-            org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager)
-                    event.getEventProperties().get(
-                    IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
-            String userStoreDomainName = (String) event.getEventProperties().get(
-                    IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
             String tenantDomain = (String) event.getEventProperties().get(
                     IdentityEventConstants.EventProperty.TENANT_DOMAIN);
             String sendFrom = (String) event.getEventProperties().get(
@@ -134,12 +128,7 @@ public class DefaultNotificationHandler extends AbstractEventHandler {
             String notificationChannel = resolveNotificationChannel(
                     (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.NOTIFICATION_CHANNEL));
 
-            if (StringUtils.isNotBlank(username) && userStoreManager != null) {
-                userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
-            } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
-                    StringUtils.isNotBlank(tenantDomain)) {
-                userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
-            }
+            userClaims = NotificationUtil.resolveUserClaims(event, tenantDomain);
 
             // Resolve notification template locale according to the notification channel.
             String locale = NotificationUtil.getNotificationLocale();
