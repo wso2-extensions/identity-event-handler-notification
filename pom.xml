@@ -487,7 +487,7 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.11.18</identity.governance.version>
+        <identity.governance.version>1.11.21</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
@@ -534,7 +534,7 @@
         <org.wso2.carbon.database.utils.version.range>[2.1.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>7.1.0</carbon.identity.framework.version>
+        <carbon.identity.framework.version>7.7.23</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[7.1.0, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
@@ -560,7 +560,7 @@
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
 
         <!-- Test Dependency Versions -->
-        <testng.version>6.9.10</testng.version>
+        <testng.version>7.4.0</testng.version>
         <powermock.version>2.0.2</powermock.version>
         <mockito.version>2.22.0</mockito.version>
         <mockito.inline.version>3.8.0</mockito.inline.version>

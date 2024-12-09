@@ -30,17 +30,20 @@ import org.wso2.carbon.identity.common.testng.WithCarbonHome;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
@@ -53,6 +56,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_
 public class UnifiedTemplateManagerTest extends PowerMockTestCase {
 
     private static final String tenantDomain = "carbon.super";
+    private static final String ROOT_ORG_ID = "10084a8d-113f-4211-a0d5-efe36b082211";
 
     @Mock
     I18nMgtDataHolder i18nMgtDataHolder;
@@ -60,6 +64,10 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     TemplatePersistenceManagerFactory templatePersistenceManagerFactory;
     @Mock
     TemplatePersistenceManager templatePersistenceManager;
+    @Mock
+    OrganizationManager organizationManager;
+    @Mock
+    OrgResourceResolverService orgResourceResolverService;
 
     UnifiedTemplateManager unifiedTemplateManager;
     List<NotificationTemplate> defaultSystemTemplates;
@@ -68,7 +76,7 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
 
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws Exception {
 
         initTestNotificationTemplates();
 
@@ -77,6 +85,10 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
         i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
         when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
         when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultSystemTemplates);
+        when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+        when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
+
+        mockOrganizationManager();
 
         mockStatic(IdentityUtil.class);
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
@@ -105,12 +117,11 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
                 tenantDomain);
 
         notificationTemplate = positiveNotificationTemplate;
-        when(templatePersistenceManager.isNotificationTemplateExists(
-                notificationTemplate.getDisplayName(),
-                notificationTemplate.getLocale(),
-                notificationTemplate.getNotificationChannel(),
-                null,
-                tenantDomain)).thenReturn(true);
+        when(orgResourceResolverService.getResourcesFromOrgHierarchy(
+                eq(ROOT_ORG_ID),
+                any(),
+                any()))
+                .thenReturn(true);
         assertTrue(unifiedTemplateManager.isNotificationTemplateExists(
                 notificationTemplate.getDisplayName(),
                 notificationTemplate.getLocale(),
@@ -118,12 +129,11 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
                 null,
                 tenantDomain));
 
-        when(templatePersistenceManager.isNotificationTemplateExists(
-                notificationTemplate.getDisplayName(),
-                notificationTemplate.getLocale(),
-                notificationTemplate.getNotificationChannel(),
-                null,
-                tenantDomain)).thenReturn(false);
+        when(orgResourceResolverService.getResourcesFromOrgHierarchy(
+                eq(ROOT_ORG_ID),
+                any(),
+                any()))
+                .thenReturn(false);
         assertFalse(unifiedTemplateManager.isNotificationTemplateExists(
                 notificationTemplate.getDisplayName(),
                 notificationTemplate.getLocale(),
@@ -291,5 +301,10 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
         negativeNotificationTemplate.setType("dummyType");
         negativeNotificationTemplate.setDisplayName("dummyDisplayName");
         negativeNotificationTemplate.setLocale("en_US");
+    }
+
+    private void mockOrganizationManager() throws Exception {
+
+        when(organizationManager.resolveOrganizationId(tenantDomain)).thenReturn(ROOT_ORG_ID);
     }
 }
