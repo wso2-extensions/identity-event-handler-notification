@@ -168,10 +168,16 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
             }
 
             String usernameInContext = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-            CompletableFuture.runAsync(
-                    () -> migrateChildOrgTemplates(registryBasedTemplate, tenantDomain, applicationUuid,
-                            usernameInContext),
-                    executorService);
+            /* Since no default templates were stored for application notification templates, all the app templates
+              created in the registry are manually created by users. Additionally, application templates did not
+              support fallback (inheritance) mechanisms previously. Therefore, child organization template migration
+              will only be applied to organization-level templates.
+             */
+            if (StringUtils.isBlank(applicationUuid)) {
+                CompletableFuture.runAsync(
+                        () -> migrateChildOrgTemplates(registryBasedTemplate, tenantDomain, usernameInContext),
+                        executorService);
+            }
         }
     }
 
@@ -303,7 +309,7 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     }
 
     private void migrateChildOrgTemplates(NotificationTemplate parentTemplate, String parentTenantDomain,
-                                          String parentAppId, String usernameInContext) {
+                                          String usernameInContext) {
 
         String cursor = null;
         int pageSize = 100;
@@ -317,54 +323,35 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(usernameInContext);
 
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
-            ApplicationManagementService applicationManagementService =
-                    I18nMgtDataHolder.getInstance().getApplicationManagementService();
             do {
                 try {
                     List<BasicOrganization> childOrganizations =
                             organizationManager.getOrganizations(pageSize, cursor, null, "DESC", "", false);
-                    Map<String, String> childAppIds = new HashMap<>();
-                    if (StringUtils.isNotBlank(parentAppId)) {
-                        childAppIds = applicationManagementService.getChildAppIds(parentAppId, parentTenantDomain,
-                                childOrganizations.stream().map(BasicOrganization::getId).collect(Collectors.toList()));
-                        if (childAppIds.isEmpty()) {
-                            continue;
-                        }
-                    }
                     for (BasicOrganization childOrganization : childOrganizations) {
                         String childTenantDomain = organizationManager.resolveTenantDomain(childOrganization.getId());
-                        String childAppId = childAppIds.get(childTenantDomain);
-
-                        if (StringUtils.isNotBlank(parentAppId) && StringUtils.isBlank(childAppId)) {
-                            continue;
-                        }
 
                         NotificationTemplate childNotificationTemplate =
                                 registryBasedTemplateManager.getNotificationTemplate(
-                                        displayName, locale, notificationChannel, childAppId, childTenantDomain);
-                        if (childNotificationTemplate != null) {
-                            if (!areNotificationTemplatesEqual(parentTemplate, childNotificationTemplate) &&
-                                    !dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale,
-                                            notificationChannel, childAppId, childTenantDomain)) {
-                                dbBasedTemplateManager.addOrUpdateNotificationTemplate(childNotificationTemplate,
-                                        childAppId, childTenantDomain);
-                            }
-
-                            registryBasedTemplateManager.deleteNotificationTemplates(displayName, notificationChannel,
-                                    childAppId, childTenantDomain);
-                            migrateChildOrgTemplates(childNotificationTemplate, childTenantDomain, childAppId,
-                                    usernameInContext);
+                                        displayName, locale, notificationChannel, null, childTenantDomain);
+                        if (childNotificationTemplate == null) {
+                            continue;
                         }
+
+                        if (!areNotificationTemplatesEqual(parentTemplate, childNotificationTemplate) &&
+                                !dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale,
+                                        notificationChannel, null, childTenantDomain)) {
+                            dbBasedTemplateManager.addOrUpdateNotificationTemplate(childNotificationTemplate,
+                                    null, childTenantDomain);
+                        }
+
+                        registryBasedTemplateManager.deleteNotificationTemplates(displayName, notificationChannel,
+                                null, childTenantDomain);
+                        migrateChildOrgTemplates(childNotificationTemplate, childTenantDomain, usernameInContext);
                     }
-                    cursor = childOrganizations.isEmpty() ? null : Base64.getEncoder().encodeToString(
-                            childOrganizations.get(childOrganizations.size() - 1).getCreated()
-                                    .getBytes(StandardCharsets.UTF_8));
+                    cursor = getNextCursor(childOrganizations);
                 } catch (OrganizationManagementException e) {
                     log.error("Error occurred while retrieving child organizations of organization " +
                             "with tenant domain: " + parentTenantDomain, e);
-                } catch (IdentityApplicationManagementException e){
-                    log.error("Error occurred while retrieving child app ids of application with id: " +
-                            parentAppId + " and tenant domain: " + parentTenantDomain, e);
                 } catch (NotificationTemplateManagerServerException e) {
                     log.error("Error occurred while migrating child organization templates of parent template: " +
                             displayName + " for locale: " + locale + " and notification channel: " +
@@ -374,6 +361,13 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    private String getNextCursor(List<BasicOrganization> childOrganizations) {
+
+        return childOrganizations.isEmpty() ? null : Base64.getEncoder().encodeToString(
+                childOrganizations.get(childOrganizations.size() - 1).getCreated()
+                        .getBytes(StandardCharsets.UTF_8));
     }
 
     private boolean areNotificationTemplatesEqual(NotificationTemplate template1, NotificationTemplate template2) {
