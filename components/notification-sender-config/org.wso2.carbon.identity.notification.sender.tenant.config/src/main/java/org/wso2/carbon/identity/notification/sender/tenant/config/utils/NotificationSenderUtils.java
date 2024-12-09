@@ -104,10 +104,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
  */
 public class NotificationSenderUtils {
 
-    private static final Logger logger = Logger.getLogger(NotificationSenderUtils.class.getName());
-
-    private static final int ENTITY_EXPANSION_LIMIT = 0;
-
     /**
      * Generate EmailPublisher.xml input stream.
      *
