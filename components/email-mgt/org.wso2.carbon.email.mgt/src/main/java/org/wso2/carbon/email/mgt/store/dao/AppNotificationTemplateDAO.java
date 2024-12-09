@@ -46,14 +46,18 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationT
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_ID_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_APP_NOTIFICATION_TEMPLATE_EXISTS_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_WITHOUT_UNICODE_SQL;
+import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
@@ -65,6 +69,7 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 public class AppNotificationTemplateDAO {
 
     private boolean isUnicodeSupported = I18nMgtDataHolder.getInstance().isUnicodeSupported();
+    private boolean isHybrid = I18nMgtDataHolder.getInstance().isHybrid();
 
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -78,12 +83,18 @@ public class AppNotificationTemplateDAO {
         int contentLength = contentByteArray.length;
         try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             String insertAppNotificationTemplateSql = isUnicodeSupported ? INSERT_APP_NOTIFICATION_TEMPLATE_SQL :
-                    INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
+                    isHybrid ? INSERT_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
+                            INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
             namedJdbcTemplate.executeInsert(insertAppNotificationTemplateSql, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
                 if (isUnicodeSupported) {
                     preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                } else if (isHybrid) {
+                    preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                    preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                    preparedStatement.setString(BODY, notificationTemplate.getBody());
+                    preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                 } else {
                     preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
                     preparedStatement.setString(BODY, notificationTemplate.getBody());
@@ -115,12 +126,22 @@ public class AppNotificationTemplateDAO {
 
         try {
             String getAppNotificationTemplateSql = isUnicodeSupported ? GET_APP_NOTIFICATION_TEMPLATE_SQL :
-                    GET_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
+                    isHybrid ? GET_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
+                            GET_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
             notificationTemplate = namedJdbcTemplate.fetchSingleRecord(getAppNotificationTemplateSql,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
                         if (isUnicodeSupported) {
                             setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                        } else if (isHybrid) {
+                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                            if (notificationTemplateResult.getSubject() == null
+                                    && notificationTemplateResult.getBody() == null
+                                    && notificationTemplateResult.getFooter() == null) {
+                                notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                                notificationTemplateResult.setBody(resultSet.getString(BODY));
+                                notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                            }
                         } else {
                             notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
                             notificationTemplateResult.setBody(resultSet.getString(BODY));
@@ -198,12 +219,22 @@ public class AppNotificationTemplateDAO {
         try {
             String listAppNotificationTemplatesByAppSql =
                     isUnicodeSupported ? LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL :
-                            LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_WITHOUT_UNICODE_SQL;
+                            isHybrid ? LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_HYBRID_SQL :
+                                    LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_WITHOUT_UNICODE_SQL;
             notificationTemplates = namedJdbcTemplate.executeQuery(listAppNotificationTemplatesByAppSql,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
                         if (isUnicodeSupported) {
                             setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                        } else if (isHybrid) {
+                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
+                            if (notificationTemplateResult.getSubject() == null
+                                    && notificationTemplateResult.getBody() == null
+                                    && notificationTemplateResult.getFooter() == null) {
+                                notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
+                                notificationTemplateResult.setBody(resultSet.getString(BODY));
+                                notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                            }
                         } else {
                             notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
                             notificationTemplateResult.setBody(resultSet.getString(BODY));
@@ -244,11 +275,17 @@ public class AppNotificationTemplateDAO {
         int contentLength = contentByteArray.length;
         try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             String updateAppNotificationTemplateSql = isUnicodeSupported ? UPDATE_APP_NOTIFICATION_TEMPLATE_SQL :
-                    UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
+                    isHybrid ? UPDATE_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
+                            UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
             namedJdbcTemplate.executeUpdate(updateAppNotificationTemplateSql,
                     preparedStatement -> {
                         if (isUnicodeSupported) {
                             preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                        } else if (isHybrid) {
+                            preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                            preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
+                            preparedStatement.setString(BODY, notificationTemplate.getBody());
+                            preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
                         } else {
                             preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
                             preparedStatement.setString(BODY, notificationTemplate.getBody());

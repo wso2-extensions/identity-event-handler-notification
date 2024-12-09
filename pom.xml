@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.25-SNAPSHOT</version>
+    <version>1.9.28-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -516,7 +516,7 @@
         <commons-collections.wso2.version.range>[3.2.0,4.0.0)</commons-collections.wso2.version.range>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.10.24</carbon.kernel.version>
+        <carbon.kernel.version>4.10.25</carbon.kernel.version>
         <carbon.kernel.feature.version>4.9.10</carbon.kernel.feature.version>
         <carbon.kernel.imp.pkg.version.range>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 

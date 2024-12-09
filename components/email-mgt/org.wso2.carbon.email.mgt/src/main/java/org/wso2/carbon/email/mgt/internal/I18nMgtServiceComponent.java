@@ -101,8 +101,9 @@ public class I18nMgtServiceComponent {
             List<String> legacyTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_LEGACY_TENANTS);
             I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
 
-            String enableUnicodeSupport = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT);
-            I18nMgtDataHolder.getInstance().setUnicodeSupport(Boolean.parseBoolean(enableUnicodeSupport));
+            String unicodeSupportType = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT);
+            I18nMgtDataHolder.getInstance().setUnicodeSupport(Boolean.parseBoolean(unicodeSupportType));
+            I18nMgtDataHolder.getInstance().setHybrid("hybrid".equalsIgnoreCase(unicodeSupportType));
 
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
