@@ -65,11 +65,8 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        boolean templateTypeExists =
-                systemDefaultTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
-                        tenantDomain);
-
-        if (templateTypeExists) {
+        if (systemDefaultTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                        tenantDomain)) {
             return true;
         }
 
@@ -79,12 +76,16 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
             OrgResourceResolverService orgResourceResolverService =
                     I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
-            return orgResourceResolverService.getResourcesFromOrgHierarchy(
+            Boolean templateTypeExists = orgResourceResolverService.getResourcesFromOrgHierarchy(
                     organizationId,
                     LambdaExceptionUtils.rethrowFunction(
                             orgId -> notificationTemplateTypeExistenceRetriever(displayName, notificationChannel,
                                     orgId)),
                     new FirstFoundAggregationStrategy<>());
+            if (templateTypeExists != null) {
+                return templateTypeExists;
+            }
+            return false;
         } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
             String errorMsg = String.format("Unexpected server error occurred while checking the existence of " +
                     "email template type: %s for tenant: %s", displayName, tenantDomain);
@@ -173,11 +174,8 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        boolean templateExists =
-                systemDefaultTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
-                        null, tenantDomain);
-
-        if (templateExists) {
+        if (systemDefaultTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                null, tenantDomain)) {
             return true;
         }
 
@@ -187,12 +185,16 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
 
             OrgResourceResolverService orgResourceResolverService =
                     I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
-            return orgResourceResolverService.getResourcesFromOrgHierarchy(
+            Boolean templateExists = orgResourceResolverService.getResourcesFromOrgHierarchy(
                     organizationId,
                     LambdaExceptionUtils.rethrowFunction(
                             orgId -> notificationTemplateExistenceRetriever(displayName, locale, notificationChannel,
                                     applicationUuid, orgId)),
                     new FirstFoundAggregationStrategy<>());
+            if (templateExists != null) {
+                return templateExists;
+            }
+            return false;
         } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
             String errorMsg = String.format("Unexpected server error occurred while checking the existence of " +
                     "email template with type: %s for tenant: %s", displayName, tenantDomain);
