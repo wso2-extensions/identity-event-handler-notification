@@ -295,6 +295,8 @@ public interface EmailTemplateManager {
     }
 
     /**
+     * @deprecated Use {@link #isEmailTemplateExists(String, String, String, String, boolean)} instead.
+     * <p>
      * Check whether the given email template type exists for the application.
      *
      * @param templateTypeDisplayName Display name of the template type.
@@ -304,6 +306,7 @@ public interface EmailTemplateManager {
      * @return True if the template type exists, false otherwise.
      * @throws I18nEmailMgtException If an error occurred while checking the existence of the email template.
      */
+    @Deprecated
     default boolean isEmailTemplateExists(String templateTypeDisplayName, String locale,
                                           String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 

@@ -523,6 +523,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         return isEmailTemplateExists(templateTypeDisplayName, locale, tenantDomain, null);
     }
 
+    @Deprecated
     @Override
     public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale,
                                          String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
