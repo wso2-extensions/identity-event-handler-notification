@@ -18,14 +18,25 @@
 
 package org.wso2.carbon.email.mgt.store;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
+import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.exception.OrgResourceHierarchyTraverseException;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.strategy.FirstFoundAggregationStrategy;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.strategy.MergeAllAggregationStrategy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -54,18 +65,57 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return systemDefaultTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
-                tenantDomain) ||
-                templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
-                        tenantDomain);
+        if (systemDefaultTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                        tenantDomain)) {
+            return true;
+        }
+
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceResolverService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            Boolean templateTypeExists = orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    organizationId,
+                    LambdaExceptionUtils.rethrowFunction(
+                            orgId -> notificationTemplateTypeExistenceRetriever(displayName, notificationChannel,
+                                    orgId)),
+                    new FirstFoundAggregationStrategy<>());
+            if (templateTypeExists != null) {
+                return templateTypeExists;
+            }
+            return false;
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format("Unexpected server error occurred while checking the existence of " +
+                    "email template type: %s for tenant: %s", displayName, tenantDomain);
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
+        }
     }
 
     @Override
     public List<String> listNotificationTemplateTypes(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        List<String> dbBasedTemplateTypes = templatePersistenceManager.listNotificationTemplateTypes
-                (notificationChannel, tenantDomain);
+        List<String> dbBasedTemplateTypes;
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceResolverService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            dbBasedTemplateTypes = orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    organizationId,
+                    LambdaExceptionUtils.rethrowFunction(
+                            orgId -> notificationTemplateTypesRetriever(notificationChannel, orgId)),
+                    new MergeAllAggregationStrategy<>(this::mergeAndRemoveDuplicates));
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format(
+                    "Unexpected server error occurred while resolving all email templates for tenant: %s",
+                    tenantDomain);
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
+        }
+
         List<String> inMemoryTemplateTypes =
                 systemDefaultTemplateManager.listNotificationTemplateTypes(notificationChannel, tenantDomain);
 
@@ -124,10 +174,35 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return systemDefaultTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
-                applicationUuid, tenantDomain) ||
-                templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
-                        applicationUuid, tenantDomain);
+        if (systemDefaultTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                null, tenantDomain)) {
+            return true;
+        }
+
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceResolverService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            Boolean templateExists = orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    organizationId,
+                    LambdaExceptionUtils.rethrowFunction(
+                            orgId -> notificationTemplateExistenceRetriever(displayName, locale, notificationChannel,
+                                    applicationUuid, orgId)),
+                    new FirstFoundAggregationStrategy<>());
+            if (templateExists != null) {
+                return templateExists;
+            }
+            return false;
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format("Unexpected server error occurred while checking the existence of " +
+                    "email template with type: %s for tenant: %s", displayName, tenantDomain);
+            if (applicationUuid != null) {
+                errorMsg += String.format(" and application id: %s", applicationUuid);
+            }
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
+        }
     }
 
     @Override
@@ -135,13 +210,35 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                                                         String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        NotificationTemplate notificationTemplate = templatePersistenceManager.getNotificationTemplate(displayName,
-                locale, notificationChannel, applicationUuid, tenantDomain);
+        NotificationTemplate notificationTemplate;
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceResolverService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            notificationTemplate = orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    organizationId,
+                    applicationUuid,
+                    LambdaExceptionUtils.rethrowFunction(
+                            (orgId, appId) -> notificationTemplateRetriever(displayName, locale, notificationChannel,
+                                    orgId, appId)),
+                    new FirstFoundAggregationStrategy<>());
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format(
+                    "Unexpected server error occurred while resolving email template with type: %s for tenant: %s",
+                    displayName, tenantDomain);
+            if (applicationUuid != null) {
+                errorMsg += String.format(" and application id: %s", applicationUuid);
+            }
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
+        }
+
         if (notificationTemplate != null) {
             return notificationTemplate;
         } else {
             return systemDefaultTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
-                    applicationUuid, tenantDomain);
+                    null, tenantDomain);
         }
     }
 
@@ -150,12 +247,28 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        List<NotificationTemplate> dbBasedTemplates = new ArrayList<>();
-        if (templatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
-                tenantDomain)) {
+        List<NotificationTemplate> dbBasedTemplates;
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceManagementService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
             dbBasedTemplates =
-                    templatePersistenceManager.listNotificationTemplates(templateType, notificationChannel,
-                            applicationUuid, tenantDomain);
+                    orgResourceManagementService.getResourcesFromOrgHierarchy(organizationId,
+                            applicationUuid,
+                            LambdaExceptionUtils.rethrowFunction(
+                                    (orgId, appId) -> notificationTemplatesRetriever(templateType, notificationChannel, orgId,
+                                            appId)),
+                            new MergeAllAggregationStrategy<>(this::mergeAndRemoveDuplicateTemplates));
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format(
+                    "Unexpected server error occurred while resolving email templates with type: %s for tenant: %s",
+                    templateType, tenantDomain);
+            if (applicationUuid != null) {
+                errorMsg += String.format(" and application id: %s", applicationUuid);
+            }
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
         }
 
         List<NotificationTemplate> inMemoryBasedTemplates = new ArrayList<>();
@@ -163,7 +276,7 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
                 tenantDomain)) {
             inMemoryBasedTemplates =
                     systemDefaultTemplateManager.listNotificationTemplates(templateType, notificationChannel,
-                            applicationUuid, tenantDomain);
+                            null, tenantDomain);
         }
 
         return mergeAndRemoveDuplicateTemplates(dbBasedTemplates, inMemoryBasedTemplates);
@@ -173,8 +286,25 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     public List<NotificationTemplate> listAllNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        List<NotificationTemplate> dbBasedTemplates =
-                templatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
+        List<NotificationTemplate> dbBasedTemplates;
+        try {
+            OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+            String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+
+            OrgResourceResolverService orgResourceManagementService =
+                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            dbBasedTemplates = orgResourceManagementService.getResourcesFromOrgHierarchy(
+                    organizationId,
+                    LambdaExceptionUtils.rethrowFunction(
+                            orgId -> allNotificationTemplatesRetriever(notificationChannel, orgId)),
+                    new MergeAllAggregationStrategy<>(this::mergeAndRemoveDuplicateTemplates));
+        } catch (OrganizationManagementException | OrgResourceHierarchyTraverseException e) {
+            String errorMsg = String.format(
+                    "Unexpected server error occurred while resolving all email templates for tenant: %s",
+                    tenantDomain);
+            throw new NotificationTemplateManagerServerException(errorMsg, e);
+        }
+
         List<NotificationTemplate> inMemoryBasedTemplates =
                 systemDefaultTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
@@ -207,34 +337,144 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
     /**
      * Merges two lists and removes duplicates.
      *
-     * @param dbBasedTemplates DbBasedTemplates
-     * @param inMemoryTemplates InMemoryTemplates
+     * @param primaryTemplates   Primary Templates
+     * @param secondaryTemplates Secondary Templates
      * @return Merged list without duplicates.
      */
-    private <T> List<T> mergeAndRemoveDuplicates(List<T> dbBasedTemplates, List<T> inMemoryTemplates) {
+    private <T> List<T> mergeAndRemoveDuplicates(List<T> primaryTemplates, List<T> secondaryTemplates) {
+
+        if (CollectionUtils.isEmpty(primaryTemplates)) {
+            return secondaryTemplates;
+        }
+        if (CollectionUtils.isEmpty(secondaryTemplates)) {
+            return primaryTemplates;
+        }
 
         Set<T> uniqueElements = new HashSet<>();
-        uniqueElements.addAll(dbBasedTemplates);
-        uniqueElements.addAll(inMemoryTemplates);
+        uniqueElements.addAll(primaryTemplates);
+        uniqueElements.addAll(secondaryTemplates);
         return new ArrayList<>(uniqueElements);
     }
 
     /**
      * Merges two NotificationTemplate lists and removes duplicate templates.
      *
-     * @param dbBasedTemplates DbBasedTemplates
-     * @param inMemoryTemplates InMemoryTemplates
+     * @param primaryTemplates   Primary Templates
+     * @param secondaryTemplates Secondary Templates
      * @return Merged list without duplicates.
      */
     private List<NotificationTemplate> mergeAndRemoveDuplicateTemplates(
-            List<NotificationTemplate> dbBasedTemplates,
-            List<NotificationTemplate> inMemoryTemplates) {
+            List<NotificationTemplate> primaryTemplates,
+            List<NotificationTemplate> secondaryTemplates) {
+
+        if (CollectionUtils.isEmpty(primaryTemplates)) {
+            return secondaryTemplates;
+        }
+
+        if (CollectionUtils.isEmpty(secondaryTemplates)) {
+            return primaryTemplates;
+        }
 
         Map<String, NotificationTemplate> templateMap = new HashMap<>();
-        dbBasedTemplates.forEach(template -> templateMap.put(template.getDisplayName(), template));
+        primaryTemplates.forEach(template -> templateMap.put(template.getDisplayName(), template));
 
-        // Add in-memory templates, only if not already present
-        inMemoryTemplates.forEach(template -> templateMap.putIfAbsent(template.getDisplayName(), template));
+        // Add secondary templates, only if not already present
+        secondaryTemplates.forEach(template -> templateMap.putIfAbsent(template.getDisplayName(), template));
         return new ArrayList<>(templateMap.values());
+    }
+
+    private Optional<Boolean> notificationTemplateTypeExistenceRetriever(String displayName, String notificationChannel,
+                                                                         String orgId)
+            throws NotificationTemplateManagerServerException, OrganizationManagementException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+
+        boolean templateTypeExists =
+                templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                        tenantDomainOfOrg);
+        if (!templateTypeExists) {
+            return Optional.empty();
+        }
+        return Optional.of(true);
+    }
+
+    private Optional<Boolean> notificationTemplateExistenceRetriever(String displayName, String locale,
+                                                                     String notificationChannel, String appId,
+                                                                     String orgId)
+            throws NotificationTemplateManagerServerException, OrganizationManagementException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+
+        boolean templateExists =
+                templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel, appId,
+                        tenantDomainOfOrg);
+        if (!templateExists) {
+            return Optional.empty();
+        }
+        return Optional.of(true);
+    }
+
+    private Optional<List<String>> notificationTemplateTypesRetriever(String notificationChannel, String orgId)
+            throws NotificationTemplateManagerServerException, OrganizationManagementException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+        List<String> notificationTemplates =
+                templatePersistenceManager.listNotificationTemplateTypes(notificationChannel, tenantDomainOfOrg);
+        return Optional.ofNullable(notificationTemplates);
+    }
+
+    private Optional<NotificationTemplate> notificationTemplateRetriever(String displayName, String locale,
+                                                                         String notificationChannel, String orgId,
+                                                                         String appId)
+            throws OrganizationManagementException, NotificationTemplateManagerServerException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+        NotificationTemplate template =
+                templatePersistenceManager.getNotificationTemplate(displayName, locale, notificationChannel, appId,
+                        tenantDomainOfOrg);
+        if (template == null && StringUtils.isNotBlank(appId)) {
+            template = templatePersistenceManager.getNotificationTemplate(displayName, locale, notificationChannel,
+                    null, tenantDomainOfOrg);
+        }
+        return Optional.ofNullable(template);
+    }
+
+    private Optional<List<NotificationTemplate>> notificationTemplatesRetriever(String templateType,
+                                                                                String notificationChannel,
+                                                                                String orgId, String appId)
+            throws OrganizationManagementException, NotificationTemplateManagerServerException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+        if (templatePersistenceManager.isNotificationTemplateTypeExists(templateType,
+                notificationChannel, tenantDomainOfOrg)) {
+            List<NotificationTemplate> notificationTemplates =
+                    templatePersistenceManager.listNotificationTemplates(templateType, notificationChannel, appId,
+                            tenantDomainOfOrg);
+            if (StringUtils.isNotBlank(appId)) {
+                List<NotificationTemplate> orgNotificationTemplates =
+                        templatePersistenceManager.listNotificationTemplates(templateType, notificationChannel, null,
+                                tenantDomainOfOrg);
+                notificationTemplates =
+                        mergeAndRemoveDuplicateTemplates(notificationTemplates, orgNotificationTemplates);
+            }
+            return Optional.ofNullable(notificationTemplates);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<NotificationTemplate>> allNotificationTemplatesRetriever(String notificationChannel,
+                                                                                   String orgId)
+            throws OrganizationManagementException, NotificationTemplateManagerServerException {
+
+        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
+        String tenantDomainOfOrg = organizationManager.resolveTenantDomain(orgId);
+        List<NotificationTemplate> notificationTemplates =
+                templatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomainOfOrg);
+        return Optional.ofNullable(notificationTemplates);
     }
 }
