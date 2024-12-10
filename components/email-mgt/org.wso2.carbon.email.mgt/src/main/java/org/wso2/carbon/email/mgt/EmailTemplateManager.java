@@ -309,4 +309,22 @@ public interface EmailTemplateManager {
 
         throw new I18nEmailMgtException("Method not implemented");
     }
+
+    /**
+     * Checks if an email template exists for the specified template type, locale, tenant domain, and application UUID.
+     *
+     * @param templateTypeDisplayName The display name of the template type.
+     * @param locale                  The locale of the email template.
+     * @param tenantDomain            The tenant domain in which to search for the template.
+     * @param applicationUuid         The UUID of the application for which the template exists (optional).
+     * @param resolve                 If true, searches for the template by resolving through the organization
+     *                                hierarchy; if false, searches only within the specified tenant domain.
+     * @return True if the email template exists; false otherwise.
+     * @throws I18nEmailMgtException If an error occurs while checking the existence of the email template.
+     */
+    default boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain,
+                                          String applicationUuid, boolean resolve) throws I18nEmailMgtException {
+
+        throw new I18nEmailMgtException("isEmailTemplateExists method not implemented in " + this.getClass().getName());
+    }
 }

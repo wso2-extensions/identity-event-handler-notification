@@ -527,9 +527,22 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale,
                                          String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
+        /* When resolve param is not specified, the default behavior results in resolved template existence,
+          since resolved template existence is always required when sending emails at runtime. */
+        return isEmailTemplateExists(templateTypeDisplayName, locale, tenantDomain, applicationUuid, true);
+    }
+
+    @Override
+    public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain,
+                                         String applicationUuid, boolean resolve) throws I18nEmailMgtException {
+
         try {
             locale = normalizeLocaleFormat(locale);
-            return templatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
+            if (resolve) {
+                return templatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
+                        NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
+            }
+            return userDefinedTemplatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
