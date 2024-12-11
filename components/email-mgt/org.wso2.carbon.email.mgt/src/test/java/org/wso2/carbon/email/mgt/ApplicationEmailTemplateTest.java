@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.email.mgt;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -24,7 +25,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
-import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.ArgumentMatchers;
@@ -42,7 +42,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
-import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
@@ -54,6 +53,7 @@ import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -81,6 +81,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     @Mock
     OrganizationManager organizationManager;
 
+    @Mock
+    OrgResourceResolverService orgResourceResolverService;
+
     @ObjectFactory
     public IObjectFactory getObjectFactory() {
 
@@ -104,6 +107,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
         when(i18nMgtDataHolder.getApplicationManagementService()).thenReturn(applicationManagementService);
         when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+        when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
         emailTemplateManager = new EmailTemplateManagerImpl();
 
         mockStatic(OrganizationManagementUtil.class);
@@ -127,7 +131,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
         mockIsValidTemplate(true, true);
         NotificationTemplate notificationTemplate = emailTemplateManager
-                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
+                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid, false);
         validateNotificationTemplate(notificationTemplate, notificationChannel);
     }
 
@@ -148,35 +152,15 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                                                          String locale, String contentType, byte[] content,
                                                          String applicationUuid) throws Exception {
 
-        String rootApplicationId = "root-application-id";
         String subOrganizationId = "sub-organization-id";
-        String primaryOrganizationId = "primary-organization-id";
-        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, tenantDomain,
-                rootApplicationId);
+        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, subOrganizationId,
+                applicationUuid);
 
         // Successful scenario for resolving the root application.
-        when(OrganizationManagementUtil.isOrganization(ArgumentMatchers.eq(subOrganizationId))).thenReturn(true);
-        when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenReturn(
-                rootApplicationId);
-        when(organizationManager.resolveOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(subOrganizationId);
-        when(organizationManager.getPrimaryOrganizationId(ArgumentMatchers.eq(subOrganizationId))).thenReturn(primaryOrganizationId);
-        when(organizationManager.resolveTenantDomain(ArgumentMatchers.eq(primaryOrganizationId))).thenReturn(tenantDomain);
         NotificationTemplate notificationTemplate =
                 emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
-                        applicationUuid);
+                        applicationUuid, false);
         validateNotificationTemplate(notificationTemplate, notificationChannel);
-
-        // Error scenario for resolving the root application.
-        notificationTemplate = null;
-        when(applicationManagementService.getMainAppId(ArgumentMatchers.eq(applicationUuid))).thenThrow(
-                IdentityApplicationManagementServerException.class);
-        try {
-            notificationTemplate = emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId, applicationUuid);
-        } catch (NotificationTemplateManagerException e) {
-            assertEquals(e.getErrorCode(), ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode());
-            assertEquals(e.getMessage(), ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage());
-        }
-        assertNull(notificationTemplate);
     }
 
     /**
@@ -199,12 +183,11 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
             String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
             String expectedErrorCode, byte[] content, String applicationUuid) throws Exception {
 
-        when(OrganizationManagementUtil.isOrganization(tenantDomain)).thenReturn(false);
         mockIsValidTemplate(isValidTemplate, isValidLocale);
         try {
             mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
             NotificationTemplate notificationTemplate = emailTemplateManager
-                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
+                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid, false);
             assertNull(notificationTemplate, "Cannot return a notificationTemplate");
         } catch (NotificationTemplateManagerException e) {
             String errorCode = e.getErrorCode();
@@ -227,8 +210,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
      * @param scenarioCode Error scenario
      */
     @Test(dataProvider = "addNotificationTemplateTypeProvider")
-    public void TestAddNotificationTemplateType(String templateName, String channel, String domain, String errorCode,
-                                                String errorMessage, int scenarioCode, String applicationUuid) {
+    public void TestAddNotificationTemplateType(String templateName, String channel, String domain, String orgId,
+                                                String errorCode, String errorMessage, int scenarioCode,
+                                                String applicationUuid) throws Exception {
 
         try {
             if (scenarioCode == 2) {
@@ -238,6 +222,12 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                 when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
                         .thenThrow(new IdentityRuntimeException("Test Error"));
             }
+            when(organizationManager.resolveOrganizationId(domain)).thenReturn(orgId);
+            when(orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    ArgumentMatchers.eq(orgId),
+                    any(),
+                    any()))
+                    .thenReturn(false);
             emailTemplateManager
                     .addNotificationTemplateType(templateName, channel, domain, applicationUuid);
         } catch (NotificationTemplateManagerException e) {
@@ -363,6 +353,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String testTemplateName = "Test template";
         String testChannel = "Test Channel";
         String testDomain = "Test Domain";
+        String testOrgId = "test-org-id";
         String applicationUuid = "test-uuid";
 
         int testScenario1 = 1;
@@ -378,11 +369,11 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String errorMessage3 = "TEST runtime exception while looking for the resource : ";
 
         return new Object[][]{
-                {StringUtils.EMPTY, testChannel, testDomain, expectedErrorCode1, errorMessage1, testScenario1,
+                {StringUtils.EMPTY, testChannel, testDomain, testOrgId, expectedErrorCode1, errorMessage1,
+                        testScenario1, applicationUuid},
+                {testTemplateName, testChannel, testDomain, testOrgId, expectedErrorCode2, errorMessage2, testScenario2,
                         applicationUuid},
-                {testTemplateName, testChannel, testDomain, expectedErrorCode2, errorMessage2, testScenario2,
-                        applicationUuid},
-                {testTemplateName, testChannel, testDomain, expectedErrorCode3, errorMessage3, testScenario3,
+                {testTemplateName, testChannel, testDomain, testOrgId, expectedErrorCode3, errorMessage3, testScenario3,
                         applicationUuid}
         };
     }

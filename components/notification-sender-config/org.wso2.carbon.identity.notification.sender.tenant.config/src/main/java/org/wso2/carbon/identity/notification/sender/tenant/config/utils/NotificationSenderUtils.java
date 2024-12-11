@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
@@ -38,14 +39,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -116,7 +115,7 @@ public class NotificationSenderUtils {
             throws ParserConfigurationException, TransformerException {
 
         Map<String, String> properties = emailSender.getProperties();
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentFactory = IdentityUtil.getSecuredDocumentBuilderFactory();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
         // Root element (eventPublisher).
@@ -133,9 +132,7 @@ public class NotificationSenderUtils {
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(outputStream);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        Transformer transformer = transformerFactory.newTransformer();
+        Transformer transformer = IdentityUtil.getSecuredTransformerFactory().newTransformer();
         transformer.transform(xmlSource, outputTarget);
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
@@ -152,7 +149,7 @@ public class NotificationSenderUtils {
             throws ParserConfigurationException, TransformerException {
 
         Map<String, String> properties = smsSender.getProperties();
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentFactory = IdentityUtil.getSecuredDocumentBuilderFactory();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
         // Root element (eventPublisher).
@@ -169,9 +166,7 @@ public class NotificationSenderUtils {
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(outputStream);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        Transformer transformer = transformerFactory.newTransformer();
+        Transformer transformer = IdentityUtil.getSecuredTransformerFactory().newTransformer();
         transformer.transform(xmlSource, outputTarget);
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
