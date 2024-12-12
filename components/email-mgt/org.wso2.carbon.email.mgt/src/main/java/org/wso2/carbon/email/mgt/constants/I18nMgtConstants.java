@@ -64,6 +64,7 @@ public class I18nMgtConstants {
 
     public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
     public static final String NOTIFICATION_TEMPLATES_LEGACY_TENANTS = "NotificationTemplates.LegacyTenants.Tenant";
+    public static final String NOTIFICATION_TEMPLATES_DEBUG_TENANTS = "NotificationTemplates.DebugTenants.Tenant";
     public static final String NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT =
             "NotificationTemplates.EnableUnicodeSupport";
 

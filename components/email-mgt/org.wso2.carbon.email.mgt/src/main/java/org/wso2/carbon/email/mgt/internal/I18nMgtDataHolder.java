@@ -39,6 +39,7 @@ public class I18nMgtDataHolder{
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
+    private List<String> debugTenants = new ArrayList<>();
     private boolean isUnicodeSupported = false;
     private boolean isUnicodeSupportedInHybridMode = false;
 
@@ -163,6 +164,26 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
+    }
+
+    /**
+     * Set the list of debug tenants.
+     *
+     * @param debugTenants List of debug tenants.
+     */
+    public void setDebugTenants(List<String> debugTenants) {
+
+        this.debugTenants = debugTenants;
+    }
+
+    /**
+     * Get the list of debug tenants.
+     *
+     * @return List of debug tenants.
+     */
+    public List<String> getDebugTenants() {
+
+        return debugTenants == null ? new ArrayList<>() : debugTenants;
     }
 
     /**
