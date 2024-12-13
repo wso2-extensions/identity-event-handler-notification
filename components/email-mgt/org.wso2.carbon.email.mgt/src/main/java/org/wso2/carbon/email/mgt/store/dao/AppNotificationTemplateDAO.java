@@ -28,13 +28,16 @@ import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.APP_ID;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.APP_TEMPLATE_SCHEMA_VERSION;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.BODY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CREATED_AT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.FOOTER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.LOCALE;
@@ -43,6 +46,8 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationT
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.UPDATED_AT;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.VERSION;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATE_SQL;
@@ -60,7 +65,9 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICA
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.CALENDER;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getCurrentTime;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 
 /**
@@ -90,6 +97,10 @@ public class AppNotificationTemplateDAO {
                 preparedStatement.setString(LOCALE, locale);
                 if (isUnicodeSupported) {
                     preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                    Timestamp currentTime = getCurrentTime();
+                    preparedStatement.setTimeStamp(CREATED_AT, currentTime, CALENDER);
+                    preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
+                    preparedStatement.setString(VERSION, APP_TEMPLATE_SCHEMA_VERSION);
                 } else if (isHybrid) {
                     preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                     preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
@@ -281,6 +292,7 @@ public class AppNotificationTemplateDAO {
                     preparedStatement -> {
                         if (isUnicodeSupported) {
                             preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
+                            preparedStatement.setTimeStamp(UPDATED_AT, getCurrentTime(), CALENDER);
                         } else if (isHybrid) {
                             preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                             preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
@@ -298,6 +310,9 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setString(APP_ID, applicationUuid);
                         preparedStatement.setInt(TENANT_ID, tenantId);
+
+                        Timestamp currentTime = getCurrentTime();
+                        preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
                     });
         } catch (DataAccessException e) {
             String error =

@@ -26,7 +26,8 @@ public class SQLConstants {
     // sql constants for notification type
     public static final String INSERT_NOTIFICATION_TYPE_SQL =
             "INSERT INTO IDN_NOTIFICATION_TYPE " +
-                    "(TYPE_KEY, NAME, CHANNEL, TENANT_ID) VALUES (:TYPE_KEY;, :NAME;, :CHANNEL;, :TENANT_ID;)";
+                    "(TYPE_KEY, NAME, CHANNEL, TENANT_ID, VERSION, CREATED_AT, UPDATED_AT) " +
+                    "VALUES (:TYPE_KEY;, :NAME;, :CHANNEL;, :TENANT_ID;, :VERSION;, :CREATED_AT;, :UPDATED_AT;)";
     public static final String GET_NOTIFICATION_TYPE_SQL =
             "SELECT NAME FROM IDN_NOTIFICATION_TYPE " +
                     "WHERE TYPE_KEY = :TYPE_KEY; AND CHANNEL = :CHANNEL; AND TENANT_ID = :TENANT_ID;";
@@ -43,9 +44,9 @@ public class SQLConstants {
     // sql constants for org notification template
     public static final String INSERT_ORG_NOTIFICATION_TEMPLATE_SQL =
             "INSERT INTO IDN_NOTIFICATION_ORG_TEMPLATE " +
-                    "(TEMPLATE_KEY, LOCALE, CONTENT, CONTENT_TYPE, TYPE_ID, TENANT_ID) " +
+                    "(TEMPLATE_KEY, LOCALE, CONTENT, CONTENT_TYPE, TYPE_ID, TENANT_ID, VERSION, CREATED_AT, UPDATED_AT) " +
                     "VALUES (:TEMPLATE_KEY;, :LOCALE;, :CONTENT;, :CONTENT_TYPE;, (" +
-                    GET_NOTIFICATION_TYPE_ID_SQL + "), :TENANT_ID;)";
+                    GET_NOTIFICATION_TYPE_ID_SQL + "), :TENANT_ID;, :VERSION;, :CREATED_AT;, :UPDATED_AT;)";
     public static final String INSERT_ORG_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL =
             "INSERT INTO IDN_NOTIFICATION_ORG_TEMPLATE " +
                     "(TEMPLATE_KEY, LOCALE, SUBJECT, BODY, FOOTER, CONTENT_TYPE, TYPE_ID, TENANT_ID) " +
@@ -82,7 +83,7 @@ public class SQLConstants {
                     "WHERE TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL + ") AND TENANT_ID = :TENANT_ID;";
     public static final String UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL =
             "UPDATE IDN_NOTIFICATION_ORG_TEMPLATE " +
-                    "SET CONTENT = :CONTENT;, CONTENT_TYPE = :CONTENT_TYPE; " +
+                    "SET CONTENT = :CONTENT;, CONTENT_TYPE = :CONTENT_TYPE;, UPDATED_AT = :UPDATED_AT; " +
                     "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
                     ") AND TENANT_ID = :TENANT_ID;";
     public static final String UPDATE_ORG_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL =
@@ -105,9 +106,9 @@ public class SQLConstants {
     // sql constants for app notification template
     public static final String INSERT_APP_NOTIFICATION_TEMPLATE_SQL =
             "INSERT INTO IDN_NOTIFICATION_APP_TEMPLATE " +
-                    "(TEMPLATE_KEY, LOCALE, CONTENT, CONTENT_TYPE, TYPE_ID, APP_ID, TENANT_ID) " +
+                    "(TEMPLATE_KEY, LOCALE, CONTENT, CONTENT_TYPE, TYPE_ID, APP_ID, TENANT_ID, VERSION, CREATED_AT, UPDATED_AT) " +
                     "VALUES (:TEMPLATE_KEY;, :LOCALE;, :CONTENT;, :CONTENT_TYPE;, (" +
-                    GET_NOTIFICATION_TYPE_ID_SQL + "), :APP_ID;, :TENANT_ID;)";
+                    GET_NOTIFICATION_TYPE_ID_SQL + "), :APP_ID;, :TENANT_ID;, :VERSION;, :CREATED_AT;, :UPDATED_AT;)";
     public static final String INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL =
             "INSERT INTO IDN_NOTIFICATION_APP_TEMPLATE " +
                     "(TEMPLATE_KEY, LOCALE, SUBJECT, BODY, FOOTER, CONTENT_TYPE, TYPE_ID, APP_ID, TENANT_ID) " +
@@ -148,7 +149,7 @@ public class SQLConstants {
                     ") AND APP_ID = :APP_ID; AND TENANT_ID = :TENANT_ID;";
     public static final String UPDATE_APP_NOTIFICATION_TEMPLATE_SQL =
             "UPDATE IDN_NOTIFICATION_APP_TEMPLATE " +
-                    "SET CONTENT = :CONTENT;, CONTENT_TYPE = :CONTENT_TYPE; " +
+                    "SET CONTENT = :CONTENT;, CONTENT_TYPE = :CONTENT_TYPE;, UPDATED_AT = :UPDATED_AT; " +
                     "WHERE TEMPLATE_KEY = :TEMPLATE_KEY; AND TYPE_ID = (" + GET_NOTIFICATION_TYPE_ID_SQL +
                     ") AND APP_ID = :APP_ID; AND TENANT_ID = :TENANT_ID;";
     public static final String UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL =
