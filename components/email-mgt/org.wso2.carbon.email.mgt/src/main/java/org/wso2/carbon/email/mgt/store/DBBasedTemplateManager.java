@@ -277,11 +277,15 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
         }
 
         if (debugTenants.contains(tenantId)) {
-            log.info("[" + tenantId + "][NotificationTemplate][GET][" + tenantDomain + "]{"
-                    + "subject: " + notificationTemplate.getSubject()
-                    + ", footer: " + notificationTemplate.getFooter()
-                    + ", body: " + notificationTemplate.getBody()
-                    + "}");
+            if (notificationTemplate != null) {
+                log.info("[" + tenantId + "][NotificationTemplate][GET][" + tenantDomain + "]{"
+                        + "subject: " + notificationTemplate.getSubject()
+                        + ", footer: " + notificationTemplate.getFooter()
+                        + ", body: " + notificationTemplate.getBody()
+                        + "}");
+            } else {
+                log.info("[" + tenantId + "][NotificationTemplate][GET][" + tenantDomain + "]{template not found}");
+            }
         }
         return notificationTemplate;
     }

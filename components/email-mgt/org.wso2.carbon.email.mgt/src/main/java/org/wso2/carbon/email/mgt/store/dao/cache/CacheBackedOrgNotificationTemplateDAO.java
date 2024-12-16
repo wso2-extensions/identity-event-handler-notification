@@ -106,11 +106,15 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         orgNotificationTemplateCache.addToCache(key, orgNotificationTemplate, tenantId);
 
         if (debugTenants.contains(String.valueOf(tenantId))) {
-            log.info("[" + tenantId + "][NotificationTemplate][GET] {"
-                    + "subject: " + orgNotificationTemplate.getSubject()
-                    + ", footer: " + orgNotificationTemplate.getFooter()
-                    + ", body: " + orgNotificationTemplate.getBody()
-                    + "}");
+            if (orgNotificationTemplate != null) {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {"
+                        + "subject: " + orgNotificationTemplate.getSubject()
+                        + ", footer: " + orgNotificationTemplate.getFooter()
+                        + ", body: " + orgNotificationTemplate.getBody()
+                        + "}");
+            } else {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {template not found}");
+            }
         }
         return orgNotificationTemplate;
     }
