@@ -188,11 +188,15 @@ public class OrgNotificationTemplateDAO {
         }
 
         if (debugTenants.contains(String.valueOf(tenantId))) {
-            log.info("[" + tenantId + "][NotificationTemplate][GET] {"
-                    + "subject: " + notificationTemplate.getSubject()
-                    + ", footer: " + notificationTemplate.getFooter()
-                    + ", body: " + notificationTemplate.getBody()
-                    + "}");
+            if (notificationTemplate != null) {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {"
+                        + "subject: " + notificationTemplate.getSubject()
+                        + ", footer: " + notificationTemplate.getFooter()
+                        + ", body: " + notificationTemplate.getBody()
+                        + "}");
+            } else {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {template not found}");
+            }
         }
 
         return notificationTemplate;
