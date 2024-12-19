@@ -65,8 +65,6 @@ public class I18nMgtConstants {
     public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
     public static final String NOTIFICATION_TEMPLATES_LEGACY_TENANTS = "NotificationTemplates.LegacyTenants.Tenant";
     public static final String NOTIFICATION_TEMPLATES_DEBUG_TENANTS = "NotificationTemplates.DebugTenants.Tenant";
-    public static final String NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT =
-            "NotificationTemplates.EnableUnicodeSupport";
 
     public static final String SERVICE_PROPERTY_KEY_SERVICE_NAME = "service.name";
     public static final String SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER = "EmailTemplateManager";
@@ -164,9 +162,6 @@ public class I18nMgtConstants {
         public static final String TENANT_ID = "TENANT_ID";
         public static final String TEMPLATE_KEY = "TEMPLATE_KEY";
         public static final String LOCALE = "LOCALE";
-        public static final String SUBJECT = "SUBJECT";
-        public static final String BODY = "BODY";
-        public static final String FOOTER = "FOOTER";
         public static final String CONTENT = "CONTENT";
         public static final String CONTENT_TYPE = "CONTENT_TYPE";
         public static final String TYPE_ID = "TYPE_ID";
