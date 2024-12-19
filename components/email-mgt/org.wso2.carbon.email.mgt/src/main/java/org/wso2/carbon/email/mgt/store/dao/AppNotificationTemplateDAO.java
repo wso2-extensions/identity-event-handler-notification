@@ -33,15 +33,12 @@ import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.APP_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.APP_TEMPLATE_SCHEMA_VERSION;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.BODY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CREATED_AT;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.FOOTER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.LOCALE;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.SUBJECT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TEMPLATE_KEY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
@@ -51,20 +48,12 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationT
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ALL_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_ID_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_APP_NOTIFICATION_TEMPLATE_EXISTS_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_WITHOUT_UNICODE_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_SQL;
-import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.CALENDER;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getCurrentTime;
@@ -74,9 +63,6 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
  * This class is to perform CRUD operations for Application NotificationTemplates.
  */
 public class AppNotificationTemplateDAO {
-
-    private boolean isUnicodeSupported = I18nMgtDataHolder.getInstance().isUnicodeSupported();
-    private boolean isHybrid = I18nMgtDataHolder.getInstance().isHybrid();
 
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -89,34 +75,21 @@ public class AppNotificationTemplateDAO {
         byte[] contentByteArray = getContentByteArray(notificationTemplate);
         int contentLength = contentByteArray.length;
         try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
-            String insertAppNotificationTemplateSql = isUnicodeSupported ? INSERT_APP_NOTIFICATION_TEMPLATE_SQL :
-                    isHybrid ? INSERT_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
-                            INSERT_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
-            namedJdbcTemplate.executeInsert(insertAppNotificationTemplateSql, (preparedStatement -> {
+            namedJdbcTemplate.executeInsert(INSERT_APP_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
-                if (isUnicodeSupported) {
-                    preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
-                    Timestamp currentTime = getCurrentTime();
-                    preparedStatement.setTimeStamp(CREATED_AT, currentTime, CALENDER);
-                    preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
-                    preparedStatement.setString(VERSION, APP_TEMPLATE_SCHEMA_VERSION);
-                } else if (isHybrid) {
-                    preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
-                    preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                    preparedStatement.setString(BODY, notificationTemplate.getBody());
-                    preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
-                } else {
-                    preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                    preparedStatement.setString(BODY, notificationTemplate.getBody());
-                    preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
-                }
+                preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                 preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
                 preparedStatement.setInt(TENANT_ID, tenantId);
                 preparedStatement.setString(APP_ID, applicationUuid);
                 preparedStatement.setInt(TENANT_ID, tenantId);
+
+                Timestamp currentTime = getCurrentTime();
+                preparedStatement.setTimeStamp(CREATED_AT, currentTime, CALENDER);
+                preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
+                preparedStatement.setString(VERSION, APP_TEMPLATE_SCHEMA_VERSION);
             }), notificationTemplate, false);
         } catch (DataAccessException e) {
             String error =
@@ -136,28 +109,10 @@ public class AppNotificationTemplateDAO {
         NotificationTemplate notificationTemplate;
 
         try {
-            String getAppNotificationTemplateSql = isUnicodeSupported ? GET_APP_NOTIFICATION_TEMPLATE_SQL :
-                    isHybrid ? GET_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
-                            GET_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
-            notificationTemplate = namedJdbcTemplate.fetchSingleRecord(getAppNotificationTemplateSql,
+            notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_APP_NOTIFICATION_TEMPLATE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        if (isUnicodeSupported) {
-                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
-                        } else if (isHybrid) {
-                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
-                            if (notificationTemplateResult.getSubject() == null
-                                    && notificationTemplateResult.getBody() == null
-                                    && notificationTemplateResult.getFooter() == null) {
-                                notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                                notificationTemplateResult.setBody(resultSet.getString(BODY));
-                                notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
-                            }
-                        } else {
-                            notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                            notificationTemplateResult.setBody(resultSet.getString(BODY));
-                            notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
-                        }
+                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
                         notificationTemplateResult.setType(templateType);
@@ -228,29 +183,10 @@ public class AppNotificationTemplateDAO {
         List<NotificationTemplate> notificationTemplates;
 
         try {
-            String listAppNotificationTemplatesByAppSql =
-                    isUnicodeSupported ? LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL :
-                            isHybrid ? LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_HYBRID_SQL :
-                                    LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_WITHOUT_UNICODE_SQL;
-            notificationTemplates = namedJdbcTemplate.executeQuery(listAppNotificationTemplatesByAppSql,
+            notificationTemplates = namedJdbcTemplate.executeQuery(LIST_APP_NOTIFICATION_TEMPLATES_BY_APP_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        if (isUnicodeSupported) {
-                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
-                        } else if (isHybrid) {
-                            setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
-                            if (notificationTemplateResult.getSubject() == null
-                                    && notificationTemplateResult.getBody() == null
-                                    && notificationTemplateResult.getFooter() == null) {
-                                notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                                notificationTemplateResult.setBody(resultSet.getString(BODY));
-                                notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
-                            }
-                        } else {
-                            notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                            notificationTemplateResult.setBody(resultSet.getString(BODY));
-                            notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
-                        }
+                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
                         notificationTemplateResult.setType(templateType.toLowerCase());
@@ -285,24 +221,9 @@ public class AppNotificationTemplateDAO {
         byte[] contentByteArray = getContentByteArray(notificationTemplate);
         int contentLength = contentByteArray.length;
         try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
-            String updateAppNotificationTemplateSql = isUnicodeSupported ? UPDATE_APP_NOTIFICATION_TEMPLATE_SQL :
-                    isHybrid ? UPDATE_APP_NOTIFICATION_TEMPLATE_HYBRID_SQL :
-                            UPDATE_APP_NOTIFICATION_TEMPLATE_WITHOUT_UNICODE_SQL;
-            namedJdbcTemplate.executeUpdate(updateAppNotificationTemplateSql,
+            namedJdbcTemplate.executeUpdate(UPDATE_APP_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
-                        if (isUnicodeSupported) {
-                            preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
-                            preparedStatement.setTimeStamp(UPDATED_AT, getCurrentTime(), CALENDER);
-                        } else if (isHybrid) {
-                            preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
-                            preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                            preparedStatement.setString(BODY, notificationTemplate.getBody());
-                            preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
-                        } else {
-                            preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                            preparedStatement.setString(BODY, notificationTemplate.getBody());
-                            preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
-                        }
+                        preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
@@ -311,8 +232,7 @@ public class AppNotificationTemplateDAO {
                         preparedStatement.setString(APP_ID, applicationUuid);
                         preparedStatement.setInt(TENANT_ID, tenantId);
 
-                        Timestamp currentTime = getCurrentTime();
-                        preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
+                        preparedStatement.setTimeStamp(UPDATED_AT, getCurrentTime(), CALENDER);
                     });
         } catch (DataAccessException e) {
             String error =
