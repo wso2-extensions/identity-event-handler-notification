@@ -40,8 +40,6 @@ public class I18nMgtDataHolder{
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
     private List<String> debugTenants = new ArrayList<>();
-    private boolean isUnicodeSupported = false;
-    private boolean isUnicodeSupportedInHybridMode = false;
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -204,45 +202,5 @@ public class I18nMgtDataHolder{
     public void setOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
 
         this.orgResourceResolverService = orgResourceResolverService;
-    }
-
-    /**
-     * Sets whether the unicode support for template content is enabled or not.
-     *
-     * @param isUnicodeSupported true to enable Unicode support, false to disable.
-     */
-    public void setUnicodeSupport(boolean isUnicodeSupported) {
-
-        this.isUnicodeSupported = isUnicodeSupported;
-    }
-
-    /**
-     * Gets whether the unicode support for template content is enabled.
-     *
-     * @return true if the unicode support for template content is enabled.
-     */
-    public boolean isUnicodeSupported() {
-
-        return isUnicodeSupported;
-    }
-
-    /**
-     * Sets whether the unicode hybrid support for template content is enabled or not.
-     *
-     * @param isUnicodeSupportedInHybridMode true to enable Unicode support in hybrid mode, false to disable.
-     */
-    public void setHybrid(boolean isUnicodeSupportedInHybridMode) {
-
-        this.isUnicodeSupportedInHybridMode = isUnicodeSupportedInHybridMode;
-    }
-
-    /**
-     * Gets whether the unicode hybrid support for template content is enabled.
-     *
-     * @return true if the unicode hybrid support for template content is enabled.
-     */
-    public boolean isHybrid() {
-
-        return isUnicodeSupportedInHybridMode;
     }
 }

@@ -71,7 +71,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_DEBUG_TENANTS;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_LEGACY_TENANTS;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_KEY_SERVICE_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_VAL_NOTIFICATION_TEMPLATE_MANAGER;
@@ -103,10 +102,6 @@ public class I18nMgtServiceComponent {
             I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
             List<String> debugTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_DEBUG_TENANTS);
             I18nMgtDataHolder.getInstance().setDebugTenants(debugTenants);
-
-            String unicodeSupportType = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_ENABLE_UNICODE_SUPPORT);
-            I18nMgtDataHolder.getInstance().setUnicodeSupport(Boolean.parseBoolean(unicodeSupportType));
-            I18nMgtDataHolder.getInstance().setHybrid("hybrid".equalsIgnoreCase(unicodeSupportType));
 
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
