@@ -179,7 +179,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
         pushNotificationData.setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE));
 
         // Add system related data.
-        pushNotificationData.setHostName((String) eventProperties.get(IP_ADDRESS));
+        pushNotificationData.setIpAddress((String) eventProperties.get(IP_ADDRESS));
         pushNotificationData.setDeviceOS((String) eventProperties.get(REQUEST_DEVICE_OS));
         pushNotificationData.setBrowser((String) eventProperties.get(REQUEST_DEVICE_BROWSER));
 

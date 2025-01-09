@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.20-SNAPSHOT</version>
+    <version>1.9.33-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -267,6 +267,11 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-collections.wso2</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${apache.common.collection.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -285,6 +290,11 @@
                 <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
                 <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
                 <version>${identity.organization.management.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.organization.management</groupId>
+                <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
+                <version>${identity.organization.management.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->
@@ -482,7 +492,7 @@
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.11.11</identity.governance.version>
+        <identity.governance.version>1.11.21</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
@@ -510,9 +520,11 @@
         <commons.logging.imp.pkg.version.range>[1.2,2.0)</commons.logging.imp.pkg.version.range>
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <commons-lang.version.range>[2.6.0,3.0.0)</commons-lang.version.range>
+        <apache.common.collection.version>3.2.0.wso2v1</apache.common.collection.version>
+        <commons-collections.wso2.version.range>[3.2.0,4.0.0)</commons-collections.wso2.version.range>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.10.24</carbon.kernel.version>
+        <carbon.kernel.version>4.10.25</carbon.kernel.version>
         <carbon.kernel.feature.version>4.9.10</carbon.kernel.feature.version>
         <carbon.kernel.imp.pkg.version.range>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
@@ -526,17 +538,18 @@
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Database Utils Version-->
-        <org.wso2.carbon.database.utils.version>2.1.0</org.wso2.carbon.database.utils.version>
+        <org.wso2.carbon.database.utils.version>2.2.2</org.wso2.carbon.database.utils.version>
         <org.wso2.carbon.database.utils.version.range>[2.1.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>7.1.0</carbon.identity.framework.version>
+        <carbon.identity.framework.version>7.7.23</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[7.1.0, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
+        <identity.organization.management.version>1.4.58</identity.organization.management.version>
         <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
@@ -555,7 +568,7 @@
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
 
         <!-- Test Dependency Versions -->
-        <testng.version>6.9.10</testng.version>
+        <testng.version>7.4.0</testng.version>
         <powermock.version>2.0.2</powermock.version>
         <mockito.version>2.22.0</mockito.version>
         <mockito.inline.version>3.8.0</mockito.inline.version>

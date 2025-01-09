@@ -22,6 +22,7 @@ import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -34,9 +35,11 @@ public class I18nMgtDataHolder{
     private RegistryResourceMgtService registryResourceMgtService;
     private OrganizationManager organizationManager;
     private ApplicationManagementService applicationManagementService;
+    private OrgResourceResolverService orgResourceResolverService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
+    private List<String> debugTenants = new ArrayList<>();
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -159,5 +162,45 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
+    }
+
+    /**
+     * Set the list of debug tenants.
+     *
+     * @param debugTenants List of debug tenants.
+     */
+    public void setDebugTenants(List<String> debugTenants) {
+
+        this.debugTenants = debugTenants;
+    }
+
+    /**
+     * Get the list of debug tenants.
+     *
+     * @return List of debug tenants.
+     */
+    public List<String> getDebugTenants() {
+
+        return debugTenants == null ? new ArrayList<>() : debugTenants;
+    }
+
+    /**
+     * Get the organization resource resolver service.
+     *
+     * @return Organization resource resolver service.
+     */
+    public OrgResourceResolverService getOrgResourceResolverService() {
+
+        return orgResourceResolverService;
+    }
+
+    /**
+     * Set the organization resource resolver service.
+     *
+     * @param orgResourceResolverService Organization resource resolver service instance.
+     */
+    public void setOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
+
+        this.orgResourceResolverService = orgResourceResolverService;
     }
 }

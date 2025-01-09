@@ -23,16 +23,24 @@ import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CREATED_AT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.NAME;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.NOTIFICATION_TYPE_SCHEMA_VERSION;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.UPDATED_AT;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.VERSION;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_NOTIFICATION_TYPE_BY_ID_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_NOTIFICATION_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_NOTIFICATION_TYPES_SQL;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.CALENDER;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getCurrentTime;
 
 /**
  * This class is to perform CRUD operations for Notification Types.
@@ -49,6 +57,11 @@ public class NotificationTypeDAO {
                 preparedStatement.setString(NAME, displayName);
                 preparedStatement.setString(CHANNEL, channelName);
                 preparedStatement.setInt(TENANT_ID, tenantId);
+
+                Timestamp currentTime = getCurrentTime();
+                preparedStatement.setTimeStamp(CREATED_AT, currentTime, CALENDER);
+                preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
+                preparedStatement.setString(VERSION, NOTIFICATION_TYPE_SCHEMA_VERSION);
             }), displayName, false);
         } catch (DataAccessException e) {
             String error =

@@ -25,25 +25,22 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.mgt.EmailTemplateManager;
 import org.wso2.carbon.email.mgt.EmailTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.NotificationTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManagerImpl;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -72,6 +69,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_DEBUG_TENANTS;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_LEGACY_TENANTS;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_KEY_SERVICE_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER;
@@ -102,6 +100,8 @@ public class I18nMgtServiceComponent {
 
             List<String> legacyTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_LEGACY_TENANTS);
             I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
+            List<String> debugTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_DEBUG_TENANTS);
+            I18nMgtDataHolder.getInstance().setDebugTenants(debugTenants);
 
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
@@ -423,6 +423,22 @@ public class I18nMgtServiceComponent {
     protected void unsetOrganizationManager(OrganizationManager organizationManager) {
 
         dataHolder.getInstance().setOrganizationManager(null);
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service",
+            service = OrgResourceResolverService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrgResourceResolverService")
+    protected void setOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
+
+        dataHolder.setOrgResourceResolverService(orgResourceResolverService);
+    }
+
+    protected void unsetOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
+
+        dataHolder.setOrgResourceResolverService(null);
     }
 }
 

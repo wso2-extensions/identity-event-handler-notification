@@ -32,7 +32,6 @@ import org.wso2.carbon.email.mgt.exceptions.I18nMgtEmailConfigException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
-import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -43,9 +42,6 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
-import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
-import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
-import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +55,6 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.buildNotificationTemplateFromEmailTemplate;
 import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.normalizeLocaleFormat;
 import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPattern.REGISTRY_INVALID_CHARS_EXISTS;
-import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION;
 
 /**
  * Provides functionality to manage email templates used in notification emails.
@@ -67,6 +62,7 @@ import static org.wso2.carbon.identity.organization.management.service.constant.
 public class EmailTemplateManagerImpl implements EmailTemplateManager, NotificationTemplateManager {
 
     private TemplatePersistenceManager templatePersistenceManager;
+    private TemplatePersistenceManager userDefinedTemplatePersistenceManager;
 
     private static final Log log = LogFactory.getLog(EmailTemplateManagerImpl.class);
 
@@ -82,6 +78,8 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         TemplatePersistenceManagerFactory templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
         this.templatePersistenceManager = templatePersistenceManagerFactory.getTemplatePersistenceManager();
+        this.userDefinedTemplatePersistenceManager =
+                templatePersistenceManagerFactory.getUserDefinedTemplatePersistenceManager();
     }
 
     @Override
@@ -169,17 +167,11 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<String> getAvailableTemplateTypes(String tenantDomain) throws I18nEmailMgtServerException {
 
         try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email template types.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-            }
             return templatePersistenceManager.listNotificationTemplateTypes(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
         } catch (NotificationTemplateManagerServerException ex) {
             String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(errorMsg, ex);
-        } catch (OrganizationManagementException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -187,18 +179,12 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<EmailTemplate> getAllEmailTemplates(String tenantDomain) throws I18nEmailMgtException {
 
         try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email templates.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-            }
             List<NotificationTemplate> notificationTemplates = templatePersistenceManager.listAllNotificationTemplates(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), tenantDomain);
             return getEmailTemplateList(notificationTemplates);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
             throw new I18nEmailMgtServerException(error, e);
-        } catch (OrganizationManagementException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
         }
     }
 
@@ -206,35 +192,34 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public EmailTemplate getEmailTemplate(String templateDisplayName, String locale, String tenantDomain)
             throws I18nEmailMgtException {
 
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email template.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-            }
-            return getEmailTemplate(templateDisplayName, locale, tenantDomain, null);
-        } catch (OrganizationManagementException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
-        }
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplate(templateDisplayName, locale, tenantDomain, null, true);
     }
 
     @Override
     public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain)
             throws I18nEmailMgtException {
 
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's email template type.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-            }
-            return getEmailTemplateType(templateDisplayName, tenantDomain, null);
-        } catch (OrganizationManagementException e) {
-            throw new I18nEmailMgtServerException(e.getMessage(), e);
-        }
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplateType(templateDisplayName, tenantDomain, null, true);
+    }
+
+    @Deprecated
+    @Override
+    public List<EmailTemplate> getEmailTemplateType(String templateDisplayName, String tenantDomain,
+                                                    String applicationUuid) throws I18nEmailMgtException {
+
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplateType(templateDisplayName, tenantDomain, applicationUuid, true);
     }
 
     @Override
     public List<EmailTemplate> getEmailTemplateType(
-            String templateDisplayName, String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
+            String templateDisplayName, String tenantDomain, String applicationUuid, boolean resolve)
+            throws I18nEmailMgtException {
 
         validateTemplateType(templateDisplayName, tenantDomain);
 
@@ -247,9 +232,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                 throw new I18nEmailMgtClientException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
             }
 
-            List<NotificationTemplate> notificationTemplates =
-                    templatePersistenceManager.listNotificationTemplates(templateDisplayName,
-                            NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
+            List<NotificationTemplate> notificationTemplates;
+            if (resolve) {
+                notificationTemplates = templatePersistenceManager.listNotificationTemplates(templateDisplayName,
+                        NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
+            } else {
+                notificationTemplates = userDefinedTemplatePersistenceManager.listNotificationTemplates(templateDisplayName,
+                        NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
+            }
             return getEmailTemplateList(notificationTemplates);
         } catch (NotificationTemplateManagerServerException ex) {
             String error = "Error when retrieving '%s' template type from %s tenant registry.";
@@ -274,37 +264,44 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
-                                                        String tenantDomain) throws NotificationTemplateManagerException {
+                                                        String tenantDomain)
+            throws NotificationTemplateManagerException {
 
-        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, null);
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, null, true);
+    }
+
+    @Deprecated
+    @Override
+    public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
+                                                        String tenantDomain, String applicationUuid)
+            throws NotificationTemplateManagerException {
+
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getNotificationTemplate(notificationChannel, templateType, locale, tenantDomain, applicationUuid, true);
     }
 
     @Override
     public NotificationTemplate getNotificationTemplate(String notificationChannel, String templateType, String locale,
-                                                        String tenantDomain, String applicationUuid) throws NotificationTemplateManagerException {
+                                                        String tenantDomain, String applicationUuid, boolean resolve)
+            throws NotificationTemplateManagerException {
 
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                // Return the root organization's notification template.
-                tenantDomain = getRootOrgTenantDomain(tenantDomain);
-                // If it's application specific template is required, get the root organization's application.
-                if (StringUtils.isNotBlank(applicationUuid)) {
-                    applicationUuid = I18nMgtDataHolder.getInstance().getApplicationManagementService().getMainAppId(applicationUuid);
-                }
-            }
-        } catch (OrganizationManagementException e) {
-            throw new NotificationTemplateManagerException(e.getMessage(), e);
-        } catch (IdentityApplicationManagementServerException e) {
-            throw new NotificationTemplateManagerException(ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getCode(),
-                    ERROR_CODE_ERROR_RESOLVING_MAIN_APPLICATION.getMessage(), e);
-        }
         // Resolve channel to either SMS or EMAIL.
         notificationChannel = resolveNotificationChannel(notificationChannel);
         validateTemplateLocale(locale);
         locale = normalizeLocaleFormat(locale);
         validateDisplayNameOfTemplateType(templateType);
-        NotificationTemplate notificationTemplate = templatePersistenceManager.getNotificationTemplate(templateType,
-                locale, notificationChannel, applicationUuid, tenantDomain);
+        NotificationTemplate notificationTemplate;
+
+        if (resolve) {
+            notificationTemplate = templatePersistenceManager.getNotificationTemplate(templateType,
+                    locale, notificationChannel, applicationUuid, tenantDomain);
+        } else {
+            notificationTemplate = userDefinedTemplatePersistenceManager.getNotificationTemplate(templateType,
+                    locale, notificationChannel, applicationUuid, tenantDomain);
+        }
 
         // Handle not having the requested SMS template type in required locale for this tenantDomain.
         if (notificationTemplate == null) {
@@ -526,13 +523,27 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         return isEmailTemplateExists(templateTypeDisplayName, locale, tenantDomain, null);
     }
 
+    @Deprecated
     @Override
     public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale,
                                          String tenantDomain, String applicationUuid) throws I18nEmailMgtException {
 
+        /* When resolve param is not specified, the default behavior results in resolved template existence,
+          since resolved template existence is always required when sending emails at runtime. */
+        return isEmailTemplateExists(templateTypeDisplayName, locale, tenantDomain, applicationUuid, true);
+    }
+
+    @Override
+    public boolean isEmailTemplateExists(String templateTypeDisplayName, String locale, String tenantDomain,
+                                         String applicationUuid, boolean resolve) throws I18nEmailMgtException {
+
         try {
             locale = normalizeLocaleFormat(locale);
-            return templatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
+            if (resolve) {
+                return templatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
+                        NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
+            }
+            return userDefinedTemplatePersistenceManager.isNotificationTemplateExists(templateTypeDisplayName, locale,
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
         } catch (NotificationTemplateManagerServerException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
@@ -599,15 +610,25 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         }
     }
 
+    @Deprecated
     @Override
     public EmailTemplate getEmailTemplate(String templateType, String locale, String tenantDomain,
                                           String applicationUuid) throws I18nEmailMgtException {
+
+        /* When resolve param is not specified, the default behavior results in resolved templates,
+          since resolved templates are always required when sending emails at runtime. */
+        return getEmailTemplate(templateType, locale, tenantDomain, applicationUuid, true);
+    }
+
+    @Override
+    public EmailTemplate getEmailTemplate(String templateType, String locale, String tenantDomain,
+                                          String applicationUuid, boolean resolve) throws I18nEmailMgtException {
 
         locale = normalizeLocaleFormat(locale);
         try {
             NotificationTemplate notificationTemplate = getNotificationTemplate(
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), templateType, locale,
-                    tenantDomain, applicationUuid);
+                    tenantDomain, applicationUuid, resolve);
             return buildEmailTemplate(notificationTemplate);
         } catch (NotificationTemplateManagerException exception) {
             String errorCode = exception.getErrorCode();
@@ -816,19 +837,5 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
             emailTemplates.add(emailTemplate);
         }
         return emailTemplates;
-    }
-
-    /**
-     * Get the root organization's tenantDomain matching to the given tenant domain.
-     *
-     * @return Root organization tenant domain.
-     * @throws OrganizationManagementException If an error occurred while getting the root organization tenant domain.
-     */
-    private String getRootOrgTenantDomain(String tenantDomain) throws OrganizationManagementException {
-
-        OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
-        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
-        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
-        return organizationManager.resolveTenantDomain(primaryOrgId);
     }
 }

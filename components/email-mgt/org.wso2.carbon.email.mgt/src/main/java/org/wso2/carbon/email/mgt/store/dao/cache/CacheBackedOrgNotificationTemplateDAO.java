@@ -24,6 +24,7 @@ import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateCache;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateCacheKey;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCache;
 import org.wso2.carbon.email.mgt.cache.OrgNotificationTemplateListCacheKey;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.store.dao.OrgNotificationTemplateDAO;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
@@ -37,6 +38,7 @@ import java.util.List;
 public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTemplateDAO {
 
     private static final Log log = LogFactory.getLog(CacheBackedOrgNotificationTemplateDAO.class);
+    private List<String> debugTenants = I18nMgtDataHolder.getInstance().getDebugTenants();
     private final OrgNotificationTemplateCache orgNotificationTemplateCache =
             OrgNotificationTemplateCache.getInstance();
     private final OrgNotificationTemplateListCache templateListCache = OrgNotificationTemplateListCache.getInstance();
@@ -56,6 +58,14 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
 
         OrgNotificationTemplateListCacheKey listCacheKey = new OrgNotificationTemplateListCacheKey(type, channel);
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
+
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            log.info("[" + tenantId + "][NotificationTemplate][ADD] {"
+                    + "subject: " + notificationTemplate.getSubject()
+                    + ", footer: " + notificationTemplate.getFooter()
+                    + ", body: " + notificationTemplate.getBody()
+                    + "}");
+        }
     }
 
     @Override
@@ -71,6 +81,15 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
                 log.debug("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
                         templateType + " in channel: " + channelName + " for tenant: " + tenantId);
             }
+            if (debugTenants.contains(String.valueOf(tenantId))) {
+                log.info("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                        templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {"
+                        + "subject: " + orgNotificationTemplate.getSubject()
+                        + ", footer: " + orgNotificationTemplate.getFooter()
+                        + ", body: " + orgNotificationTemplate.getBody()
+                        + "}");
+            }
             return orgNotificationTemplate;
         }
 
@@ -78,10 +97,25 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
             log.debug("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
                     templateType + " in channel: " + channelName + " for tenant: " + tenantId);
         }
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            log.info("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                    templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+        }
 
         orgNotificationTemplate = super.getNotificationTemplate(locale, templateType, channelName, tenantId);
         orgNotificationTemplateCache.addToCache(key, orgNotificationTemplate, tenantId);
 
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            if (orgNotificationTemplate != null) {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {"
+                        + "subject: " + orgNotificationTemplate.getSubject()
+                        + ", footer: " + orgNotificationTemplate.getFooter()
+                        + ", body: " + orgNotificationTemplate.getBody()
+                        + "}");
+            } else {
+                log.info("[" + tenantId + "][NotificationTemplate][GET] {template not found}");
+            }
+        }
         return orgNotificationTemplate;
     }
 
@@ -97,6 +131,10 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
                 log.debug("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
                         templateType + " in channel: " + channelName + " for tenant: " + tenantId);
             }
+            if (debugTenants.contains(String.valueOf(tenantId))) {
+                log.info("Cache hit in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                        templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return true;
         }
 
@@ -104,6 +142,12 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
             log.debug("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
                     templateType + " in channel: " + channelName + " for tenant: " + tenantId);
         }
+
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            log.info("Cache miss in OrgNotificationTemplateCache for locale: " + locale + ", template type: " +
+                    templateType + " in channel: " + channelName + " for tenant: " + tenantId);
+        }
+
 
         return super.isNotificationTemplateExists(locale, templateType, channelName, tenantId);
     }
@@ -120,11 +164,19 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
                 log.debug("Cache hit in OrgNotificationTemplateListCache for template type: " + templateType +
                         " in channel: " + channelName + " for tenant: " + tenantId);
             }
+            if (debugTenants.contains(String.valueOf(tenantId))) {
+                log.info("Cache hit in OrgNotificationTemplateListCache for template type: " + templateType +
+                        " in channel: " + channelName + " for tenant: " + tenantId);
+            }
             return notificationTemplates;
         }
 
         if (log.isDebugEnabled()) {
             log.debug("Cache miss in OrgNotificationTemplateListCache for template type: " + templateType +
+                    " in channel: " + channelName + " for tenant: " + tenantId);
+        }
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            log.info("Cache miss in OrgNotificationTemplateListCache for template type: " + templateType +
                     " in channel: " + channelName + " for tenant: " + tenantId);
         }
 
@@ -149,6 +201,14 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
 
         OrgNotificationTemplateListCacheKey listCacheKey = new OrgNotificationTemplateListCacheKey(type, channel);
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
+        
+        if (debugTenants.contains(String.valueOf(tenantId))) {
+            log.info("[" + tenantId + "][NotificationTemplate][UPDATE] {"
+                    + "subject: " + notificationTemplate.getSubject()
+                    + ", footer: " + notificationTemplate.getFooter()
+                    + ", body: " + notificationTemplate.getBody()
+                    + "}");
+        }
     }
 
     @Override

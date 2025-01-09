@@ -64,6 +64,7 @@ public class I18nMgtConstants {
 
     public static final String NOTIFICATION_TEMPLATES_STORAGE_CONFIG = "DataStorageType.NotificationTemplates";
     public static final String NOTIFICATION_TEMPLATES_LEGACY_TENANTS = "NotificationTemplates.LegacyTenants.Tenant";
+    public static final String NOTIFICATION_TEMPLATES_DEBUG_TENANTS = "NotificationTemplates.DebugTenants.Tenant";
 
     public static final String SERVICE_PROPERTY_KEY_SERVICE_NAME = "service.name";
     public static final String SERVICE_PROPERTY_VAL_EMAIL_TEMPLATE_MANAGER = "EmailTemplateManager";
@@ -150,6 +151,10 @@ public class I18nMgtConstants {
      */
     public static class NotificationTableColumns {
 
+        public static final String NOTIFICATION_TYPE_SCHEMA_VERSION = "1.0.0";
+        public static final String ORG_TEMPLATE_SCHEMA_VERSION = "1.0.0";
+        public static final String APP_TEMPLATE_SCHEMA_VERSION = "1.0.0";
+
         public static final String ID = "ID";
         public static final String TYPE_KEY = "TYPE_KEY";
         public static final String NAME = "NAME";
@@ -157,11 +162,15 @@ public class I18nMgtConstants {
         public static final String TENANT_ID = "TENANT_ID";
         public static final String TEMPLATE_KEY = "TEMPLATE_KEY";
         public static final String LOCALE = "LOCALE";
-        public static final String SUBJECT = "SUBJECT";
-        public static final String BODY = "BODY";
-        public static final String FOOTER = "FOOTER";
+        public static final String CONTENT = "CONTENT";
         public static final String CONTENT_TYPE = "CONTENT_TYPE";
         public static final String TYPE_ID = "TYPE_ID";
         public static final String APP_ID = "APP_ID";
+        public static final String VERSION = "VERSION";
+        public static final String CREATED_AT = "CREATED_AT";
+        public static final String UPDATED_AT = "UPDATED_AT";
+
+        private NotificationTableColumns() {
+        }
     }
 }
