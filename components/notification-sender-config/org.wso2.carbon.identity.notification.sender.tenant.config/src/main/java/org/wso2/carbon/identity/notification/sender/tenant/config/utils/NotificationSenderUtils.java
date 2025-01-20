@@ -388,6 +388,7 @@ public class NotificationSenderUtils {
         Map<String, String> attributesMap =
                 resource.getAttributes().stream()
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
+                        .filter(attribute -> attribute.getValue() != null)
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
         attributesMap.forEach((key, value) -> {
             switch (key) {
