@@ -37,7 +37,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSe
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterDeleteMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -147,13 +146,6 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
     }
 
     @Override
-    public PushSenderDTO addPushSender(PushSenderDTO pushSender) throws
-            NotificationSenderManagementException {
-
-        throw new IllegalArgumentException("Channel support for the push notifications is not implemented.");
-    }
-
-    @Override
     public void deleteNotificationSender(String senderName) throws NotificationSenderManagementException {
 
         try {
@@ -201,12 +193,6 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
                     smsSender.getName());
         }
         return buildSmsSenderFromResource(smsSenderResource);
-    }
-
-    @Override
-    public PushSenderDTO updatePushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
-
-        throw new IllegalArgumentException("Channel support for the push notifications is not implemented.");
     }
 
     private void validateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementClientException {

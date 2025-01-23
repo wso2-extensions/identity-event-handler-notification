@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
+import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -130,16 +131,13 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                     }
 
                     PushNotificationData pushNotificationData = buildPushNotificationData(event);
-                    provider.sendNotification(pushNotificationData, pushSenderDTO, tenantDomain);
+                    provider.sendNotification(pushNotificationData, buildPushSenderData(pushSenderDTO), tenantDomain);
                 }
             }
         } catch (NotificationSenderManagementException e) {
             throw new IdentityEventException("Error while retrieving SMS Sender: "
                     + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
         } catch (PushProviderException e) {
-            // Error code and message thrown by the PushProviderException is thrown with an IdentityEventException.
-            // This error will be handled in the authenticator to display relevant error message according to the
-            // error scenario.
             throw new IdentityEventException(e.getErrorCode(), e.getMessage(), e);
         }
     }
@@ -175,45 +173,6 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
     private PushNotificationData buildPushNotificationData(Event event) throws IdentityEventException {
 
         Map<String, Object> eventProperties = event.getEventProperties();
-        PushNotificationData pushNotificationData = new PushNotificationData();
-
-        // Build the notification popup content.
-        buildNotificationContent(eventProperties, pushNotificationData);
-
-        // Add user related data.
-        pushNotificationData.setUsername(
-                (String) eventProperties.get(IdentityEventConstants.EventProperty.USER_NAME));
-        pushNotificationData.setTenantDomain(
-                (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN));
-        pushNotificationData.setUserStoreDomain(
-                (String) eventProperties.get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN));
-        pushNotificationData.setApplicationName(
-                (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_NAME));
-
-        // Add push notification related data.
-        pushNotificationData.setNotificationScenario((String) eventProperties.get(NOTIFICATION_SCENARIO));
-        pushNotificationData.setPushId((String) eventProperties.get(PUSH_ID));
-        pushNotificationData.setDeviceToken((String) eventProperties.get(DEVICE_TOKEN));
-        pushNotificationData.setChallenge((String) eventProperties.get(CHALLENGE));
-        pushNotificationData.setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE));
-
-        // Add system related data.
-        pushNotificationData.setIpAddress((String) eventProperties.get(IP_ADDRESS));
-        pushNotificationData.setDeviceOS((String) eventProperties.get(REQUEST_DEVICE_OS));
-        pushNotificationData.setBrowser((String) eventProperties.get(REQUEST_DEVICE_BROWSER));
-
-        return pushNotificationData;
-    }
-
-    /**
-     * Build the content of the push notification.
-     *
-     * @param eventProperties       Event properties.
-     * @param pushNotificationData  Push notification data object.
-     * @throws IdentityEventException If an error occurs while building the notification content.
-     */
-    private void buildNotificationContent(Map<String, Object> eventProperties,
-                                          PushNotificationData pushNotificationData) throws IdentityEventException {
 
         String scenario = (String) eventProperties.get(NOTIFICATION_SCENARIO);
 
@@ -247,9 +206,25 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
 
         // Replace the placeholders in the push notification template with the actual values.
         String title = replacePlaceHolders(template.getTitle(), placeholderValues);
-        pushNotificationData.setNotificationTitle(title);
         String body = replacePlaceHolders(template.getBody(), placeholderValues);
-        pushNotificationData.setNotificationBody(body);
+
+        return new PushNotificationData.Builder()
+                .setNotificationTitle(title)
+                .setNotificationBody(body)
+                .setUsername((String) eventProperties.get(IdentityEventConstants.EventProperty.USER_NAME))
+                .setTenantDomain((String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN))
+                .setUserStoreDomain((String) eventProperties.get(
+                        IdentityEventConstants.EventProperty.USER_STORE_DOMAIN))
+                .setApplicationName((String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_NAME))
+                .setNotificationScenario((String) eventProperties.get(NOTIFICATION_SCENARIO))
+                .setPushId((String) eventProperties.get(PUSH_ID))
+                .setDeviceToken((String) eventProperties.get(DEVICE_TOKEN))
+                .setChallenge((String) eventProperties.get(CHALLENGE))
+                .setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE))
+                .setIpAddress((String) eventProperties.get(IP_ADDRESS))
+                .setDeviceOS((String) eventProperties.get(REQUEST_DEVICE_OS))
+                .setBrowser((String) eventProperties.get(REQUEST_DEVICE_BROWSER))
+                .build();
     }
 
     /**
@@ -314,5 +289,21 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             content = content.replace("{{" + placeholder + "}}", value);
         }
         return content;
+    }
+
+    /**
+     * Build PushSenderData from PushSenderDTO.
+     *
+     * @param pushSenderDTO PushSender DTO.
+     * @return PushSenderData.
+     */
+    private static PushSenderData buildPushSenderData(PushSenderDTO pushSenderDTO) {
+
+        PushSenderData pushSenderData = new PushSenderData();
+        pushSenderData.setName(pushSenderDTO.getName());
+        pushSenderData.setProvider(pushSenderDTO.getProvider());
+        pushSenderData.setProperties(pushSenderDTO.getProperties());
+        pushSenderData.setProviderId(pushSenderDTO.getProviderId());
+        return pushSenderData;
     }
 }

@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.impl.FCMPushProvider;
+import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
@@ -269,7 +270,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         properties.put("key1", "value1");
         pushSender.setProperties(properties);
 
-        when(fcmPushProvider.preProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         Resource resource = new Resource();
         resource.setResourceName(DEFAULT_PUSH_PUBLISHER);
@@ -281,9 +282,9 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(resource);
         when(configurationManager.replaceResource(any(String.class), any(Resource.class))).thenReturn(resource);
 
-        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         PushSenderDTO result = notificationSenderManagementService.addPushSender(pushSender);
 
@@ -294,10 +295,10 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         verify(configurationManager, times(1)).getResource(any(String.class), any(String.class));
         verify(configurationManager, times(1)).addResource(any(String.class), any(Resource.class));
         verify(configurationManager, times(1)).replaceResource(any(String.class), any(Resource.class));
-        verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).preProcessProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderDTO.class));
+        verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).preProcessProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -336,7 +337,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         properties.put("key1", "value1");
         pushSender.setProperties(properties);
 
-        when(fcmPushProvider.preProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         Resource resource = new Resource();
         resource.setResourceName(DEFAULT_PUSH_PUBLISHER);
@@ -361,7 +362,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         properties.put("key1", "value1");
         pushSender.setProperties(properties);
 
-        when(fcmPushProvider.preProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         Resource resource = new Resource();
         resource.setResourceName(DEFAULT_PUSH_PUBLISHER);
@@ -374,9 +375,9 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         when(configurationManager.replaceResource(any(String.class), any(Resource.class))).thenThrow(
                 ConfigurationManagementException.class);
 
-        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         notificationSenderManagementService.addPushSender(pushSender);
     }
@@ -391,7 +392,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         properties.put("key1", "value1");
         pushSender.setProperties(properties);
 
-        when(fcmPushProvider.preProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         Resource resource = new Resource();
         resource.setResourceName(DEFAULT_PUSH_PUBLISHER);
@@ -402,7 +403,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         resource.setAttributes(attributes);
         when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(resource);
 
-        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderDTO.class))).thenThrow(
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenThrow(
                 PushProviderException.class);
 
         notificationSenderManagementService.addPushSender(pushSender);
@@ -425,8 +426,8 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         resource.setAttributes(attributes);
 
         when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         PushSenderDTO result = notificationSenderManagementService.getPushSender(senderName, false);
 
@@ -435,8 +436,8 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         assert properties.equals(result.getProperties());
 
         verify(configurationManager, times(1)).getResource(anyString(), anyString());
-        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderDTO.class));
+        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -470,8 +471,8 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         Resources resources = new Resources(resourceList);
 
         when(configurationManager.getResourcesByType(anyString())).thenReturn(resources);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         List<PushSenderDTO> results = notificationSenderManagementService.getPushSenders(false);
         assert results.size() == 1;
@@ -481,8 +482,8 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         assert properties.equals(result.getProperties());
 
         verify(configurationManager, times(1)).getResourcesByType(anyString());
-        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderDTO.class));
+        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementException.class)
@@ -514,9 +515,9 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
 
         when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
         when(configurationManager.replaceResource(any(String.class), any(Resource.class))).thenReturn(resource);
-        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderDTO.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderDTO.class))).thenReturn(properties);
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         PushSenderDTO result = notificationSenderManagementService.updatePushSender(pushSender);
 
@@ -526,9 +527,9 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
 
         verify(configurationManager, times(1)).getResource(anyString(), anyString());
         verify(configurationManager, times(2)).replaceResource(any(String.class), any(Resource.class));
-        verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderDTO.class));
-        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderDTO.class));
+        verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -622,7 +623,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
 
         notificationSenderManagementService.deleteNotificationSender("PushPublisher");
 
-        verify(fcmPushProvider, times(1)).deletePushProviderSecretProperties(any(PushSenderDTO.class));
+        verify(fcmPushProvider, times(1)).deletePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementServerException.class)
@@ -651,7 +652,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         doNothing().when(defaultChannelConfigurationHandler).deleteNotificationSender(anyString());
 
         doThrow(PushProviderException.class).when(fcmPushProvider)
-                .deletePushProviderSecretProperties(any(PushSenderDTO.class));
+                .deletePushProviderSecretProperties(any(PushSenderData.class));
 
         notificationSenderManagementService.deleteNotificationSender("PushPublisher");
     }

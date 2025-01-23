@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.event.handler.notification.internal.Notification
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
+import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
@@ -49,6 +50,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Test class for PushNotificationHandler.
+ */
 public class PushNotificationHandlerTest {
 
     @InjectMocks
@@ -120,7 +124,8 @@ public class PushNotificationHandlerTest {
 
             pushNotificationHandler.handleEvent(event);
 
-            verify(pushProvider, times(1)).sendNotification(any(PushNotificationData.class), eq(pushSenderDTO),
+            verify(pushProvider, times(1)).sendNotification(any(PushNotificationData.class),
+                    any(PushSenderData.class),
                     eq("carbon.super"));
         }
     }
@@ -261,7 +266,7 @@ public class PushNotificationHandlerTest {
             when(notificationHandlerDataHolder.getPushProvider(anyString())).thenReturn(pushProvider);
 
             doThrow(new PushProviderException("Error")).when(pushProvider)
-                    .sendNotification(any(PushNotificationData.class), any(PushSenderDTO.class), anyString());
+                    .sendNotification(any(PushNotificationData.class), any(PushSenderData.class), anyString());
 
             pushNotificationHandler.handleEvent(event);
         }

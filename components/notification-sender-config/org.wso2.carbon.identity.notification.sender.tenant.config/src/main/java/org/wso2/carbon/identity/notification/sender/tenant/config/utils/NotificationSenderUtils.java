@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
+import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -429,6 +430,8 @@ public class NotificationSenderUtils {
      * Build Resource by Push sender DTO.
      *
      * @param pushSender PushSender DTO.
+     * @param pushProvider  PushProvider pushProvider.
+     * @param isProcessProperties Is conditionally process the values of the push sender properties.
      * @return Resource object.
      */
     public static Resource buildResourceFromPushSender(PushSenderDTO pushSender, PushProvider pushProvider,
@@ -440,7 +443,7 @@ public class NotificationSenderUtils {
         try {
             Map<String, String> pushSenderAttributes;
             if (isProcessProperties) {
-                pushSenderAttributes = pushProvider.preProcessProperties(pushSender);
+                pushSenderAttributes = pushProvider.preProcessProperties(buildPushSenderData(pushSender));
             } else {
                 pushSenderAttributes = pushSender.getProperties();
             }
@@ -462,6 +465,7 @@ public class NotificationSenderUtils {
      * Build a push sender response from push sender's resource object.
      *
      * @param resource Push sender resource object.
+     * @param isProcessProperties Is conditionally process the values of the push sender properties.
      * @return Push sender response.
      */
     public static PushSenderDTO buildPushSenderFromResource(Resource resource, boolean isProcessProperties)
@@ -488,8 +492,8 @@ public class NotificationSenderUtils {
 
         try {
             PushProvider provider = getPushProvider(pushSender);
-            pushSender.setProperties(provider.retrievePushProviderSecretProperties(pushSender));
-            pushSender.setProperties(provider.postProcessProperties(pushSender));
+            pushSender.setProperties(provider.retrievePushProviderSecretProperties(buildPushSenderData(pushSender)));
+            pushSender.setProperties(provider.postProcessProperties(buildPushSenderData(pushSender)));
         } catch (PushProviderException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES,
                     pushSender.getName(), e);
@@ -498,15 +502,16 @@ public class NotificationSenderUtils {
     }
 
     /**
-     * Update push sender credentials.
+     * This method is used to trigger any push provider specific operations when updating push sender properties.
      *
      * @param pushSender Push sender DTO.
      */
-    public static void updatePushSenderCredentials(PushSenderDTO pushSender, PushProvider pushProvider)
+    public static void updatePushSenderCredentials(PushSenderDTO pushSender, PushProvider pushProvider,
+                                                   String tenantDomain)
             throws NotificationSenderManagementServerException {
 
         try {
-            pushProvider.updateCredentials(pushSender);
+            pushProvider.updateCredentials(buildPushSenderData(pushSender), tenantDomain);
         } catch (PushProviderException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES,
                     pushSender.getName(), e);
@@ -542,7 +547,7 @@ public class NotificationSenderUtils {
         try {
             PushSenderDTO pushSender = buildPushSenderFromResource(resource, false);
             PushProvider pushProvider = getPushProvider(pushSender);
-            pushProvider.deletePushProviderSecretProperties(pushSender);
+            pushProvider.deletePushProviderSecretProperties(buildPushSenderData(pushSender));
         } catch (PushProviderException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS,
                     e.getMessage(), e);
@@ -563,5 +568,21 @@ public class NotificationSenderUtils {
         String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
         String primaryTenantDomain = organizationManager.resolveTenantDomain(primaryOrgId);
         return IdentityTenantUtil.getTenantId(primaryTenantDomain);
+    }
+
+    /**
+     * Build PushSenderData from PushSenderDTO.
+     *
+     * @param pushSenderDTO PushSender DTO.
+     * @return PushSenderData.
+     */
+    public static PushSenderData buildPushSenderData(PushSenderDTO pushSenderDTO) {
+
+        PushSenderData pushSenderData = new PushSenderData();
+        pushSenderData.setName(pushSenderDTO.getName());
+        pushSenderData.setProvider(pushSenderDTO.getProvider());
+        pushSenderData.setProperties(pushSenderDTO.getProperties());
+        pushSenderData.setProviderId(pushSenderDTO.getProviderId());
+        return pushSenderData;
     }
 }

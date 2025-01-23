@@ -110,7 +110,8 @@ public interface NotificationSenderManagementService {
      * When set to false, it retrieves only the configurations explicitly set for the current tenant.
      *
      * @param senderName Push sender's name.
-     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings when called from a
+     *                              sub organization context.
      * @return null.
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */

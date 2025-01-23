@@ -110,6 +110,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderData;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
@@ -126,11 +127,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
     public static final int MAX_RETRY_COUNT = 60;
     public static final String SMS_OTP_AUTHENTICATOR = "sms-otp-authenticator";
-    public static final String PUSH_NOTIFICATION_AUTHENTICATOR = "push-notification-authenticator";
 
     static final Map<String, String> SENDERS = new HashMap<String, String>() { {
         put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
-        put("PushPublisher", PUSH_NOTIFICATION_AUTHENTICATOR);
     } };
 
     @Override
@@ -205,7 +204,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         try {
             Resource addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .addResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
-            updatePushSenderCredentials(pushSender, pushProvider);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
             PushSenderDTO addedPushSender = buildPushSenderFromResource(addedResource, false);
             return encryptSecretProperties(addedPushSender, pushProvider);
         } catch (ConfigurationManagementException e) {
@@ -492,7 +492,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         try {
             Resource updatedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .replaceResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
-            updatePushSenderCredentials(pushSender, pushProvider);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
             PushSenderDTO updatedPushSender = buildPushSenderFromResource(updatedResource, false);
             encryptSecretProperties(updatedPushSender, pushProvider);
             return pushSender;
@@ -874,7 +875,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throws NotificationSenderManagementException {
 
         try {
-            Map<String, String> processedProperties = pushProvider.storePushProviderSecretProperties(pushSender);
+            Map<String, String> processedProperties =
+                    pushProvider.storePushProviderSecretProperties(buildPushSenderData(pushSender));
             processedProperties.put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
             pushSender.setProperties(processedProperties);
             Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider, false);
