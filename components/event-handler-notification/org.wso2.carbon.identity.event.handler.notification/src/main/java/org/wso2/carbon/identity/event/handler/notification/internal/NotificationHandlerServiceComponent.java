@@ -26,8 +26,11 @@ import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.handler.notification.DefaultNotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.NotificationHandler;
+import org.wso2.carbon.identity.event.handler.notification.PushNotificationHandler;
 import org.wso2.carbon.identity.event.handler.notification.listener.NotificationEventTenantListener;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
@@ -52,6 +55,7 @@ public class NotificationHandlerServiceComponent {
         try {
             context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new NotificationHandler(), null);
             context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new DefaultNotificationHandler(), null);
+            context.getBundleContext().registerService(AbstractEventHandler.class.getName(), new PushNotificationHandler(), null);
             context.getBundleContext().registerService(TenantMgtListener.class.getName(), new NotificationEventTenantListener(), null);
         } catch (Throwable e) {
             log.error("Error occurred while activating Notification Handler Service Component", e);
@@ -233,6 +237,46 @@ public class NotificationHandlerServiceComponent {
             log.debug("Un-setting the Application Management Service.");
         }
         NotificationHandlerDataHolder.getInstance().setApplicationManagementService(null);
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.identity.notification.sender.tenant.config",
+            service = NotificationSenderManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetNotificationSenderManagementService"
+    )
+    protected void setNotificationSenderManagementService(
+            NotificationSenderManagementService notificationSenderManagementService) {
+
+        NotificationHandlerDataHolder.getInstance()
+                .setNotificationSenderManagementService(notificationSenderManagementService);
+    }
+
+    protected void unsetNotificationSenderManagementService(
+            NotificationSenderManagementService notificationSenderManagementService) {
+
+        NotificationHandlerDataHolder.getInstance().setNotificationSenderManagementService(null);
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.identity.notification.push.provider",
+            service = PushProvider.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPushProvider"
+    )
+    protected void setPushProvider(PushProvider provider) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("PushProvider: " + provider.getName() + " is registered.");
+        }
+        NotificationHandlerDataHolder.getInstance().addPushProvider(provider.getName(), provider);
+    }
+
+    protected void unsetPushProvider(PushProvider provider) {
+
+        NotificationHandlerDataHolder.getInstance().removePushProvider(provider.getName());
     }
 }
 

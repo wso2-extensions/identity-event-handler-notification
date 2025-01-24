@@ -62,6 +62,10 @@
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.notification.push</groupId>
+            <artifactId>org.wso2.carbon.identity.notification.push.provider</artifactId>
+        </dependency>
         <!--Test dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
@@ -80,6 +84,12 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -166,7 +176,11 @@
                             org.wso2.carbon.identity.organization.management.service.util;
                             version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.exception;
-                            version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}"
+                            version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+
+                            org.wso2.carbon.identity.notification.push.provider; version="${identity.notification.push.version.range}",
+                            org.wso2.carbon.identity.notification.push.provider.exception; version="${identity.notification.push.version.range}",
+                            org.wso2.carbon.identity.notification.push.provider.model; version="${identity.notification.push.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>

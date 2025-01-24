@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
@@ -46,6 +47,18 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException;
+
+    /**
+     * Create a push sender resource with a resource file.
+     *
+     * @param pushSender Push sender post request.
+     * @return Push sender.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default PushSenderDTO addPushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
+
+        return null;
+    }
 
     /**
      * Delete a SMS/Email sender by name.
@@ -91,6 +104,24 @@ public interface NotificationSenderManagementService {
     }
 
     /**
+     * Retrieve the push sender details by name for the current organization with an option to exclude inherited
+     * tenant settings.
+     * When the 'inheritTenantSettings' flag is set to true, the method includes configurations from the parent tenant.
+     * When set to false, it retrieves only the configurations explicitly set for the current tenant.
+     *
+     * @param senderName Push sender's name.
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings when called from a
+     *                              sub organization context.
+     * @return null.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default PushSenderDTO getPushSender(String senderName, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        return null;
+    }
+
+    /**
      * Retrieve all email senders of the tenant.
      *
      * @return Email senders of the tenant.
@@ -122,6 +153,21 @@ public interface NotificationSenderManagementService {
     }
 
     /**
+     * Retrieves all push senders configured for the current tenant with an option to exclude inherited tenant settings.
+     * When the 'inheritTenantSettings' flag is set to true, the method includes configurations from the parent tenant.
+     * When set to false, it retrieves only the configurations explicitly set for the current tenant.
+     *
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @return Null.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default List<PushSenderDTO> getPushSenders(boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        return null;
+    }
+
+    /**
      * Update email sender details.
      *
      * @param emailSender Email sender's updated configurations.
@@ -138,4 +184,16 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     SMSSenderDTO updateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementException;
+
+    /**
+     * Update push sender details.
+     *
+     * @param pushSender Push sender's updated configurations.
+     * @return Updated Push sender.
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default PushSenderDTO updatePushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
+
+        return null;
+    }
 }
