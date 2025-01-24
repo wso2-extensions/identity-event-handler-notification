@@ -120,6 +120,9 @@ public class NotificationConstants {
         public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
     }
 
+    /**
+     * Define Push Notification constants.
+     */
     public static class PushNotification {
 
         public static final String PUSH_NOTIFICATION_EVENT = "TRIGGER_PUSH_NOTIFICATION";
@@ -138,6 +141,9 @@ public class NotificationConstants {
         public static final String REQUEST_DEVICE_BROWSER = "browser";
     }
 
+    /**
+     * Define Push Notification templates.
+     */
     public enum PushNotificationTemplate {
 
         AUTHENTICATION(
@@ -172,6 +178,9 @@ public class NotificationConstants {
         }
     }
 
+    /**
+     * Define Push Notification placeholders.
+     */
     public enum PushNotificationPlaceholder {
 
         USER_NAME("user-name"),

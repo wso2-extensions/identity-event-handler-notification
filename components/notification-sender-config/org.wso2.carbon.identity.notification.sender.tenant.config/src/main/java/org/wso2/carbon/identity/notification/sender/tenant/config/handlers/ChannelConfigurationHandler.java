@@ -70,7 +70,6 @@ public abstract class ChannelConfigurationHandler {
     public abstract SMSSenderDTO addSMSSender(SMSSenderDTO smsSender) throws
             NotificationSenderManagementException;
 
-
     /**
      * Method holds the implementation of updating the Email sender configurations.
      * TODO: Adding this since channel support will be added to email notification senders too.
