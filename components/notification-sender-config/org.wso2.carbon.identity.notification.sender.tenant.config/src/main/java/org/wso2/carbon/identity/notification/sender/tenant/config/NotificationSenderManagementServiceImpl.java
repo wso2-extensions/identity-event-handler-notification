@@ -39,7 +39,6 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
-import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
@@ -82,7 +81,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFLICT_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONNECTED_APPLICATION_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
@@ -110,7 +108,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderData;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
@@ -200,14 +197,13 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
         pushSender.getProperties().put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
         PushProvider pushProvider = getPushProvider(pushSender);
-        Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider, true);
         try {
+            Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider);
             Resource addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                     .addResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
-            PushSenderDTO addedPushSender = buildPushSenderFromResource(addedResource, false);
-            return encryptSecretProperties(addedPushSender, pushProvider);
+            return buildPushSenderFromResource(addedResource, true);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER,
                     pushSender.getName());
@@ -488,15 +484,13 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
         pushSender.getProperties().put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
         PushProvider pushProvider = getPushProvider(pushSender);
-        Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider, true);
         try {
+            Resource pushSenderResource1 = buildResourceFromPushSender(pushSender, pushProvider);
             Resource updatedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .replaceResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
+                    .replaceResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource1);
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
-            PushSenderDTO updatedPushSender = buildPushSenderFromResource(updatedResource, false);
-            encryptSecretProperties(updatedPushSender, pushProvider);
-            return pushSender;
+            return buildPushSenderFromResource(updatedResource, true);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
                     pushSender.getName());
@@ -861,34 +855,5 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
         }
         return true;
-    }
-
-    /**
-     * Encrypt the secret properties of the push sender.
-     *
-     * @param pushSender    Push sender object.
-     * @param pushProvider  Push provider object.
-     * @return  Encrypted push sender object.
-     * @throws NotificationSenderManagementException If an error occurred while encrypting the secret properties.
-     */
-    private PushSenderDTO encryptSecretProperties(PushSenderDTO pushSender, PushProvider pushProvider)
-            throws NotificationSenderManagementException {
-
-        try {
-            Map<String, String> processedProperties =
-                    pushProvider.storePushProviderSecretProperties(buildPushSenderData(pushSender));
-            processedProperties.put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
-            pushSender.setProperties(processedProperties);
-            Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider, false);
-            Resource updatedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                    .replaceResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
-            return buildPushSenderFromResource(updatedResource, true);
-        } catch (ConfigurationManagementException e) {
-            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS,
-                    pushSender.getName());
-        } catch (PushProviderException e) {
-            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS,
-                    e.getMessage(), e);
-        }
     }
 }
