@@ -280,7 +280,6 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         attributes.add(new Attribute("provider", "FCM"));
         resource.setAttributes(attributes);
         when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(resource);
-        when(configurationManager.replaceResource(any(String.class), any(Resource.class))).thenReturn(resource);
 
         when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
         when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
@@ -294,7 +293,6 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
 
         verify(configurationManager, times(1)).getResource(any(String.class), any(String.class));
         verify(configurationManager, times(1)).addResource(any(String.class), any(Resource.class));
-        verify(configurationManager, times(1)).replaceResource(any(String.class), any(Resource.class));
         verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).preProcessProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
@@ -348,36 +346,6 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         resource.setAttributes(attributes);
         when(configurationManager.addResource(any(String.class), any(Resource.class))).thenThrow(
                 ConfigurationManagementException.class);
-
-        notificationSenderManagementService.addPushSender(pushSender);
-    }
-
-    @Test(expectedExceptions = NotificationSenderManagementException.class)
-    public void testAddPushSenderFailWhenReplacingWithEncryptedProperties()
-            throws PushProviderException, ConfigurationManagementException, NotificationSenderManagementException {
-
-        PushSenderDTO pushSender = new PushSenderDTO();
-        pushSender.setProvider("FCM");
-        Map<String, String> properties = new HashMap<>();
-        properties.put("key1", "value1");
-        pushSender.setProperties(properties);
-
-        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
-
-        Resource resource = new Resource();
-        resource.setResourceName(DEFAULT_PUSH_PUBLISHER);
-        resource.setResourceId("sampleResourceId");
-        List<Attribute> attributes = new ArrayList<>();
-        attributes.add(new Attribute("key1", "value1"));
-        attributes.add(new Attribute("provider", "FCM"));
-        resource.setAttributes(attributes);
-        when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(resource);
-        when(configurationManager.replaceResource(any(String.class), any(Resource.class))).thenThrow(
-                ConfigurationManagementException.class);
-
-        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
-        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
-        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
 
         notificationSenderManagementService.addPushSender(pushSender);
     }
@@ -526,7 +494,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         assert properties.equals(result.getProperties());
 
         verify(configurationManager, times(1)).getResource(anyString(), anyString());
-        verify(configurationManager, times(2)).replaceResource(any(String.class), any(Resource.class));
+        verify(configurationManager, times(1)).replaceResource(any(String.class), any(Resource.class));
         verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));

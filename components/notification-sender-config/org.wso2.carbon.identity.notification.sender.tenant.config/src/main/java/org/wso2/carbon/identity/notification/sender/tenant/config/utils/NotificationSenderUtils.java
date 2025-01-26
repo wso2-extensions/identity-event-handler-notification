@@ -432,34 +432,30 @@ public class NotificationSenderUtils {
      *
      * @param pushSender PushSender DTO.
      * @param pushProvider  PushProvider pushProvider.
-     * @param isProcessProperties Is conditionally process the values of the push sender properties.
      * @return Resource object.
      */
-    public static Resource buildResourceFromPushSender(PushSenderDTO pushSender, PushProvider pushProvider,
-                                                       boolean isProcessProperties)
+    public static Resource buildResourceFromPushSender(PushSenderDTO pushSender, PushProvider pushProvider)
             throws NotificationSenderManagementServerException {
 
-        Resource resource = new Resource();
-        resource.setResourceName(pushSender.getName());
         try {
-            Map<String, String> pushSenderAttributes;
-            if (isProcessProperties) {
-                pushSenderAttributes = pushProvider.preProcessProperties(buildPushSenderData(pushSender));
-            } else {
-                pushSenderAttributes = pushSender.getProperties();
-            }
-            pushSenderAttributes.put(PROVIDER, pushSender.getProvider());
-            List<Attribute> resourceAttributes =
-                    pushSenderAttributes.entrySet().stream()
-                            .filter(attribute -> attribute.getValue() != null && !"null".equals(attribute.getValue()))
-                            .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
-                            .collect(Collectors.toList());
-            resource.setAttributes(resourceAttributes);
-            return resource;
+            pushSender.setProperties(pushProvider.preProcessProperties(buildPushSenderData(pushSender)));
+            pushSender.setProperties(pushProvider.storePushProviderSecretProperties(buildPushSenderData(pushSender)));
         } catch (PushProviderException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES,
                     pushSender.getName(), e);
         }
+
+        Resource resource = new Resource();
+        resource.setResourceName(pushSender.getName());
+        Map<String, String> pushSenderAttributes = pushSender.getProperties();
+        pushSenderAttributes.put(PROVIDER, pushSender.getProvider());
+        List<Attribute> resourceAttributes =
+                pushSenderAttributes.entrySet().stream()
+                        .filter(attribute -> attribute.getValue() != null && !"null".equals(attribute.getValue()))
+                        .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
+                        .collect(Collectors.toList());
+        resource.setAttributes(resourceAttributes);
+        return resource;
     }
 
     /**
