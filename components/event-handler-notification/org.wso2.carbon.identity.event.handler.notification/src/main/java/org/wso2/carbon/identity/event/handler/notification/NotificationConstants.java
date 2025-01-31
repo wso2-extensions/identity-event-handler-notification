@@ -139,6 +139,7 @@ public class NotificationConstants {
         public static final String IP_ADDRESS = "ipAddress";
         public static final String REQUEST_DEVICE_OS = "deviceOS";
         public static final String REQUEST_DEVICE_BROWSER = "browser";
+        public static final String DEVICE_ID = "deviceId";
     }
 
     /**
