@@ -98,11 +98,6 @@ public class I18nMgtServiceComponent {
             I18nMgtDataHolder.getInstance().setDefaultSMSTemplates(
                     loadDefaultTemplatesFromFile(NotificationChannels.SMS_CHANNEL.getChannelType()));
 
-            List<String> legacyTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_LEGACY_TENANTS);
-            I18nMgtDataHolder.getInstance().setLegacyTenants(legacyTenants);
-            List<String> debugTenants = IdentityUtil.getPropertyAsList(NOTIFICATION_TEMPLATES_DEBUG_TENANTS);
-            I18nMgtDataHolder.getInstance().setDebugTenants(debugTenants);
-
             // Register Email Mgt Service as an OSGi service.
             EmailTemplateManagerImpl emailTemplateManager = new EmailTemplateManagerImpl();
             ServiceRegistration emailTemplateSR = bundleCtx.registerService(EmailTemplateManager.class.getName(),

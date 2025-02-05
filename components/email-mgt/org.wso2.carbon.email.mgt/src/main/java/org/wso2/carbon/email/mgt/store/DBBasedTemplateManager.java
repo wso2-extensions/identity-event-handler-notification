@@ -43,7 +43,6 @@ import java.util.List;
 public class DBBasedTemplateManager implements TemplatePersistenceManager {
 
     private static final Log log = LogFactory.getLog(DBBasedTemplateManager.class);
-    private List<String> debugTenants = I18nMgtDataHolder.getInstance().getDebugTenants();
 
     private final NotificationTypeDAO notificationTypeDAO = new CacheBackedNotificationTypeDAO();
     private final OrgNotificationTemplateDAO orgNotificationTemplateDAO = new CacheBackedOrgNotificationTemplateDAO();
@@ -135,11 +134,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                             "Org %s template with locale: %s for type: %s for tenant: %s successfully added.",
                             notificationChannel, locale, displayName, tenantDomain));
                 }
-                if (debugTenants.contains(tenantId)) {
-                    log.info(String.format(
-                            "Org %s template with locale: %s for type: %s for tenant: %s successfully added.",
-                            notificationChannel, locale, displayName, tenantDomain));
-                }
             } else {
                 appNotificationTemplateDAO.addNotificationTemplate(notificationTemplate, applicationUuid, tenantId);
                 if (log.isDebugEnabled()) {
@@ -148,19 +142,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                     "successfully added.",
                             notificationChannel, locale, displayName, applicationUuid, tenantDomain));
                 }
-                if (debugTenants.contains(tenantId)) {
-                    log.info(String.format(
-                            "App %s template with locale: %s for type: %s for application: %s for tenant: %s " +
-                                    "successfully added.",
-                            notificationChannel, locale, displayName, applicationUuid, tenantDomain));
-                }
-            }
-            if (debugTenants.contains(tenantId)) {
-                log.info("[" + tenantId + "][NotificationTemplate][ADD][" + tenantDomain + "]{"
-                        + "subject: " + notificationTemplate.getSubject()
-                        + ", footer: " + notificationTemplate.getFooter()
-                        + ", body: " + notificationTemplate.getBody()
-                        + "}");
             }
         } else {
             // Registry impl updates the template if exists
@@ -168,11 +149,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                 orgNotificationTemplateDAO.updateNotificationTemplate(notificationTemplate, tenantId);
                 if (log.isDebugEnabled()) {
                     log.debug(String.format(
-                            "Org %s template with locale: %s for type: %s for tenant: %s successfully updated.",
-                            notificationChannel, locale, displayName, tenantDomain));
-                }
-                if (debugTenants.contains(tenantId)) {
-                    log.info(String.format(
                             "Org %s template with locale: %s for type: %s for tenant: %s successfully updated.",
                             notificationChannel, locale, displayName, tenantDomain));
                 }
@@ -184,19 +160,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                     "successfully updated.",
                             notificationChannel, locale, displayName, applicationUuid, tenantDomain));
                 }
-                if (debugTenants.contains(tenantId)) {
-                    log.info(String.format(
-                            "App %s template with locale: %s for type: %s for application: %s for tenant: %s " +
-                                    "successfully updated.",
-                            notificationChannel, locale, displayName, applicationUuid, tenantDomain));
-                }
-            }
-            if (debugTenants.contains(tenantId)) {
-                log.info("[" + tenantId + "][NotificationTemplate][UPDATE][" + tenantDomain + "]{"
-                        + "subject: " + notificationTemplate.getSubject()
-                        + ", footer: " + notificationTemplate.getFooter()
-                        + ", body: " + notificationTemplate.getBody()
-                        + "}");
             }
         }
     }
@@ -253,12 +216,6 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                         "Org %s template with locale: %s for type: %s for tenant: %s successfully retrieved.",
                         notificationChannel, locale, displayName, tenantDomain));
             }
-
-            if (debugTenants.contains(tenantId)) {
-                log.info(String.format(
-                        "Org %s template with locale: %s for type: %s for tenant: %s successfully retrieved.",
-                        notificationChannel, locale, displayName, tenantDomain));
-            }
         } else {
             notificationTemplate =
                     appNotificationTemplateDAO.getNotificationTemplate(locale, templateTypeKey, notificationChannel,
@@ -269,24 +226,8 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                 "for tenant: %s successfully retrieved.", notificationChannel, locale, displayName,
                         applicationUuid, tenantDomain));
             }
-            if (debugTenants.contains(tenantId)) {
-                log.info(String.format("App %s template with locale: %s for type: %s for application: %s " +
-                                "for tenant: %s successfully retrieved.", notificationChannel, locale, displayName,
-                        applicationUuid, tenantDomain));
-            }
         }
 
-        if (debugTenants.contains(tenantId)) {
-            if (notificationTemplate != null) {
-                log.info("[" + tenantId + "][NotificationTemplate][GET][" + tenantDomain + "]{"
-                        + "subject: " + notificationTemplate.getSubject()
-                        + ", footer: " + notificationTemplate.getFooter()
-                        + ", body: " + notificationTemplate.getBody()
-                        + "}");
-            } else {
-                log.info("[" + tenantId + "][NotificationTemplate][GET][" + tenantDomain + "]{template not found}");
-            }
-        }
         return notificationTemplate;
     }
 

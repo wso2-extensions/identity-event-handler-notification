@@ -41,18 +41,10 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
 
     private TemplatePersistenceManager dbBasedTemplateManager = new DBBasedTemplateManager();
     private TemplatePersistenceManager registryBasedTemplateManager = new RegistryBasedTemplateManager();
-    private List<String> legacyTenants = I18nMgtDataHolder.getInstance().getLegacyTenants();
 
     @Override
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            log.info(String.format("Adding %s template type for channel: %s to the registry for legacy tenant %s.",
-                    displayName, notificationChannel, tenantDomain));
-            registryBasedTemplateManager.addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
-            return;
-        }
 
         dbBasedTemplateManager.addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
     }
@@ -60,11 +52,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     @Override
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
-                            tenantDomain);
-        }
 
         return dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                 tenantDomain) ||
@@ -75,10 +62,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     @Override
     public List<String> listNotificationTemplateTypes(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.listNotificationTemplateTypes(notificationChannel, tenantDomain);
-        }
 
         List<String> dbBasedTemplateTypes = dbBasedTemplateManager.listNotificationTemplateTypes(notificationChannel,
                 tenantDomain);
@@ -120,15 +103,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        if (legacyTenants.contains(tenantDomain)) {
-            log.info(String.format("Adding %s template: %s for locale: %s in tenant: %s to the registry for legacy tenant.",
-                    notificationTemplate.getNotificationChannel(), notificationTemplate.getDisplayName(),
-                    notificationTemplate.getLocale(), tenantDomain));
-            registryBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
-                    tenantDomain);
-            return;
-        }
-
         dbBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
 
         String displayName = notificationTemplate.getDisplayName();
@@ -156,11 +130,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
-                            applicationUuid, tenantDomain);
-        }
-
         return dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain) ||
                 registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
@@ -171,11 +140,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     public NotificationTemplate getNotificationTemplate(String displayName, String locale, String notificationChannel,
                                                         String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
-                            applicationUuid, tenantDomain);
-        }
 
         if (dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
@@ -191,11 +155,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     public List<NotificationTemplate> listNotificationTemplates(String templateType, String notificationChannel,
                                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.listNotificationTemplates(templateType, notificationChannel,
-                            applicationUuid, tenantDomain);
-        }
 
         List<NotificationTemplate> dbBasedTemplates = new ArrayList<>();
         if (dbBasedTemplateManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
@@ -219,10 +178,6 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     @Override
     public List<NotificationTemplate> listAllNotificationTemplates(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
-
-        if (legacyTenants.contains(tenantDomain)) {
-            return registryBasedTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
-        }
 
         List<NotificationTemplate> dbBasedTemplates =
                 dbBasedTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
