@@ -65,7 +65,6 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 public class OrgNotificationTemplateDAO {
 
     private static final Log log = LogFactory.getLog(OrgNotificationTemplateDAO.class);
-    private List<String> debugTenants = I18nMgtDataHolder.getInstance().getDebugTenants();
 
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -101,14 +100,6 @@ public class OrgNotificationTemplateDAO {
         } catch (IOException e) {
             throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
-
-        if (debugTenants.contains(String.valueOf(tenantId))) {
-            log.info("[" + tenantId + "][NotificationTemplate][ADD] {"
-                    + "subject: " + notificationTemplate.getSubject()
-                    + ", footer: " + notificationTemplate.getFooter()
-                    + ", body: " + notificationTemplate.getBody()
-                    + "}");
-        }
     }
 
     public NotificationTemplate getNotificationTemplate(String locale, String templateType, String channelName,
@@ -141,18 +132,6 @@ public class OrgNotificationTemplateDAO {
                     String.format("Error while retrieving %s template %s of type %s from %s tenant.", channelName,
                             locale, templateType, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
-        }
-
-        if (debugTenants.contains(String.valueOf(tenantId))) {
-            if (notificationTemplate != null) {
-                log.info("[" + tenantId + "][NotificationTemplate][GET] {"
-                        + "subject: " + notificationTemplate.getSubject()
-                        + ", footer: " + notificationTemplate.getFooter()
-                        + ", body: " + notificationTemplate.getBody()
-                        + "}");
-            } else {
-                log.info("[" + tenantId + "][NotificationTemplate][GET] {template not found}");
-            }
         }
 
         return notificationTemplate;
@@ -257,14 +236,6 @@ public class OrgNotificationTemplateDAO {
             throw new NotificationTemplateManagerServerException(error, e);
         } catch (IOException e) {
             throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
-        }
-
-        if (debugTenants.contains(String.valueOf(tenantId))) {
-            log.info("[" + tenantId + "][NotificationTemplate][UPDATE] {"
-                    + "subject: " + notificationTemplate.getSubject()
-                    + ", footer: " + notificationTemplate.getFooter()
-                    + ", body: " + notificationTemplate.getBody()
-                    + "}");
         }
 
     }

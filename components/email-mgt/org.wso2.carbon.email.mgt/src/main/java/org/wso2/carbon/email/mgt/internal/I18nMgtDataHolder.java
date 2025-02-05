@@ -29,7 +29,12 @@ import org.wso2.carbon.user.core.service.RealmService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class I18nMgtDataHolder{
+
+/**
+ * This class holds the data required for the notification management.
+ */
+public class I18nMgtDataHolder {
+
     private RealmService realmService;
     private RegistryService registryService;
     private RegistryResourceMgtService registryResourceMgtService;
@@ -38,8 +43,6 @@ public class I18nMgtDataHolder{
     private OrgResourceResolverService orgResourceResolverService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
-    private List<String> legacyTenants = new ArrayList<>();
-    private List<String> debugTenants = new ArrayList<>();
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -142,46 +145,6 @@ public class I18nMgtDataHolder{
     public OrganizationManager getOrganizationManager() {
 
         return organizationManager;
-    }
-
-    /**
-     * Set the list of legacy tenants.
-     *
-     * @param legacyTenants List of legacy tenants.
-     */
-    public void setLegacyTenants(List<String> legacyTenants) {
-
-        this.legacyTenants = legacyTenants;
-    }
-
-    /**
-     * Get the list of legacy tenants.
-     *
-     * @return List of legacy tenants.
-     */
-    public List<String> getLegacyTenants() {
-
-        return legacyTenants;
-    }
-
-    /**
-     * Set the list of debug tenants.
-     *
-     * @param debugTenants List of debug tenants.
-     */
-    public void setDebugTenants(List<String> debugTenants) {
-
-        this.debugTenants = debugTenants;
-    }
-
-    /**
-     * Get the list of debug tenants.
-     *
-     * @return List of debug tenants.
-     */
-    public List<String> getDebugTenants() {
-
-        return debugTenants == null ? new ArrayList<>() : debugTenants;
     }
 
     /**
