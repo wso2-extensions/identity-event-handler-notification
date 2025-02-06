@@ -56,6 +56,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
         </dependency>
         <dependency>
@@ -181,6 +185,8 @@
                             org.wso2.carbon.identity.notification.push.provider; version="${identity.notification.push.version.range}",
                             org.wso2.carbon.identity.notification.push.provider.exception; version="${identity.notification.push.version.range}",
                             org.wso2.carbon.identity.notification.push.provider.model; version="${identity.notification.push.version.range}",
+
+                            org.wso2.carbon.identity.application.authentication.framework.util; version="${carbon.identity.framework.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>
