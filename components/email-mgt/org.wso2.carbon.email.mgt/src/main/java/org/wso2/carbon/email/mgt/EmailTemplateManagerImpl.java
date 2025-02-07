@@ -313,7 +313,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
                 String error = String
                         .format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_TEMPLATE_FOUND.getMessage(),
                                 templateType, locale, tenantDomain);
-                throw new NotificationTemplateManagerServerException(
+                throw new NotificationTemplateManagerClientException(
                         IdentityMgtConstants.ErrorMessages.ERROR_CODE_NO_TEMPLATE_FOUND.getCode(), error);
             } else {
                 if (log.isDebugEnabled()) {
