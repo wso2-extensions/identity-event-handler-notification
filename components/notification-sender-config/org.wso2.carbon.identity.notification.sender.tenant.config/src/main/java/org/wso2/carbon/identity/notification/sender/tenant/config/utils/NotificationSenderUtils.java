@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
@@ -488,12 +489,21 @@ public class NotificationSenderUtils {
         }
 
         try {
+            /*
+            * When the subOrganization tries to inherit push sender configurations from the parent organization,
+            * to retrieve the secret properties of the push sender from parent organization, we need to start the
+            * tenant flow with the tenant domain of the parent organization since, the secrets of the push sender
+            * are stored against the parent organization.
+            * */
+            FrameworkUtils.startTenantFlow(resource.getTenantDomain());
             PushProvider provider = getPushProvider(pushSender);
             pushSender.setProperties(provider.retrievePushProviderSecretProperties(buildPushSenderData(pushSender)));
             pushSender.setProperties(provider.postProcessProperties(buildPushSenderData(pushSender)));
         } catch (PushProviderException e) {
             throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES,
                     pushSender.getName(), e);
+        } finally {
+            FrameworkUtils.endTenantFlow();
         }
         return pushSender;
     }
