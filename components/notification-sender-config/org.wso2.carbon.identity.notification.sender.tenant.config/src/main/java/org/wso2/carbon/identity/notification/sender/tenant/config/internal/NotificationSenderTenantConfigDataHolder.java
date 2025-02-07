@@ -23,6 +23,7 @@ import org.wso2.carbon.email.mgt.SMSProviderPayloadTemplateManager;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
@@ -45,6 +46,7 @@ public class NotificationSenderTenantConfigDataHolder {
     Map<String, ChannelConfigurationHandler> configurationHandlerMap = new HashMap<>();
     private ApplicationManagementService applicationManagementService = null;
     private OrganizationManager organizationManager = null;
+    private final Map<String, PushProvider> pushNotificationProviders = new HashMap<>();
 
     private NotificationSenderTenantConfigDataHolder() {
     }
@@ -137,5 +139,37 @@ public class NotificationSenderTenantConfigDataHolder {
     public OrganizationManager getOrganizationManager() {
 
         return organizationManager;
+    }
+
+    /**
+     * Add a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     * @param provider     {@link org.wso2.carbon.identity.notification.push.provider.PushProvider} instance.
+     */
+    public void addPushProvider(String providerName, PushProvider provider) {
+
+        pushNotificationProviders.put(providerName, provider);
+    }
+
+    /**
+     * Remove a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     */
+    public void removePushProvider(String providerName) {
+
+        pushNotificationProviders.remove(providerName);
+    }
+
+    /**
+     * Get a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     * @return {@link org.wso2.carbon.identity.notification.push.provider.PushProvider} instance.
+     */
+    public PushProvider getPushProvider(String providerName) {
+
+        return pushNotificationProviders.get(providerName);
     }
 }

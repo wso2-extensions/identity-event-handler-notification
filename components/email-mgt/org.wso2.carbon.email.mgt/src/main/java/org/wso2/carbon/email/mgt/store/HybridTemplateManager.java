@@ -20,6 +20,7 @@ package org.wso2.carbon.email.mgt.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
@@ -85,6 +86,20 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     }
 
     @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
+            dbBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+
+        if (registryBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                tenantDomain)) {
+            registryBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+    }
+
+    @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
@@ -97,8 +112,11 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         if (registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
 
-            registryBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
-                    applicationUuid, tenantDomain);
+//            registryBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
+//                    applicationUuid, tenantDomain);
+            log.info(String.format("Copied %s template: %s for locale: %s in tenant: %s from registry to the database.",
+                    notificationChannel, displayName, locale, tenantDomain));
+
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "Moved %s template: %s for locale: %s in tenant: %s from registry to the database.",

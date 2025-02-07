@@ -51,6 +51,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
     private final AppNotificationTemplateListCache
             appNotificationTemplateListCache = AppNotificationTemplateListCache.getInstance();
 
+    @Override
     public void addNotificationTemplateType(String type, String displayName, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -61,6 +62,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         notificationTypeListCache.clearCacheEntry(channelName, tenantId);
     }
 
+    @Override
     public String getNotificationTemplateType(String type, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -86,6 +88,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         return templateTypeDisplayName;
     }
 
+    @Override
     public List<String> listNotificationTemplateTypes(String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -110,6 +113,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         return templateTypes;
     }
 
+    @Override
     public void deleteNotificationTemplateType(String type, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 

@@ -18,25 +18,34 @@
 
 package org.wso2.carbon.email.mgt.store.dao;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
+import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.List;
 
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.BODY;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CHANNEL;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CONTENT_TYPE;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.FOOTER;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.CREATED_AT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.LOCALE;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.ORG_TEMPLATE_SCHEMA_VERSION;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TEMPLATE_KEY;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.SUBJECT;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TENANT_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_ID;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.TYPE_KEY;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.UPDATED_AT;
+import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NotificationTableColumns.VERSION;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.DELETE_ORG_NOTIFICATION_TEMPLATE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.GET_NOTIFICATION_TYPE_ID_SQL;
@@ -45,11 +54,17 @@ import static org.wso2.carbon.email.mgt.constants.SQLConstants.INSERT_ORG_NOTIFI
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL;
 import static org.wso2.carbon.email.mgt.constants.SQLConstants.UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.CALENDER;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getContentByteArray;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.getCurrentTime;
+import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.setContent;
 
 /**
  * This class is to perform CRUD operations for Org NotificationTemplates.
  */
 public class OrgNotificationTemplateDAO {
+
+    private static final Log log = LogFactory.getLog(OrgNotificationTemplateDAO.class);
 
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -59,24 +74,31 @@ public class OrgNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        try {
+        byte[] contentByteArray = getContentByteArray(notificationTemplate);
+        int contentLength = contentByteArray.length;
+        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             namedJdbcTemplate.executeInsert(INSERT_ORG_NOTIFICATION_TEMPLATE_SQL, (preparedStatement -> {
                 preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                 preparedStatement.setString(LOCALE, locale);
-                preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                preparedStatement.setString(BODY, notificationTemplate.getBody());
-                preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
+                preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                 preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
                 preparedStatement.setInt(TENANT_ID, tenantId);
                 preparedStatement.setInt(TENANT_ID, tenantId);
+
+                Timestamp currentTime = getCurrentTime();
+                preparedStatement.setTimeStamp(CREATED_AT, currentTime, CALENDER);
+                preparedStatement.setTimeStamp(UPDATED_AT, currentTime, CALENDER);
+                preparedStatement.setString(VERSION, ORG_TEMPLATE_SCHEMA_VERSION);
             }), notificationTemplate, false);
         } catch (DataAccessException e) {
             String error =
                     String.format("Error while adding %s template %s of type %s to %s tenant.", channelName,
                             locale, displayName, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
+        } catch (IOException e) {
+            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
     }
 
@@ -91,9 +113,7 @@ public class OrgNotificationTemplateDAO {
             notificationTemplate = namedJdbcTemplate.fetchSingleRecord(GET_ORG_NOTIFICATION_TEMPLATE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
                         notificationTemplateResult.setType(templateType);
@@ -125,10 +145,7 @@ public class OrgNotificationTemplateDAO {
 
         try {
             Integer typeId = namedJdbcTemplate.fetchSingleRecord(GET_NOTIFICATION_TYPE_ID_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer typeID = resultSet.getInt(ID);
-                        return typeID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
@@ -140,10 +157,7 @@ public class OrgNotificationTemplateDAO {
             }
 
             Integer templateId = namedJdbcTemplate.fetchSingleRecord(IS_ORG_NOTIFICATION_TEMPLATE_EXISTS_SQL,
-                    (resultSet, rowNumber) -> {
-                        Integer templateID = resultSet.getInt(ID);
-                        return templateID;
-                    },
+                    (resultSet, rowNumber) -> resultSet.getInt(ID),
                     preparedStatement -> {
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setInt(TYPE_ID, typeId);
@@ -169,9 +183,7 @@ public class OrgNotificationTemplateDAO {
             notificationTemplates = namedJdbcTemplate.executeQuery(LIST_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
                     (resultSet, rowNumber) -> {
                         NotificationTemplate notificationTemplateResult = new NotificationTemplate();
-                        notificationTemplateResult.setSubject(resultSet.getString(SUBJECT));
-                        notificationTemplateResult.setBody(resultSet.getString(BODY));
-                        notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
+                        setContent(resultSet.getBinaryStream(CONTENT), notificationTemplateResult);
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
                         notificationTemplateResult.setType(templateType.toLowerCase());
@@ -186,7 +198,7 @@ public class OrgNotificationTemplateDAO {
                     });
         } catch (DataAccessException e) {
             String error =
-                    String.format("Error while listing %s templates %s of type %s from %s tenant.", channelName,
+                    String.format("Error while listing %s templates of type %s from %s tenant.", channelName,
                             templateType, tenantId);
             throw new NotificationTemplateManagerServerException(String.format(error, templateType, tenantId), e);
         }
@@ -202,24 +214,28 @@ public class OrgNotificationTemplateDAO {
         String channelName = notificationTemplate.getNotificationChannel();
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        try {
+        byte[] contentByteArray = getContentByteArray(notificationTemplate);
+        int contentLength = contentByteArray.length;
+        try (InputStream contentStream = new ByteArrayInputStream(contentByteArray)) {
             namedJdbcTemplate.executeUpdate(UPDATE_ORG_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
-                        preparedStatement.setString(SUBJECT, notificationTemplate.getSubject());
-                        preparedStatement.setString(BODY, notificationTemplate.getBody());
-                        preparedStatement.setString(FOOTER, notificationTemplate.getFooter());
+                        preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
                         preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
+
+                        preparedStatement.setTimeStamp(UPDATED_AT, getCurrentTime(), CALENDER);
                     });
         } catch (DataAccessException e) {
             String error =
                     String.format("Error while updating %s template %s of type %s from %s tenant.", channelName, locale,
                             displayName, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
+        } catch (IOException e) {
+            throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
         }
 
     }

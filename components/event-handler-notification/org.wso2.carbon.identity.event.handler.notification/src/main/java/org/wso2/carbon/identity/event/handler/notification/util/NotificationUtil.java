@@ -29,6 +29,7 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -43,6 +44,7 @@ import org.wso2.carbon.identity.branding.preference.management.core.constant.Bra
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -67,7 +69,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -80,6 +81,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.namespace.QName;
+
 import static org.wso2.carbon.identity.core.util.IdentityTenantUtil.isSuperTenantRequiredInUrl;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.AUTHENTICATION_ENDPOINT_PLACEHOLDER;
@@ -90,11 +93,11 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COMMON_SCREEN;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CUSTOM_TEXT_COPYRIGHT_YEAR_KEY;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_HTML;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
@@ -142,10 +145,10 @@ public class NotificationUtil {
             String domainNameProperty = getUserStoreDomainName(userStoreManager);
             String message = null;
             if (StringUtils.isNotBlank(domainNameProperty)) {
-                message = "Error occurred while retrieving user claim values for user " + userName + " in user store "
+                message = "Error occurred while retrieving user claim values for user " + LoggerUtils.getMaskedContent(userName) + " in user store "
                         + domainNameProperty + " in tenant " + getTenantDomain(userStoreManager);
             } else {
-                message = "Error occurred while retrieving user claim values for user " + userName + " in tenant "
+                message = "Error occurred while retrieving user claim values for user " + LoggerUtils.getMaskedContent(userName) + " in tenant "
                         + getTenantDomain(userStoreManager);
             }
             log.error(message, e);
@@ -677,6 +680,7 @@ public class NotificationUtil {
         EmailTemplate emailTemplate;
         String applicationUuid = null;
         String applicationName = null;
+        boolean emailTemplateExists = false;
         try {
             String applicationDomain = StringUtils.isNotBlank(appDomain) ? appDomain : tenantDomain;
 
@@ -695,8 +699,9 @@ public class NotificationUtil {
                 log.debug("Fallback to organization preference. Cannot get application id or application name from the event");
             }
 
-            if (NotificationHandlerDataHolder.getInstance().getEmailTemplateManager().isEmailTemplateExists(
-                    notificationEvent, locale, applicationDomain, applicationUuid)) {
+            emailTemplateExists = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
+                    .isEmailTemplateExists(notificationEvent, locale, applicationDomain, applicationUuid);
+            if (emailTemplateExists) {
                 emailTemplate = NotificationHandlerDataHolder.getInstance().getEmailTemplateManager()
                         .getEmailTemplate(notificationEvent, locale, applicationDomain, applicationUuid);
             } else {
@@ -705,9 +710,14 @@ public class NotificationUtil {
                         .getEmailTemplate(notificationEvent, locale, applicationDomain);
             }
         } catch (I18nEmailMgtException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error when retrieving email template for locale: " + locale + " for scenario: " +
+                        notificationEvent + " for tenant: " + tenantDomain + ". Email template exists: " +
+                        emailTemplateExists + ", appDomain: " + appDomain + ", applicationUuid: " + applicationUuid);
+            }
             // If the email template is not found and the property IGNORE_IF_TEMPLATE_NOT_FOUND is set to true,
             // ignore the event.
-            if (e.getErrorCode().equals(I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND)
+            if (I18nMgtConstants.ErrorCodes.EMAIL_TEMPLATE_TYPE_NODE_FOUND.equals(e.getErrorCode())
                     && event.getEventProperties().containsKey(NotificationConstants.IGNORE_IF_TEMPLATE_NOT_FOUND)
                     && (Boolean) event.getEventProperties().get(NotificationConstants.IGNORE_IF_TEMPLATE_NOT_FOUND)) {
                 if (log.isDebugEnabled()) {
@@ -750,7 +760,7 @@ public class NotificationUtil {
      * @return Human-readable name related to the represented organization space.
      * @throws IdentityEventException Error while resolving organization name.
      */
-    private static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
+    public static String resolveHumanReadableOrganizationName(String tenantDomain) throws IdentityEventException {
 
         String organizationName = tenantDomain;
         try {
@@ -787,9 +797,7 @@ public class NotificationUtil {
      */
     public static String getNotificationLocale() {
 
-        return StringUtils.isNotBlank(IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE))
-                ? IdentityUtil.getProperty(NotificationConstants.NOTIFICATION_DEFAULT_LOCALE)
-                : NotificationConstants.EmailNotification.LOCALE_DEFAULT;
+        return I18nEmailUtil.getNotificationLocale();
     }
 
     /**

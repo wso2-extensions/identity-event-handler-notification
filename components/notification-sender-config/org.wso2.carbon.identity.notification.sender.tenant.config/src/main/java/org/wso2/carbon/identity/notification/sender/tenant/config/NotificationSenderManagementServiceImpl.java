@@ -38,10 +38,11 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
@@ -49,7 +50,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
-import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
@@ -74,6 +74,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
@@ -99,6 +100,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_TYPE_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_PORT;
@@ -106,8 +108,13 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.deletePushSenderSecretProperties;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getPushProvider;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.updatePushSenderCredentials;
 
 /**
  * OSGi service of Notification Sender Management operations.
@@ -178,6 +185,32 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
+    public PushSenderDTO addPushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
+
+        // Set the default publisher name if name is not defined.
+        if (StringUtils.isEmpty(pushSender.getName())) {
+            pushSender.setName(DEFAULT_PUSH_PUBLISHER);
+        }
+        Optional<Resource> resourceOptional = getPublisherResource(pushSender.getName());
+        if (resourceOptional.isPresent()) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, pushSender.getName());
+        }
+        pushSender.getProperties().put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
+        PushProvider pushProvider = getPushProvider(pushSender);
+        try {
+            Resource pushSenderResource = buildResourceFromPushSender(pushSender, pushProvider);
+            Resource addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .addResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
+            return buildPushSenderFromResource(addedResource, true);
+        } catch (ConfigurationManagementException e) {
+            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER,
+                    pushSender.getName());
+        }
+    }
+
+    @Override
     public void deleteNotificationSender(String senderName) throws NotificationSenderManagementException {
 
         Resource resource = getPublisherResource(senderName).orElseThrow(() ->
@@ -189,6 +222,17 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         String channel = getChannelTypeFromResource(resource);
         if (NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap().containsKey(channel)) {
+
+            // If pushSender, delete push provider secret properties from the secret store.
+            if (resource.isHasAttribute()) {
+                for (Attribute attribute : resource.getAttributes()) {
+                    if (PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey())
+                            && PUSH_PUBLISHER_TYPE.equals(attribute.getValue())) {
+                        deletePushSenderSecretProperties(resource);
+                    }
+                }
+            }
+
             NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationHandlerMap()
                     .get(channel).deleteNotificationSender(senderName);
         } else {
@@ -234,10 +278,40 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 return buildSmsSenderFromResource(resource);
             }
             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
-                resourceOptional = getPublisherResource(getPrimaryTenantId(), senderName);
+                resourceOptional =
+                        getPublisherResource(NotificationSenderUtils.getPrimaryTenantId(tenantDomain), senderName);
                 if (resourceOptional.isPresent()) {
                     Resource resource = resourceOptional.get();
                     return buildSmsSenderFromResource(resource);
+                }
+            }
+            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+        } catch (OrganizationManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+                    e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public PushSenderDTO getPushSender(String senderName, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        Optional<Resource> resourceOptional = getPublisherResource(senderName);
+        if (resourceOptional.isPresent()) {
+            Resource resource = resourceOptional.get();
+            return buildPushSenderFromResource(resource, true);
+        }
+        if (!inheritTenantSettings) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
+        }
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
+                resourceOptional = getPublisherResource(
+                        NotificationSenderUtils.getPrimaryTenantId(tenantDomain), senderName);
+                if (resourceOptional.isPresent()) {
+                    Resource resource = resourceOptional.get();
+                    return buildPushSenderFromResource(resource, true);
                 }
             }
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
@@ -306,7 +380,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 publisherResources.getResources().isEmpty()) {
             publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
                     .getConfigurationManager()
-                    .getResourcesByType(getPrimaryTenantId(), PUBLISHER_RESOURCE_TYPE);
+                    .getResourcesByType(NotificationSenderUtils.getPrimaryTenantId(tenantDomain),
+                            PUBLISHER_RESOURCE_TYPE);
         }
         return publisherResources;
     }
@@ -319,6 +394,31 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                                 SMS_PUBLISHER_TYPE.equals(attribute.getValue())))
                 .map(NotificationSenderUtils::buildSmsSenderFromResource)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PushSenderDTO> getPushSenders(boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        try {
+            Resources publisherResources = getPublisherResources(inheritTenantSettings);
+            List<PushSenderDTO> pushSenders = new ArrayList<>();
+
+            for (Resource resource : publisherResources.getResources()) {
+                if (resource.getAttributes().stream().anyMatch(
+                        attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey())
+                        && PUSH_PUBLISHER_TYPE.equals(attribute.getValue()))) {
+                    pushSenders.add(buildPushSenderFromResource(resource, true));
+                }
+            }
+            return pushSenders;
+        } catch (ConfigurationManagementException e) {
+            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE,
+                    SMS_PUBLISHER_TYPE);
+        } catch (OrganizationManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+                    e.getMessage(), e);
+        }
     }
 
     @Override
@@ -371,6 +471,29 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             return configurationHandler.updateSMSSender(smsSender);
         } else {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public PushSenderDTO updatePushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
+
+        // Check whether a publisher exists to replace.
+        Optional<Resource> resourceOptional = getPublisherResource(pushSender.getName());
+        if (!resourceOptional.isPresent()) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_NO_RESOURCE_EXISTS, pushSender.getName());
+        }
+        pushSender.getProperties().put(PUBLISHER_TYPE_PROPERTY, PUSH_PUBLISHER_TYPE);
+        PushProvider pushProvider = getPushProvider(pushSender);
+        try {
+            Resource pushSenderResource1 = buildResourceFromPushSender(pushSender, pushProvider);
+            Resource updatedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .replaceResource(PUBLISHER_RESOURCE_TYPE, pushSenderResource1);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            updatePushSenderCredentials(pushSender, pushProvider, tenantDomain);
+            return buildPushSenderFromResource(updatedResource, true);
+        } catch (ConfigurationManagementException e) {
+            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
+                    pushSender.getName());
         }
     }
 
@@ -732,22 +855,5 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
         }
         return true;
-    }
-
-    /**
-     * Get the primary tenant id of the given tenant domain.
-     *
-     * @return Primary tenant id.
-     * @throws OrganizationManagementException If an error occurred while getting the primary tenant id.
-     */
-    private int getPrimaryTenantId() throws OrganizationManagementException {
-
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        OrganizationManager organizationManager = NotificationSenderTenantConfigDataHolder.getInstance()
-                .getOrganizationManager();
-        String orgId = organizationManager.resolveOrganizationId(tenantDomain);
-        String primaryOrgId = organizationManager.getPrimaryOrganizationId(orgId);
-        String primaryTenantDomain = organizationManager.resolveTenantDomain(primaryOrgId);
-        return IdentityTenantUtil.getTenantId(primaryTenantDomain);
     }
 }

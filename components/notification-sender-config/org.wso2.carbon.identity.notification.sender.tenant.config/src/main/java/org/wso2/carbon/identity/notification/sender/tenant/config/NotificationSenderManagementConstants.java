@@ -37,6 +37,7 @@ public class NotificationSenderManagementConstants {
     public static final String PUBLISHER_TYPE_PROPERTY = "type";
     public static final String DEFAULT_EMAIL_PUBLISHER = "EmailPublisher";
     public static final String DEFAULT_SMS_PUBLISHER = "SMSPublisher";
+    public static final String DEFAULT_PUSH_PUBLISHER = "PushPublisher";
     public static final String PUBLISHER_FILE_EXTENSION = ".xml";
     public static final String RESOURCE_NOT_EXISTS_ERROR_CODE = "CONFIGM_00017";
     public static final String PLACEHOLDER_IDENTIFIER = "$";
@@ -65,6 +66,9 @@ public class NotificationSenderManagementConstants {
     public static final String SMS_PUBLISHER_TYPE = "sms";
     public static final String MY_ACCOUNT_SMS_RESOURCE_TYPE = "myaccount";
     public static final String MY_ACCOUNT_SMS_RESOURCE_NAME = "myaccount-2FA-config";
+
+    // Push Sender's main properties.
+    public static final String PUSH_PUBLISHER_TYPE = "push";
 
     // Constant for eventPublisher file generation.
     public static final String ROOT_ELEMENT = "eventPublisher";
@@ -177,7 +181,20 @@ public class NotificationSenderManagementConstants {
                 " subscribers."),
         ERROR_CODE_VALIDATING_CONNECTED_APPS("65016",
                 "Error while validating connected applications.",
-                "Error while validating connected applications: %s.");
+                "Error while validating connected applications: %s."),
+        ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND("65017",
+                "Matching push provider not found in the configured push sender.",
+                "Matching push provider not found the configured push sender: %s."),
+        ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES("65018",
+                "Error while processing and storing push sender properties.",
+                "Error while processing and storing push sender properties: %s."),
+        ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES("65019",
+                "Error while updating push sender properties.",
+                "Error while updating push sender properties: %s."),
+        ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS("65020", "Unable to add notification sender.",
+                "Server encountered an error while adding the notification sender secrets to resource: %s"),
+        ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS("65021", "Unable to delete notification sender.",
+                "Server encountered an error while deleting the notification sender secrets from resource: %s");
 
         private final String code;
         private final String message;
