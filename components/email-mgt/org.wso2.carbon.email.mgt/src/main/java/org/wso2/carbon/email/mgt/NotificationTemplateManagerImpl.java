@@ -93,10 +93,13 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
         try {
             if (templatePersistenceManager
                     .isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
-                // This error is caught in the catch block below to generate the
-                // NotificationTemplateManagerServerException.
-                throw new NotificationTemplateManagerInternalException(
-                        TemplateMgtConstants.ErrorCodes.TEMPLATE_TYPE_ALREADY_EXISTS, StringUtils.EMPTY);
+                String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
+                        TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_ALREADY_EXISTS.getCode(),
+                        TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
+                String message = String.format(
+                        TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_ALREADY_EXISTS.getMessage(),
+                        displayName, tenantDomain);
+                throw new NotificationTemplateManagerClientException(code, message);
             }
             templatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel,
                     tenantDomain);
@@ -108,19 +111,6 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ADDING_TEMPLATE.getMessage(), displayName,
                     tenantDomain);
             throw new NotificationTemplateManagerException(code, message, e);
-        } catch (NotificationTemplateManagerInternalException e) {
-            if (TemplateMgtConstants.ErrorCodes.TEMPLATE_TYPE_ALREADY_EXISTS.equals(e.getErrorCode())) {
-                String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
-                        TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_ALREADY_EXISTS.getCode(),
-                        TemplateMgtConstants.ErrorScenarios.NOTIFICATION_TEMPLATE_MANAGER);
-                String message = String.format(
-                        TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_ALREADY_EXISTS.getMessage(),
-                        displayName, tenantDomain);
-                throw new NotificationTemplateManagerServerException(code, message, e);
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Error when adding template type : " + displayName + " to tenant : " + tenantDomain, e);
-            }
         }
     }
 
@@ -144,7 +134,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_SYSTEM_RESOURCE_DELETION_NOT_ALLOWED.getMessage(),
                     "System template types are not eligible for deletion.");
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerClientException(code, message);
         }
 
         try {
@@ -311,7 +301,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                 String errorMessage = String
                         .format(TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_NOT_FOUND.getMessage(),
                                 templateType, tenantDomain);
-                throw new NotificationTemplateManagerServerException(code, errorMessage);
+                throw new NotificationTemplateManagerClientException(code, errorMessage);
             } else {
                 if (log.isDebugEnabled()) {
                     String message = String
@@ -366,7 +356,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
                 String errorMessage = String
                         .format(TemplateMgtConstants.ErrorMessages.ERROR_CODE_SYSTEM_TEMPLATE_NOT_FOUND.getMessage(),
                                 templateType);
-                throw new NotificationTemplateManagerServerException(code, errorMessage);
+                throw new NotificationTemplateManagerClientException(code, errorMessage);
             } else {
                 if (log.isDebugEnabled()) {
                     String message = String
@@ -419,7 +409,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_ALREADY_EXISTS.getMessage(), displayName,
                     tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerClientException(code, message);
         }
         try {
             userDefinedTemplatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
@@ -469,7 +459,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_NOT_FOUND.getMessage(), displayName,
                     tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerClientException(code, message);
         }
         try {
             userDefinedTemplatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
@@ -693,7 +683,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
     }
 
     private void verifySystemTemplateTypeExists(String templateType, String notificationChannel)
-            throws NotificationTemplateManagerServerException {
+            throws NotificationTemplateManagerClientException, NotificationTemplateManagerServerException {
 
         if (!systemTemplatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
                 null)) {
@@ -703,12 +693,12 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_SYSTEM_TEMPLATE_TYPE_NOT_FOUND.getMessage(),
                     templateType);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerClientException(code, message);
         }
     }
 
     private void verifyTemplateTypeExists(String templateType, String notificationChannel, String tenantDomain)
-            throws NotificationTemplateManagerServerException {
+            throws NotificationTemplateManagerServerException, NotificationTemplateManagerClientException {
 
         if (!templatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
                 tenantDomain)) {
@@ -718,7 +708,7 @@ public class NotificationTemplateManagerImpl implements NotificationTemplateMana
             String message = String.format(
                     TemplateMgtConstants.ErrorMessages.ERROR_CODE_TEMPLATE_TYPE_NOT_FOUND.getMessage(),
                     templateType, tenantDomain);
-            throw new NotificationTemplateManagerServerException(code, message);
+            throw new NotificationTemplateManagerClientException(code, message);
         }
     }
 }
