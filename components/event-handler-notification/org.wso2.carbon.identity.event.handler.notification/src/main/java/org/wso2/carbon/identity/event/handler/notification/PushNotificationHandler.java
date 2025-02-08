@@ -200,9 +200,21 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
         if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         }
+        String organizationName = NotificationUtil.resolveHumanReadableOrganizationName(tenantDomain);
         if (placeholderValues.containsKey(ORGANIZATION_NAME_PLACEHOLDER)) {
-            String organizationName = NotificationUtil.resolveHumanReadableOrganizationName(tenantDomain);
             placeholderValues.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
+        }
+
+        /*
+         * If the tenant domain is different from the organization name, then it is an organization user. Hence,
+         * the organization ID is the tenant domain.
+         */
+        String organizationId = null;
+        if (!tenantDomain.equals(organizationName)) {
+            organizationId = tenantDomain;
+        } else {
+            // If tenant user, organizationName is null.
+            organizationName = null;
         }
 
         // Replace the placeholders in the push notification template with the actual values.
@@ -213,7 +225,9 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 .setNotificationTitle(title)
                 .setNotificationBody(body)
                 .setUsername((String) eventProperties.get(IdentityEventConstants.EventProperty.USER_NAME))
-                .setTenantDomain((String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN))
+                .setTenantDomain(tenantDomain)
+                .setOrganizationId(organizationId)
+                .setOrganizationName(organizationName)
                 .setUserStoreDomain((String) eventProperties.get(
                         IdentityEventConstants.EventProperty.USER_STORE_DOMAIN))
                 .setApplicationName((String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_NAME))
