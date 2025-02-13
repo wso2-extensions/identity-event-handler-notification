@@ -29,7 +29,7 @@
     </configuration>
     <configuration type="accountIdRecovery" display="accountIdRecovery" locale="en_US">
         <body>
-            Hello, your username is {{userstore-domain}}/{{user-name}}@{{tenant-domain}}
+            Hello, your username is {{userstore-domain}}/{{user-name}}
         </body>
     </configuration>
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
