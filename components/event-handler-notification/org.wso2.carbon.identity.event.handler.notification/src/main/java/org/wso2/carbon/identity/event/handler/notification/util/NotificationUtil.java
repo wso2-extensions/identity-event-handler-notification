@@ -650,21 +650,25 @@ public class NotificationUtil {
         //if it is not there, then assume this sent-to parameter should read from user's email claim only.
         String sendTo = placeHolderData.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO);
         Map<String, String> userClaims = new HashMap<>();
-        String notificationEvent = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
-        String username = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_NAME);
-        org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) event.getEventProperties().get(
-                IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
-        String userStoreDomainName = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
-        String tenantDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
-        String sendFrom = (String) event.getEventProperties().get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
-        String appDomain = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
+
+        Map<String, Object> eventProperties = event.getEventProperties();
+        String notificationEvent = (String) eventProperties
+                .get(NotificationConstants.EmailNotification.EMAIL_TEMPLATE_TYPE);
+        String username = (String) eventProperties.get(IdentityEventConstants.EventProperty.USER_NAME);
+        org.wso2.carbon.user.core.UserStoreManager userStoreManager = (org.wso2.carbon.user.core.UserStoreManager)
+                eventProperties.get(IdentityEventConstants.EventProperty.USER_STORE_MANAGER);
+        String userStoreDomainName = (String) eventProperties
+                .get(IdentityEventConstants.EventProperty.USER_STORE_DOMAIN);
+        String tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
+        String sendFrom = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
+        String appDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
 
         // If the user is federated, use the federated user claims provided in the event properties.
-        if (event.getEventProperties().containsKey(NotificationConstants.IS_FEDERATED_USER) &&
-                (Boolean) event.getEventProperties().get(NotificationConstants.IS_FEDERATED_USER) &&
-                event.getEventProperties().containsKey(NotificationConstants.FEDERATED_USER_CLAIMS)) {
+        if (eventProperties.containsKey(NotificationConstants.IS_FEDERATED_USER) &&
+                (Boolean) eventProperties.get(NotificationConstants.IS_FEDERATED_USER) &&
+                eventProperties.containsKey(NotificationConstants.FEDERATED_USER_CLAIMS)) {
             Map<String, String> fedUserClaims = new HashMap<>();
-            ((Map<ClaimMapping, String>) event.getEventProperties().get(NotificationConstants.FEDERATED_USER_CLAIMS))
+            ((Map<ClaimMapping, String>) eventProperties.get(NotificationConstants.FEDERATED_USER_CLAIMS))
                     .forEach((claimMapping, value) ->
                             fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
             userClaims.putAll(fedUserClaims);
@@ -676,9 +680,13 @@ public class NotificationUtil {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreDomainName, tenantDomain);
             }
         }
-
         String locale = getNotificationLocale();
-        if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
+        if (Boolean.TRUE.equals(eventProperties.get(NotificationConstants.IS_FEDERATED_USER)) &&
+                eventProperties.containsKey(NotificationConstants.EmailNotification.ARBITRARY_LOCALE)) {
+
+            // For JIT provisioned federated users, the locale is set in the event properties.
+            locale = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_LOCALE);
+        } else if (userClaims.containsKey(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE)) {
             locale = userClaims.get(NotificationConstants.EmailNotification.CLAIM_URI_LOCALE);
         }
         //Only sendTo value read from claims if it is not set the event sender.
