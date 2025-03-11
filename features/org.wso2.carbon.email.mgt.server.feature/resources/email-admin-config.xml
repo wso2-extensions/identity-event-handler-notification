@@ -4492,7 +4492,7 @@
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        To complete your registration with <b>{{organization-name}}</b>, please use the verification code below.
+                                                                                        To continue your registration with <b>{{organization-name}}</b>, please verify your email address using the code below.
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
