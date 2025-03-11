@@ -100,6 +100,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.REGISTRATION_FLOW;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -662,6 +663,7 @@ public class NotificationUtil {
         String tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
+        String flowType = (String) eventProperties.get(NotificationConstants.FLOW_TYPE);
 
         // If the user is federated, use the federated user claims provided in the event properties.
         if (eventProperties.containsKey(NotificationConstants.IS_FEDERATED_USER) &&
@@ -672,7 +674,7 @@ public class NotificationUtil {
                     .forEach((claimMapping, value) ->
                             fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
             userClaims.putAll(fedUserClaims);
-        } else {
+        } else if (!REGISTRATION_FLOW.equals(flowType)) {
             if (StringUtils.isNotBlank(username) && userStoreManager != null) {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
             } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&

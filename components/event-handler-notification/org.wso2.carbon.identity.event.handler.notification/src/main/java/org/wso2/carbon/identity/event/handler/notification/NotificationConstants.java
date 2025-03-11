@@ -35,6 +35,8 @@ public class NotificationConstants {
     public static final String IS_FEDERATED_USER = "isFederatedUser";
     public static final String FEDERATED_USER_CLAIMS = "federatedUserClaims";
     public static final String IGNORE_IF_TEMPLATE_NOT_FOUND = "ignoreIfTemplateNotFound";
+    public static final String FLOW_TYPE = "flowType";
+    public static final String REGISTRATION_FLOW = "registration";
 
     public static class EmailNotification {
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
