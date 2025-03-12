@@ -55,6 +55,13 @@ public class NotificationSenderManagementConstants {
     public static final String PASSWORD = "password";
     public static final String EMAIL_PUBLISHER_TYPE = "email";
 
+    // Email Sender's additional properties.
+    public static final String REPLY_TO_ADDRESS = "mail.smtp.replyTo";
+    public static final String DISPLAY_NAME = "mail.smtp.signature";
+    public static final String CLIENT_ID = "mail.smtp.clientId";
+    public static final String CLIENT_SECRET = "mail.smtp.secret";
+    public static final String TOKEN_ENDPOINT = "mail.smtp.tokenEndpoint";
+
     // SMS Sender's main properties.
     public static final String PROVIDER = "provider";
     public static final String PROVIDER_URL = "providerURL";
@@ -194,7 +201,9 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS("65020", "Unable to add notification sender.",
                 "Server encountered an error while adding the notification sender secrets to resource: %s"),
         ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS("65021", "Unable to delete notification sender.",
-                "Server encountered an error while deleting the notification sender secrets from resource: %s");
+                "Server encountered an error while deleting the notification sender secrets from resource: %s"),
+        ERROR_CODE_INVALID_INPUTS("65022", "Invalid input.",
+                "Invalid input received for notification sender.");
 
         private final String code;
         private final String message;
