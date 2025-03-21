@@ -485,7 +485,7 @@
 
             </html>]]></body>
     </configuration>
-    <configuration type="passwordResetOtp" display="PasswordResetOtp" locale="en_US" emailContentType="text/html">
+    <configuration type="passwordResetOTP" display="PasswordResetOTP" locale="en_US" emailContentType="text/html">
         <subject>Reset Your Password – OTP Verification Required</subject>
         <body>
             <![CDATA[<!DOCTYPE html
@@ -927,7 +927,7 @@
             </html>]]>
         </body>
     </configuration>
-    <configuration type="ResendPasswordResetOTP" display="ResendPasswordResetOTP" locale="en_US" emailContentType="text/html">
+    <configuration type="resendPasswordResetOTP" display="resendPasswordResetOTP" locale="en_US" emailContentType="text/html">
         <subject>Reset Your Password – OTP Verification Required</subject>
         <body>
             <![CDATA[<!DOCTYPE html
