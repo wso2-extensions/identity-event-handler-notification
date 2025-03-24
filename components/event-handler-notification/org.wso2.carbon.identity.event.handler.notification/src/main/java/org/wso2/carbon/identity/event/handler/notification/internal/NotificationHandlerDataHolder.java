@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.identity.event.handler.notification.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.notification.push.provider.PushProvider;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -39,6 +43,8 @@ public class NotificationHandlerDataHolder {
     private NotificationTemplateManager notificationTemplateManager = null;
     private OrganizationManager organizationManager;
     private ApplicationManagementService applicationManagementService;
+    private NotificationSenderManagementService notificationSenderManagementService;
+    private final Map<String, PushProvider> pushNotificationProviders = new HashMap<>();
 
     public ApplicationManagementService getApplicationManagementService() {
 
@@ -137,5 +143,58 @@ public class NotificationHandlerDataHolder {
     public void setOrganizationManager(OrganizationManager organizationManager) {
 
         this.organizationManager = organizationManager;
+    }
+
+    /**
+     * Set notification sender management service.
+     *
+     * @param notificationSenderManagementService
+     * {@link org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService}
+     */
+    public void setNotificationSenderManagementService(NotificationSenderManagementService notificationSenderManagementService) {
+
+        this.notificationSenderManagementService = notificationSenderManagementService;
+    }
+
+    /**
+     * Get notification sender management service.
+     *
+     * @return {@link org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementService}
+     */
+    public NotificationSenderManagementService getNotificationSenderManagementService() {
+
+        return notificationSenderManagementService;
+    }
+
+    /**
+     * Add a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     * @param provider     {@link org.wso2.carbon.identity.notification.push.provider.PushProvider} instance.
+     */
+    public void addPushProvider(String providerName, PushProvider provider) {
+
+        pushNotificationProviders.put(providerName, provider);
+    }
+
+    /**
+     * Remove a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     */
+    public void removePushProvider(String providerName) {
+
+        pushNotificationProviders.remove(providerName);
+    }
+
+    /**
+     * Get a push notification provider.
+     *
+     * @param providerName Name of the provider.
+     * @return {@link org.wso2.carbon.identity.notification.push.provider.PushProvider} instance.
+     */
+    public PushProvider getPushProvider(String providerName) {
+
+        return pushNotificationProviders.get(providerName);
     }
 }

@@ -41,6 +41,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
             AppNotificationTemplateCache.getInstance();
     private final AppNotificationTemplateListCache templateListCache = AppNotificationTemplateListCache.getInstance();
 
+    @Override
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -59,6 +60,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public NotificationTemplate getNotificationTemplate(String locale, String templateType, String channelName,
                                                         String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -89,6 +91,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return appNotificationTemplate;
     }
 
+    @Override
     public boolean isNotificationTemplateExists(String locale, String templateType, String channelName,
                                                         String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -115,6 +118,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return super.isNotificationTemplateExists(locale, templateType, channelName, applicationUuid, tenantId);
     }
 
+    @Override
     public List<NotificationTemplate> listNotificationTemplates(String templateType, String channelName,
                                                                 String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -142,6 +146,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         return notificationTemplates;
     }
 
+    @Override
     public void updateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                            int tenantId) throws NotificationTemplateManagerServerException {
 
@@ -160,6 +165,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeNotificationTemplate(String locale, String templateType, String channelName,
                                            String applicationUuid, int tenantId)
             throws NotificationTemplateManagerServerException {
@@ -175,6 +181,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
     }
 
+    @Override
     public void removeNotificationTemplates(String templateType, String channelName, String applicationUuid,
                                             int tenantId) throws NotificationTemplateManagerServerException {
 
@@ -185,5 +192,17 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         AppNotificationTemplateListCacheKey listCacheKey =
                 new AppNotificationTemplateListCacheKey(templateType, channelName, applicationUuid);
         templateListCache.clearCacheEntry(listCacheKey, tenantId);
+    }
+
+    @Override
+    public void removeAllNotificationTemplates(String templateType, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
+
+        super.removeAllNotificationTemplates(templateType, channelName, tenantId);
+
+        appNotificationTemplateCache.clear(tenantId);
+        // Clearing full template list cache for tenant since it's not possible to remove all entries for a template
+        // type at once.
+        templateListCache.clear(tenantId);
     }
 }

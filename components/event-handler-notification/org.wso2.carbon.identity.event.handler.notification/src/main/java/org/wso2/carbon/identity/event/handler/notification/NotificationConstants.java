@@ -35,6 +35,8 @@ public class NotificationConstants {
     public static final String IS_FEDERATED_USER = "isFederatedUser";
     public static final String FEDERATED_USER_CLAIMS = "federatedUserClaims";
     public static final String IGNORE_IF_TEMPLATE_NOT_FOUND = "ignoreIfTemplateNotFound";
+    public static final String FLOW_TYPE = "flowType";
+    public static final String REGISTRATION_FLOW = "registration";
 
     public static class EmailNotification {
         public static final String EMAIL_TEMPLATE_PATH = "identity/Email/";
@@ -118,6 +120,89 @@ public class NotificationConstants {
         public static final String STREAM_NAME = "id_gov_sms_notify_stream";
         public static final String STREAM_VERSION = "1.0.0";
         public static final String DEFAULT_SMS_NOTIFICATION_LOCALE = "en_US";
+    }
+
+    /**
+     * Define Push Notification constants.
+     */
+    public static class PushNotification {
+
+        public static final String PUSH_NOTIFICATION_EVENT = "TRIGGER_PUSH_NOTIFICATION";
+        public static final String PUSH_NOTIFICATION_HANDLER_NAME = "PushNotificationHandler";
+        public static final String PUSH_PUBLISHER_NAME = "PushPublisher";
+        public static final String PUSH_AUTHENTICATION_SCENARIO = "AUTHENTICATION";
+
+        public static final String NOTIFICATION_SCENARIO = "NOTIFICATION_SCENARIO";
+        public static final String NOTIFICATION_PROVIDER = "notificationProvider";
+        public static final String PUSH_ID = "pushId";
+        public static final String DEVICE_TOKEN = "deviceToken";
+        public static final String CHALLENGE = "challenge";
+        public static final String NUMBER_CHALLENGE = "numberChallenge";
+        public static final String IP_ADDRESS = "ipAddress";
+        public static final String REQUEST_DEVICE_OS = "deviceOS";
+        public static final String REQUEST_DEVICE_BROWSER = "browser";
+        public static final String DEVICE_ID = "deviceId";
+    }
+
+    /**
+     * Define Push Notification templates.
+     */
+    public enum PushNotificationTemplate {
+
+        AUTHENTICATION(
+                PushNotification.PUSH_AUTHENTICATION_SCENARIO,
+                "Authentication Request",
+                "{{user-name}} from {{organization-name}} is trying to login");
+
+        private String scenario;
+        private String title;
+        private String body;
+
+        PushNotificationTemplate(String scenario, String title, String body) {
+
+            this.scenario = scenario;
+            this.title = title;
+            this.body = body;
+        }
+
+        public String getScenario() {
+
+            return scenario;
+        }
+
+        public String getTitle() {
+
+            return title;
+        }
+
+        public String getBody() {
+
+            return body;
+        }
+    }
+
+    /**
+     * Define Push Notification placeholders.
+     */
+    public enum PushNotificationPlaceholder {
+
+        USER_NAME("user-name"),
+        USER_GIVEN_NAME("user.claim.givenname"),
+        USER_STORE_DOMAIN("userstore-domain"),
+        ORGANIZATION_NAME("organization-name"),
+        TENANT_DOMAIN("tenant-domain"),;
+
+        private String placeholder;
+
+        PushNotificationPlaceholder(String placeholder) {
+
+            this.placeholder = placeholder;
+        }
+
+        public String getPlaceholder() {
+
+            return placeholder;
+        }
     }
 
     /**

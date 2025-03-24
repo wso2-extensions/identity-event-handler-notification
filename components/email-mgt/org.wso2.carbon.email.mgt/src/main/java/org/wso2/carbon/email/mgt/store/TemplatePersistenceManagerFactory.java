@@ -33,8 +33,25 @@ public class TemplatePersistenceManagerFactory {
     private static final Log log = LogFactory.getLog(TemplatePersistenceManagerFactory.class);
 
     /**
-     * Returns a {@link TemplatePersistenceManager} implementation based on the configuration.
+     * Returns a {@link TemplatePersistenceManager} implementation that handles both system templates and user defined
+     * templates.
+     * Based on the configuration, the returning {@link UnifiedTemplateManager} instance will use an instance
+     * of user defined template manager as follows:
+     * if the storage type is configured as database, {@link DBBasedTemplateManager} will be used.
+     * if the storage type is configured as hybrid, {@link HybridTemplateManager} will be used.
+     * if the storage type is configured as registry, {@link RegistryBasedTemplateManager} will be used.
+     * For any other case, {@link DBBasedTemplateManager} will be used.
      *
+     * @return an implementation of {@link TemplatePersistenceManager}.
+     */
+    public TemplatePersistenceManager getTemplatePersistenceManager() {
+
+        return new UnifiedTemplateManager(getUserDefinedTemplatePersistenceManager());
+    }
+
+    /**
+     * Returns a {@link TemplatePersistenceManager} implementation based on the configuration that handles only user
+     * defined templates.
      * If the storage type is configured as database, an instance of {@link DBBasedTemplateManager} will be returned.
      * If the storage type is configured as hybrid, an instance of {@link HybridTemplateManager} will be returned.
      * If the storage type is configured as registry, an instance of {@link RegistryBasedTemplateManager} will be returned.
@@ -42,22 +59,19 @@ public class TemplatePersistenceManagerFactory {
      *
      * @return an implementation of {@link TemplatePersistenceManager}.
      */
-    public TemplatePersistenceManager getTemplatePersistenceManager() {
+    public TemplatePersistenceManager getUserDefinedTemplatePersistenceManager() {
 
         String notificationTemplatesStorageType = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG);
 
         TemplatePersistenceManager persistenceManager = new DBBasedTemplateManager();
 
         if (StringUtils.isNotBlank(notificationTemplatesStorageType)) {
-            switch (notificationTemplatesStorageType) {
-                case "hybrid":
-                    persistenceManager = new HybridTemplateManager();
-                    log.info("Hybrid template persistent manager initialized.");
-                    break;
-                case "registry":
-                    persistenceManager = new RegistryBasedTemplateManager();
-                    log.warn("Registry based template persistent manager initialized.");
-                    break;
+            if (notificationTemplatesStorageType.equals("hybrid")) {
+                persistenceManager = new HybridTemplateManager();
+                log.info("Hybrid template persistent manager initialized.");
+            } else if (notificationTemplatesStorageType.equals("registry")) {
+                persistenceManager = new RegistryBasedTemplateManager();
+                log.warn("Registry based template persistent manager initialized.");
             }
         }
 

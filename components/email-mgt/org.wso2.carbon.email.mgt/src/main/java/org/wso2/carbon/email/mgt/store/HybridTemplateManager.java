@@ -85,10 +85,22 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     }
 
     @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
+            dbBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+
+        if (registryBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                tenantDomain)) {
+            registryBasedTemplateManager.deleteAllNotificationTemplates(displayName, notificationChannel, tenantDomain);
+        }
+    }
+
+    @Override
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
-
-        dbBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
 
         String displayName = notificationTemplate.getDisplayName();
         String locale = notificationTemplate.getLocale();
@@ -97,11 +109,17 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         if (registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
 
-            registryBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel,
-                    applicationUuid, tenantDomain);
+            registryBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid,
+                    tenantDomain);
+
             if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Moved %s template: %s for locale: %s in tenant: %s from registry to the database.",
+                log.debug(String.format("Updated %s template: %s for locale: %s in tenant: %s in registry.",
+                        notificationChannel, displayName, locale, tenantDomain));
+            }
+        } else {
+            dbBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Added/Updated %s template: %s for locale: %s in tenant: %s in database.",
                         notificationChannel, displayName, locale, tenantDomain));
             }
         }

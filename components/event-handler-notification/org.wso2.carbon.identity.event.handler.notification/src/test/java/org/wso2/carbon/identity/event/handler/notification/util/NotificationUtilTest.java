@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,13 +21,41 @@ package org.wso2.carbon.identity.event.handler.notification.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.testng.Assert;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.email.mgt.EmailTemplateManager;
+import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
+import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
+import org.wso2.carbon.email.mgt.model.EmailTemplate;
+import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.core.internal.IdentityCoreServiceComponent;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
+import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertEquals;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 
 /**
  * Class that contains the test cases for NotificationUtil class.
@@ -85,10 +113,43 @@ public class NotificationUtilTest {
     String BRANDING_ENABLED = "true";
     String BRANDING_DISABLED = "false";
 
+    private static final String DUMMY_PROTOCOL = "https";
+    private static final String SAMPLE_EMAIL = "test@test.com";
+    private static final String SAMPLE_ORGANIZATION_NAME = "OrganizationA";
+    private static final String SAMPLE_LOCALE = "fr-FR";
+    private static final String SAMPLE_EMAIL_BODY = "SampleEmailBody";
+
+    private static final String ACCOUNT_RECOVERY_ENDPOINT_URL = "https://example.com/account/recovery";
+    private static final String AUTHENTICATION_ENDPOINT_URL = "https://example.com/authentication";
+
     int CASE_1 = 1;
     int CASE_2 = 2;
     int CASE_3 = 3;
     int CASE_4 = 4;
+
+    @Mock
+    EmailTemplateManager mockEmailTemplateManager;
+
+    @Mock
+    EmailTemplate mockEmailTemplate;
+
+    @Mock
+    ConfigurationContextService configurationContextService;
+
+    @Mock
+    ConfigurationContext configurationContext;
+
+    @Mock
+    AxisConfiguration axisConfiguration;
+
+    @Mock
+    ServerConfiguration serverConfiguration;
+
+    @BeforeMethod
+    public void setUp() {
+
+        initMocks(this);
+    }
 
     @DataProvider(name = "GetBrandingPreferenceDataProvider")
     public Object[][] provideTestData() {
@@ -189,57 +250,169 @@ public class NotificationUtilTest {
                 ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER, brandingPreferences, brandingFallback);
 
         if (caseNo == 1) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL);
-            Assert.assertEquals(logoAltText, ORGANIZATION_LIGHT_LOGO_ALT_TEXT);
-            Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT);
-            Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL);
-            Assert.assertEquals(primaryColor, ORGANIZATION_LIGHT_PRIMARY_COLOR);
-            Assert.assertEquals(backgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR);
-            Assert.assertEquals(font, ORGANIZATION_LIGHT_FONT);
-            Assert.assertEquals(fontColor, ORGANIZATION_LIGHT_FONT_COLOR);
-            Assert.assertEquals(buttonFontColor, ORGANIZATION_LIGHT_BUTTON_FONT_COLOR);
-            Assert.assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
+            assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL);
+            assertEquals(logoAltText, ORGANIZATION_LIGHT_LOGO_ALT_TEXT);
+            assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT);
+            assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL);
+            assertEquals(primaryColor, ORGANIZATION_LIGHT_PRIMARY_COLOR);
+            assertEquals(backgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR);
+            assertEquals(font, ORGANIZATION_LIGHT_FONT);
+            assertEquals(fontColor, ORGANIZATION_LIGHT_FONT_COLOR);
+            assertEquals(buttonFontColor, ORGANIZATION_LIGHT_BUTTON_FONT_COLOR);
+            assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
         }
 
         if (caseNo == 2) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_DARK_LOGO_URL);
-            Assert.assertEquals(logoAltText, ORGANIZATION_DARK_LOGO_ALT_TEXT);
-            Assert.assertEquals(primaryColor, ORGANIZATION_DARK_PRIMARY_COLOR);
-            Assert.assertEquals(backgroundColor, ORGANIZATION_DARK_BACKGROUND_COLOR);
-            Assert.assertEquals(font, ORGANIZATION_DARK_FONT);
-            Assert.assertEquals(fontColor, ORGANIZATION_DARK_FONT_COLOR);
-            Assert.assertEquals(buttonFontColor, ORGANIZATION_DARK_BUTTON_FONT_COLOR);
-            Assert.assertEquals(themeBackgroundColor, ORGANIZATION_DARK_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(themeBorderColor, ORGANIZATION_DARK_BORDER_COLOR_FALLBACK);
+            assertEquals(logoUrl, ORGANIZATION_DARK_LOGO_URL);
+            assertEquals(logoAltText, ORGANIZATION_DARK_LOGO_ALT_TEXT);
+            assertEquals(primaryColor, ORGANIZATION_DARK_PRIMARY_COLOR);
+            assertEquals(backgroundColor, ORGANIZATION_DARK_BACKGROUND_COLOR);
+            assertEquals(font, ORGANIZATION_DARK_FONT);
+            assertEquals(fontColor, ORGANIZATION_DARK_FONT_COLOR);
+            assertEquals(buttonFontColor, ORGANIZATION_DARK_BUTTON_FONT_COLOR);
+            assertEquals(themeBackgroundColor, ORGANIZATION_DARK_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(themeBorderColor, ORGANIZATION_DARK_BORDER_COLOR_FALLBACK);
         }
 
         if (caseNo == 3) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
-            Assert.assertEquals(logoAltText, StringUtils.EMPTY);
-            Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
-            Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
-            Assert.assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
-            Assert.assertEquals(backgroundColor, ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(font, ORGANIZATION_FONT_FALLBACK);
-            Assert.assertEquals(fontColor, ORGANIZATION_FONT_COLOR_FALLBACK);
-            Assert.assertEquals(buttonFontColor, ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
-            Assert.assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
+            assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
+            assertEquals(logoAltText, StringUtils.EMPTY);
+            assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
+            assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
+            assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
+            assertEquals(backgroundColor, ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(font, ORGANIZATION_FONT_FALLBACK);
+            assertEquals(fontColor, ORGANIZATION_FONT_COLOR_FALLBACK);
+            assertEquals(buttonFontColor, ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
+            assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
         }
 
         if (caseNo == 4) {
-            Assert.assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
-            Assert.assertEquals(logoAltText, StringUtils.EMPTY);
-            Assert.assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
-            Assert.assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
-            Assert.assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
-            Assert.assertEquals(backgroundColor, ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(font, ORGANIZATION_FONT_FALLBACK);
-            Assert.assertEquals(fontColor, ORGANIZATION_FONT_COLOR_FALLBACK);
-            Assert.assertEquals(buttonFontColor, ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
-            Assert.assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
-            Assert.assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
+            assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL_FALLBACK);
+            assertEquals(logoAltText, StringUtils.EMPTY);
+            assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT_FALLBACK);
+            assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL_FALLBACK);
+            assertEquals(primaryColor, ORGANIZATION_PRIMARY_COLOR_FALLBACK);
+            assertEquals(backgroundColor, ORGANIZATION_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(font, ORGANIZATION_FONT_FALLBACK);
+            assertEquals(fontColor, ORGANIZATION_FONT_COLOR_FALLBACK);
+            assertEquals(buttonFontColor, ORGANIZATION_BUTTON_FONT_COLOR_FALLBACK);
+            assertEquals(themeBackgroundColor, ORGANIZATION_LIGHT_BACKGROUND_COLOR_FALLBACK);
+            assertEquals(themeBorderColor, ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK);
         }
+    }
+
+    @Test
+    public void testGetNotificationLocale() {
+
+        String result = NotificationUtil.getNotificationLocale();
+        assertEquals(result, I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE);
+    }
+
+    @DataProvider(name = "testEmailOTPLocaleDataProvider")
+    public Object[][] testEmailOTPLocaleDataProvider() {
+
+        return new Object[][] {
+                { true },   // For provisioned users with Locale changed in myaccount.
+                { false }   // For provisioned users without associated locale.
+        };
+    }
+
+    @Test(dataProvider = "testEmailOTPLocaleDataProvider")
+    public void testEmailOTPNotificationUsesCorrectLocaleForProvisionedUser(boolean containsAssociatedLocale)
+            throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> notificationHandlerDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class);
+             MockedStatic<IdentityConfigParser> identityConfigParser = mockStatic(IdentityConfigParser.class);
+             MockedStatic<ConfigurationFacade> configurationFacade = mockStatic(ConfigurationFacade.class);
+             MockedStatic<IdentityCoreServiceComponent> identityCoreServiceComponent
+                     = mockStatic(IdentityCoreServiceComponent.class);
+             MockedStatic<CarbonUtils> carbonUtils = mockStatic(CarbonUtils.class)){
+
+            mockNotificationHandlerDataHolder(notificationHandlerDataHolder);
+            mockIdentityConfigParser(identityConfigParser);
+            mockConfigurationFacade(configurationFacade);
+            mockConfigurationContext(identityCoreServiceComponent);
+            mockCarbonUtils(carbonUtils);
+
+            Map<String, Object> eventProperties = new HashMap<>();
+            eventProperties.put(NotificationConstants.IS_FEDERATED_USER, true);
+            eventProperties.put(NotificationConstants.FEDERATED_USER_CLAIMS, new HashMap<>());
+
+            if (containsAssociatedLocale) {
+                eventProperties.put(NotificationConstants.EmailNotification.ARBITRARY_LOCALE, SAMPLE_LOCALE);
+            }
+            Map<String, String> placeHolderData = new HashMap<>();
+            placeHolderData.put(NotificationConstants.EmailNotification.ARBITRARY_SEND_TO, SAMPLE_EMAIL);
+            placeHolderData.put(ORGANIZATION_NAME_PLACEHOLDER, SAMPLE_ORGANIZATION_NAME);
+
+            ArgumentCaptor<String> localeCaptor = ArgumentCaptor.forClass(String.class);
+            Event event = new Event(IdentityEventConstants.Event.TRIGGER_NOTIFICATION, eventProperties);
+
+            NotificationUtil.buildNotification(event, placeHolderData);
+
+            Mockito.verify(mockEmailTemplateManager).isEmailTemplateExists(any(), localeCaptor.capture(), any(), any());
+            String capturedLocale = localeCaptor.getValue();
+
+            if (containsAssociatedLocale) {
+                assertEquals(SAMPLE_LOCALE, capturedLocale);
+            } else {
+                assertEquals(I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE, capturedLocale);
+            }
+        }
+    }
+
+    private void mockNotificationHandlerDataHolder(MockedStatic<NotificationHandlerDataHolder>
+                                                           notificationHandlerDataHolderMockedStatic)
+            throws Exception {
+
+        NotificationHandlerDataHolder mockNotificationHandlerDataHolder = mock(NotificationHandlerDataHolder.class);
+        notificationHandlerDataHolderMockedStatic.when(NotificationHandlerDataHolder::getInstance)
+                .thenReturn(mockNotificationHandlerDataHolder);
+        when(mockNotificationHandlerDataHolder.getEmailTemplateManager()).thenReturn(mockEmailTemplateManager);
+        mockEmailTemplate();
+    }
+
+    private void mockEmailTemplate() throws I18nEmailMgtException {
+
+        when(mockEmailTemplateManager.isEmailTemplateExists(any(), any(), any(), any())).thenReturn(true);
+        when(mockEmailTemplateManager.getEmailTemplate(any(), any(), any(), any())).thenReturn(mockEmailTemplate);
+        when(mockEmailTemplate.getBody()).thenReturn(SAMPLE_EMAIL_BODY);
+    }
+
+    private void mockIdentityConfigParser(MockedStatic<IdentityConfigParser> identityConfigParser) {
+
+        IdentityConfigParser mockIdentityConfigParser = mock(IdentityConfigParser.class);
+        identityConfigParser.when(IdentityConfigParser::getInstance)
+                .thenReturn(mockIdentityConfigParser);
+    }
+
+    private void mockConfigurationFacade(MockedStatic<ConfigurationFacade> configurationFacade) {
+
+        ConfigurationFacade mockConfigurationFacade = mock(ConfigurationFacade.class);
+        configurationFacade.when(ConfigurationFacade::getInstance).thenReturn(mockConfigurationFacade);
+        when(mockConfigurationFacade.getAccountRecoveryEndpointAbsolutePath())
+                .thenReturn(ACCOUNT_RECOVERY_ENDPOINT_URL);
+        when(mockConfigurationFacade.getAuthenticationEndpointAbsoluteURL()).thenReturn(AUTHENTICATION_ENDPOINT_URL);
+    }
+
+    private void mockConfigurationContext(MockedStatic<IdentityCoreServiceComponent> identityCoreServiceComponent) {
+
+        identityCoreServiceComponent.when(() -> IdentityCoreServiceComponent.getServiceURLBuilderFactory())
+                .thenReturn(null);
+        identityCoreServiceComponent.when(() -> IdentityCoreServiceComponent.getConfigurationContextService())
+                .thenReturn(configurationContextService);
+        when(configurationContextService.getServerConfigContext()).thenReturn(configurationContext);
+        when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
+    }
+
+    private void mockCarbonUtils(MockedStatic<CarbonUtils> carbonUtils) {
+
+        carbonUtils.when(() -> CarbonUtils.getTransportProxyPort(axisConfiguration, null)).thenReturn(-1);
+        carbonUtils.when(() -> CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        carbonUtils.when(CarbonUtils::getManagementTransport).thenReturn(DUMMY_PROTOCOL);
     }
 }

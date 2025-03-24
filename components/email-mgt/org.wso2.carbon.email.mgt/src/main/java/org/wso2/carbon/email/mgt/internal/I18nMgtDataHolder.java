@@ -18,22 +18,29 @@
 
 package org.wso2.carbon.email.mgt.internal;
 
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
-import org.wso2.carbon.identity.organization.management.application.OrgApplicationManager;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class I18nMgtDataHolder{
+
+/**
+ * This class holds the data required for the notification management.
+ */
+public class I18nMgtDataHolder {
+
     private RealmService realmService;
     private RegistryService registryService;
     private RegistryResourceMgtService registryResourceMgtService;
     private OrganizationManager organizationManager;
-    private OrgApplicationManager sharedAppManager;
+    private ApplicationManagementService applicationManagementService;
+    private OrgResourceResolverService orgResourceResolverService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
 
@@ -44,6 +51,26 @@ public class I18nMgtDataHolder{
 
     public static I18nMgtDataHolder getInstance() {
         return instance;
+    }
+
+    /**
+     * Get the application management service.
+     *
+     * @return Application management service.
+     */
+    public ApplicationManagementService getApplicationManagementService() {
+
+        return applicationManagementService;
+    }
+
+    /**
+     * Set the application management service.
+     *
+     * @param applicationManagementService Application management service instance.
+     */
+    public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
+        this.applicationManagementService = applicationManagementService;
     }
 
     public RealmService getRealmService() {
@@ -121,22 +148,22 @@ public class I18nMgtDataHolder{
     }
 
     /**
-     * Get the shared application manager.
+     * Get the organization resource resolver service.
      *
-     * @return Shared application manager.
+     * @return Organization resource resolver service.
      */
-    public OrgApplicationManager getSharedAppManager() {
+    public OrgResourceResolverService getOrgResourceResolverService() {
 
-        return sharedAppManager;
+        return orgResourceResolverService;
     }
 
     /**
-     * Set the shared application manager.
+     * Set the organization resource resolver service.
      *
-     * @param sharedAppManager Shared application manager.
+     * @param orgResourceResolverService Organization resource resolver service instance.
      */
-    public void setSharedAppManager(OrgApplicationManager sharedAppManager) {
+    public void setOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
 
-        this.sharedAppManager = sharedAppManager;
+        this.orgResourceResolverService = orgResourceResolverService;
     }
 }

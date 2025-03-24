@@ -41,7 +41,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -297,6 +296,23 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         }
     }
 
+    @Override
+    public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException {
+
+        String path = buildTemplateRootDirectoryPath(I18nEmailUtil.getNormalizedName(displayName),
+                notificationChannel, null);
+
+        try {
+            Collection templates = (Collection) resourceMgtService.getIdentityResource(path, tenantDomain);
+            for (String subPath : templates.getChildren()) {
+                resourceMgtService.deleteIdentityResource(subPath, tenantDomain);
+            }
+        } catch (IdentityRuntimeException | RegistryException e) {
+            throw new NotificationTemplateManagerServerException("Error while deleting notification templates.", e);
+        }
+    }
+
     /**
      * Get the notification template from resource.
      *
@@ -359,7 +375,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             Object content = templateResource.getContent();
             if (content != null) {
                 byte[] templateContentArray = (byte[]) content;
-                String templateContent = new String(templateContentArray, Charset.forName("UTF-8"));
+                String templateContent = new String(templateContentArray, StandardCharsets.UTF_8);
 
                 String[] templateContentElements;
                 try {

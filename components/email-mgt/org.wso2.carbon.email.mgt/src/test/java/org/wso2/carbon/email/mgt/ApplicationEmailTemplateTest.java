@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.email.mgt;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -26,6 +27,7 @@ import static org.testng.Assert.assertNull;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
 
 import org.apache.commons.lang.StringUtils;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -40,6 +42,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
@@ -48,7 +51,9 @@ import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -69,6 +74,15 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
 
     @Mock
     Resource resource;
+
+    @Mock
+    ApplicationManagementService applicationManagementService;
+
+    @Mock
+    OrganizationManager organizationManager;
+
+    @Mock
+    OrgResourceResolverService orgResourceResolverService;
 
     @ObjectFactory
     public IObjectFactory getObjectFactory() {
@@ -91,6 +105,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
 
         // Mock RegistryResourceMgtService.
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
+        when(i18nMgtDataHolder.getApplicationManagementService()).thenReturn(applicationManagementService);
+        when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+        when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
         emailTemplateManager = new EmailTemplateManagerImpl();
 
         mockStatic(OrganizationManagementUtil.class);
@@ -111,23 +128,39 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
             String contentType, byte[] content, String applicationUuid) throws Exception {
 
-        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
+        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
         mockIsValidTemplate(true, true);
         NotificationTemplate notificationTemplate = emailTemplateManager
-                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
-        assertNotNull(notificationTemplate);
-        assertNotNull(notificationTemplate.getBody(), "Template should have a notification body");
-        assertEquals(notificationTemplate.getNotificationChannel(), notificationChannel);
+                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid, false);
+        validateNotificationTemplate(notificationTemplate, notificationChannel);
+    }
 
-        // Validate not having subject or footer in SMS notification template.
-        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            assertNull(notificationTemplate.getFooter(), "SMS notification template cannot have a footer");
-            assertNull(notificationTemplate.getSubject(), "SMS notification template cannot have a subject");
-        } else {
-            assertNotNull(notificationTemplate.getFooter(), "EMAIL notification template must have a footer");
-            assertNotNull(notificationTemplate.getSubject(),
-                    "EMAIL notification template must have a subject");
-        }
+    /**
+     * Contains the test scenarios for getting notification template for shared applications.
+     *
+     * @param notificationChannel Notification channel of the template.
+     * @param displayName         Display name of the template.
+     * @param type                Template type.
+     * @param locale              Locale of the notification template.
+     * @param contentType         Content type of the template.
+     * @param content             Template content.
+     * @param applicationUuid     The UUID of the application from which the template should be retrieved.
+     * @throws Exception Errors occurred while testing getNotificationTemplate implementation.
+     */
+    @Test(dataProvider = "notificationTemplateDataProvider")
+    public void testGetNotificationTemplateForSharedApps(String notificationChannel, String displayName, String type,
+                                                         String locale, String contentType, byte[] content,
+                                                         String applicationUuid) throws Exception {
+
+        String subOrganizationId = "sub-organization-id";
+        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, subOrganizationId,
+                applicationUuid);
+
+        // Successful scenario for resolving the root application.
+        NotificationTemplate notificationTemplate =
+                emailTemplateManager.getNotificationTemplate(notificationChannel, type, locale, subOrganizationId,
+                        applicationUuid, false);
+        validateNotificationTemplate(notificationTemplate, notificationChannel);
     }
 
     /**
@@ -150,12 +183,11 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
             String locale, String contentType, boolean isValidTemplate, boolean isValidLocale, String errorMsg,
             String expectedErrorCode, byte[] content, String applicationUuid) throws Exception {
 
-        when(OrganizationManagementUtil.isOrganization(tenantDomain)).thenReturn(false);
         mockIsValidTemplate(isValidTemplate, isValidLocale);
         try {
-            mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
+            mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content, null, null);
             NotificationTemplate notificationTemplate = emailTemplateManager
-                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid);
+                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, applicationUuid, false);
             assertNull(notificationTemplate, "Cannot return a notificationTemplate");
         } catch (NotificationTemplateManagerException e) {
             String errorCode = e.getErrorCode();
@@ -178,8 +210,9 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
      * @param scenarioCode Error scenario
      */
     @Test(dataProvider = "addNotificationTemplateTypeProvider")
-    public void TestAddNotificationTemplateType(String templateName, String channel, String domain, String errorCode,
-                                                String errorMessage, int scenarioCode, String applicationUuid) {
+    public void TestAddNotificationTemplateType(String templateName, String channel, String domain, String orgId,
+                                                String errorCode, String errorMessage, int scenarioCode,
+                                                String applicationUuid) throws Exception {
 
         try {
             if (scenarioCode == 2) {
@@ -189,6 +222,12 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
                 when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
                         .thenThrow(new IdentityRuntimeException("Test Error"));
             }
+            when(organizationManager.resolveOrganizationId(domain)).thenReturn(orgId);
+            when(orgResourceResolverService.getResourcesFromOrgHierarchy(
+                    ArgumentMatchers.eq(orgId),
+                    any(),
+                    any()))
+                    .thenReturn(false);
             emailTemplateManager
                     .addNotificationTemplateType(templateName, channel, domain, applicationUuid);
         } catch (NotificationTemplateManagerException e) {
@@ -314,6 +353,7 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String testTemplateName = "Test template";
         String testChannel = "Test Channel";
         String testDomain = "Test Domain";
+        String testOrgId = "test-org-id";
         String applicationUuid = "test-uuid";
 
         int testScenario1 = 1;
@@ -329,11 +369,11 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         String errorMessage3 = "TEST runtime exception while looking for the resource : ";
 
         return new Object[][]{
-                {StringUtils.EMPTY, testChannel, testDomain, expectedErrorCode1, errorMessage1, testScenario1,
+                {StringUtils.EMPTY, testChannel, testDomain, testOrgId, expectedErrorCode1, errorMessage1,
+                        testScenario1, applicationUuid},
+                {testTemplateName, testChannel, testDomain, testOrgId, expectedErrorCode2, errorMessage2, testScenario2,
                         applicationUuid},
-                {testTemplateName, testChannel, testDomain, expectedErrorCode2, errorMessage2, testScenario2,
-                        applicationUuid},
-                {testTemplateName, testChannel, testDomain, expectedErrorCode3, errorMessage3, testScenario3,
+                {testTemplateName, testChannel, testDomain, testOrgId, expectedErrorCode3, errorMessage3, testScenario3,
                         applicationUuid}
         };
     }
@@ -465,13 +505,26 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
      * @param locale              Notification template locale
      * @param contentType         Notification template content type
      * @param templateContent     Notification template content (Subject,body,footer etc)
+     * @param tenantDomain        Tenant domain of the notification template.
+     * @param applicationId       Root application id of the notification template.
      * @throws Exception Error mocking notification template
      */
     private void mockRegistryResource(String notificationChannel, String displayName, String templateType,
-                                      String locale, String contentType, byte[] templateContent) throws Exception {
+                                      String locale, String contentType, byte[] templateContent, String tenantDomain,
+                                      String applicationId)
+            throws Exception {
 
-        when(resourceMgtService.getIdentityResource(Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
-                .thenReturn(resource);
+        if (StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(applicationId) &&
+                StringUtils.equals(notificationChannel, NotificationChannels.EMAIL_CHANNEL.getChannelType())) {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.contains(applicationId),
+                    ArgumentMatchers.eq(tenantDomain), ArgumentMatchers.anyString())).thenReturn(resource);
+        } else if (StringUtils.isNotBlank(tenantDomain)) {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.eq(tenantDomain),
+                    ArgumentMatchers.anyString())).thenReturn(resource);
+        } else {
+            when(resourceMgtService.getIdentityResource(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                    ArgumentMatchers.anyString())).thenReturn(resource);
+        }
 
         // Mock Resource properties.
         when(resource.getProperty(I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(displayName);
@@ -501,5 +554,29 @@ public class ApplicationEmailTemplateTest extends PowerMockTestCase {
         // Mock methods in validateLocale method.
         when(IdentityValidationUtil.isValidOverBlackListPatterns(Matchers.anyString(), Matchers.anyString())).
                 thenReturn(isValidLocale);
+    }
+
+    /**
+     * This method will validate the essential details of an Email or SMS notification template.
+     *
+     * @param notificationTemplate The notification template to be validated.
+     * @param notificationChannel  The expected notification channel for the template being validated.
+     */
+    private void validateNotificationTemplate(NotificationTemplate notificationTemplate,
+                                              String notificationChannel) {
+
+        assertNotNull(notificationTemplate);
+        assertNotNull(notificationTemplate.getBody(), "Template should have a notification body");
+        assertEquals(notificationTemplate.getNotificationChannel(), notificationChannel);
+
+        // Validate not having subject or footer in SMS notification template.
+        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+            assertNull(notificationTemplate.getFooter(), "SMS notification template cannot have a footer");
+            assertNull(notificationTemplate.getSubject(), "SMS notification template cannot have a subject");
+        } else {
+            assertNotNull(notificationTemplate.getFooter(), "EMAIL notification template must have a footer");
+            assertNotNull(notificationTemplate.getSubject(),
+                    "EMAIL notification template must have a subject");
+        }
     }
 }

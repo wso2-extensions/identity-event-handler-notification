@@ -29,7 +29,7 @@
     </configuration>
     <configuration type="accountIdRecovery" display="accountIdRecovery" locale="en_US">
         <body>
-            Hello, your user name is {{userstore-domain}}/{{user-name}}@{{tenant-domain}}
+            Hello, your username is {{userstore-domain}}/{{user-name}}
         </body>
     </configuration>
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
@@ -42,6 +42,6 @@
         <body>Your Mobile Number Verification Code : {{confirmation-code}}</body>
     </configuration>
     <configuration type="SMSOTP" display="SMSOTP" locale="en_US">
-        <body>Your one-time password for the {{application-name}} is {{otpToken}}. This expires in {{otp-expiry-time}} minutes.</body>
+        <body>Your one-time password for the {{application-name}} is {{confirmation-code}}. This expires in {{otp-expiry-time}} minutes.</body>
     </configuration>
 </configurations>
