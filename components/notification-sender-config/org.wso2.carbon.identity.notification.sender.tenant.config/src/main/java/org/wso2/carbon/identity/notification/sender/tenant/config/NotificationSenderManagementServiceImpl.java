@@ -737,8 +737,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
         if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
             emailSenderAttributes.put(AUTH_TYPE, emailSender.getAuthType());
-        } else {
-            emailSenderAttributes.put(AUTH_TYPE, BASIC);
         }
         emailSenderAttributes.put(SMTP_SERVER_HOST, emailSender.getSmtpServerHost());
         emailSenderAttributes.put(SMTP_PORT, String.valueOf(emailSender.getSmtpPort()));
@@ -774,6 +772,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 resource.getAttributes().stream()
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        // If authType is set to BASIC, username & password should be set in the properties. If not, set as first class
+        // attributes.
+        if (BASIC.equals(attributesMap.get(AUTH_TYPE))) {
+            emailSender.getProperties().put(USERNAME, attributesMap.get(USERNAME));
+            emailSender.getProperties().put(PASSWORD, attributesMap.get(PASSWORD));
+            attributesMap.remove(attributesMap.get(USERNAME));
+            attributesMap.remove(attributesMap.get(PASSWORD));
+        }
         attributesMap.forEach((key, value) -> {
             switch (key) {
                 case SMTP_SERVER_HOST:
