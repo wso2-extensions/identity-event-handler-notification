@@ -52,6 +52,7 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_PORT = "smtpPort";
     public static final String FROM_ADDRESS = "fromAddress";
     public static final String EMAIL_PUBLISHER_TYPE = "email";
+    public static final String AUTH_TYPE = "authType";
 
     // Email Sender's additional properties.
     public static final String REPLY_TO_ADDRESS = "mail.smtp.replyTo";

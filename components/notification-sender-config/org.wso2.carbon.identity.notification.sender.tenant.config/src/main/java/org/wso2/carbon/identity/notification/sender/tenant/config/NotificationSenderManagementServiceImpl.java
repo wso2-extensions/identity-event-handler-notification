@@ -71,6 +71,7 @@ import javax.xml.transform.TransformerException;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
@@ -734,6 +735,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (StringUtils.isNotEmpty(emailSender.getPassword())) {
             emailSenderAttributes.put(PASSWORD, emailSender.getPassword());
         }
+        if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
+            emailSenderAttributes.put(AUTH_TYPE, emailSender.getAuthType());
+        } else {
+            emailSenderAttributes.put(AUTH_TYPE, BASIC);
+        }
         emailSenderAttributes.put(SMTP_SERVER_HOST, emailSender.getSmtpServerHost());
         emailSenderAttributes.put(SMTP_PORT, String.valueOf(emailSender.getSmtpPort()));
 
@@ -784,6 +790,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     break;
                 case PASSWORD:
                     emailSender.setPassword(value);
+                    break;
+                case AUTH_TYPE:
+                    emailSender.setAuthType(value);
                     break;
                 default:
                     emailSender.getProperties().put(key, value);
