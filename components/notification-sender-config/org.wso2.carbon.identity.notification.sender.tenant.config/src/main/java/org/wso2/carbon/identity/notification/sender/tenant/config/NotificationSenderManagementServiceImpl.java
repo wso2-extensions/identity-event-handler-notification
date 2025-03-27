@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementClientException;
@@ -122,6 +123,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.deletePushSenderSecretProperties;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.encrypt;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getPushProvider;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.updatePushSenderCredentials;
@@ -726,26 +728,42 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Resource resource = new Resource();
-        resource.setResourceName(emailSender.getName());
-        Map<String, String> emailSenderAttributes = emailSender.getProperties();
-        emailSenderAttributes.put(FROM_ADDRESS, emailSender.getFromAddress());
-        if (StringUtils.isNotEmpty(emailSender.getUsername())) {
-            emailSenderAttributes.put(USERNAME, emailSender.getUsername());
-        }
-        if (StringUtils.isNotEmpty(emailSender.getPassword())) {
-            emailSenderAttributes.put(PASSWORD, emailSender.getPassword());
-        }
-        if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
-            emailSenderAttributes.put(AUTH_TYPE, emailSender.getAuthType());
-        }
-        emailSenderAttributes.put(SMTP_SERVER_HOST, emailSender.getSmtpServerHost());
-        emailSenderAttributes.put(SMTP_PORT, String.valueOf(emailSender.getSmtpPort()));
+        List<Attribute> resourceAttributes;
+        try {
+            resource.setResourceName(emailSender.getName());
+            Map<String, String> emailSenderAttributes = emailSender.getProperties();
+            emailSenderAttributes.put(FROM_ADDRESS, emailSender.getFromAddress());
+            if (StringUtils.isNotEmpty(emailSender.getUsername())) {
+                emailSenderAttributes.put(USERNAME, encrypt(emailSender.getUsername()));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getPassword())) {
+                emailSenderAttributes.put(PASSWORD, encrypt(emailSender.getPassword()));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
+                emailSenderAttributes.put(AUTH_TYPE, emailSender.getAuthType());
+            }
+            emailSenderAttributes.put(SMTP_SERVER_HOST, emailSender.getSmtpServerHost());
+            emailSenderAttributes.put(SMTP_PORT, String.valueOf(emailSender.getSmtpPort()));
 
-        List<Attribute> resourceAttributes =
-                emailSenderAttributes.entrySet().stream()
-                        .filter(attribute -> attribute.getValue() != null && !"null".equals(attribute.getValue()))
-                        .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
-                        .collect(Collectors.toList());
+            resourceAttributes = new ArrayList<>();
+
+            for (Map.Entry<String, String> entry : emailSenderAttributes.entrySet()) {
+                if (entry.getValue() != null && !"null".equals(entry.getValue())) {
+                    String key = entry.getKey();
+                    switch (key) {
+                        case PASSWORD:
+                        case CLIENT_SECRET:
+                            resourceAttributes.add(new Attribute(key, encrypt(entry.getValue())));
+                            break;
+                        default:
+                            resourceAttributes.add(new Attribute(key, entry.getValue()));
+                            break;
+                    }
+                }
+            }
+        } catch (CryptoException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_TRANSFORMER_EXCEPTION, e.getMessage(), e);
+        }
         resource.setAttributes(resourceAttributes);
         // Set file.
         ResourceFile file = new ResourceFile();

@@ -209,7 +209,9 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS("65021", "Unable to delete notification sender.",
                 "Server encountered an error while deleting the notification sender secrets from resource: %s"),
         ERROR_CODE_INVALID_INPUTS("65022", "Invalid input.",
-                "Invalid input received for notification sender.");
+                "Invalid input received for notification sender."),
+        ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS("65023", "Error while encrypting credentials.",
+                "Error while encrypting credentials for notification sender: %s.");
 
         private final String code;
         private final String message;
