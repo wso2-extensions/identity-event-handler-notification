@@ -18,10 +18,13 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
@@ -41,6 +44,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -591,5 +595,31 @@ public class NotificationSenderUtils {
         pushSenderData.setProperties(pushSenderDTO.getProperties());
         pushSenderData.setProviderId(pushSenderDTO.getProviderId());
         return pushSenderData;
+    }
+
+    /**
+     * Encrypt the given text.
+     *
+     * @param plainText text to be encrypted.
+     * @return encrypted claim value.
+     */
+    public static String encrypt(String plainText) throws CryptoException {
+
+            if (plainText.isEmpty()) {
+                return plainText;
+            }
+            return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(plainText.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Decrypt the given cipher text.
+     *
+     * @param cipherText The string which needs to be decrypted
+     * @return Base64 decoded string
+     * @throws CryptoException On an error during decryption
+     */
+    public static String decrypt(String cipherText) throws CryptoException {
+
+        return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(cipherText), Charsets.UTF_8);
     }
 }
