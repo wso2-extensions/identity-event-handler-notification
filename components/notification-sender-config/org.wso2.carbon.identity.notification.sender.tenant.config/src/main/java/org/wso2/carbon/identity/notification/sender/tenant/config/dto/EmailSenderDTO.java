@@ -32,6 +32,7 @@ public class EmailSenderDTO {
     private String fromAddress;
     private String username;
     private String password;
+    private String authType;
     private Map<String, String> properties = new HashMap<>();
 
     public String getName() {
@@ -103,5 +104,15 @@ public class EmailSenderDTO {
     public void setProperties(Map<String, String> properties) {
 
         this.properties = properties;
+    }
+
+    public String getAuthType() {
+
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+
+        this.authType = authType;
     }
 }
