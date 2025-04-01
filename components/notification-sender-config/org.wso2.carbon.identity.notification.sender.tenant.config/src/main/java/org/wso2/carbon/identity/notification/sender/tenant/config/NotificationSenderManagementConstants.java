@@ -46,6 +46,12 @@ public class NotificationSenderManagementConstants {
     public static final String PLUS = "+";
     public static final String URL_ENCODED_SPACE = "%20";
     public static final String CONFIG_MGT_ERROR_CODE_DELIMITER = "_";
+    public static final String SECRET_PROPERTIES = "_SECRET_PROPERTIES";
+
+    // Notification Type
+    public static final String EMAIL_PROVIDER = "EMAIL_PROVIDER";
+    public static final String SMS_PROVIDER = "SMS_PROVIDER";
+    public static final String PUSH_PROVIDER = "PUSH_PROVIDER";
 
     // Email Sender's main properties.
     public static final String SMTP_SERVER_HOST = "smtpServerHost";

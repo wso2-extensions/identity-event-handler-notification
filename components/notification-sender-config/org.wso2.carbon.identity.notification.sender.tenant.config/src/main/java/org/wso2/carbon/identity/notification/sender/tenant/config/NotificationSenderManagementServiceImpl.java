@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementClientException;
@@ -53,6 +52,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.internal.Notif
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.util.ResourceUtils;
 import org.wso2.carbon.idp.mgt.model.ConnectedAppsResult;
@@ -83,6 +83,8 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISPLAY_NAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISPLAY_NAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
@@ -119,6 +121,8 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_ENDPOINT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
@@ -137,9 +141,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public static final int MAX_RETRY_COUNT = 60;
     public static final String SMS_OTP_AUTHENTICATOR = "sms-otp-authenticator";
 
-    static final Map<String, String> SENDERS = new HashMap<String, String>() { {
-        put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
-    } };
+    static final Map<String, String> SENDERS = new HashMap<String, String>() {
+        {
+            put("SMSPublisher", SMS_OTP_AUTHENTICATOR);
+        }
+    };
 
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
@@ -303,7 +309,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO getEmailSender(String senderName) throws NotificationSenderManagementException {
 
-        Optional<Resource> resourceOptional  = getPublisherResource(senderName);
+        Optional<Resource> resourceOptional = getPublisherResource(senderName);
         if (!resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
@@ -467,7 +473,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             for (Resource resource : publisherResources.getResources()) {
                 if (resource.getAttributes().stream().anyMatch(
                         attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey())
-                        && PUSH_PUBLISHER_TYPE.equals(attribute.getValue()))) {
+                                && PUSH_PUBLISHER_TYPE.equals(attribute.getValue()))) {
                     pushSenders.add(buildPushSenderFromResource(resource, true));
                 }
             }
@@ -683,7 +689,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         eventPublisherName);
             }
         } catch (EventPublisherConfigurationException e) {
-            throw  new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
                     eventPublisherName, e);
         }
         return publisherInSuperTenant;
@@ -692,9 +698,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     /**
      * Get default properties of super tenant Publisher.
      *
-     * @param publisherName    Name of the publisher.
-     *
-     * @return  Map of Properties.
+     * @param publisherName Name of the publisher.
+     * @return Map of Properties.
      */
     private Map<String, String> getDefaultPublisherProperties(String publisherName)
             throws NotificationSenderManagementException {
@@ -728,16 +733,18 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
 
         Resource resource = new Resource();
-        List<Attribute> resourceAttributes;
+        List<Attribute> resourceAttributes = new ArrayList<>();
         try {
             resource.setResourceName(emailSender.getName());
             Map<String, String> emailSenderAttributes = emailSender.getProperties();
             emailSenderAttributes.put(FROM_ADDRESS, emailSender.getFromAddress());
             if (StringUtils.isNotEmpty(emailSender.getUsername())) {
-                emailSenderAttributes.put(USERNAME, encrypt(emailSender.getUsername()));
+                resourceAttributes.add(new Attribute(USERNAME, encryptCredential(EMAIL_PROVIDER, BASIC, USERNAME,
+                        emailSender.getUsername())));
             }
             if (StringUtils.isNotEmpty(emailSender.getPassword())) {
-                emailSenderAttributes.put(PASSWORD, encrypt(emailSender.getPassword()));
+                resourceAttributes.add(new Attribute(PASSWORD, encryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD,
+                        emailSender.getPassword())));
             }
             if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
                 emailSenderAttributes.put(AUTH_TYPE, emailSender.getAuthType());
@@ -745,15 +752,25 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             emailSenderAttributes.put(SMTP_SERVER_HOST, emailSender.getSmtpServerHost());
             emailSenderAttributes.put(SMTP_PORT, String.valueOf(emailSender.getSmtpPort()));
 
-            resourceAttributes = new ArrayList<>();
-
             for (Map.Entry<String, String> entry : emailSenderAttributes.entrySet()) {
                 if (entry.getValue() != null && !"null".equals(entry.getValue())) {
                     String key = entry.getKey();
                     switch (key) {
+                        case USERNAME:
+                            resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, BASIC, USERNAME,
+                                    entry.getValue())));
+                            break;
                         case PASSWORD:
+                            resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD,
+                                    entry.getValue())));
+                            break;
+                        case CLIENT_ID:
+                            resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                    CLIENT_CREDENTIAL, CLIENT_ID, entry.getValue())));
+                            break;
                         case CLIENT_SECRET:
-                            resourceAttributes.add(new Attribute(key, encrypt(entry.getValue())));
+                            resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                    CLIENT_CREDENTIAL, CLIENT_SECRET, entry.getValue())));
                             break;
                         default:
                             resourceAttributes.add(new Attribute(key, entry.getValue()));
@@ -761,8 +778,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     }
                 }
             }
-        } catch (CryptoException e) {
-            throw new NotificationSenderManagementServerException(ERROR_CODE_TRANSFORMER_EXCEPTION, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER, e.getMessage(), e);
         }
         resource.setAttributes(resourceAttributes);
         // Set file.
@@ -810,10 +827,18 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     emailSender.setFromAddress(value);
                     break;
                 case USERNAME:
-                    emailSender.setUsername(value);
+                    try {
+                        emailSender.setUsername(decryptCredential(EMAIL_PROVIDER, BASIC, USERNAME));
+                    } catch (SecretManagementException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
                 case PASSWORD:
-                    emailSender.setPassword(value);
+                    try {
+                        emailSender.setPassword(decryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD));
+                    } catch (SecretManagementException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
                 case AUTH_TYPE:
                     emailSender.setAuthType(value);
@@ -888,8 +913,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     /**
      * Method to check whether the sender is allowed to delete.
      *
-     * @param senderName    Name of the sender.
-     * @return  whether the sender is allowed to delete.
+     * @param senderName Name of the sender.
+     * @return whether the sender is allowed to delete.
      * @throws NotificationSenderManagementException If an error occurred while checking the sender.
      */
     private boolean canSenderDelete(String senderName) throws NotificationSenderManagementException {
@@ -904,8 +929,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 // and offset as 0.
                 ConnectedAppsResult appsResult =
                         NotificationSenderTenantConfigDataHolder.getInstance()
-                        .getApplicationManagementService()
-                        .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1 , 0);
+                                .getApplicationManagementService()
+                                .getConnectedAppsForLocalAuthenticator(authenticatorId, tenantDomain, 1, 0);
                 // If there are any connected apps, the sender cannot be deleted.
                 if (appsResult.getApps() != null && appsResult.getApps().size() > 0) {
                     return false;
@@ -919,7 +944,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 List<Attribute> smsAttributes = resource.getAttributes().stream().filter(attribute -> attribute
                         .getKey().equals("sms_otp_enabled")).collect(
                         Collectors.toList());
-                String smsOtpEnabled = null;        
+                String smsOtpEnabled = null;
                 if (!smsAttributes.isEmpty()) {
                     smsOtpEnabled = smsAttributes.get(0).getValue();
                 }
