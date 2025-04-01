@@ -37,8 +37,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSe
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandler;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
-import org.wso2.carbon.identity.secret.mgt.core.SecretManager;
-import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -237,43 +235,5 @@ public class NotificationSenderTenantConfigServiceDS {
     protected void unsetPushProvider(PushProvider provider) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().removePushProvider(provider.getName());
-    }
-
-    @Reference(
-            name = "org.wso2.carbon.identity.secret.mgt.core.SecretManager",
-            service = SecretManager.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetSecretManager"
-    )
-    private void setSecretManager(SecretManager secretManager) {
-
-        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
-        log.debug("SecretManager set in NotificationSenderTenantConfigDataHolder bundle.");
-    }
-
-    private void unsetSecretManager(SecretManager secretManager) {
-
-        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(null);
-        log.debug("SecretManager unset in NotificationSenderTenantConfigDataHolder bundle.");
-    }
-
-    @Reference(
-            name = "org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager",
-            service = SecretResolveManager.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetSecretResolveManager"
-    )
-    private void setSecretResolveManager(SecretResolveManager secretResolveManager) {
-
-        NotificationSenderTenantConfigDataHolder.getInstance().setSecretResolveManager(secretResolveManager);
-        log.debug("SecretResolveManager set in NotificationSenderTenantConfigDataHolder bundle.");
-    }
-
-    private void unsetSecretResolveManager(SecretResolveManager secretResolveManager) {
-
-        NotificationSenderTenantConfigDataHolder.getInstance().setSecretResolveManager(null);
-        log.debug("SecretResolveManager unset in NotificationSenderTenantConfigDataHolder bundle.");
     }
 }

@@ -67,10 +67,6 @@
             <artifactId>org.wso2.carbon.identity.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.secret.mgt.core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.notification.push</groupId>
             <artifactId>org.wso2.carbon.identity.notification.push.provider</artifactId>
         </dependency>
@@ -150,8 +146,6 @@
                             org.wso2.carbon.base.api; version="${carbon.kernel.carbon.base.pkg.version}",
                             org.wso2.carbon.context; version="${carbon.kernel.imp.pkg.version.range}",
 
-                            org.wso2.carbon.core.util; version="${carbon.kernel.imp.pkg.version.range}",
-
                             org.wso2.carbon.email.mgt; version="${identity.event.handler.notification.imp.pkg.version.range}",
                             org.wso2.carbon.email.mgt.model; version="${identity.event.handler.notification.imp.pkg.version.range}",
 
@@ -193,10 +187,6 @@
                             org.wso2.carbon.identity.notification.push.provider.model; version="${identity.notification.push.version.range}",
 
                             org.wso2.carbon.identity.application.authentication.framework.util; version="${carbon.identity.framework.imp.pkg.version.range}",
-
-                            org.wso2.carbon.identity.secret.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.secret.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.secret.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>
