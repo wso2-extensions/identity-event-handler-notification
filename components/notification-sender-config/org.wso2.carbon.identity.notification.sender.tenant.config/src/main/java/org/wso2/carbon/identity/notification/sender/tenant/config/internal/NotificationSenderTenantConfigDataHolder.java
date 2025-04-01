@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.com).
+ * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,8 @@ import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.secret.mgt.core.SecretManager;
+import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 
 import java.util.HashMap;
@@ -47,6 +49,8 @@ public class NotificationSenderTenantConfigDataHolder {
     private ApplicationManagementService applicationManagementService = null;
     private OrganizationManager organizationManager = null;
     private final Map<String, PushProvider> pushNotificationProviders = new HashMap<>();
+    private SecretManager secretManager;
+    private SecretResolveManager secretResolveManager;
 
     private NotificationSenderTenantConfigDataHolder() {
     }
@@ -171,5 +175,45 @@ public class NotificationSenderTenantConfigDataHolder {
     public PushProvider getPushProvider(String providerName) {
 
         return pushNotificationProviders.get(providerName);
+    }
+
+    /**
+     * Get the SecretManager.
+     *
+     * @return SecretManager instance.
+     */
+    public SecretManager getSecretManager() {
+
+        return secretManager;
+    }
+
+    /**
+     * Set the SecretManager.
+     *
+     * @param secretManager SecretManager instance.
+     */
+    public void setSecretManager(SecretManager secretManager) {
+
+        this.secretManager = secretManager;
+    }
+
+    /**
+     * Get the SecretResolveManager.
+     *
+     * @return SecretResolveManager instance.
+     */
+    public SecretResolveManager getSecretResolveManager() {
+
+        return secretResolveManager;
+    }
+
+    /**
+     * Set the SecretResolveManager.
+     *
+     * @param secretResolveManager SecretResolveManager instance.
+     */
+    public void setSecretResolveManager(SecretResolveManager secretResolveManager) {
+
+        this.secretResolveManager = secretResolveManager;
     }
 }
