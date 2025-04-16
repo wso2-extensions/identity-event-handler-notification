@@ -44,4 +44,10 @@
     <configuration type="SMSOTP" display="SMSOTP" locale="en_US">
         <body>Your one-time password for the {{application-name}} is {{confirmation-code}}. This expires in {{otp-expiry-time}} minutes.</body>
     </configuration>
+    <configuration type="adminForcedPasswordReset" display="adminForcedPasswordReset" locale="en_US">
+        <body>The organization administrator is requesting a password reset. Please use this one-time password (OTP): {{confirmation-code}} to sign in and then reset your password.</body>
+    </configuration>
+    <configuration type="resendAdminForcedPasswordReset" display="resendAdminForcedPasswordReset" locale="en_US">
+        <body>The organization administrator is requesting a password reset. Please use this one-time password (OTP): {{confirmation-code}} to sign in and then reset your password.</body>
+    </configuration>
 </configurations>
