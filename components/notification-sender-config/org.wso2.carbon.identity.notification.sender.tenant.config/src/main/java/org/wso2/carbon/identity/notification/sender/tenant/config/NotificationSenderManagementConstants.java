@@ -130,6 +130,11 @@ public class NotificationSenderManagementConstants {
     public static final String CONSTANT_HTTP_POST = "HttpPost";
     public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
     public static final String DEFAULT_HANDLER_NAME = "default";
+    public static final String SMTP_CLIENT_ID_PROPERTY = "mail.smtp.clientId";
+    public static final String SMTP_CLIENT_SECRET_PROPERTY = "mail.smtp.clientSecret";
+    public static final String SMTP_TOKEN_ENDPOINT_PROPERTY = "mail.smtp.tokenEndpoint";
+    public static final String SMTP_SCOPES_PROPERTY = "mail.smtp.scopes";
+    public static final String SMTP_AUTH_TYPE_PROPERTY = "mail.smtp.authType";
 
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));

@@ -25,15 +25,18 @@ import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
 
+/**
+ * This class is used to encrypt and decrypt the secret properties of the notification sender.
+ */
 public class NotificationSenderSecretProcessor {
 
     /**
      * Encrypt secret property.
      *
-     * @param notificationSender    Notification Sender: EMAIL_PROVIDER.
-     * @param authType              Authentication Type
-     * @param property              Authentication Property.
-     * @param value                 Authentication Property Value.
+     * @param notificationSender Notification Sender: EMAIL_PROVIDER.
+     * @param authType           Authentication Type
+     * @param property           Authentication Property.
+     * @param value              Authentication Property Value.
      * @return Reference of the secret.
      * @throws SecretManagementException If an error occurs while encrypting the secret.
      */
@@ -53,9 +56,9 @@ public class NotificationSenderSecretProcessor {
     /**
      * Decrypt secret property.
      *
-     * @param notificationSender    Notification Sender: EMAIL_PROVIDER.
-     * @param authType              Authentication Type
-     * @param property              Authentication Property.
+     * @param notificationSender Notification Sender: EMAIL_PROVIDER.
+     * @param authType           Authentication Type
+     * @param property           Authentication Property.
      * @throws SecretManagementException If an error occurs while decrypting the secret.
      */
     public static String decryptCredential(String notificationSender, String authType, String property)
@@ -76,9 +79,9 @@ public class NotificationSenderSecretProcessor {
     /**
      * Create secret name.
      *
-     * @param notificationSender     Notification Sender.
-     * @param authType     Authentication Type.
-     * @param authProperty Authentication Property.
+     * @param notificationSender Notification Sender.
+     * @param authType           Authentication Type.
+     * @param authProperty       Authentication Property.
      * @return Secret Name.
      */
     private static String buildSecretName(String notificationSender, String authType, String authProperty) {
@@ -119,10 +122,11 @@ public class NotificationSenderSecretProcessor {
      *
      * @param secretType Secret type.
      * @param secretName Name of the secret.
-     * @param value   secret value.
+     * @param value      secret value.
      * @throws SecretManagementException If an error occurs while adding the secret.
      */
-    private static void addNewActionSecretProperty(String secretType, String secretName, String value) throws SecretManagementException {
+    private static void addNewActionSecretProperty(String secretType, String secretName, String value)
+            throws SecretManagementException {
 
         Secret secret = new Secret();
         secret.setSecretName(secretName);
@@ -135,7 +139,7 @@ public class NotificationSenderSecretProcessor {
      *
      * @param secretType Secret type.
      * @param secretName Name of the secret.
-     * @param value   secret value.
+     * @param value      secret value.
      * @throws SecretManagementException If an error occurs while adding the secret.
      */
     private static void updateExistingSecretProperty(String secretType, String secretName, String value)

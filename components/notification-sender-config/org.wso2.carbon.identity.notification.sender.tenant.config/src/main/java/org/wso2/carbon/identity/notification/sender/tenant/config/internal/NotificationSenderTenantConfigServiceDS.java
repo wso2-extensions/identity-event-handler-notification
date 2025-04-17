@@ -246,13 +246,13 @@ public class NotificationSenderTenantConfigServiceDS {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetSecretManager"
     )
-    private void setSecretManager(SecretManager secretManager) {
+    protected void setSecretManager(SecretManager secretManager) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
         log.debug("SecretManager set in NotificationSenderTenantConfigDataHolder bundle.");
     }
 
-    private void unsetSecretManager(SecretManager secretManager) {
+    protected void unsetSecretManager(SecretManager secretManager) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(null);
         log.debug("SecretManager unset in NotificationSenderTenantConfigDataHolder bundle.");
@@ -265,13 +265,13 @@ public class NotificationSenderTenantConfigServiceDS {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetSecretResolveManager"
     )
-    private void setSecretResolveManager(SecretResolveManager secretResolveManager) {
+    protected void setSecretResolveManager(SecretResolveManager secretResolveManager) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().setSecretResolveManager(secretResolveManager);
         log.debug("SecretResolveManager set in NotificationSenderTenantConfigDataHolder bundle.");
     }
 
-    private void unsetSecretResolveManager(SecretResolveManager secretResolveManager) {
+    protected void unsetSecretResolveManager(SecretResolveManager secretResolveManager) {
 
         NotificationSenderTenantConfigDataHolder.getInstance().setSecretResolveManager(null);
         log.debug("SecretResolveManager unset in NotificationSenderTenantConfigDataHolder bundle.");

@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +61,10 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_EMAIL_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_HTTP_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_HTTP_METHOD_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONSTANT_HTTP_POST;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CUSTOM_MAPPING_KEY;
@@ -68,6 +72,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_ADDRESS_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_ADDRESS_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_INLINE_BODY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_SUBJECT_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_SUBJECT_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_TYPE_PROPERTY;
@@ -86,6 +91,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING_TYPE_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PLACEHOLDER_IDENTIFIER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROCESSING_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG;
@@ -93,21 +99,30 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ROOT_ELEMENT;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SCOPES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_AUTH_TYPE_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_CLIENT_ID_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_CLIENT_SECRET_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_FROM_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_HOST_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_PASSWORD_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_PORT_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_SCOPES_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_TOKEN_ENDPOINT_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_USER_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STATISTICS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TEXT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TO;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_ENDPOINT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TRACE_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_VALUE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 
 /**
  * Util class for notification sender.
@@ -123,7 +138,7 @@ public class NotificationSenderUtils {
      * @throws TransformerException         Transformer exception.
      */
     public static InputStream generateEmailPublisher(EmailSenderDTO emailSender)
-            throws ParserConfigurationException, TransformerException {
+            throws ParserConfigurationException, TransformerException, NotificationSenderManagementServerException {
 
         Map<String, String> properties = emailSender.getProperties();
         DocumentBuilderFactory documentFactory = IdentityUtil.getSecuredDocumentBuilderFactory();
@@ -272,7 +287,8 @@ public class NotificationSenderUtils {
     }
 
     private static void addToElementToEmailEventPublisher(EmailSenderDTO emailSender, Map<String, String> properties,
-                                                          Document document, Element root) {
+                                                          Document document, Element root) throws
+            NotificationSenderManagementServerException {
 
         Element to = document.createElement(TO);
         root.appendChild(to);
@@ -285,35 +301,59 @@ public class NotificationSenderUtils {
         adapterProperties.put(EMAIL_ADDRESS_PROPERTY, EMAIL_ADDRESS_VALUE);
         adapterProperties.put(EMAIL_TYPE_PROPERTY, EMAIL_TYPE_VALUE);
         adapterProperties.put(EMAIL_SUBJECT_PROPERTY, EMAIL_SUBJECT_VALUE);
-        if (StringUtils.isNotEmpty(emailSender.getPassword())) {
-            adapterProperties.put(SMTP_PASSWORD_PROPERTY, emailSender.getPassword());
-        }
-        if (StringUtils.isNotEmpty(emailSender.getFromAddress())) {
-            adapterProperties.put(SMTP_FROM_PROPERTY, emailSender.getFromAddress());
-        }
-        if (StringUtils.isNotEmpty(emailSender.getUsername())) {
-            adapterProperties.put(SMTP_USER_PROPERTY, emailSender.getUsername());
-        }
-        if (StringUtils.isNotEmpty(emailSender.getSmtpServerHost())) {
-            adapterProperties.put(SMTP_HOST_PROPERTY, emailSender.getSmtpServerHost());
-        }
-        if (!"null".equals(String.valueOf(emailSender.getSmtpPort()))) {
-            adapterProperties.put(SMTP_PORT_PROPERTY, String.valueOf(emailSender.getSmtpPort()));
-        }
-        for (Map.Entry<String, String> property : properties.entrySet()) {
-            if (!(PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG.contains(property.getKey()) ||
-                    property.getKey().startsWith(INLINE_BODY_PARAM_PREFIX))) {
-                adapterProperties.put(property.getKey(), property.getValue());
+        try {
+            if (StringUtils.isNotEmpty(emailSender.getPassword())) {
+                adapterProperties.put(SMTP_PASSWORD_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD,
+                        emailSender.getPassword()));
             }
-        }
-        // Add properties.
-        for (Map.Entry<String, String> property : adapterProperties.entrySet()) {
-            Element adapterProperty = document.createElement(ADAPTER_PROPERTY);
-            Attr attribute = document.createAttribute(ADAPTER_PROPERTY_NAME);
-            attribute.setValue(property.getKey());
-            adapterProperty.setAttributeNode(attribute);
-            adapterProperty.appendChild(document.createTextNode(property.getValue()));
-            to.appendChild(adapterProperty);
+            if (StringUtils.isNotEmpty(emailSender.getFromAddress())) {
+                adapterProperties.put(SMTP_FROM_PROPERTY, emailSender.getFromAddress());
+            }
+            if (StringUtils.isNotEmpty(emailSender.getUsername())) {
+                adapterProperties.put(SMTP_USER_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, USERNAME,
+                        emailSender.getUsername()));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getSmtpServerHost())) {
+                adapterProperties.put(SMTP_HOST_PROPERTY, emailSender.getSmtpServerHost());
+            }
+            if (!"null".equals(String.valueOf(emailSender.getSmtpPort()))) {
+                adapterProperties.put(SMTP_PORT_PROPERTY, String.valueOf(emailSender.getSmtpPort()));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
+                adapterProperties.put(SMTP_AUTH_TYPE_PROPERTY, emailSender.getAuthType());
+            }
+            if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_ID))) {
+                adapterProperties.put(SMTP_CLIENT_ID_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, CLIENT_ID,
+                        emailSender.getProperties().get(CLIENT_ID)));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_SECRET))) {
+                adapterProperties.put(SMTP_CLIENT_SECRET_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC,
+                        CLIENT_SECRET, emailSender.getProperties().get(CLIENT_SECRET)));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
+                adapterProperties.put(SMTP_TOKEN_ENDPOINT_PROPERTY, emailSender.getProperties().get(TOKEN_ENDPOINT));
+            }
+            if (StringUtils.isNotEmpty(emailSender.getProperties().get(SCOPES))) {
+                adapterProperties.put(SMTP_SCOPES_PROPERTY, emailSender.getProperties().get(SCOPES));
+            }
+            for (Map.Entry<String, String> property : properties.entrySet()) {
+                if (!(PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG.contains(property.getKey()) ||
+                        property.getKey().startsWith(INLINE_BODY_PARAM_PREFIX))) {
+                    adapterProperties.put(property.getKey(), property.getValue());
+                }
+            }
+            // Add properties.
+            for (Map.Entry<String, String> property : adapterProperties.entrySet()) {
+                Element adapterProperty = document.createElement(ADAPTER_PROPERTY);
+                Attr attribute = document.createAttribute(ADAPTER_PROPERTY_NAME);
+                attribute.setValue(property.getKey());
+                adapterProperty.setAttributeNode(attribute);
+                adapterProperty.appendChild(document.createTextNode(property.getValue()));
+                to.appendChild(adapterProperty);
+            }
+        } catch (SecretManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES,
+                    emailSender.getName(), e);
         }
     }
 
