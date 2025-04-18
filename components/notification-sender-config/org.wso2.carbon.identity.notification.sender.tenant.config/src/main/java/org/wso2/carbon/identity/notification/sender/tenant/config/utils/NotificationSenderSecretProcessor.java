@@ -48,7 +48,7 @@ public class NotificationSenderSecretProcessor {
         if (isSecretPropertyExists(secretType, secretName)) {
             updateExistingSecretProperty(secretType, secretName, value);
         } else {
-            addNewActionSecretProperty(secretType, secretName, value);
+            addNewNotificationSenderSecretProperty(secretType, secretName, value);
         }
         return buildSecretReference(secretType, secretName);
     }
@@ -118,14 +118,14 @@ public class NotificationSenderSecretProcessor {
     }
 
     /**
-     * Add new Secret for Action secret type.
+     * Add new Secret for Notification Sender secret type.
      *
      * @param secretType Secret type.
      * @param secretName Name of the secret.
      * @param value      secret value.
      * @throws SecretManagementException If an error occurs while adding the secret.
      */
-    private static void addNewActionSecretProperty(String secretType, String secretName, String value)
+    private static void addNewNotificationSenderSecretProperty(String secretType, String secretName, String value)
             throws SecretManagementException {
 
         Secret secret = new Secret();
@@ -135,7 +135,7 @@ public class NotificationSenderSecretProcessor {
     }
 
     /**
-     * Update an existing secret of Action secret type.
+     * Update an existing secret of Notification Sender secret type.
      *
      * @param secretType Secret type.
      * @param secretName Name of the secret.

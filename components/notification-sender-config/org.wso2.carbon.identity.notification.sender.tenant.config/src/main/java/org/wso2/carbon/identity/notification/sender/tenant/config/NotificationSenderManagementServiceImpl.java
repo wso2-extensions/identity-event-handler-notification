@@ -235,7 +235,6 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
             return;
         }
-
         throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_INVALID_INPUTS);
     }
 
