@@ -292,7 +292,7 @@ public class NotificationSenderUtils {
 
         Element to = document.createElement(TO);
         root.appendChild(to);
-        // Set attributes to to element.
+        // Set attributes to element.
         Attr eventAdapterTypeAttr = document.createAttribute(ADAPTER_TYPE_KEY);
         eventAdapterTypeAttr.setValue(ADAPTER_TYPE_EMAIL_VALUE);
         to.setAttributeNode(eventAdapterTypeAttr);

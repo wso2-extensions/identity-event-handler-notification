@@ -225,7 +225,9 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS("65023", "Error while encrypting credentials.",
                 "Error while encrypting credentials for notification sender: %s."),
         ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS("65024", "Error while decrypting credentials.",
-                "Error while decrypting credentials for notification sender: %s.");
+                "Error while decrypting credentials for notification sender: %s."),
+        ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS("65025", "Error while deleting credentials.",
+                "Error while deleting credentials for notification sender: %s.");
 
         private final String code;
         private final String message;

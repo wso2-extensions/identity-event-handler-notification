@@ -23,7 +23,13 @@ import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementExcept
 import org.wso2.carbon.identity.secret.mgt.core.model.ResolvedSecret;
 import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 
 /**
  * This class is used to encrypt and decrypt the secret properties of the notification sender.
@@ -74,6 +80,41 @@ public class NotificationSenderSecretProcessor {
                 .getResolvedSecret(secretType, secretName);
 
         return resolvedSecret.getResolvedSecretValue();
+    }
+
+    /**
+     * Delete secret property.
+     *
+     * @param notificationSender Notification Sender: EMAIL_PROVIDER.
+     * @throws SecretManagementException If an error occurs while deleting the secret.
+     */
+    public static void deleteAssociatedSecrets(String notificationSender)
+            throws SecretManagementException {
+
+        deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
+        deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET);
+    }
+
+    /**
+     * Helper method to delete secrets for a specific authentication type.
+     *
+     * @param notificationSender Notification Sender.
+     * @param authType           Authentication Type.
+     * @param properties         Authentication Properties.
+     * @throws SecretManagementException If an error occurs while deleting the secrets.
+     */
+    private static void deleteSecretsForAuthType(String notificationSender, String authType, String... properties)
+            throws SecretManagementException {
+
+        for (String property : properties) {
+            String secretName = buildSecretName(notificationSender, authType, property);
+            String secretType = notificationSender + SECRET_PROPERTIES;
+            if (!isSecretPropertyExists(secretType, secretName)) {
+                return;
+            }
+            NotificationSenderTenantConfigDataHolder.getInstance().getSecretManager().deleteSecret(secretType,
+                    secretName);
+        }
     }
 
     /**
