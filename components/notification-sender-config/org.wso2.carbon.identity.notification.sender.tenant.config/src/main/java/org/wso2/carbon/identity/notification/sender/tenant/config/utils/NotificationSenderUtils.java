@@ -316,7 +316,7 @@ public class NotificationSenderUtils {
             if (StringUtils.isNotEmpty(emailSender.getSmtpServerHost())) {
                 adapterProperties.put(SMTP_HOST_PROPERTY, emailSender.getSmtpServerHost());
             }
-            if (!"null".equals(String.valueOf(emailSender.getSmtpPort()))) {
+            if (StringUtils.isNotBlank(String.valueOf(emailSender.getSmtpPort()))) {
                 adapterProperties.put(SMTP_PORT_PROPERTY, String.valueOf(emailSender.getSmtpPort()));
             }
             if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
