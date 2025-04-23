@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.com).
+ * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,16 +54,22 @@ public class NotificationSenderManagementConstants {
     public static final String PUSH_PROVIDER = "PUSH_PROVIDER";
 
     // Email Sender's main properties.
+    public static final String NAME = "name";
     public static final String SMTP_SERVER_HOST = "smtpServerHost";
     public static final String SMTP_PORT = "smtpPort";
     public static final String FROM_ADDRESS = "fromAddress";
+    public static final String EMAIL_PUBLISHER_TYPE = "email";
+    public static final String AUTH_TYPE = "authType";
+    public static final String REPLY_TO_ADDRESS = "mail.smtp.replyTo";
+    public static final String DISPLAY_NAME = "mail.smtp.signature";
+
+    // Email Sender's additional properties.
     public static final String CLIENT_ID = "clientId";
     public static final String CLIENT_SECRET = "clientSecret";
     public static final String TOKEN_ENDPOINT = "tokenEndpoint";
     public static final String SCOPES = "scopes";
     public static final String USERNAME = "userName";
     public static final String PASSWORD = "password";
-    public static final String EMAIL_PUBLISHER_TYPE = "email";
 
     // Email Sender Authentication types.
     public static final String BASIC = "BASIC";
@@ -124,6 +130,11 @@ public class NotificationSenderManagementConstants {
     public static final String CONSTANT_HTTP_POST = "HttpPost";
     public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
     public static final String DEFAULT_HANDLER_NAME = "default";
+    public static final String SMTP_CLIENT_ID_PROPERTY = "mail.smtp.clientId";
+    public static final String SMTP_CLIENT_SECRET_PROPERTY = "mail.smtp.clientSecret";
+    public static final String SMTP_TOKEN_ENDPOINT_PROPERTY = "mail.smtp.tokenEndpoint";
+    public static final String SMTP_SCOPES_PROPERTY = "mail.smtp.scopes";
+    public static final String SMTP_AUTH_TYPE_PROPERTY = "mail.smtp.authType";
 
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
@@ -208,7 +219,15 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER_SECRETS("65020", "Unable to add notification sender.",
                 "Server encountered an error while adding the notification sender secrets to resource: %s"),
         ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS("65021", "Unable to delete notification sender.",
-                "Server encountered an error while deleting the notification sender secrets from resource: %s");
+                "Server encountered an error while deleting the notification sender secrets from resource: %s"),
+        ERROR_CODE_INVALID_INPUTS("65022", "Invalid input.",
+                "Invalid input received for notification sender."),
+        ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS("65023", "Error while encrypting credentials.",
+                "Error while encrypting credentials for notification sender: %s."),
+        ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS("65024", "Error while decrypting credentials.",
+                "Error while decrypting credentials for notification sender: %s."),
+        ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS("65025", "Error while deleting credentials.",
+                "Error while deleting credentials for notification sender: %s.");
 
         private final String code;
         private final String message;
