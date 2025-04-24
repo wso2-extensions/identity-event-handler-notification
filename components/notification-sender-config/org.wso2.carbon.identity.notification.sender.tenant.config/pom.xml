@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.49-SNAPSHOT</version>
+        <version>1.9.51-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -106,6 +106,10 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.secret.mgt.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -175,6 +179,8 @@
                             org.wso2.carbon.identity.tenant.resource.manager.util; version="${identity.governance.imp.pkg.version.range}",
                             org.wso2.carbon.utils; version="${carbon.kernel.imp.pkg.version.range}",
 
+                            org.wso2.carbon.core.util; version="${carbon.kernel.imp.pkg.version.range}",
+
                             org.wso2.carbon.identity.organization.management.service;
                             version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.util;
@@ -187,6 +193,10 @@
                             org.wso2.carbon.identity.notification.push.provider.model; version="${identity.notification.push.version.range}",
 
                             org.wso2.carbon.identity.application.authentication.framework.util; version="${carbon.identity.framework.imp.pkg.version.range}",
+
+                            org.wso2.carbon.identity.secret.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.secret.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.secret.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>
                 </configuration>

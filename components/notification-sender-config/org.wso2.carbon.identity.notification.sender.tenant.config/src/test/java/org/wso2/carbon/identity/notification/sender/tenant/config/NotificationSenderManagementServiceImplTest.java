@@ -36,6 +36,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.impl.FCMPushProvider;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
@@ -101,7 +102,6 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
                 .setApplicationManagementService(applicationManagementService);
         NotificationSenderTenantConfigDataHolder.getInstance()
                 .addPushProvider("FCM", fcmPushProvider);
-
     }
 
     @Test(dataProvider = "addSMSSenderDataProvider")
@@ -115,7 +115,6 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         SMSSenderDTO smsSenderDTO =
                 notificationSenderManagementService.addSMSSender(constructSMSSenderDto(channelType));
         Assert.assertEquals(smsSenderDTO.getProperties().get("channel.type"), channelType);
-
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -623,6 +622,158 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
                 .deletePushProviderSecretProperties(any(PushSenderData.class));
 
         notificationSenderManagementService.deleteNotificationSender("PushPublisher");
+    }
+
+    @Test
+    public void testValidateInputsSuccessWithBasicAuthWithV1() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType(null);
+        emailSender.setUsername("testUser");
+        emailSender.setPassword("testPassword");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("mail.smtp.signature", "Test Display Name");
+        properties.put("mail.smtp.replyTo", "reply@example.com");
+        properties.put("userName", "testUser");
+        properties.put("password", "testPassword");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test
+    public void testValidateInputsSuccessWithBasicAuthV2() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType("BASIC");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("mail.smtp.signature", "Test Display Name");
+        properties.put("mail.smtp.replyTo", "reply@example.com");
+        properties.put("userName", "testUser");
+        properties.put("password", "testPassword");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test
+    public void testValidateInputsSuccessWithClientCredentialAuth() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType("CLIENT_CREDENTIAL");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("mail.smtp.signature", "Test Display Name");
+        properties.put("mail.smtp.replyTo", "reply@example.com");
+        properties.put("clientId", "clientId");
+        properties.put("clientSecret", "clientSecret");
+        properties.put("tokenEndpoint", "https://example.com/token");
+        properties.put("scopes", "email");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsMissingRequiredFields() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("displayName", "Test Display Name");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(dataProvider = "invalidAuthTypeDataProvider",
+            expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsInvalidAuthType(String authType, String username, String password,
+                                                  Map<String, String> properties)
+            throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType(authType);
+        emailSender.setUsername(username);
+        emailSender.setPassword(password);
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @DataProvider(name = "invalidAuthTypeDataProvider")
+    public Object[][] provideInvalidAuthTypeData() {
+
+        Map<String, String> properties1 = new HashMap<>();
+        properties1.put("mail.smtp.signature", "Test Display Name");
+        properties1.put("mail.smtp.replyTo", "reply@example.com");
+
+        Map<String, String> properties2 = new HashMap<>();
+        properties2.put("mail.smtp.signature", "Test Display Name");
+        properties2.put("mail.smtp.replyTo", "reply@example.com");
+        properties2.put("userName", "testUser");
+
+        Map<String, String> properties3 = new HashMap<>();
+        properties3.put("mail.smtp.signature", "Test Display Name");
+        properties3.put("mail.smtp.replyTo", "reply@example.com");
+        properties3.put("userName", "testUser");
+        properties3.put("password", "testPassword");
+
+        Map<String, String> properties4 = new HashMap<>();
+        properties4.put("mail.smtp.signature", "Test Display Name");
+        properties4.put("mail.smtp.replyTo", "reply@example.com");
+        properties4.put("clientId", "client_id");
+        properties4.put("clientSecret", "client_secret");
+        properties4.put("tokenEndpoint", "https://example.com/token");
+        properties4.put("scopes", "email");
+
+        return new Object[][]{
+                // authType, username, password, properties
+
+                // Invalid: username/password in properties missing.
+                {"BASIC", "testUser", "testPassword", properties1},
+
+                // Invalid: username/password in properties present.
+                {"BASIC", null, null, properties2},
+
+                // Invalid: username/password present in both properties and first class attributes.
+                {"BASIC", "testUser", "testPassword", properties3},
+
+                // Invalid: clientId/clientSecret present in properties with BASIC authType.
+                {"BASIC", null, null, properties4},
+
+                // Invalid: username/password set for CLIENT_CREDENTIAL.
+                {"CLIENT_CREDENTIAL", "testUser", "testPassword", properties2},
+
+                // Invalid: username/password set for CLIENT_CREDENTIAL.
+                {"CLIENT_CREDENTIAL", "testUser", "testPassword", properties1},
+
+                // Invalid: username/password set for CLIENT_CREDENTIAL.
+                {"CLIENT_CREDENTIAL", null, null, properties3},
+
+                // Invalid: username/password present in properties without the authType.
+                {null, null, null, properties3},
+
+                // Invalid: clientId/clientSecret present in properties without the authType.
+                {null, null, null, properties4}
+        };
     }
 
     private SMSSenderDTO constructSMSSenderDto(String channelType) {
