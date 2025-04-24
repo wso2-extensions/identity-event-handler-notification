@@ -93,7 +93,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
@@ -831,43 +830,49 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 resource.getAttributes().stream()
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
-        try {
-            for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                switch (key) {
-                    case SMTP_SERVER_HOST:
-                        emailSender.setSmtpServerHost(value);
-                        break;
-                    case SMTP_PORT:
-                        emailSender.setSmtpPort(Integer.valueOf(value));
-                        break;
-                    case FROM_ADDRESS:
-                        emailSender.setFromAddress(value);
-                        break;
-                    // Decrypting username and password as they need to be available in the notification sender v1 API
-                    // response.
-                    case USERNAME:
-                        emailSender.setUsername(decryptCredential(EMAIL_PROVIDER, BASIC, USERNAME));
-                        break;
-                    case PASSWORD:
-                        emailSender.setPassword(decryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD));
-                        break;
-                    // Client ID and secret needs to be ignored as they are not supported with v1 and credentials are
-                    // not included in the v2 response.
-                    case CLIENT_ID:
-                    case CLIENT_SECRET:
-                        break;
-                    case AUTH_TYPE:
-                        emailSender.setAuthType(value);
-                        break;
-                    default:
-                        emailSender.getProperties().put(key, value);
-                }
+        for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            switch (key) {
+                case SMTP_SERVER_HOST:
+                    emailSender.setSmtpServerHost(value);
+                    break;
+                case SMTP_PORT:
+                    emailSender.setSmtpPort(Integer.valueOf(value));
+                    break;
+                case FROM_ADDRESS:
+                    emailSender.setFromAddress(value);
+                    break;
+                // Decrypting username and password as they need to be available in the notification sender v1 API
+                // response.
+                case USERNAME:
+                    try {
+                        value = decryptCredential(EMAIL_PROVIDER, BASIC, USERNAME);
+                    } catch (SecretManagementException e) {
+                        // Do nothing. As there are existing credentials in plain text.
+                    }
+                    emailSender.setUsername(value);
+                    break;
+                case PASSWORD:
+                    try {
+                        value = decryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD);
+                    } catch (SecretManagementException e) {
+                        // Do nothing. As there are existing credentials in plain text.
+                    }
+                    emailSender.setPassword(value);
+                    break;
+                // Client ID and secret needs to be ignored as they are not supported with v1 and credentials are
+                // not included in the v2 response.
+                case CLIENT_ID:
+                case CLIENT_SECRET:
+                    break;
+                case AUTH_TYPE:
+                    emailSender.setAuthType(value);
+                    break;
+                default:
+                    emailSender.getProperties().put(key, value);
             }
-        } catch (SecretManagementException e) {
-            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS,
-                    e.getMessage(), e);
+
         }
         return emailSender;
     }
