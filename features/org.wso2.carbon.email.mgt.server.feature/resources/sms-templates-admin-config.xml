@@ -50,4 +50,7 @@
     <configuration type="resendAdminForcedPasswordReset" display="resendAdminForcedPasswordReset" locale="en_US">
         <body>The organization administrator is requesting a password reset. Please use this one-time password (OTP): {{confirmation-code}} to sign in and then reset your password.</body>
     </configuration>
+    <configuration type="SMSOTPVerification" display="SMSOTPVerification" locale="en_US">
+        <body>Please use code {{confirmation-code}} to verify your mobile and continue registration with {{organization-name}}.</body>
+    </configuration>
 </configurations>
