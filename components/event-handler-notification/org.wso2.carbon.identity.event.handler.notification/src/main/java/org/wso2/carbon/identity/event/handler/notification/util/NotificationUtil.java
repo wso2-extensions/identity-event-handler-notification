@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 
@@ -334,6 +335,7 @@ public class NotificationUtil {
 
         placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
+        placeHolderData.put("authentication.endpoint-root-url", ConfigurationFacade.getInstance().getAuthenticationEndpointAbsoluteURL().replace("/login.do", ""));
         String emailType = placeHolderData.get(TEMPLATE_TYPE);
 
         if (MAGIC_LINK.equals(emailType)) {
@@ -663,7 +665,17 @@ public class NotificationUtil {
         String tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
-        String flowType = (String) eventProperties.get(NotificationConstants.FLOW_TYPE);
+        String flowType = (String) eventProperties.get("flowType");
+        String flowId = (String) eventProperties.get("flowId");
+        String actionId = (String) eventProperties.get("actionId");
+        Map<String, String> inputsMap = (Map<String, String>) eventProperties.get("inputs");
+
+        String inputsJsonString = inputsMap.entrySet().stream()
+                .map(entry -> "\"" + entry.getKey() + "\":\"" + entry.getValue().replace("\"", "\\\"") + "\"")
+                .collect(Collectors.joining(", ", "{", "}"));
+        placeHolderData.put("flowId", flowId);
+        placeHolderData.put("actionId", actionId);
+        placeHolderData.put("inputs", inputsJsonString);
 
         // If the user is federated, use the federated user claims provided in the event properties.
         if (eventProperties.containsKey(NotificationConstants.IS_FEDERATED_USER) &&
