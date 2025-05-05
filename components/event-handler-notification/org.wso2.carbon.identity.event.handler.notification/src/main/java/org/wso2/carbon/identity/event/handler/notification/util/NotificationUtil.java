@@ -69,6 +69,9 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -297,6 +300,31 @@ public class NotificationUtil {
                         if (placeHolderData.get(placeHolder) == null) {
                             placeHolderData.put(placeHolder, "");
                         }
+                    }
+                } else if (placeHolder.equals(NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER)) {
+                    // Generate a single query param string with all UTM parameters
+                    StringBuilder utmParamStringBuilder = new StringBuilder();
+                    for (Map.Entry<String, String> entry : placeHolderData.entrySet()) {
+                        if (!entry.getKey().startsWith(
+                                NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX)) {
+                            continue;
+                        }
+                        if (utmParamStringBuilder.length() > 0) {
+                            utmParamStringBuilder.append("&");
+                        }
+                        utmParamStringBuilder.append(entry.getKey()).append("=")
+                                .append(entry.getValue());
+                    }
+                    if (utmParamStringBuilder.length() > 0) {
+                        utmParamStringBuilder.insert(0, "&");
+                    }
+                    try {
+                        placeHolderData.put(NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER,
+                                URLEncoder.encode(utmParamStringBuilder.toString(), StandardCharsets.UTF_8.toString()));
+                    } catch (UnsupportedEncodingException e) {
+                        /* No need to break the flow for marketing parameter encoding errors. These values are for
+                        internal use only.*/
+                        log.warn("Error while encoding UTM parameters. Parameter values are ignored.", e);
                     }
                 }
             }
