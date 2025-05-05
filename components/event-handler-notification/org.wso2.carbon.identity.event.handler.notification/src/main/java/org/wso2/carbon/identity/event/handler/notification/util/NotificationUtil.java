@@ -309,14 +309,7 @@ public class NotificationUtil {
                                 NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX)) {
                             continue;
                         }
-                        if (utmParamStringBuilder.length() > 0) {
-                            utmParamStringBuilder.append("&");
-                        }
-                        utmParamStringBuilder.append(entry.getKey()).append("=")
-                                .append(entry.getValue());
-                    }
-                    if (utmParamStringBuilder.length() > 0) {
-                        utmParamStringBuilder.insert(0, "&");
+                        utmParamStringBuilder.append("&").append(entry.getKey()).append("=").append(entry.getValue());
                     }
                     try {
                         placeHolderData.put(NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER,
