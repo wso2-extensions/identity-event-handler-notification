@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2024-2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -24,6 +24,7 @@ import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service.OrgAppResourceResolverService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
@@ -215,9 +216,9 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
 
-            OrgResourceResolverService orgResourceResolverService =
-                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
-            notificationTemplate = orgResourceResolverService.getResourcesFromOrgHierarchy(
+            OrgAppResourceResolverService orgResourceManagementService =
+                    I18nMgtDataHolder.getInstance().getOrgAppResourceResolverService();
+            notificationTemplate = orgResourceManagementService.getResourcesFromOrgHierarchy(
                     organizationId,
                     applicationUuid,
                     LambdaExceptionUtils.rethrowFunction(
@@ -252,8 +253,8 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
 
-            OrgResourceResolverService orgResourceManagementService =
-                    I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
+            OrgAppResourceResolverService orgResourceManagementService =
+                    I18nMgtDataHolder.getInstance().getOrgAppResourceResolverService();
             dbBasedTemplates =
                     orgResourceManagementService.getResourcesFromOrgHierarchy(organizationId,
                             applicationUuid,
