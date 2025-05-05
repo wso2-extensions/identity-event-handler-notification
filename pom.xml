@@ -296,6 +296,11 @@
                 <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
                 <version>${identity.organization.management.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.organization.management</groupId>
+                <artifactId>org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service</artifactId>
+                <version>${identity.organization.management.version}</version>
+            </dependency>
 
             <!-- Test Dependencies -->
             <dependency>
@@ -543,8 +548,8 @@
         <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
-        <identity.organization.management.version>1.4.58</identity.organization.management.version>
-        <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)
+        <identity.organization.management.version>2.0.0</identity.organization.management.version>
+        <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,3.0.0)
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
