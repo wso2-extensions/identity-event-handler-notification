@@ -55,8 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -400,9 +398,9 @@ public class NotificationUtilTest {
     }
 
     @Test(dataProvider = "GetPlaceholderValuesDataProvider")
-    public void testGetPlaceHolderValues(EmailTemplate emailTemplate,
-                                         Map<String, String> placeHolderData,
-                                         Map<String, String> userClaims, String applicationUuid) {
+    public void testGetPlaceHolderValues(EmailTemplate emailTemplate, Map<String, String> placeHolderData,
+                                         Map<String, String> userClaims, String applicationUuid)
+            throws URLBuilderException {
 
         try (
                 MockedStatic<IdentityConfigParser> staticMockedIdentityConfigParser =
@@ -439,8 +437,6 @@ public class NotificationUtilTest {
                     UTM_PARAMETER_PREFIX + "campaign" + "=" + "UTM_CAMPAIGN_SAMPLE" + "&" +
                             UTM_PARAMETER_PREFIX + "medium" + "=" + "UTM_MEDIUM_SAMPLE" + "&" +
                                     UTM_PARAMETER_PREFIX + "source" + "=" + "UTM_SOURCE_SAMPLE");
-        } catch (URLBuilderException e) {
-            throw new RuntimeException(e);
         }
     }
 
