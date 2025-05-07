@@ -856,10 +856,20 @@
                                                                                         You have requested to reset your password for your account in the organization {{organization-name}}.
                                                                                         To proceed, use the following One-Time Password (OTP). </p>
                                                                                     </br>
-                                                                                    <p
-                                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                    OTP: <b>{{confirmation-code}}</b>
-                                                                                    </p>
+                                                                                       <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{confirmation-code}}</b>
+                                                                                        </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
                                                                                     style="color: {{organization.font.color}} !important;; line-height: 140%; text-align: left; word-wrap: break-word;">
@@ -1298,10 +1308,20 @@
                                                                                         You have requested to reset your password for your account in the organization {{organization-name}}.
                                                                                         To proceed, use the following One-Time Password (OTP). </p>
                                                                                     </br>
-                                                                                    <p
-                                                                                    style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                    OTP: <b>{{confirmation-code}}</b>
-                                                                                    </p>
+                                                                                      <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{confirmation-code}}</b>
+                                                                                      </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
                                                                                     style="color: {{organization.font.color}} !important;; line-height: 140%; text-align: left; word-wrap: break-word;">
@@ -4494,9 +4514,19 @@
                                                                                         Please use the below OTP as the password the
                                                                                         next time you sign in.
                                                                                     </p>
-                                                                                    <p
-                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
-                                                                                        Password: <b>{{otp-password}}</b>
+                                                                                       <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{otp-password}}</b>
                                                                                     </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
@@ -4937,9 +4967,19 @@
                                                                                         Please use the below code to sign in to your
                                                                                         application.
                                                                                     </p>
-                                                                                    <p
-                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
-                                                                                        One-Time Passcode: <b>{{OTPCode}}</b>
+                                                                                       <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{OTPCode}}</b>
                                                                                     </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
@@ -5378,10 +5418,20 @@
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
                                                                                         To continue your registration with <b>{{organization-name}}</b>, please verify your email address using the code below.
                                                                                     </p>
-                                                                                    <p
-                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
-                                                                                        Verification Code: <b>{{OTPCode}}</b>
-                                                                                    </p>
+                                                                                     <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{OTPCode}}</b>
+                                                                                     </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
                                                                                     style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
@@ -7694,9 +7744,19 @@
                                                                                         password (OTP) to sign in and then reset
                                                                                         your password.
                                                                                     </p>
-                                                                                    <p
-                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        OTP: <b>{{confirmation-code}}</b>
+                                                                                       <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{confirmation-code}}</b>
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
@@ -8145,9 +8205,19 @@
                                                                                         password (OTP) to sign in and then reset
                                                                                         your password.
                                                                                     </p>
-                                                                                    <p
-                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        OTP: <b>{{confirmation-code}}</b>
+                                                                                       <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                        font-size: 24px;
+                                                                                        font-weight: bold;
+                                                                                        letter-spacing: normal;
+                                                                                        line-height: 24px;
+                                                                                        margin: 30px auto;
+                                                                                        padding: 20px;
+                                                                                        width: 80%;
+                                                                                        text-align: center;
+                                                                                        background-color: {{organization.color.background}};
+                                                                                        border-radius: 5px;
+                                                                                        display: inline-block;">
+                                                                                            <b>{{confirmation-code}}</b>
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 5px;text-align: left;">
