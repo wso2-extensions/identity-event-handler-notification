@@ -48,10 +48,12 @@ public class NotificationConstants {
         public static final String OIDC_CLAIM_URI_EMAIL = "email";
         public static final String IDENTITY_CLAIM_PREFIX = "identity";
         public static final String USER_CLAIM_PREFIX = "user.claim";
+        public static final String UTM_PARAMETER_PREFIX = "utm_";
         public static final String IDENTITY_TEMPLATE_VALUE_PREFIX = "server.placeholder";
         public static final String TEMPLATE_PLACEHOLDERS_ELEM = "EmailTemplatePlaceholders";
         public static final String TEMPLATE_PLACEHOLDER_ELEM = "EmailTemplatePlaceholder";
         public static final String TEMPLATE_PLACEHOLDER_KEY_ATTRIB = "key";
+        public static final String UTM_PARAMETERS_PLACEHOLDER = "utm-parameters";
         public static final String WSO2_CLAIM_URI = "http://wso2.org/claims/";
 
         public static final String STREAM_NAME = "id_gov_notify_stream";

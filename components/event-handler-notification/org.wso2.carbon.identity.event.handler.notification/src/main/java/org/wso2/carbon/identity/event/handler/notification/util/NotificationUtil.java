@@ -69,6 +69,9 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -299,6 +302,31 @@ public class NotificationUtil {
                         }
                     }
                 }
+            }
+            if (placeHolder.equals(NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER)) {
+                // Generate a single query param string with all UTM parameters
+                StringBuilder utmParamStringBuilder = new StringBuilder();
+                for (Map.Entry<String, String> entry : placeHolderData.entrySet()) {
+                    if (!entry.getKey().startsWith(
+                            NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX)) {
+                        continue;
+                    }
+                    try {
+                        String key = URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString());
+                        String value = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString());
+                        if (utmParamStringBuilder.length() == 0) {
+                            utmParamStringBuilder.append(key).append("=").append(value);
+                        } else {
+                            utmParamStringBuilder.append("&").append(key).append("=").append(value);
+                        }
+                    } catch (UnsupportedEncodingException e) {
+                            /* No need to break the flow for marketing parameter encoding errors. These values are for
+                            internal use only.*/
+                        log.warn("Error while encoding UTM parameters. Parameter values are ignored.", e);
+                    }
+                }
+                placeHolderData.put(NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER,
+                        utmParamStringBuilder.toString());
             }
         }
 
