@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -62,6 +63,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_HTTP_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_HTTP_METHOD_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
@@ -323,11 +325,11 @@ public class NotificationSenderUtils {
                 adapterProperties.put(SMTP_AUTH_TYPE_PROPERTY, emailSender.getAuthType());
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_ID))) {
-                adapterProperties.put(SMTP_CLIENT_ID_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, CLIENT_ID,
-                        emailSender.getProperties().get(CLIENT_ID)));
+                adapterProperties.put(SMTP_CLIENT_ID_PROPERTY, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
+                        CLIENT_ID, emailSender.getProperties().get(CLIENT_ID)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_SECRET))) {
-                adapterProperties.put(SMTP_CLIENT_SECRET_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC,
+                adapterProperties.put(SMTP_CLIENT_SECRET_PROPERTY, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
                         CLIENT_SECRET, emailSender.getProperties().get(CLIENT_SECRET)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
