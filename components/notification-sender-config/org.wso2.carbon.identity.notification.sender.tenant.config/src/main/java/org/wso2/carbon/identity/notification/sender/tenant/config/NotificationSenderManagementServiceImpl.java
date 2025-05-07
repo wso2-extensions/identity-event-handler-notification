@@ -853,9 +853,12 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     case PASSWORD:
                         emailSender.setPassword(decryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD));
                         break;
-                    // Client ID and secret needs to be ignored as they are not supported with v1 and credentials are
-                    // not included in the v2 response.
                     case CLIENT_ID:
+                        emailSender.getProperties().put(CLIENT_ID,
+                                decryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL, CLIENT_ID));
+                        break;
+                    // Client secret needs to be ignored as it is not supported with v1 and secrets are
+                    // not included in the v2 response.
                     case CLIENT_SECRET:
                         break;
                     case AUTH_TYPE:
