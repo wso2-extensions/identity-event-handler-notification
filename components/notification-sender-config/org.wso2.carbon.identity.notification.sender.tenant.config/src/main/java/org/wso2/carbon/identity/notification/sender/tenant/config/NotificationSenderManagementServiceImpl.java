@@ -93,6 +93,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
@@ -861,9 +862,17 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     }
                     emailSender.setPassword(value);
                     break;
-                // Client ID and secret needs to be ignored as they are not supported with v1 and credentials are
-                // not included in the v2 response.
                 case CLIENT_ID:
+                    try {
+                        value = decryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL, CLIENT_ID);
+                    } catch (SecretManagementException e) {
+                        throw new NotificationSenderManagementServerException(
+                                ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS, e.getMessage(), e);
+                    }
+                    emailSender.getProperties().put(CLIENT_ID, value);
+                    break;
+                // Client secret needs to be ignored as it is not supported with v1 and secrets are
+                // not included in the v2 response.
                 case CLIENT_SECRET:
                     break;
                 case AUTH_TYPE:
