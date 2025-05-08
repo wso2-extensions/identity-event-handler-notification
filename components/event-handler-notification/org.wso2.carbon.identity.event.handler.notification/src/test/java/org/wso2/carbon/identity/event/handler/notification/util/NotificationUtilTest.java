@@ -434,9 +434,9 @@ public class NotificationUtilTest {
             NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims, applicationUuid);
             Assert.assertNotNull(placeHolderData.get(UTM_PARAMETERS_PLACEHOLDER));
             Assert.assertEquals(placeHolderData.get(UTM_PARAMETERS_PLACEHOLDER),
-                    UTM_PARAMETER_PREFIX + "campaign" + "=" + "UTM_CAMPAIGN_SAMPLE" + "&" +
-                            UTM_PARAMETER_PREFIX + "medium" + "=" + "UTM_MEDIUM_SAMPLE" + "&" +
-                                    UTM_PARAMETER_PREFIX + "source" + "=" + "UTM_SOURCE_SAMPLE");
+                    "&" + UTM_PARAMETER_PREFIX + "campaign" + "=" + "UTM_CAMPAIGN_SAMPLE" +
+                    "&" + UTM_PARAMETER_PREFIX + "medium" + "=" + "UTM_MEDIUM_SAMPLE" +
+                    "&" + UTM_PARAMETER_PREFIX + "source" + "=" + "UTM_SOURCE_SAMPLE");
         }
     }
 

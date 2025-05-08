@@ -314,11 +314,7 @@ public class NotificationUtil {
                     try {
                         String key = URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString());
                         String value = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString());
-                        if (utmParamStringBuilder.length() == 0) {
-                            utmParamStringBuilder.append(key).append("=").append(value);
-                        } else {
-                            utmParamStringBuilder.append("&").append(key).append("=").append(value);
-                        }
+                        utmParamStringBuilder.append("&").append(key).append("=").append(value);
                     } catch (UnsupportedEncodingException e) {
                             /* No need to break the flow for marketing parameter encoding errors. These values are for
                             internal use only.*/
