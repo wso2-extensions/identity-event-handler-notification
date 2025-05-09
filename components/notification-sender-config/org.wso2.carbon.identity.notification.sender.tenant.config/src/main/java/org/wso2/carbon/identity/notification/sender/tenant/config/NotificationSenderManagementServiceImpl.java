@@ -871,8 +871,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     }
                     emailSender.getProperties().put(CLIENT_ID, value);
                     break;
-                // Client secret needs to be ignored as it is not supported with v1 and secrets are
-                // not included in the v2 response.
+                /* Client secret needs to be ignored as it is not supported with v1 and secrets are
+                not included in the v2 response. */
                 case CLIENT_SECRET:
                     break;
                 case AUTH_TYPE:
