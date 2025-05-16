@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2016-2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -34,10 +34,10 @@ import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.model.SMSProviderTemplate;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
 import org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager;
+import org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service.OrgAppResourceResolverService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -435,5 +435,20 @@ public class I18nMgtServiceComponent {
 
         dataHolder.setOrgResourceResolverService(null);
     }
-}
 
+    @Reference(
+            name = "org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service",
+            service = OrgAppResourceResolverService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrgAppResourceResolverService")
+    protected void setOrgAppResourceResolverService(OrgAppResourceResolverService orgAppResourceResolverService) {
+
+        dataHolder.setOrgAppResourceResolverService(orgAppResourceResolverService);
+    }
+
+    protected void unsetOrgAppResourceResolverService(OrgAppResourceResolverService orgAppResourceResolverService) {
+
+        dataHolder.setOrgAppResourceResolverService(null);
+    }
+}
