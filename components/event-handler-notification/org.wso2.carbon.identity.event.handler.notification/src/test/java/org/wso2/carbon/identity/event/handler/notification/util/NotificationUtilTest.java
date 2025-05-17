@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -37,8 +38,12 @@ import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.core.ServiceURL;
+import org.wso2.carbon.identity.core.ServiceURLBuilder;
+import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.internal.IdentityCoreServiceComponent;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
@@ -56,6 +61,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX;
 
 /**
  * Class that contains the test cases for NotificationUtil class.
@@ -223,6 +230,31 @@ public class NotificationUtilTest {
         };
     }
 
+    @DataProvider(name = "GetPlaceholderValuesDataProvider")
+    public Object[][] providePlaceholderValuesTestData() {
+
+        EmailTemplate emailTemplate = new EmailTemplate();
+        emailTemplate.setSubject("Sample Subject");
+        emailTemplate.setBody("Test email body. UTM Parameter query string : {{" + UTM_PARAMETERS_PLACEHOLDER + "}}.");
+        emailTemplate.setFooter("Sample Footer");
+        emailTemplate.setLocale("en_US");
+        emailTemplate.setTemplateType("liteuseremailconfirmation");
+        emailTemplate.setTemplateDisplayName("liteuseremailconfirmation");
+
+
+        Map<String, String> placeHolderData = new HashMap<>();
+        placeHolderData.put(UTM_PARAMETER_PREFIX + "source", "UTM_SOURCE_SAMPLE");
+        placeHolderData.put(UTM_PARAMETER_PREFIX + "medium", "UTM_MEDIUM_SAMPLE");
+        placeHolderData.put(UTM_PARAMETER_PREFIX + "campaign", "UTM_CAMPAIGN_SAMPLE");
+        placeHolderData.put("random-placeholder", "random-value");
+
+        Map<String, String> userClaims = new HashMap<>();
+
+        return new Object[][] {
+                {emailTemplate, placeHolderData, userClaims, null}
+        };
+    }
+
     @Test(dataProvider = "GetBrandingPreferenceDataProvider")
     public void testGetBrandingPreference(JsonNode brandingPreferences, Map<String, String> brandingFallback, int caseNo) {
 
@@ -362,6 +394,49 @@ public class NotificationUtilTest {
             } else {
                 assertEquals(I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE, capturedLocale);
             }
+        }
+    }
+
+    @Test(dataProvider = "GetPlaceholderValuesDataProvider")
+    public void testGetPlaceHolderValues(EmailTemplate emailTemplate, Map<String, String> placeHolderData,
+                                         Map<String, String> userClaims, String applicationUuid)
+            throws URLBuilderException {
+
+        try (
+                MockedStatic<IdentityConfigParser> staticMockedIdentityConfigParser =
+                        Mockito.mockStatic(IdentityConfigParser.class);
+                MockedStatic<IdentityUtil> staticMockedIdentityUtil = Mockito.mockStatic(IdentityUtil.class);
+                MockedStatic<ConfigurationFacade> staticMockedConfigurationFacade =
+                        Mockito.mockStatic(ConfigurationFacade.class);
+                MockedStatic<ServiceURLBuilder> staticMockedServiceURLBuilder =
+                        Mockito.mockStatic(ServiceURLBuilder.class);
+        ) {
+            IdentityConfigParser mockedIdentityConfigParser = mock(IdentityConfigParser.class);
+            when(mockedIdentityConfigParser.getConfigElement(
+                    NotificationConstants.EmailNotification.ORGANIZATION_LEVEL_EMAIL_BRANDING_FALLBACKS_ELEM))
+                    .thenReturn(null);
+
+            staticMockedIdentityConfigParser.when(IdentityConfigParser::getInstance)
+                    .thenReturn(mockedIdentityConfigParser);
+            staticMockedIdentityUtil.when(() -> IdentityUtil.getProperty(
+                    NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))
+                    .thenReturn("false");
+
+            staticMockedConfigurationFacade.when(ConfigurationFacade::getInstance)
+                    .thenReturn(mock(ConfigurationFacade.class));
+
+            ServiceURL serviceURL = mock(ServiceURL.class);
+            when(serviceURL.getAbsolutePublicURL()).thenReturn("https://wso2test.com");
+            ServiceURLBuilder mockedServiceURLBuilder = mock(ServiceURLBuilder.class);
+            when(mockedServiceURLBuilder.build()).thenReturn(serviceURL);
+            staticMockedServiceURLBuilder.when(ServiceURLBuilder::create).thenReturn(mockedServiceURLBuilder);
+
+            NotificationUtil.getPlaceholderValues(emailTemplate, placeHolderData, userClaims, applicationUuid);
+            Assert.assertNotNull(placeHolderData.get(UTM_PARAMETERS_PLACEHOLDER));
+            Assert.assertEquals(placeHolderData.get(UTM_PARAMETERS_PLACEHOLDER),
+                    "&" + UTM_PARAMETER_PREFIX + "campaign" + "=" + "UTM_CAMPAIGN_SAMPLE" +
+                    "&" + UTM_PARAMETER_PREFIX + "medium" + "=" + "UTM_MEDIUM_SAMPLE" +
+                    "&" + UTM_PARAMETER_PREFIX + "source" + "=" + "UTM_SOURCE_SAMPLE");
         }
     }
 
