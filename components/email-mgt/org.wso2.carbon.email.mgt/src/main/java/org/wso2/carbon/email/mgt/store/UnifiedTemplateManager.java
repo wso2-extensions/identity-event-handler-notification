@@ -216,9 +216,9 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
 
-            OrgAppResourceResolverService orgResourceManagementService =
+            OrgAppResourceResolverService orgAppResourceResolverService =
                     I18nMgtDataHolder.getInstance().getOrgAppResourceResolverService();
-            notificationTemplate = orgResourceManagementService.getResourcesFromOrgHierarchy(
+            notificationTemplate = orgAppResourceResolverService.getResourcesFromOrgHierarchy(
                     organizationId,
                     applicationUuid,
                     LambdaExceptionUtils.rethrowFunction(
@@ -253,10 +253,10 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
 
-            OrgAppResourceResolverService orgResourceManagementService =
+            OrgAppResourceResolverService orgAppResourceResolverService =
                     I18nMgtDataHolder.getInstance().getOrgAppResourceResolverService();
             dbBasedTemplates =
-                    orgResourceManagementService.getResourcesFromOrgHierarchy(organizationId,
+                    orgAppResourceResolverService.getResourcesFromOrgHierarchy(organizationId,
                             applicationUuid,
                             LambdaExceptionUtils.rethrowFunction(
                                     (orgId, appId) -> notificationTemplatesRetriever(templateType, notificationChannel, orgId,
@@ -292,9 +292,9 @@ public class UnifiedTemplateManager implements TemplatePersistenceManager {
             OrganizationManager organizationManager = I18nMgtDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
 
-            OrgResourceResolverService orgResourceManagementService =
+            OrgResourceResolverService orgResourceResolverService =
                     I18nMgtDataHolder.getInstance().getOrgResourceResolverService();
-            dbBasedTemplates = orgResourceManagementService.getResourcesFromOrgHierarchy(
+            dbBasedTemplates = orgResourceResolverService.getResourcesFromOrgHierarchy(
                     organizationId,
                     LambdaExceptionUtils.rethrowFunction(
                             orgId -> allNotificationTemplatesRetriever(notificationChannel, orgId)),
