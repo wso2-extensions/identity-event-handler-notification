@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.common.testng.WithCarbonHome;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
+import org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service.OrgAppResourceResolverService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -68,6 +69,8 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     OrganizationManager organizationManager;
     @Mock
     OrgResourceResolverService orgResourceResolverService;
+    @Mock
+    OrgAppResourceResolverService orgAppResourceResolverService;
 
     UnifiedTemplateManager unifiedTemplateManager;
     List<NotificationTemplate> defaultSystemTemplates;
@@ -87,6 +90,7 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
         when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultSystemTemplates);
         when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
         when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
+        when(i18nMgtDataHolder.getOrgAppResourceResolverService()).thenReturn(orgAppResourceResolverService);
 
         mockOrganizationManager();
 
