@@ -44,6 +44,7 @@ import org.wso2.carbon.identity.branding.preference.management.core.constant.Bra
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
+import org.wso2.carbon.identity.branding.preference.management.core.util.BrandingPreferenceMgtUtils;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
@@ -359,10 +360,21 @@ public class NotificationUtil {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
         }
 
-        if (!Flow.Name.INVITED_USER_REGISTRATION.toString().equalsIgnoreCase(placeHolderData.get(FLOW_TYPE)) ||
-                StringUtils.isBlank(placeHolderData.get(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER))) {
+        String flowType = placeHolderData.get(FLOW_TYPE);
+        if (Flow.Name.INVITED_USER_REGISTRATION.toString().equalsIgnoreCase(flowType)) {
+            if (StringUtils.isBlank(placeHolderData.get(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER))) {
+                try {
+                    placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, BrandingPreferenceMgtUtils.
+                            buildDefaultPortalUrl(flowType));
+                } catch (URLBuilderException e) {
+                    throw NotificationRuntimeException.error("Error while building the default portal " +
+                            "URL.", e);
+                }
+            }
+        } else {
             placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
         }
+
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
         String emailType = placeHolderData.get(TEMPLATE_TYPE);
 

@@ -60,6 +60,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX;
@@ -81,6 +82,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_BUTTON_FONT_COLOR_PLACEHOLDER = "organization.button.font.color";
     String ORGANIZATION_THEME_BACKGROUND_COLOR_PLACEHOLDER = "organization.theme.background.color";
     String ORGANIZATION_THEME_BORDER_COLOR_PLACEHOLDER = "organization.theme.border.color";
+    String ORGANIZATION_RECOVERY_PORTAL_URL_PLACEHOLDER = "account.recovery.endpoint-url";
 
     // Sample values for branding fallbacks.
     String ORGANIZATION_LIGHT_LOGO_URL_FALLBACK = "https://example.com/logo";
@@ -95,6 +97,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_DARK_BACKGROUND_COLOR_FALLBACK = "#212F3D";
     String ORGANIZATION_LIGHT_BORDER_COLOR_FALLBACK = "#D5D8DC";
     String ORGANIZATION_DARK_BORDER_COLOR_FALLBACK = "#AEB6BF";
+    String ORGANIZATION_RECOVERY_PORTAL_URL_FALLBACK = "https://example.com/recovery";
 
     // Sample values for branding preferences.
     String ORGANIZATION_LIGHT_LOGO_URL = "light.logo.url";
@@ -113,6 +116,7 @@ public class NotificationUtilTest {
     String ORGANIZATION_DARK_FONT_COLOR = "#FFFFFF";
     String ORGANIZATION_LIGHT_BUTTON_FONT_COLOR = "#F7F9F9";
     String ORGANIZATION_DARK_BUTTON_FONT_COLOR = "#FBFCFC";
+    String ORGANIZATION_RECOVERY_PORTAL_URL = "https://example.com/recovery";
 
     String LIGHT_THEME = "LIGHT";
     String DARK_THEME = "DARK";
@@ -163,6 +167,7 @@ public class NotificationUtilTest {
 
         String brandingPreferencesStr = "{" +
                 "\"configs\":{\"isBrandingEnabled\":%s}," +
+                "\"urls\": {\"recoveryPortalURL\":\"%s\"}," +
                 "\"organizationDetails\":{\"copyrightText\":\"%s\",\"supportEmail\":\"%s\"}," +
                 "\"theme\":{\"activeTheme\":\"%s\"," +
                 "\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"%s\"}}}}," +
@@ -175,21 +180,21 @@ public class NotificationUtilTest {
                 "\"typography\":{\"font\":{\"fontFamily\":\"%s\"}}}}}";
 
         String brandingPreferencesStr1 = String.format(brandingPreferencesStr,
-                BRANDING_ENABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
+                BRANDING_ENABLED, ORGANIZATION_RECOVERY_PORTAL_URL, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
                 ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
                 ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
                 ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
                 ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
                 ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
         String brandingPreferencesStr2 = String.format(brandingPreferencesStr,
-                BRANDING_ENABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, DARK_THEME,
+                BRANDING_ENABLED, "", ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, DARK_THEME,
                 ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
                 ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
                 ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
                 ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
                 ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
         String brandingPreferencesStr3 = String.format(brandingPreferencesStr,
-                BRANDING_DISABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
+                BRANDING_DISABLED, ORGANIZATION_RECOVERY_PORTAL_URL, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, LIGHT_THEME,
                 ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
                 ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
                 ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
@@ -260,6 +265,8 @@ public class NotificationUtilTest {
 
         String logoUrl = NotificationUtil.getBrandingPreference(
                 ORGANIZATION_LOGO_URL_PLACEHOLDER, brandingPreferences, brandingFallback);
+        String recoveryPortalUrl = NotificationUtil.getBrandingPreference(
+                ORGANIZATION_RECOVERY_PORTAL_URL_PLACEHOLDER, brandingPreferences, brandingFallback);
         String logoAltText = NotificationUtil.getBrandingPreference(
                 ORGANIZATION_LOGO_ALT_TEXT_PLACEHOLDER, brandingPreferences, brandingFallback);
         String copyrightText = NotificationUtil.getBrandingPreference(
@@ -283,6 +290,7 @@ public class NotificationUtilTest {
 
         if (caseNo == 1) {
             assertEquals(logoUrl, ORGANIZATION_LIGHT_LOGO_URL);
+            assertEquals(recoveryPortalUrl, ORGANIZATION_RECOVERY_PORTAL_URL);
             assertEquals(logoAltText, ORGANIZATION_LIGHT_LOGO_ALT_TEXT);
             assertEquals(copyrightText, ORGANIZATION_COPYRIGHT_TEXT);
             assertEquals(supportMail, ORGANIZATION_SUPPORT_EMAIL);
@@ -297,6 +305,7 @@ public class NotificationUtilTest {
 
         if (caseNo == 2) {
             assertEquals(logoUrl, ORGANIZATION_DARK_LOGO_URL);
+            assertNotEquals(recoveryPortalUrl, ORGANIZATION_RECOVERY_PORTAL_URL);
             assertEquals(logoAltText, ORGANIZATION_DARK_LOGO_ALT_TEXT);
             assertEquals(primaryColor, ORGANIZATION_DARK_PRIMARY_COLOR);
             assertEquals(backgroundColor, ORGANIZATION_DARK_BACKGROUND_COLOR);
