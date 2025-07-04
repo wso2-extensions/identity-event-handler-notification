@@ -6429,7 +6429,7 @@
             </html>]]></body>
     </configuration>
     <configuration type="orchestratedAskPassword" display="OrchestratedAskPassword" locale="en_US" emailContentType="text/html">
-        <subject>Here is your new account in organization {{organization-name}}</subject>
+        <subject>Here is your new account in {{organization-name}}</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -6437,7 +6437,7 @@
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-                <title>Here is your new account in the organization {{organization-name}}</title>
+                <title>Here is your new account in {{organization-name}}</title>
 
                 <!-- [if mso]>
                 <style type="text/css">
@@ -6775,7 +6775,7 @@
                                                                 valign="top" align="left">
                                                                 <h1
                                                                     style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
-                                                                    Here is your new account in the organization {{organization-name}}
+                                                                    Here is your new account in {{organization-name}}
                                                                 </h1>
                                                             </td>
                                                         </tr>
@@ -6891,7 +6891,7 @@
             </html>]]></body>
     </configuration>
     <configuration type="orchestratedResendAskPassword" display="OrchestratedResendAskPassword" locale="en_US" emailContentType="text/html">
-        <subject>Here is your new account in organization {{organization-name}}</subject>
+        <subject>Here is your new account in {{organization-name}}</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -6899,7 +6899,7 @@
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-                <title>Here is your new account in the organization {{organization-name}}</title>
+                <title>Here is your new account in {{organization-name}}</title>
 
                 <!-- [if mso]>
                 <style type="text/css">
@@ -7237,7 +7237,7 @@
                                                                 valign="top" align="left">
                                                                 <h1
                                                                     style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
-                                                                    Here is your new account in the organization {{organization-name}}
+                                                                    Here is your new account in {{organization-name}}
                                                                 </h1>
                                                             </td>
                                                         </tr>
