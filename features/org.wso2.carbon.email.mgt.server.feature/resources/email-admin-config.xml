@@ -6429,7 +6429,7 @@
             </html>]]></body>
     </configuration>
     <configuration type="orchestratedAskPassword" display="OrchestratedAskPassword" locale="en_US" emailContentType="text/html">
-        <subject>Here is your new account in the organization {{organization-name}}</subject>
+        <subject>Here is your new account in organization {{organization-name}}</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -6795,19 +6795,16 @@
                                                                                     style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        Hi,
+                                                                                        Hi {{user-name}},
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        An account has been created for the below
-                                                                                        username in the organization
-                                                                                        <b>{{organization-name}}</b>.<br>
+                                                                                        We’ve set up your account in the <b>{{organization-name}}</b> organization.<br>
                                                                                         Username: <b>{{user-name}}</b>
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
-                                                                                        Please click the following button to complete the
-                                                                                        registration:
+                                                                                        Click the button below to finish setting up the registration:
                                                                                     </p>
                                                                                     <table align="center" cellpadding="0"
                                                                                         cellspacing="0" border="0" width="100%"
@@ -6894,7 +6891,7 @@
             </html>]]></body>
     </configuration>
     <configuration type="orchestratedResendAskPassword" display="OrchestratedResendAskPassword" locale="en_US" emailContentType="text/html">
-        <subject>Here is your new account in the organization {{organization-name}}</subject>
+        <subject>Here is your new account in organization {{organization-name}}</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -7260,19 +7257,16 @@
                                                                                     style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        Hi,
+                                                                                        Hi {{user-name}},
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        An account has been created for the below
-                                                                                        username in the organization
-                                                                                        <b>{{organization-name}}</b>.<br>
+                                                                                        We’ve set up your account in the <b>{{organization-name}}</b> organization.<br>
                                                                                         Username: <b>{{user-name}}</b>
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
-                                                                                        Please click the following button to complete the
-                                                                                        registration:
+                                                                                        Click the button below to finish setting up the registration:
                                                                                     </p>
                                                                                     <table align="center" cellpadding="0"
                                                                                         cellspacing="0" border="0" width="100%"
@@ -7287,8 +7281,7 @@
                                                                                                         style="box-sizing:border-box;display:inline-block;font-family:'{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;text-decoration:none;font-size: 14px; line-height: 24px; font-weight:600; text-align:center;color:{{organization.button.font.color}};background-color:{{organization.color.primary}};border-radius:6px;width:auto;max-width:100%;word-break:break-word;word-wrap:break-word;line-height:inherit"
                                                                                                         target="_blank"><span
                                                                                                             style="display:block;line-height:120%;padding:14px 24px"><span
-                                                                                                                style="font-size:14px;line-height:16.8px">Complete
-                                                                                                                Registration</span></span></a><br
+                                                                                                                style="font-size:14px;line-height:16.8px">Complete Registration</span></span></a><br
                                                                                                         style="line-height:inherit">
                                                                                                 </td>
                                                                                             </tr>
@@ -7329,8 +7322,8 @@
                                                                     <span
                                                                         style="font-size: 12px; line-height: 16.8px; color: #808080;">You
                                                                         received this email because you have an account in the
-                                                                        organization <b>{{organization-name}}</b>. If you encounter any issues,
-                                                                        you may contact us at <a
+                                                                        organization <b>{{organization-name}}</b>.
+                                                                        If you encounter any issues, you may contact us at <a
                                                                             class="wso2_orange3" href="mailto:{{organization.support.mail}}"
                                                                             style="color:#808080;"
                                                                             target="_blank">{{organization.support.mail}}</a>.</span>
