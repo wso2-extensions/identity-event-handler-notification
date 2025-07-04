@@ -47,6 +47,7 @@ import org.wso2.carbon.identity.branding.preference.management.core.model.Custom
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.context.model.Flow;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -698,7 +699,7 @@ public class NotificationUtil {
                     .forEach((claimMapping, value) ->
                             fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
             userClaims.putAll(fedUserClaims);
-        } else if (!REGISTRATION_FLOW.equals(flowType)) {
+        } else if (!Flow.Name.USER_REGISTRATION.toString().equals(flowType) && !REGISTRATION_FLOW.equals(flowType)) {
             if (StringUtils.isNotBlank(username) && userStoreManager != null) {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
             } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
