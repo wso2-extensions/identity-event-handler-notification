@@ -44,9 +44,11 @@ import org.wso2.carbon.identity.branding.preference.management.core.constant.Bra
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
+import org.wso2.carbon.identity.branding.preference.management.core.util.BrandingPreferenceMgtUtils;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.context.model.Flow;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -93,6 +95,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_DISPLAY_NAME_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_URL_PATH;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_RECOVERY_PORTAL_URL;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
@@ -103,6 +106,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.FLOW_TYPE;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.REGISTRATION_FLOW;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
@@ -356,7 +360,21 @@ public class NotificationUtil {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
         }
 
-        placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
+        String flowType = placeHolderData.get(FLOW_TYPE);
+        if (Flow.Name.INVITED_USER_REGISTRATION.toString().equalsIgnoreCase(flowType)) {
+            if (StringUtils.isBlank(placeHolderData.get(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER))) {
+                try {
+                    placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, BrandingPreferenceMgtUtils.
+                            buildDefaultPortalUrl(flowType));
+                } catch (URLBuilderException e) {
+                    throw NotificationRuntimeException.error("Error while building the default portal " +
+                            "URL.", e);
+                }
+            }
+        } else {
+            placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
+        }
+
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
         String emailType = placeHolderData.get(TEMPLATE_TYPE);
 
@@ -657,6 +675,12 @@ public class NotificationUtil {
                         : theme.equals(NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LIGHT_THEME)
                             ? brandingFallbacks.get("light_border_color")
                             : brandingFallbacks.get("dark_border_color");
+                break;
+            case ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER :
+                value = (brandingIsEnabled && StringUtils.isNotBlank(
+                        brandingPreferences.at(BRANDING_PREFERENCES_RECOVERY_PORTAL_URL).asText()))
+                        ? brandingPreferences.at(BRANDING_PREFERENCES_RECOVERY_PORTAL_URL).asText()
+                        : null; // Default value is not handled here since the parameter is not passed.
                 break;
             default: break;
         }
