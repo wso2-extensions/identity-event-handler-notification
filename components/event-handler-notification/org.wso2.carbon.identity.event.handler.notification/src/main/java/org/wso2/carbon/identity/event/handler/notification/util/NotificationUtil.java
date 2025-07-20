@@ -95,7 +95,6 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_DISPLAY_NAME_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_ALTTEXT_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_LOGO_URL_PATH;
-import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_RECOVERY_PORTAL_URL;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.BRANDING_PREFERENCES_SUPPORT_EMAIL_PATH;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.CARBON_PRODUCT_URL_WITH_USER_TENANT_TEMPLATE_PLACEHOLDER;
@@ -190,7 +189,7 @@ public class NotificationUtil {
     /**
      * Set place holder values for email templates.
      *
-     * @param emailTemplate   {@link org.wso2.carbon.email.mgt.model.EmailTemplate}
+     * @param emailTemplate   {@link EmailTemplate}
      * @param placeHolderData List of place holder data
      * @param userClaims      List of user claims
      * @return Place holder data
@@ -205,7 +204,7 @@ public class NotificationUtil {
     /**
      * Set placeholder values for email templates with app level branding.
      *
-     * @param emailTemplate   {@link org.wso2.carbon.email.mgt.model.EmailTemplate}
+     * @param emailTemplate   {@link EmailTemplate}
      * @param placeHolderData List of placeholder data
      * @param userClaims      List of user claims
      * @return Place holder data
@@ -219,10 +218,11 @@ public class NotificationUtil {
         JsonNode brandingPreferences = null;
         Map<String, String> brandingFallbacks = getBrandingFallbacksFromConfigFile();
 
+        BrandingPreferenceManager brandingPreferenceManager = null;
         if (Boolean.parseBoolean(
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
-                BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
+                brandingPreferenceManager = new BrandingPreferenceManagerImpl();
                 BrandingPreference responseDTO;
                 if (StringUtils.isNotBlank(applicationUuid)) {
                     responseDTO = brandingPreferenceManager.resolveApplicationBrandingPreference(applicationUuid,
@@ -362,13 +362,14 @@ public class NotificationUtil {
 
         String flowType = placeHolderData.get(FLOW_TYPE);
         if (Flow.Name.INVITED_USER_REGISTRATION.toString().equalsIgnoreCase(flowType)) {
-            if (StringUtils.isBlank(placeHolderData.get(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER))) {
+            if (brandingPreferenceManager != null) {
                 try {
                     placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, BrandingPreferenceMgtUtils.
-                            buildDefaultPortalUrl(flowType));
-                } catch (URLBuilderException e) {
-                    throw NotificationRuntimeException.error("Error while building the default portal " +
-                            "URL.", e);
+                            buildConfiguredPortalURL(null, placeHolderData.get(TENANT_DOMAIN),
+                                    brandingPreferenceManager, flowType));
+                } catch (URLBuilderException | BrandingPreferenceMgtException e) {
+                    throw NotificationRuntimeException.error("Error while retrieving the portal URL for " +
+                            "the tenant: " + placeHolderData.get(TENANT_DOMAIN) + ", flowtype: " + flowType, e);
                 }
             }
         } else {
@@ -676,12 +677,6 @@ public class NotificationUtil {
                             ? brandingFallbacks.get("light_border_color")
                             : brandingFallbacks.get("dark_border_color");
                 break;
-            case ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER :
-                value = (brandingIsEnabled && StringUtils.isNotBlank(
-                        brandingPreferences.at(BRANDING_PREFERENCES_RECOVERY_PORTAL_URL).asText()))
-                        ? brandingPreferences.at(BRANDING_PREFERENCES_RECOVERY_PORTAL_URL).asText()
-                        : null; // Default value is not handled here since the parameter is not passed.
-                break;
             default: break;
         }
 
@@ -711,7 +706,7 @@ public class NotificationUtil {
         String tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
-        String flowType = (String) eventProperties.get(NotificationConstants.FLOW_TYPE);
+        String flowType = (String) eventProperties.get(FLOW_TYPE);
 
         // If the user is federated, use the federated user claims provided in the event properties.
         if (eventProperties.containsKey(NotificationConstants.IS_FEDERATED_USER) &&
