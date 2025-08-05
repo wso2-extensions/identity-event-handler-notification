@@ -35,6 +35,9 @@
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
         <body>Your One-Time Password : {{confirmation-code}}</body>
     </configuration>
+    <configuration type="resendaccountconfirmation" display="resendaccountconfirmation" locale="en_US">
+        <body>Your One-Time Password : {{confirmation-code}}</body>
+    </configuration>
     <configuration type="resendPasswordReset" display="resendPasswordReset" locale="en_US">
         <body>Your One-Time Password : {{confirmation-code}}</body>
     </configuration>
