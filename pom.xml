@@ -391,9 +391,9 @@
         <identity.branding.preference.management.version.range>[1.0.1, 2.0.0)</identity.branding.preference.management.version.range>
 
         <!--Orbit Version-->
-        <axis2.wso2.version>1.6.1-wso2v38</axis2.wso2.version>
-        <axis2.wso2.imp.pkg.version.range>[1.6.1-wso2v38, 2.0.0)</axis2.wso2.imp.pkg.version.range>
-        <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v105</axis2.wso2.version>
+        <axis2.wso2.imp.pkg.version.range>[1.6.1-wso2v105, 2.0.0)</axis2.wso2.imp.pkg.version.range>
+        <axiom.wso2.version>1.2.11-wso2v29</axiom.wso2.version>
         <axiom.wso2.imp.pkg.version.range>[1.2.11, 2.0.0)</axiom.wso2.imp.pkg.version.range>
         <axis2-transports.version>2.0.0-wso2v38</axis2-transports.version>
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
