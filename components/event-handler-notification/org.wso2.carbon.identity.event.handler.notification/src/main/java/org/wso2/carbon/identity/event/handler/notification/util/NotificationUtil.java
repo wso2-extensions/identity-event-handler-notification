@@ -63,6 +63,8 @@ import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.organization.management.service.util.Utils;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -839,6 +841,9 @@ public class NotificationUtil {
         String organizationName = tenantDomain;
         try {
             if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                if (Utils.isSuperOrgNameSupportedInNotificationTemplates()) {
+                    return OrganizationManagementUtil.getSuperRootOrgName();
+                }
                 return organizationName;
             }
             RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
