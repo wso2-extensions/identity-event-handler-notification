@@ -167,7 +167,6 @@ public class NotificationUtilTest {
 
         String brandingPreferencesStr = "{" +
                 "\"configs\":{\"isBrandingEnabled\":%s}," +
-                "\"urls\": {\"recoveryPortalURL\":\"%s\"}," +
                 "\"organizationDetails\":{\"copyrightText\":\"%s\",\"supportEmail\":\"%s\"}," +
                 "\"theme\":{\"activeTheme\":\"%s\"," +
                 "\"LIGHT\":{\"buttons\":{\"primary\":{\"base\":{\"font\":{\"color\":\"%s\"}}}}," +
@@ -187,7 +186,7 @@ public class NotificationUtilTest {
                 ORGANIZATION_DARK_LOGO_ALT_TEXT, ORGANIZATION_DARK_LOGO_URL, ORGANIZATION_DARK_BACKGROUND_COLOR,
                 ORGANIZATION_DARK_FONT_COLOR, ORGANIZATION_DARK_FONT);
         String brandingPreferencesStr2 = String.format(brandingPreferencesStr,
-                BRANDING_ENABLED, "", ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, DARK_THEME,
+                BRANDING_ENABLED, ORGANIZATION_COPYRIGHT_TEXT, ORGANIZATION_SUPPORT_EMAIL, DARK_THEME,
                 ORGANIZATION_LIGHT_BUTTON_FONT_COLOR, ORGANIZATION_LIGHT_PRIMARY_COLOR, ORGANIZATION_LIGHT_LOGO_ALT_TEXT,
                 ORGANIZATION_LIGHT_LOGO_URL, ORGANIZATION_LIGHT_BACKGROUND_COLOR, ORGANIZATION_LIGHT_FONT_COLOR,
                 ORGANIZATION_LIGHT_FONT, ORGANIZATION_DARK_BUTTON_FONT_COLOR, ORGANIZATION_DARK_PRIMARY_COLOR,
