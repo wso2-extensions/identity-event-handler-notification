@@ -48,6 +48,8 @@ import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.organization.management.service.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -63,6 +65,8 @@ import static org.testng.Assert.assertEquals;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETERS_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.UTM_PARAMETER_PREFIX;
+import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.SUPER;
+import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
 /**
  * Class that contains the test cases for NotificationUtil class.
@@ -438,6 +442,33 @@ public class NotificationUtilTest {
                     "&" + UTM_PARAMETER_PREFIX + "campaign" + "=" + "UTM_CAMPAIGN_SAMPLE" +
                     "&" + UTM_PARAMETER_PREFIX + "medium" + "=" + "UTM_MEDIUM_SAMPLE" +
                     "&" + UTM_PARAMETER_PREFIX + "source" + "=" + "UTM_SOURCE_SAMPLE");
+        }
+    }
+
+    @DataProvider(name = "resolveSuperTenantOrganizationNameDataProvider")
+    public Object[][] resolveSuperTenantOrganizationNameDataProvider() {
+
+        return new Object[][] {
+                {true, SUPER},
+                {false, SUPER_TENANT_DOMAIN_NAME}
+        };
+    }
+
+    @Test(dataProvider = "resolveSuperTenantOrganizationNameDataProvider")
+    public void testResolveHumanReadableOrganizationNameForSuperTenant(boolean isSuperOrgNameSupported,
+                                                                       String expectedOrgName)
+            throws Exception {
+
+        try (MockedStatic<Utils> mockedUtils = mockStatic(Utils.class);
+             MockedStatic<OrganizationManagementUtil> mockedOrgManagementUtil = mockStatic(
+                     OrganizationManagementUtil.class)) {
+
+            mockedUtils.when(Utils::isSuperOrgNameSupportedInNotificationTemplates)
+                    .thenReturn(isSuperOrgNameSupported);
+            mockedOrgManagementUtil.when(OrganizationManagementUtil::getSuperRootOrgName).thenReturn(expectedOrgName);
+
+            String result = NotificationUtil.resolveHumanReadableOrganizationName(SUPER_TENANT_DOMAIN_NAME);
+            assertEquals(result, expectedOrgName);
         }
     }
 

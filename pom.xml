@@ -538,7 +538,7 @@
         <axis2.osgi.version.range>[1.6.1, 2.0.0)</axis2.osgi.version.range>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.7.11</carbon.commons.version>
+        <carbon.commons.version>4.10.24</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Database Utils Version-->
