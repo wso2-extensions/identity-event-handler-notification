@@ -7258,7 +7258,7 @@
                                                                                         username in the organization
                                                                                         <b>{{organization-name}}</b>.<br>
                                                                                         Username: <b>{{user-name}}</b><br><br>
-                                                                                        Please use this one-time password (OTP) to signin and set up your password.<br>
+                                                                                        Please use this one-time password (OTP) to signin and complete your registration.<br>
                                                                                     </p>
                                                                                     <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
                                                                                         font-size: 24px;
@@ -7714,7 +7714,7 @@
                                                                                         username in the organization
                                                                                         <b>{{organization-name}}</b>.<br>
                                                                                         Username: <b>{{user-name}}</b><br><br>
-                                                                                        Please use this one-time password (OTP) to signin and set up your password.<br>
+                                                                                        Please use this one-time password (OTP) to signin and complete your registration.<br>
                                                                                     </p>
                                                                                     <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
                                                                                         font-size: 24px;

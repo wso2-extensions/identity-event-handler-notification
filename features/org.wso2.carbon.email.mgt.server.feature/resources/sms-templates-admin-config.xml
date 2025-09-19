@@ -57,12 +57,12 @@
         <body>Please use code {{confirmation-code}} to verify your mobile and continue registration with {{organization-name}}.</body>
     </configuration>
     <configuration type="askPasswordSMSOTP" display="askPasswordSMSOTP" locale="en_US">
-        <body>Please use this one-time password (OTP): {{confirmation-code}} as the password at next login and then set your password.</body>
+        <body>Please use this one-time password (OTP): {{confirmation-code}} to signin and complete your registration.</body>
     </configuration>
     <configuration type="askPasswordResendSMSOTP" display="askPasswordResendSMSOTP" locale="en_US">
-        <body>Please use this one-time password (OTP): {{confirmation-code}} as the password at next login and then set your password.</body>
+        <body>Please use this one-time password (OTP): {{confirmation-code}} to signin and complete your registration.</body>
     </configuration>
     <configuration type="askPasswordSetSuccess" display="askPasswordSetSuccess" locale="en_US">
-        <body>Password set successfully.</body>
+        <body>Your account has been set up successfully.</body>
     </configuration>
 </configurations>
