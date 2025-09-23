@@ -17,6 +17,7 @@
 -->
 <%@page import="java.nio.charset.StandardCharsets"%>
 <%@page import="java.util.Base64"%>
+<%@ page import="java.util.ResourceBundle" %>
 <%@page import="java.net.URLDecoder"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.apache.commons.lang.StringUtils" %>
@@ -34,6 +35,9 @@
         response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         return;
     }
+    
+    String BUNDLE = "org.wso2.carbon.email.mgt.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     String emailTypeDisplayName = request.getParameter("emailType");
     String emailContentType = request.getParameter("emailContentType");
@@ -83,7 +87,8 @@
 </script>
 <%
 } catch (Exception e) {
-    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
+    String message = resourceBundle.getString("error.while.adding.email.template.data");
+    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
 %>
 <script type="text/javascript">
     location.href = "email-template-add.jsp";
