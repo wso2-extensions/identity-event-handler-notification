@@ -28,9 +28,7 @@
         <body>Your One-Time Password is : {{confirmation-code}}</body>
     </configuration>
     <configuration type="accountIdRecovery" display="accountIdRecovery" locale="en_US">
-        <body>
-            Hello, your username is {{userstore-domain}}/{{user-name}}
-        </body>
+        <body>Hello, your username is {{userstore-domain}}/{{user-name}}</body>
     </configuration>
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
         <body>Your One-Time Password : {{confirmation-code}}</body>
