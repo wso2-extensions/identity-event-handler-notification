@@ -20,9 +20,8 @@ package org.wso2.carbon.email.mgt.store;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
@@ -36,9 +35,10 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -48,8 +48,7 @@ import static org.testng.Assert.assertTrue;
 /**
  * Class that contains the test cases for {@link SystemDefaultTemplateManager}.
  */
-@PrepareForTest({I18nMgtDataHolder.class, CarbonUtils.class})
-public class SystemDefaultTemplateManagerTest extends PowerMockTestCase {
+public class SystemDefaultTemplateManagerTest {
 
     private final String baseDirectoryPath = Paths.get(System.getProperty("user.dir"),
             "src", "test", "resources").toString();
@@ -63,13 +62,18 @@ public class SystemDefaultTemplateManagerTest extends PowerMockTestCase {
     NotificationTemplate positiveNotificationTemplate;
     NotificationTemplate negativeNotificationTemplate;
 
+    MockedStatic<I18nMgtDataHolder> i18nMgtDataHolderStatic;
+    MockedStatic<CarbonUtils> carbonUtilsStatic;
+
     @BeforeMethod
     public void setUp() {
 
         initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+        i18nMgtDataHolderStatic = mockStatic(I18nMgtDataHolder.class);
+        carbonUtilsStatic = mockStatic(CarbonUtils.class);
+        
+        i18nMgtDataHolder = mock(I18nMgtDataHolder.class);
+        i18nMgtDataHolderStatic.when(I18nMgtDataHolder::getInstance).thenReturn(i18nMgtDataHolder);
 
         List<NotificationTemplate> defaultEmailTemplate = loadDefaultTemplatesFromFile(baseDirectoryPath,
                 NotificationChannels.EMAIL_CHANNEL.getChannelType());
@@ -77,6 +81,13 @@ public class SystemDefaultTemplateManagerTest extends PowerMockTestCase {
 
         systemDefaultTemplateManager = new SystemDefaultTemplateManager();
         initTestNotificationTemplates();
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        i18nMgtDataHolderStatic.close();
+        carbonUtilsStatic.close();
     }
 
     private void initTestNotificationTemplates() {
@@ -181,19 +192,8 @@ public class SystemDefaultTemplateManagerTest extends PowerMockTestCase {
     private List<NotificationTemplate> loadDefaultTemplatesFromFile(String baseDirectoryPath,
                                                                     String notificationChannel) {
 
-        mockNotificationChannelConfigPath(baseDirectoryPath);
+        carbonUtilsStatic.when(CarbonUtils::getCarbonConfigDirPath).thenReturn(baseDirectoryPath);
         I18nMgtServiceComponent component = new I18nMgtServiceComponent();
         return component.loadDefaultTemplatesFromFile(notificationChannel);
-    }
-
-    /**
-     * Mock the default config xml path of notification templates.
-     *
-     * @param baseDirectoryPath Resource folder location
-     */
-    private void mockNotificationChannelConfigPath(String baseDirectoryPath) {
-
-        mockStatic(CarbonUtils.class);
-        when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(baseDirectoryPath);
     }
 }

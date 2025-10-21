@@ -20,9 +20,8 @@ package org.wso2.carbon.email.mgt.store;
 
 import org.apache.commons.lang.StringUtils;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
@@ -33,18 +32,18 @@ import org.wso2.carbon.identity.governance.service.notification.NotificationChan
 import org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service.OrgAppResourceResolverService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
@@ -53,8 +52,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_
  * Class that contains the test cases for {@link UnifiedTemplateManager}.
  */
 @WithCarbonHome
-@PrepareForTest({I18nMgtDataHolder.class, CarbonUtils.class, IdentityUtil.class})
-public class UnifiedTemplateManagerTest extends PowerMockTestCase {
+public class UnifiedTemplateManagerTest {
 
     private static final String tenantDomain = "carbon.super";
     private static final String ROOT_ORG_ID = "10084a8d-113f-4211-a0d5-efe36b082211";
@@ -77,6 +75,8 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
     NotificationTemplate positiveNotificationTemplate;
     NotificationTemplate negativeNotificationTemplate;
 
+    MockedStatic<I18nMgtDataHolder> i18nMgtDataHolderStatic;
+    MockedStatic<IdentityUtil> identityUtilStatic;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -84,9 +84,10 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
         initTestNotificationTemplates();
 
         initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+        
+        i18nMgtDataHolderStatic = mockStatic(I18nMgtDataHolder.class);
+        i18nMgtDataHolder = mock(I18nMgtDataHolder.class);
+        i18nMgtDataHolderStatic.when(I18nMgtDataHolder::getInstance).thenReturn(i18nMgtDataHolder);
         when(i18nMgtDataHolder.getDefaultEmailTemplates()).thenReturn(defaultSystemTemplates);
         when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
         when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
@@ -94,13 +95,21 @@ public class UnifiedTemplateManagerTest extends PowerMockTestCase {
 
         mockOrganizationManager();
 
-        mockStatic(IdentityUtil.class);
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
+        identityUtilStatic = mockStatic(IdentityUtil.class);
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("registry");
 
-        templatePersistenceManager = PowerMockito.mock(TemplatePersistenceManager.class);
+        templatePersistenceManager = mock(TemplatePersistenceManager.class);
         unifiedTemplateManager = new UnifiedTemplateManager(templatePersistenceManager);
-        templatePersistenceManagerFactory = PowerMockito.mock(TemplatePersistenceManagerFactory.class);
+        templatePersistenceManagerFactory = mock(TemplatePersistenceManagerFactory.class);
         when(templatePersistenceManagerFactory.getTemplatePersistenceManager()).thenReturn(unifiedTemplateManager);
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        i18nMgtDataHolderStatic.close();
+        identityUtilStatic.close();
     }
 
     @Test

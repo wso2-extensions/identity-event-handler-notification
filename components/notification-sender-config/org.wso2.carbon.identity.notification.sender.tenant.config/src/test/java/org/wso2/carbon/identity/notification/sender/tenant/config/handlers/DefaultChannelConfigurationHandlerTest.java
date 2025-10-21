@@ -4,10 +4,10 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -47,8 +47,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
@@ -56,8 +57,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 /**
  * Unit tests for {@link DefaultChannelConfigurationHandler}.
  */
-@PrepareForTest({NotificationSenderUtils.class, PrivilegedCarbonContext.class})
-public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
+public class DefaultChannelConfigurationHandlerTest {
 
     private DefaultChannelConfigurationHandler defaultChannelConfigurationHandler;
     @Mock
@@ -71,12 +71,17 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
     @Mock
     private ResourceManager resourceManager;
 
+    private MockedStatic<NotificationSenderUtils> notificationSenderUtilsStatic;
+    private MockedStatic<PrivilegedCarbonContext> privilegedCarbonContextStatic;
+
     @BeforeMethod
     public void setUp() {
 
         setCarbonHome();
-        setCarbonContextForTenant();
-        mockStatic(NotificationSenderUtils.class);
+        initMocks(this);
+        privilegedCarbonContextStatic = mockStatic(PrivilegedCarbonContext.class);
+        setCarbonContextForTenant(privilegedCarbonContextStatic);
+        notificationSenderUtilsStatic = mockStatic(NotificationSenderUtils.class);
         defaultChannelConfigurationHandler = new DefaultChannelConfigurationHandler();
 
         NotificationSenderTenantConfigDataHolder.getInstance()
@@ -89,6 +94,13 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
                 .setClusteringAgent(clusteringAgent);
         NotificationSenderTenantConfigDataHolder.getInstance()
                 .setResourceManager(resourceManager);
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        notificationSenderUtilsStatic.close();
+        privilegedCarbonContextStatic.close();
     }
 
     @Test
@@ -118,7 +130,7 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
 
         InputStream inputStream = constructInputStream();
 
-        when(NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
+        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
                 .thenReturn(inputStream);
 
         Resource resource = constructResource(inputStream, smsSenderDTO);
@@ -129,7 +141,8 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        when(NotificationSenderUtils.buildSmsSenderFromResource(any())).thenReturn(smsSenderDTO);
+        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
+                .thenReturn(smsSenderDTO);
 
         SMSSenderDTO response = defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
 
@@ -168,7 +181,7 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
         when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
                 .thenReturn((List<EventPublisherConfiguration>) eventPublisherConfigurationList);
 
-        when(NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
+        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.generateSMSPublisher(any(SMSSenderDTO.class)))
                 .thenReturn((InputStream) inputStream);
 
         when(configurationManager.addResource(Mockito.eq(PUBLISHER_RESOURCE_TYPE), any(Resource.class)))
@@ -371,7 +384,6 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
     public void testUpdateSMSSender() throws EventPublisherConfigurationException, ConfigurationManagementException,
             TenantResourceManagementException, ClusteringFault, NotificationSenderManagementException {
 
-        mockStatic(NotificationSenderUtils.class);
         SMSSenderDTO smsSenderDTORequestObject = constructSMSSenderDTO(
                 "SMSPublisher",
                 "Twilio",
@@ -391,7 +403,8 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        when(NotificationSenderUtils.buildSmsSenderFromResource(any())).thenReturn(smsSenderDTORequestObject);
+        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
+                .thenReturn(smsSenderDTORequestObject);
 
         SMSSenderDTO smsSenderDTOResponseObject = defaultChannelConfigurationHandler
                 .updateSMSSender(smsSenderDTORequestObject);
@@ -498,11 +511,11 @@ public class DefaultChannelConfigurationHandlerTest extends PowerMockTestCase {
         System.setProperty(CarbonBaseConstants.CARBON_CONFIG_DIR_PATH, Paths.get(carbonHome, "conf").toString());
     }
 
-    private void setCarbonContextForTenant() {
-
-        mockStatic(PrivilegedCarbonContext.class);
+    private void setCarbonContextForTenant(MockedStatic<PrivilegedCarbonContext> privilegedCarbonContextStatic) {
+        
         PrivilegedCarbonContext privilegedCarbonContext = mock(PrivilegedCarbonContext.class);
-        when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        privilegedCarbonContextStatic.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                .thenReturn(privilegedCarbonContext);
         when(privilegedCarbonContext.getTenantDomain()).thenReturn("tenant");
         when(privilegedCarbonContext.getTenantId()).thenReturn(1);
     }

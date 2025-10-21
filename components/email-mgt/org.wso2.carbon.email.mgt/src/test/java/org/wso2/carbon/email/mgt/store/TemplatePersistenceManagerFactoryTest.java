@@ -19,9 +19,8 @@
 package org.wso2.carbon.email.mgt.store;
 
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.CarbonBaseConstants;
@@ -33,9 +32,10 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_TEMPLATES_STORAGE_CONFIG;
@@ -44,8 +44,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_
  * Class that contains the test cases for {@link TemplatePersistenceManagerFactory}.
  */
 @WithCarbonHome
-@PrepareForTest({I18nMgtDataHolder.class, IdentityUtil.class})
-public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
+public class TemplatePersistenceManagerFactoryTest {
 
     @Mock
     RegistryResourceMgtService resourceMgtService;
@@ -53,23 +52,35 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     I18nMgtDataHolder i18nMgtDataHolder;
     private TemplatePersistenceManagerFactory templatePersistenceManagerFactory;
 
+    MockedStatic<I18nMgtDataHolder> i18nMgtDataHolderStatic;
+    MockedStatic<IdentityUtil> identityUtilStatic;
+
     @BeforeMethod
     public void setUp() {
 
         initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+        
+        i18nMgtDataHolderStatic = mockStatic(I18nMgtDataHolder.class);
+        i18nMgtDataHolder = mock(I18nMgtDataHolder.class);
+        i18nMgtDataHolderStatic.when(I18nMgtDataHolder::getInstance).thenReturn(i18nMgtDataHolder);
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
 
-        mockStatic(IdentityUtil.class);
+        identityUtilStatic = mockStatic(IdentityUtil.class);
         templatePersistenceManagerFactory = new TemplatePersistenceManagerFactory();
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        i18nMgtDataHolderStatic.close();
+        identityUtilStatic.close();
     }
 
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsDatabase() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("database");
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("database");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
@@ -79,7 +90,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @Test
     public void shouldUseHybridTemplateManagerWhenConfigIsOnMigration() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("hybrid");
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("hybrid");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
@@ -89,7 +101,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @Test
     public void shouldUseRegistryBasedTemplateManagerWhenConfigIsRegistry() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("registry");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
@@ -99,7 +112,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsInvalid() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("invalid");
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("invalid");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
@@ -109,7 +123,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsBlank() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("");
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
@@ -119,7 +134,8 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
     @Test
     public void shouldUseDBBasedTemplateManagerWhenConfigIsNull() {
 
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn(null);
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn(null);
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
         assertTrue(templatePersistenceManager instanceof UnifiedTemplateManager);
