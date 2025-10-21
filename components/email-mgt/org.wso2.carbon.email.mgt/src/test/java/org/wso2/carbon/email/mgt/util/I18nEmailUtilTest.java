@@ -20,9 +20,9 @@ package org.wso2.carbon.email.mgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -38,19 +38,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_CONTENT_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME;
 
-@PrepareForTest({LogFactory.class, Resource.class, IdentityUtil.class})
-public class I18nEmailUtilTest extends PowerMockTestCase {
+public class I18nEmailUtilTest {
 
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TYPE = "templateType";
@@ -74,11 +73,19 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     @Mock
     private Log log;
 
+    private MockedStatic<IdentityUtil> identityUtilStatic;
+
     @BeforeMethod
     public void setUp() {
 
         initMocks(this);
-        mockStatic(IdentityUtil.class);
+        identityUtilStatic = mockStatic(IdentityUtil.class);
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        identityUtilStatic.close();
     }
 
     @DataProvider(name = "provideTestData")
@@ -102,64 +109,65 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     @Test(dataProvider = "provideTestData")
     public void testGetEmailTemplate(Map<String, String> configMap, byte[] content, int caseNo) throws Exception {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
-        doNothing().when(log).debug(any());
-        doNothing().when(log).error(any());
-        doNothing().when(log).error(any(), any(Throwable.class));
+        try (MockedStatic<LogFactory> logFactoryStatic = mockStatic(LogFactory.class)) {
+            logFactoryStatic.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(log);
+            doNothing().when(log).debug(any());
+            doNothing().when(log).error(any());
+            doNothing().when(log).error(any(), any(Throwable.class));
 
-        when(log.isDebugEnabled()).thenReturn(true);
-        when(templateResource.getProperty(TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(configMap.get
-                (TEMPLATE_TYPE_DISPLAY_NAME));
-        when(templateResource.getProperty(TEMPLATE_TYPE)).thenReturn(configMap.get(TEMPLATE_TYPE));
-        when(templateResource.getProperty(TEMPLATE_CONTENT_TYPE)).thenReturn(configMap.get(TEMPLATE_CONTENT_TYPE));
-        when(templateResource.getProperty(TEMPLATE_CONTENT_TYPE)).thenReturn(configMap.get(TEMPLATE_CONTENT_TYPE));
-        when(templateResource.getProperty(TEMPLATE_LOCALE)).thenReturn(configMap.get(TEMPLATE_LOCALE));
-        if (caseNo == CASE_5) {
-            when(templateResource.getContent()).thenThrow(new RegistryException("Test registry exception."));
-        } else {
-            when(templateResource.getContent()).thenReturn(content);
-        }
-
-        if (caseNo == CASE_1) {
-            EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
-
-            assertEquals(emailTemplate.getTemplateDisplayName(), DISPLAY_NAME);
-            assertEquals(emailTemplate.getTemplateType(), TYPE);
-            assertEquals(emailTemplate.getEmailContentType(), TEMPLATE_CONTENT_TYPE_WITH_UTF_8);
-            assertEquals(emailTemplate.getLocale(), LOCALE);
-            assertEquals(emailTemplate.getSubject(), "Subject");
-            assertEquals(emailTemplate.getBody(), "Body");
-            assertEquals(emailTemplate.getFooter(), "Footer");
-
-        } else if (caseNo == CASE_2) {
-            EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
-
-            Assert.assertNull(emailTemplate.getSubject(), "Subject should be null");
-            Assert.assertNull(emailTemplate.getBody(), "Body should be null");
-            Assert.assertNull(emailTemplate.getFooter(), "Footer should be null");
-
-        } else if (caseNo == CASE_3) {
-            try {
-                I18nEmailUtil.getEmailTemplate(templateResource);
-                Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
-            } catch (I18nEmailMgtServerException e) {
-                Assert.assertTrue(e.getMessage().contains("Error deserializing"));
+            when(log.isDebugEnabled()).thenReturn(true);
+            when(templateResource.getProperty(TEMPLATE_TYPE_DISPLAY_NAME)).thenReturn(configMap.get
+                    (TEMPLATE_TYPE_DISPLAY_NAME));
+            when(templateResource.getProperty(TEMPLATE_TYPE)).thenReturn(configMap.get(TEMPLATE_TYPE));
+            when(templateResource.getProperty(TEMPLATE_CONTENT_TYPE)).thenReturn(configMap.get(TEMPLATE_CONTENT_TYPE));
+            when(templateResource.getProperty(TEMPLATE_CONTENT_TYPE)).thenReturn(configMap.get(TEMPLATE_CONTENT_TYPE));
+            when(templateResource.getProperty(TEMPLATE_LOCALE)).thenReturn(configMap.get(TEMPLATE_LOCALE));
+            if (caseNo == CASE_5) {
+                when(templateResource.getContent()).thenThrow(new RegistryException("Test registry exception."));
+            } else {
+                when(templateResource.getContent()).thenReturn(content);
             }
 
-        } else if (caseNo == CASE_4) {
-            try {
-                I18nEmailUtil.getEmailTemplate(templateResource);
-                Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
-            } catch (I18nMgtEmailConfigException e) {
-                Assert.assertTrue(e.getMessage().contains("Template"));
-            }
-        } else if (caseNo == CASE_5) {
-            try {
-                I18nEmailUtil.getEmailTemplate(templateResource);
-                Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
-            } catch (I18nEmailMgtServerException e) {
-                Assert.assertTrue(e.getMessage().contains("Error retrieving a template"));
+            if (caseNo == CASE_1) {
+                EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
+
+                assertEquals(emailTemplate.getTemplateDisplayName(), DISPLAY_NAME);
+                assertEquals(emailTemplate.getTemplateType(), TYPE);
+                assertEquals(emailTemplate.getEmailContentType(), TEMPLATE_CONTENT_TYPE_WITH_UTF_8);
+                assertEquals(emailTemplate.getLocale(), LOCALE);
+                assertEquals(emailTemplate.getSubject(), "Subject");
+                assertEquals(emailTemplate.getBody(), "Body");
+                assertEquals(emailTemplate.getFooter(), "Footer");
+
+            } else if (caseNo == CASE_2) {
+                EmailTemplate emailTemplate = I18nEmailUtil.getEmailTemplate(templateResource);
+
+                Assert.assertNull(emailTemplate.getSubject(), "Subject should be null");
+                Assert.assertNull(emailTemplate.getBody(), "Body should be null");
+                Assert.assertNull(emailTemplate.getFooter(), "Footer should be null");
+
+            } else if (caseNo == CASE_3) {
+                try {
+                    I18nEmailUtil.getEmailTemplate(templateResource);
+                    Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
+                } catch (I18nEmailMgtServerException e) {
+                    Assert.assertTrue(e.getMessage().contains("Error deserializing"));
+                }
+
+            } else if (caseNo == CASE_4) {
+                try {
+                    I18nEmailUtil.getEmailTemplate(templateResource);
+                    Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
+                } catch (I18nMgtEmailConfigException e) {
+                    Assert.assertTrue(e.getMessage().contains("Template"));
+                }
+            } else if (caseNo == CASE_5) {
+                try {
+                    I18nEmailUtil.getEmailTemplate(templateResource);
+                    Assert.fail("Test should throw an exception of type: " + I18nEmailMgtServerException.class.getName());
+                } catch (I18nEmailMgtServerException e) {
+                    Assert.assertTrue(e.getMessage().contains("Error retrieving a template"));
+                }
             }
         }
     }
@@ -185,10 +193,12 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     public void testGetNotificationLocale() {
 
         String customDefaultLocale = "fr-FR";
-        when(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)).thenReturn(customDefaultLocale);
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE))
+                .thenReturn(customDefaultLocale);
         String result = I18nEmailUtil.getNotificationLocale();
         assertEquals(result, customDefaultLocale);
-        when(IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE)).thenReturn(null);
+        identityUtilStatic.when(() -> IdentityUtil.getProperty(I18nMgtConstants.NOTIFICATION_DEFAULT_LOCALE))
+                .thenReturn(null);
         String result2 = I18nEmailUtil.getNotificationLocale();
         assertEquals(result2, I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE);
     }
