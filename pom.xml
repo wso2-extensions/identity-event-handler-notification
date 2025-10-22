@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.58-SNAPSHOT</version>
+    <version>1.9.74-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -301,6 +301,11 @@
                 <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
                 <version>${identity.organization.management.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.organization.management</groupId>
+                <artifactId>org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service</artifactId>
+                <version>${identity.organization.management.version}</version>
+            </dependency>
 
             <!-- Test Dependencies -->
             <dependency>
@@ -501,7 +506,7 @@
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
-        <identity.branding.preference.management.version>1.1.5</identity.branding.preference.management.version>
+        <identity.branding.preference.management.version>1.1.29</identity.branding.preference.management.version>
         <identity.branding.preference.management.version.range>[1.0.1, 2.0.0)</identity.branding.preference.management.version.range>
 
         <identity.notification.push.version>1.0.5</identity.notification.push.version>
@@ -533,7 +538,7 @@
         <axis2.osgi.version.range>[1.6.1, 2.0.0)</axis2.osgi.version.range>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.7.11</carbon.commons.version>
+        <carbon.commons.version>4.10.24</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!--Carbon Database Utils Version-->
@@ -541,15 +546,15 @@
         <org.wso2.carbon.database.utils.version.range>[2.1.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>7.7.23</carbon.identity.framework.version>
+        <carbon.identity.framework.version>7.8.249</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version.range>[7.1.0, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
-        <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
+        <identity.organization.management.core.version>1.1.55</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
-        <identity.organization.management.version>1.4.58</identity.organization.management.version>
-        <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,2.0.0)
+        <identity.organization.management.version>2.0.0</identity.organization.management.version>
+        <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,3.0.0)
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->

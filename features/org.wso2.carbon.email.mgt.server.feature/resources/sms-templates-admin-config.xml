@@ -28,11 +28,12 @@
         <body>Your One-Time Password is : {{confirmation-code}}</body>
     </configuration>
     <configuration type="accountIdRecovery" display="accountIdRecovery" locale="en_US">
-        <body>
-            Hello, your username is {{userstore-domain}}/{{user-name}}
-        </body>
+        <body>Hello, your username is {{userstore-domain}}/{{user-name}}</body>
     </configuration>
     <configuration type="passwordReset" display="passwordReset" locale="en_US">
+        <body>Your One-Time Password : {{confirmation-code}}</body>
+    </configuration>
+    <configuration type="resendaccountconfirmation" display="resendaccountconfirmation" locale="en_US">
         <body>Your One-Time Password : {{confirmation-code}}</body>
     </configuration>
     <configuration type="resendPasswordReset" display="resendPasswordReset" locale="en_US">
@@ -52,5 +53,14 @@
     </configuration>
     <configuration type="SMSOTPVerification" display="SMSOTPVerification" locale="en_US">
         <body>Please use code {{confirmation-code}} to verify your mobile and continue registration with {{organization-name}}.</body>
+    </configuration>
+    <configuration type="askPasswordSMSOTP" display="askPasswordSMSOTP" locale="en_US">
+        <body>Please use this one-time password (OTP): {{confirmation-code}} to signin and complete your registration.</body>
+    </configuration>
+    <configuration type="askPasswordResendSMSOTP" display="askPasswordResendSMSOTP" locale="en_US">
+        <body>Please use this one-time password (OTP): {{confirmation-code}} to signin and complete your registration.</body>
+    </configuration>
+    <configuration type="askPasswordSetSuccess" display="askPasswordSetSuccess" locale="en_US">
+        <body>Your account has been set up successfully.</body>
     </configuration>
 </configurations>

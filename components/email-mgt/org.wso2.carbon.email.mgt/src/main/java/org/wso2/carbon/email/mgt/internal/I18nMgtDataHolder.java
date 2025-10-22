@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2016-2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,6 +21,7 @@ package org.wso2.carbon.email.mgt.internal;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
+import org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service.OrgAppResourceResolverService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.OrgResourceResolverService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -41,6 +42,7 @@ public class I18nMgtDataHolder {
     private OrganizationManager organizationManager;
     private ApplicationManagementService applicationManagementService;
     private OrgResourceResolverService orgResourceResolverService;
+    private OrgAppResourceResolverService orgAppResourceResolverService;
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
 
@@ -165,5 +167,25 @@ public class I18nMgtDataHolder {
     public void setOrgResourceResolverService(OrgResourceResolverService orgResourceResolverService) {
 
         this.orgResourceResolverService = orgResourceResolverService;
+    }
+
+    /**
+     * Get the organization application resource resolver service.
+     *
+     * @return Organization application resource resolver service.
+     */
+    public OrgAppResourceResolverService getOrgAppResourceResolverService() {
+
+        return orgAppResourceResolverService;
+    }
+
+    /**
+     * Set the organization application resource resolver service.
+     *
+     * @param orgAppResourceResolverService Organization application resource resolver service instance.
+     */
+    public void setOrgAppResourceResolverService(OrgAppResourceResolverService orgAppResourceResolverService) {
+
+        this.orgAppResourceResolverService = orgAppResourceResolverService;
     }
 }

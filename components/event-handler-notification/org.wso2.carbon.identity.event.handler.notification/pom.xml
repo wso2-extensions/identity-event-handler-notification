@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.58-SNAPSHOT</version>
+        <version>1.9.74-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -205,6 +205,7 @@
                             org.wso2.carbon.identity.organization.management.service;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.constant;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.management.service.exception;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.management.service.util;version="${org.wso2.identity.organization.mgt.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.notification.push.provider; version="${identity.notification.push.version.range}",
                             org.wso2.carbon.identity.notification.push.provider.exception; version="${identity.notification.push.version.range}",
                             org.wso2.carbon.identity.notification.push.provider.model; version="${identity.notification.push.version.range}",

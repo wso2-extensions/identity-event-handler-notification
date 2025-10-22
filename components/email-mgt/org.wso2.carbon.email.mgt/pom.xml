@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.58-SNAPSHOT</version>
+        <version>1.9.74-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -95,6 +95,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.organization.management</groupId>
             <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.organization.management</groupId>
+            <artifactId>org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-collections.wso2</groupId>
@@ -188,6 +192,8 @@
                             org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.exception;
                             version="${org.wso2.identity.organization.mgt.imp.pkg.version.range}",
                             org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service.strategy;
+                            version="${org.wso2.identity.organization.mgt.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service;
                             version="${org.wso2.identity.organization.mgt.imp.pkg.version.range}",
                         </Import-Package>
                     </instructions>

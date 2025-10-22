@@ -44,9 +44,11 @@ import org.wso2.carbon.identity.branding.preference.management.core.constant.Bra
 import org.wso2.carbon.identity.branding.preference.management.core.exception.BrandingPreferenceMgtException;
 import org.wso2.carbon.identity.branding.preference.management.core.model.BrandingPreference;
 import org.wso2.carbon.identity.branding.preference.management.core.model.CustomText;
+import org.wso2.carbon.identity.branding.preference.management.core.util.BrandingPreferenceMgtUtils;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.context.model.Flow;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -61,6 +63,8 @@ import org.wso2.carbon.identity.governance.model.UserIdentityClaim;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementClientException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.organization.management.service.util.Utils;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -103,6 +107,7 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.NEW_LINE_CHARACTER_STRING;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_COPYRIGHT_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.FLOW_TYPE;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.REGISTRATION_FLOW;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.TENANT_DOMAIN;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_NOT_FOUND_FOR_TENANT;
@@ -186,7 +191,7 @@ public class NotificationUtil {
     /**
      * Set place holder values for email templates.
      *
-     * @param emailTemplate   {@link org.wso2.carbon.email.mgt.model.EmailTemplate}
+     * @param emailTemplate   {@link EmailTemplate}
      * @param placeHolderData List of place holder data
      * @param userClaims      List of user claims
      * @return Place holder data
@@ -201,7 +206,7 @@ public class NotificationUtil {
     /**
      * Set placeholder values for email templates with app level branding.
      *
-     * @param emailTemplate   {@link org.wso2.carbon.email.mgt.model.EmailTemplate}
+     * @param emailTemplate   {@link EmailTemplate}
      * @param placeHolderData List of placeholder data
      * @param userClaims      List of user claims
      * @return Place holder data
@@ -215,10 +220,11 @@ public class NotificationUtil {
         JsonNode brandingPreferences = null;
         Map<String, String> brandingFallbacks = getBrandingFallbacksFromConfigFile();
 
+        BrandingPreferenceManager brandingPreferenceManager = null;
         if (Boolean.parseBoolean(
                 IdentityUtil.getProperty(NotificationConstants.EmailNotification.ENABLE_ORGANIZATION_LEVEL_EMAIL_BRANDING))) {
             try {
-                BrandingPreferenceManager brandingPreferenceManager = new BrandingPreferenceManagerImpl();
+                brandingPreferenceManager = new BrandingPreferenceManagerImpl();
                 BrandingPreference responseDTO;
                 if (StringUtils.isNotBlank(applicationUuid)) {
                     responseDTO = brandingPreferenceManager.resolveApplicationBrandingPreference(applicationUuid,
@@ -356,7 +362,22 @@ public class NotificationUtil {
             throw NotificationRuntimeException.error("Error while building the server url.", e);
         }
 
-        placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
+        String flowType = placeHolderData.get(FLOW_TYPE);
+        if (Flow.Name.INVITED_USER_REGISTRATION.toString().equalsIgnoreCase(flowType)) {
+            if (brandingPreferenceManager != null) {
+                try {
+                    placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, BrandingPreferenceMgtUtils.
+                            buildConfiguredPortalURL(null, placeHolderData.get(TENANT_DOMAIN),
+                                    brandingPreferenceManager, flowType));
+                } catch (URLBuilderException | BrandingPreferenceMgtException e) {
+                    throw NotificationRuntimeException.error("Error while retrieving the portal URL for " +
+                            "the tenant: " + placeHolderData.get(TENANT_DOMAIN) + ", flowtype: " + flowType, e);
+                }
+            }
+        } else {
+            placeHolderData.put(ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER, accountRecoveryEndpointURL);
+        }
+
         placeHolderData.put(AUTHENTICATION_ENDPOINT_PLACEHOLDER, authenticationEndpointURL);
         String emailType = placeHolderData.get(TEMPLATE_TYPE);
 
@@ -687,7 +708,7 @@ public class NotificationUtil {
         String tenantDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.TENANT_DOMAIN);
         String sendFrom = (String) eventProperties.get(NotificationConstants.EmailNotification.ARBITRARY_SEND_FROM);
         String appDomain = (String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_DOMAIN);
-        String flowType = (String) eventProperties.get(NotificationConstants.FLOW_TYPE);
+        String flowType = (String) eventProperties.get(FLOW_TYPE);
 
         // If the user is federated, use the federated user claims provided in the event properties.
         if (eventProperties.containsKey(NotificationConstants.IS_FEDERATED_USER) &&
@@ -820,6 +841,9 @@ public class NotificationUtil {
         String organizationName = tenantDomain;
         try {
             if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                if (Utils.isSuperOrgNameSupportedInNotificationTemplates()) {
+                    return OrganizationManagementUtil.getSuperRootOrgName();
+                }
                 return organizationName;
             }
             RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();

@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.bean.IdentityEventMessageContext;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
@@ -54,6 +55,8 @@ import static org.mockito.Mockito.when;
  * Test class for PushNotificationHandler.
  */
 public class PushNotificationHandlerTest {
+
+    private static final String SAMPLE_ORGANIZATION_NAME = "Great Hospital";
 
     @InjectMocks
     private PushNotificationHandler pushNotificationHandler;
@@ -104,9 +107,12 @@ public class PushNotificationHandlerTest {
         event.getEventProperties().put("user-name", "sampleUser");
 
         try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder = mockStatic(
-                NotificationHandlerDataHolder.class)) {
+                NotificationHandlerDataHolder.class);
+             MockedStatic<NotificationUtil> mockedNotificationUtil = mockStatic(NotificationUtil.class)) {
 
             mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(notificationHandlerDataHolder);
+            mockedNotificationUtil.when(() -> NotificationUtil.resolveHumanReadableOrganizationName(anyString()))
+                    .thenReturn(SAMPLE_ORGANIZATION_NAME);
             when(notificationHandlerDataHolder.getOrganizationManager()).thenReturn(organizationManager);
             when(organizationManager.resolveOrganizationId(anyString())).thenReturn("orgId");
             when(notificationHandlerDataHolder.getNotificationSenderManagementService()).thenReturn(
@@ -247,9 +253,12 @@ public class PushNotificationHandlerTest {
         event.getEventProperties().put("user-name", "sampleUser");
 
         try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder = mockStatic(
-                NotificationHandlerDataHolder.class)) {
+                NotificationHandlerDataHolder.class);
+             MockedStatic<NotificationUtil> mockedNotificationUtil = mockStatic(NotificationUtil.class)) {
 
             mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(notificationHandlerDataHolder);
+            mockedNotificationUtil.when(() -> NotificationUtil.resolveHumanReadableOrganizationName(anyString()))
+                    .thenReturn(SAMPLE_ORGANIZATION_NAME);
             when(notificationHandlerDataHolder.getOrganizationManager()).thenReturn(organizationManager);
             when(organizationManager.resolveOrganizationId(anyString())).thenReturn("orgId");
             when(notificationHandlerDataHolder.getNotificationSenderManagementService()).thenReturn(
