@@ -871,9 +871,16 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     }
                     emailSender.getProperties().put(CLIENT_ID, value);
                     break;
-                /* Client secret needs to be ignored as it is not supported with v1 and secrets are
-                not included in the v2 response. */
+                /* Client secret will be dropped from the response from api level, However returning the secret is
+                required at this level to support the patch request. */
                 case CLIENT_SECRET:
+                    try {
+                        value = decryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL, CLIENT_SECRET);
+                    } catch (SecretManagementException e) {
+                        throw new NotificationSenderManagementServerException(
+                                ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS, e.getMessage(), e);
+                    }
+                    emailSender.getProperties().put(CLIENT_SECRET, value);
                     break;
                 case AUTH_TYPE:
                     emailSender.setAuthType(value);
