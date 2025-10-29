@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
@@ -62,6 +63,8 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_EMAIL_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_HTTP_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_PROP_PREFIX;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_HTTP_METHOD_PROPERTY;
@@ -375,6 +378,15 @@ public class NotificationSenderUtils {
         } else {
             adapterProperties.put(HTTP_URL_PROPERTY, StringUtils.EMPTY);
         }
+        if (smsSender.getAuthentication() != null) {
+            if (StringUtils.isNotEmpty(smsSender.getAuthentication().getType().getName())) {
+                adapterProperties.put(AUTH_TYPE, smsSender.getAuthentication().getType().getName());
+            }
+            for (Map.Entry<String, String> property : smsSender.getAuthentication().getProperties().entrySet()) {
+                adapterProperties.put(AUTH_PROP_PREFIX + property.getKey(), property.getValue());
+            }
+        }
+
         // Default client method is httpPost. Can be changed by configuring properties.
         adapterProperties.put(CLIENT_HTTP_METHOD_PROPERTY, CONSTANT_HTTP_POST);
         for (Map.Entry<String, String> property : properties.entrySet()) {
@@ -435,8 +447,9 @@ public class NotificationSenderUtils {
      */
     public static SMSSenderDTO buildSmsSenderFromResource(Resource resource) {
 
-        SMSSenderDTO smsSender = new SMSSenderDTO();
-        smsSender.setName(resource.getResourceName());
+        SMSSenderDTO.Builder smsSenderBuilder = new SMSSenderDTO.Builder();
+        smsSenderBuilder.name(resource.getResourceName());
+
         // Skip STREAM_NAME, STREAM_VERSION and PUBLISHER_TYPE_PROPERTY properties which are stored for internal use.
         Map<String, String> attributesMap =
                 resource.getAttributes().stream()
@@ -446,28 +459,42 @@ public class NotificationSenderUtils {
         attributesMap.forEach((key, value) -> {
             switch (key) {
                 case PROVIDER:
-                    smsSender.setProvider(value);
+                    smsSenderBuilder.provider(value);
                     break;
                 case PROVIDER_URL:
-                    smsSender.setProviderURL(value);
+                    smsSenderBuilder.providerURL(value);
                     break;
                 case KEY:
-                    smsSender.setKey(value);
+                    smsSenderBuilder.key(value);
                     break;
                 case SECRET:
-                    smsSender.setSecret(value);
+                    smsSenderBuilder.secret(value);
                     break;
                 case SENDER:
-                    smsSender.setSender(value);
+                    smsSenderBuilder.sender(value);
                     break;
                 case CONTENT_TYPE:
-                    smsSender.setContentType(value);
+                    smsSenderBuilder.contentType(value);
+                    break;
+                case AUTH_TYPE:
+                    smsSenderBuilder.authType(value);
                     break;
                 default:
-                    smsSender.getProperties().put(key, value);
+                    if (StringUtils.startsWith(key, AUTH_PROP_PREFIX)) {
+                        String authPropertyKey = StringUtils.removeStart(key, AUTH_PROP_PREFIX);
+                        smsSenderBuilder.addAuthPropertiesString(authPropertyKey, value);
+                    } else {
+                        smsSenderBuilder.addProperty(key, value);
+                    }
             }
         });
-        return smsSender;
+
+        try {
+            return smsSenderBuilder.build();
+        } catch (NotificationSenderManagementException e) {
+            // This exception won't occur as we are not setting any invalid values.
+            return null;
+        }
     }
 
     /**

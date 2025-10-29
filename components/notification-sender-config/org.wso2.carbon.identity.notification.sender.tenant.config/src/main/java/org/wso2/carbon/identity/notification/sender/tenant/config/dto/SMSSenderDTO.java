@@ -18,8 +18,17 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_AUTH_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME_AUTH_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Type.BASIC;
+
 
 /**
  * DTO for SMS sender.
@@ -34,6 +43,7 @@ public class SMSSenderDTO {
     private String sender;
     private String contentType;
     private Map<String, String> properties = new HashMap<>();
+    private Authentication authentication;
 
     public String getName() {
 
@@ -113,5 +123,133 @@ public class SMSSenderDTO {
     public void setProperties(Map<String, String> properties) {
 
         this.properties = properties;
+    }
+
+    public void setAuthentication(Authentication authentication) {
+
+        this.authentication = authentication;
+    }
+
+    public Authentication getAuthentication() {
+
+        return authentication;
+    }
+
+    /**
+     * Builder for SMSSenderDTO.
+     */
+    public static class Builder {
+
+        private String name;
+        private String provider;
+        private String providerURL;
+        private String key;
+        private String secret;
+        private String sender;
+        private String contentType;
+        private final Map<String, String> properties = new HashMap<>();
+        private String authType;
+        private final Map<String, String> authProperties = new HashMap<>();
+
+        public Builder name(String name) {
+
+            this.name = name;
+            return this;
+        }
+
+        public Builder provider(String provider) {
+
+            this.provider = provider;
+            return this;
+        }
+
+        public Builder providerURL(String providerURL) {
+
+            this.providerURL = providerURL;
+            return this;
+        }
+
+        public Builder key(String key) {
+
+            this.key = key;
+            return this;
+        }
+
+        public Builder secret(String secret) {
+
+            this.secret = secret;
+            return this;
+        }
+
+        public Builder sender(String sender) {
+
+            this.sender = sender;
+            return this;
+        }
+
+        public Builder contentType(String contentType) {
+
+            this.contentType = contentType;
+            return this;
+        }
+
+        public Builder addProperty(String key, String value) {
+
+            properties.put(key, value);
+            return this;
+        }
+
+        public Builder authType(String authType) {
+
+            this.authType = authType;
+            return this;
+        }
+
+        public Builder addAuthPropertiesString(String key, String value) {
+
+            authProperties.put(key, value);
+            return this;
+        }
+
+        public SMSSenderDTO build() throws NotificationSenderManagementException {
+
+            SMSSenderDTO smsSenderDTO = new SMSSenderDTO();
+            if (StringUtils.isNotEmpty(authType)) {
+                Authentication authentication = new Authentication.AuthenticationBuilder(
+                        authType, authProperties).build();
+                validateAuthConfig(authentication);
+                smsSenderDTO.setAuthentication(authentication);
+            }
+
+            smsSenderDTO.setName(this.name);
+            smsSenderDTO.setProvider(this.provider);
+            smsSenderDTO.setProviderURL(this.providerURL);
+            smsSenderDTO.setKey(this.key);
+            smsSenderDTO.setSecret(this.secret);
+
+
+            smsSenderDTO.setSender(this.sender);
+            smsSenderDTO.setContentType(this.contentType);
+            smsSenderDTO.setProperties(this.properties);
+            return smsSenderDTO;
+        }
+
+        private void validateAuthConfig(Authentication authentication) throws NotificationSenderManagementException {
+
+            if (StringUtils.isEmpty(key) && StringUtils.isEmpty(secret)) {
+
+                if (!BASIC.equals(authentication.getType())) {
+                    return;
+                }
+                key(authentication.getProperties().get(USERNAME_AUTH_PROP));
+                secret(authentication.getProperties().get(PASSWORD_AUTH_PROP));
+            }
+
+            if (!StringUtils.equals(key, authentication.getProperties().get(USERNAME_AUTH_PROP)) ||
+                    !StringUtils.equals(secret, authentication.getProperties().get(PASSWORD_AUTH_PROP))) {
+                throw new NotificationSenderManagementException(
+                        NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
+            }
+        }
     }
 }

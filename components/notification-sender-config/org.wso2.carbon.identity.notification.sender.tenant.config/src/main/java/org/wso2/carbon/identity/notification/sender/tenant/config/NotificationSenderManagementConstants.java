@@ -53,6 +53,16 @@ public class NotificationSenderManagementConstants {
     public static final String SMS_PROVIDER = "SMS_PROVIDER";
     public static final String PUSH_PROVIDER = "PUSH_PROVIDER";
 
+    // Authentication properties
+    public static final String USERNAME_AUTH_PROP = "username";
+    public static final String PASSWORD_AUTH_PROP = "password";
+    public static final String CLIENT_ID_AUTH_PROP = "clientId";
+    public static final String CLIENT_SECRET_AUTH_PROP = "clientSecret";
+    public static final String HEADER_AUTH_PROP = "header";
+    public static final String VALUE_AUTH_PROP = "value";
+    public static final String ACCESS_TOKEN_AUTH_PROP = "accessToken";
+    public static final String AUTH_PROP_PREFIX = "authPrefix";
+
     // Email Sender's main properties.
     public static final String NAME = "name";
     public static final String SMTP_SERVER_HOST = "smtpServerHost";
