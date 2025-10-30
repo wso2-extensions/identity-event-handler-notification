@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.74-SNAPSHOT</version>
+    <version>1.9.75-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -315,21 +315,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito.inline.version}</version>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.core.version}</version>
                 <scope>test</scope>
             </dependency>
             <!-- Common test utility -->
@@ -573,9 +561,7 @@
 
         <!-- Test Dependency Versions -->
         <testng.version>7.4.0</testng.version>
-        <powermock.version>2.0.2</powermock.version>
-        <mockito.version>2.22.0</mockito.version>
-        <mockito.inline.version>3.8.0</mockito.inline.version>
+        <mockito.core.version>5.3.1</mockito.core.version>
         <jacoco.version>0.8.7</jacoco.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
 

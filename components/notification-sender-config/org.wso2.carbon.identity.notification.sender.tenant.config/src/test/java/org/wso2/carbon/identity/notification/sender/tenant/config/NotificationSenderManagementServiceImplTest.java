@@ -19,7 +19,6 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
 import org.mockito.Mock;
-import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -60,13 +59,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 
 /**
  * Unit tests for {@link NotificationSenderManagementServiceImpl}.
  */
-public class NotificationSenderManagementServiceImplTest extends PowerMockTestCase {
+public class NotificationSenderManagementServiceImplTest {
 
     private NotificationSenderManagementServiceImpl notificationSenderManagementService;
 
@@ -89,6 +89,7 @@ public class NotificationSenderManagementServiceImplTest extends PowerMockTestCa
         setCarbonContextForTenant();
         notificationSenderManagementService = new NotificationSenderManagementServiceImpl();
 
+        initMocks(this);
         when(defaultChannelConfigurationHandler.getName()).thenReturn(DEFAULT_HANDLER_NAME);
         when(websubhubChannelConfigurationHandler.getName()).thenReturn(WEB_SUB_HUB_HANDLER_NAME);
 

@@ -20,16 +20,11 @@ package org.wso2.carbon.email.mgt;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
-import org.testng.IObjectFactory;
+import org.mockito.MockedStatic;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
@@ -37,7 +32,6 @@ import org.wso2.carbon.email.mgt.internal.I18nMgtServiceComponent;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
-import org.wso2.carbon.identity.common.testng.WithCarbonHome;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
@@ -50,6 +44,9 @@ import org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,14 +56,13 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -75,9 +71,7 @@ import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.NOTIFICATION_
 /**
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
-@PrepareForTest({IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class,
-        OrganizationManagementUtil.class, IdentityUtil.class})
-public class OrganizationEmailTemplateTest extends PowerMockTestCase {
+public class OrganizationEmailTemplateTest {
 
     private EmailTemplateManagerImpl emailTemplateManager;
 
@@ -96,34 +90,42 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
     @Mock
     Resource resource;
 
-    @ObjectFactory
-    public IObjectFactory getObjectFactory() {
-
-        return new org.powermock.modules.testng.PowerMockObjectFactory();
-    }
-
     private String tenantDomain = "carbon.super";
     private static final String ROOT_ORG_ID = "10084a8d-113f-4211-a0d5-efe36b082211";
+
+    MockedStatic<I18nMgtDataHolder> i18nMgtDataHolderStatic;
+    MockedStatic<IdentityUtil> identityUtilStatic;
+    MockedStatic<OrganizationManagementUtil> orgMgtUtilStatic;
 
     @BeforeMethod
     public void setUp() throws Exception {
 
         initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+        
+        i18nMgtDataHolderStatic = mockStatic(I18nMgtDataHolder.class);
+        i18nMgtDataHolder = mock(I18nMgtDataHolder.class);
+        i18nMgtDataHolderStatic.when(I18nMgtDataHolder::getInstance).thenReturn(i18nMgtDataHolder);
         when(i18nMgtDataHolder.getOrganizationManager()).thenReturn(organizationManager);
         when(i18nMgtDataHolder.getOrgResourceResolverService()).thenReturn(orgResourceResolverService);
 
         when(organizationManager.resolveOrganizationId(tenantDomain)).thenReturn(ROOT_ORG_ID);
 
-        mockStatic(IdentityUtil.class);
-        when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("registry");
+        identityUtilStatic = mockStatic(IdentityUtil.class);
+        identityUtilStatic.when(()->IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG))
+                .thenReturn("registry");
 
         // Mock RegistryResourceMgtService.
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
         emailTemplateManager = new EmailTemplateManagerImpl();
-        mockStatic(OrganizationManagementUtil.class);
+        orgMgtUtilStatic = mockStatic(OrganizationManagementUtil.class);
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+
+        i18nMgtDataHolderStatic.close();
+        identityUtilStatic.close();
+        orgMgtUtilStatic.close();
     }
 
     /**
@@ -140,23 +142,26 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
     @Test(dataProvider = "notificationTemplateDataProvider")
     public void testGetNotificationTemplate(String notificationChannel, String displayName, String type, String locale,
                                             String contentType, byte[] content) throws Exception {
+        
+        try (MockedStatic<IdentityValidationUtil> identityValidationUtilStatic =
+                     mockStatic(IdentityValidationUtil.class)) {
+            mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
+            mockIsValidTemplate(true, true, identityValidationUtilStatic);
+            NotificationTemplate notificationTemplate = emailTemplateManager
+                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, null, false);
+            assertNotNull(notificationTemplate);
+            assertNotNull(notificationTemplate.getBody(), "Template should have a notification body");
+            assertEquals(notificationTemplate.getNotificationChannel(), notificationChannel);
 
-        mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
-        mockIsValidTemplate(true, true);
-        NotificationTemplate notificationTemplate = emailTemplateManager
-                .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, null, false);
-        assertNotNull(notificationTemplate);
-        assertNotNull(notificationTemplate.getBody(), "Template should have a notification body");
-        assertEquals(notificationTemplate.getNotificationChannel(), notificationChannel);
-
-        // Validate not having subject or footer in SMS notification template.
-        if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
-            assertNull(notificationTemplate.getFooter(), "SMS notification template cannot have a footer");
-            assertNull(notificationTemplate.getSubject(), "SMS notification template cannot have a subject");
-        } else {
-            assertNotNull(notificationTemplate.getFooter(), "EMAIL notification template must have a footer");
-            assertNotNull(notificationTemplate.getSubject(),
-                    "EMAIL notification template must have a subject");
+            // Validate not having subject or footer in SMS notification template.
+            if (NotificationChannels.SMS_CHANNEL.getChannelType().equals(notificationChannel)) {
+                assertNull(notificationTemplate.getFooter(), "SMS notification template cannot have a footer");
+                assertNull(notificationTemplate.getSubject(), "SMS notification template cannot have a subject");
+            } else {
+                assertNotNull(notificationTemplate.getFooter(), "EMAIL notification template must have a footer");
+                assertNotNull(notificationTemplate.getSubject(),
+                        "EMAIL notification template must have a subject");
+            }
         }
     }
 
@@ -181,19 +186,22 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
                                                   boolean isValidLocale, String errorMsg,
                                                   String expectedErrorCode, byte[] content) throws Exception {
 
-        mockIsValidTemplate(isValidTemplate, isValidLocale);
-        try {
-            mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
-            NotificationTemplate notificationTemplate = emailTemplateManager
-                    .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, null, false);
-            assertNull(notificationTemplate, "Cannot return a notificationTemplate");
-        } catch (NotificationTemplateManagerException e) {
-            String errorCode = e.getErrorCode();
-            assertNotNull(errorCode, "Error code cannot be empty");
-            if (StringUtils.isEmpty(errorMsg)) {
-                errorMsg = e.getMessage();
+        try (MockedStatic<IdentityValidationUtil> identityValidationUtilStatic =
+                     mockStatic(IdentityValidationUtil.class)) {
+            mockIsValidTemplate(isValidTemplate, isValidLocale, identityValidationUtilStatic);
+            try {
+                mockRegistryResource(notificationChannel, displayName, type, locale, contentType, content);
+                NotificationTemplate notificationTemplate = emailTemplateManager
+                        .getNotificationTemplate(notificationChannel, type, locale, tenantDomain, null, false);
+                assertNull(notificationTemplate, "Cannot return a notificationTemplate");
+            } catch (NotificationTemplateManagerException e) {
+                String errorCode = e.getErrorCode();
+                assertNotNull(errorCode, "Error code cannot be empty");
+                if (StringUtils.isEmpty(errorMsg)) {
+                    errorMsg = e.getMessage();
+                }
+                assertEquals(errorCode, expectedErrorCode, errorMsg);
             }
-            assertEquals(errorCode, expectedErrorCode, errorMsg);
         }
     }
 
@@ -214,15 +222,15 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
 
         try {
             if (scenarioCode == 2) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
+                when(resourceMgtService.isResourceExists(anyString(), anyString())).thenReturn(true);
             }
             if (scenarioCode == 3) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+                when(resourceMgtService.isResourceExists(anyString(), anyString()))
                         .thenThrow(new IdentityRuntimeException("Test Error"));
             }
             when(organizationManager.resolveOrganizationId(domain)).thenReturn(orgId);
             when(orgResourceResolverService.getResourcesFromOrgHierarchy(
-                    ArgumentMatchers.eq(orgId),
+                    eq(orgId),
                     any(),
                     any()))
                     .thenReturn(false);
@@ -256,7 +264,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
             notificationTemplate = buildSampleNotificationTemplate(templateContent);
         }
         try {
-            when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+            when(resourceMgtService.isResourceExists(anyString(), anyString()))
                     .thenThrow(new IdentityRuntimeException("Test Error"));
             emailTemplateManager.addNotificationTemplate(notificationTemplate, tenantDomain);
             throw new Exception("Exception should be thrown for above testing scenarios");
@@ -283,11 +291,13 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
                                                     String message) throws Exception {
 
         int numberOfDefaultTemplates = getNumberOfDefaultTemplates(notificationChannel, baseDirectoryPath);
-        mockNotificationChannelConfigPath(baseDirectoryPath);
-        I18nMgtServiceComponent component = new I18nMgtServiceComponent();
-        List<NotificationTemplate> defaultNotificationTemplates =
-                component.loadDefaultTemplatesFromFile(notificationChannel);
-        assertEquals(defaultNotificationTemplates.size(), numberOfDefaultTemplates, message);
+        try (MockedStatic<CarbonUtils> carbonUtilsStatic = mockStatic(CarbonUtils.class)) {
+            carbonUtilsStatic.when(CarbonUtils::getCarbonConfigDirPath).thenReturn(baseDirectoryPath);
+            I18nMgtServiceComponent component = new I18nMgtServiceComponent();
+            List<NotificationTemplate> defaultNotificationTemplates =
+                    component.loadDefaultTemplatesFromFile(notificationChannel);
+            assertEquals(defaultNotificationTemplates.size(), numberOfDefaultTemplates, message);
+        }
     }
 
     /**
@@ -430,7 +440,7 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
     private void mockRegistryResource(String notificationChannel, String displayName, String templateType,
                                       String locale, String contentType, byte[] templateContent) throws Exception {
 
-        when(resourceMgtService.getIdentityResource(Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
+        when(resourceMgtService.getIdentityResource(anyString(), anyString(), anyString()))
                 .thenReturn(resource);
 
         // Mock Resource properties.
@@ -449,18 +459,16 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
      * @param isValidTemplate Whether the template is valid or not
      * @param isValidLocale   Whether the locate is valid or not
      */
-    private void mockIsValidTemplate(boolean isValidTemplate, boolean isValidLocale) {
-
-        mockStatic(IdentityValidationUtil.class);
-
+    private void mockIsValidTemplate(boolean isValidTemplate, boolean isValidLocale,
+                                     MockedStatic<IdentityValidationUtil> identityValidationUtilStatic) {
+        
         // Mock methods in validateTemplateType method.
-        when(IdentityValidationUtil
-                .isValid(Matchers.anyString(), Matchers.any(String[].class), Matchers.any(String[].class)))
-                .thenReturn(isValidTemplate);
+        identityValidationUtilStatic.when(() -> IdentityValidationUtil
+                        .isValid(anyString(), any(String[].class), any(String[].class))).thenReturn(isValidTemplate);
 
         // Mock methods in validateLocale method.
-        when(IdentityValidationUtil.isValidOverBlackListPatterns(Matchers.anyString(), Matchers.anyString())).
-                thenReturn(isValidLocale);
+        identityValidationUtilStatic.when(() -> IdentityValidationUtil
+                        .isValidOverBlackListPatterns(anyString(), anyString())).thenReturn(isValidLocale);
     }
 
     /**
@@ -570,17 +578,6 @@ public class OrganizationEmailTemplateTest extends PowerMockTestCase {
         notificationTemplate.setBody(templateContent[5]);
         notificationTemplate.setSubject(templateContent[6]);
         return notificationTemplate;
-    }
-
-    /**
-     * Mock the default config xml path of notification templates.
-     *
-     * @param baseDirectoryPath Resource folder location
-     */
-    private void mockNotificationChannelConfigPath(String baseDirectoryPath) {
-
-        mockStatic(CarbonUtils.class);
-        when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(baseDirectoryPath);
     }
 
     /**
