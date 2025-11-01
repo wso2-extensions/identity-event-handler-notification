@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -135,6 +136,24 @@ public class SMSSenderDTO {
         return authentication;
     }
 
+    public void getToken() {
+
+        // check allowed grant to call
+        TokenManager tokenManager = new TokenManager();
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("client_id", "TESTID");
+        authProps.put("client_secret", "TESTSECRET");
+        authProps.put("scope", "testing");
+        Authentication tempAuth = new Authentication.AuthenticationBuilder(
+                Authentication.Type.CLIENT_CREDENTIAL.name(), authProps).build();
+        tokenManager.setAuthentication(tempAuth);
+        try {
+            tokenManager.getToken();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while acquiring token for the SMS sender", e);
+        }
+    }
+
     /**
      * Builder for SMSSenderDTO.
      */
@@ -205,7 +224,7 @@ public class SMSSenderDTO {
             return this;
         }
 
-        public Builder addAuthPropertiesString(String key, String value) {
+        public Builder addAuthProperties(String key, String value) {
 
             authProperties.put(key, value);
             return this;
@@ -226,8 +245,6 @@ public class SMSSenderDTO {
             smsSenderDTO.setProviderURL(this.providerURL);
             smsSenderDTO.setKey(this.key);
             smsSenderDTO.setSecret(this.secret);
-
-
             smsSenderDTO.setSender(this.sender);
             smsSenderDTO.setContentType(this.contentType);
             smsSenderDTO.setProperties(this.properties);
@@ -236,17 +253,18 @@ public class SMSSenderDTO {
 
         private void validateAuthConfig(Authentication authentication) throws NotificationSenderManagementException {
 
+            /* If key and secret are not provided in the DTO, fetch them from the authentication
+             configuration for only if the BASIC auth type is configured. */
             if (StringUtils.isEmpty(key) && StringUtils.isEmpty(secret)) {
-
                 if (!BASIC.equals(authentication.getType())) {
                     return;
                 }
-                key(authentication.getProperties().get(USERNAME_AUTH_PROP));
-                secret(authentication.getProperties().get(PASSWORD_AUTH_PROP));
+                key(authentication.getProperty(USERNAME_AUTH_PROP).getValue());
+                secret(authentication.getProperty(PASSWORD_AUTH_PROP).getValue());
             }
 
-            if (!StringUtils.equals(key, authentication.getProperties().get(USERNAME_AUTH_PROP)) ||
-                    !StringUtils.equals(secret, authentication.getProperties().get(PASSWORD_AUTH_PROP))) {
+            if (!StringUtils.equals(key, authentication.getProperty(USERNAME_AUTH_PROP).getValue()) ||
+                    !StringUtils.equals(secret, authentication.getProperty(PASSWORD_AUTH_PROP).getValue())) {
                 throw new NotificationSenderManagementException(
                         NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
             }

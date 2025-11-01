@@ -56,12 +56,14 @@ public class NotificationSenderManagementConstants {
     // Authentication properties
     public static final String USERNAME_AUTH_PROP = "username";
     public static final String PASSWORD_AUTH_PROP = "password";
-    public static final String CLIENT_ID_AUTH_PROP = "clientId";
-    public static final String CLIENT_SECRET_AUTH_PROP = "clientSecret";
+    public static final String CLIENT_ID_AUTH_PROP = "client_id";
+    public static final String CLIENT_SECRET_AUTH_PROP = "client_secret";
     public static final String HEADER_AUTH_PROP = "header";
     public static final String VALUE_AUTH_PROP = "value";
     public static final String ACCESS_TOKEN_AUTH_PROP = "accessToken";
-    public static final String AUTH_PROP_PREFIX = "authPrefix";
+    public static final String SCOPE_AUTH_PROP = "scope";
+    public static final String AUTH_INTERNAL_PROP_PREFIX = "auth.internal.";
+    public static final String AUTH_EXTERNAL_PROP_PREFIX = "auth.external.";
 
     // Email Sender's main properties.
     public static final String NAME = "name";
