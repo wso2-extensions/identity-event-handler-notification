@@ -70,6 +70,10 @@
             <groupId>org.wso2.carbon.identity.notification.push</groupId>
             <artifactId>org.wso2.carbon.identity.notification.push.provider</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
         <!--Test dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
@@ -190,6 +194,8 @@
                             org.wso2.carbon.identity.secret.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+
+                            org.apache.http.*; version="${httpcore.version.osgi.import.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>

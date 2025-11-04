@@ -18,81 +18,119 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.external.api.client.api.model.APIClientConfig;
 import org.wso2.carbon.identity.external.api.token.handler.api.exception.TokenHandlerException;
 import org.wso2.carbon.identity.external.api.token.handler.api.model.GrantContext;
 import org.wso2.carbon.identity.external.api.token.handler.api.model.TokenRequestContext;
 import org.wso2.carbon.identity.external.api.token.handler.api.model.TokenResponse;
 import org.wso2.carbon.identity.external.api.token.handler.api.service.TokenAcquirerService;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.AuthProperty;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 
 /**
  * Manager class for handling Client Credentials Token acquisition and management.
  */
 public class TokenManager {
 
+    private static final Log LOG = LogFactory.getLog(TokenManager.class);
     private final TokenAcquirerService tokenAcquirerService;
-    private TokenResponse tokenResponse;
-    private Authentication authentication;
+    private static final TokenManager tokenManager = new TokenManager();
 
-    public TokenManager() {
+    private TokenManager() {
 
         this.tokenAcquirerService = new TokenAcquirerService(buildAPIClientConfig());
     }
 
-    public void setAuthentication(Authentication authentication) {
+    public static TokenManager getInstance() {
 
-        this.authentication = authentication;
+        return tokenManager;
     }
 
-    public String getToken() throws TokenHandlerException {
+    public void retrieveToken(Authentication authentication) throws NotificationSenderManagementServerException {
 
-        if (tokenResponse != null && StringUtils.isBlank(tokenResponse.getAccessToken())) {
-            return tokenResponse.getAccessToken();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving token for authentication type: " + authentication.getType());
         }
-        return getNewToken(false);
-    }
-
-    public String getRefreshToken() {
-
-        return tokenResponse.getRefreshToken();
-    }
-
-    public String getNewToken(Boolean withRefreshTokenGrant) throws TokenHandlerException {
 
         TokenRequestContext tokenRequestContext = buildTokenRequestContext(authentication);
         tokenAcquirerService.setTokenRequestContext(tokenRequestContext);
-        tokenResponse = tokenAcquirerService.getNewAccessToken();
-        return tokenResponse.getAccessToken();
-    }
 
-    private TokenRequestContext buildTokenRequestContext(Authentication authentication) throws TokenHandlerException {
+        TokenResponse tokenResponse;
+        String refreshToken = authentication.getInternalProperties().get("RefreshToken");
 
-        // only for credentials grant type <= think where this check should go
-        // properly set the grant context details with switch
-        Map<String, String> authPropertiesMap = new HashMap<>();
-        for (AuthProperty authProperty : authentication.getProperties()) {
-            if (authProperty.getScope() == AuthProperty.Scope.EXTERNAL) {
-                authPropertiesMap.put(authProperty.getName(), authProperty.getValue());
+        try {
+            if (refreshToken != null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Attempting to retrieve access token using refresh token grant.");
+                }
+                try {
+                    tokenResponse = tokenAcquirerService.getNewAccessTokenFromRefreshGrant(refreshToken);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Successfully retrieved access token using refresh token grant.");
+                    }
+                } catch (TokenHandlerException e) {
+                    LOG.warn("Failed to retrieve access token using refresh token grant. Falling back to client " +
+                            "credentials grant.", e);
+                    tokenResponse = tokenAcquirerService.getNewAccessToken();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Successfully retrieved access token using client credentials grant.");
+                    }
+                }
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No refresh token available. Retrieving access token using client credentials grant.");
+                }
+                tokenResponse = tokenAcquirerService.getNewAccessToken();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Successfully retrieved access token using client credentials grant.");
+                }
             }
+        } catch (TokenHandlerException e) {
+            LOG.error("Error while retrieving token.", e);
+            throw new NotificationSenderManagementServerException(
+                    ErrorMessage.ERROR_CODE_ERROR_WHILE_RETRIEVING_TOKEN, null, e);
         }
 
-        GrantContext grantContext = new GrantContext.Builder()
+        addInternalProperties(tokenResponse, authentication);
+    }
+
+    private void addInternalProperties(TokenResponse tokenResponse, Authentication authentication) {
+
+        authentication.addInternalProperty("RefreshToken", tokenResponse.getRefreshToken());
+        authentication.addInternalProperty("AccessToken", tokenResponse.getAccessToken());
+    }
+
+    private TokenRequestContext buildTokenRequestContext(Authentication authentication)
+            throws NotificationSenderManagementServerException {
+
+        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL) {
+            LOG.error("Unsupported authentication type for token retrieval: " + authentication.getType());
+            throw new NotificationSenderManagementServerException(
+                    ErrorMessage.ERROR_CODE_ERROR_UNSUPPORTED_AUTH_TYPE_FOR_TOKEN_RETRIEVAL, null);
+        }
+
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Building token request context for client credentials grant.");
+            }
+            GrantContext grantContext = new GrantContext.Builder()
                     .grantType(GrantContext.GrantType.CLIENT_CREDENTIAL)
-                    .properties(authPropertiesMap)
+                    .properties(authentication.getProperties())
                     .build();
 
-        // get endpoint url from prop
-        TokenRequestContext.Builder builder = new TokenRequestContext.Builder()
-                .grantContext(grantContext)
-                .endpointUrl("https://customauth.free.beeceptor.com/todos");
+            TokenRequestContext.Builder builder = new TokenRequestContext.Builder()
+                    .grantContext(grantContext)
+                    .endpointUrl(authentication.getProperty(Authentication.Property.TOKEN_ENDPOINT.getName()));
 
-        return builder.build();
+            return builder.build();
+        } catch (TokenHandlerException e) {
+            LOG.error("Error while building token request context.", e);
+            throw new NotificationSenderManagementServerException(
+                    ErrorMessage.ERROR_CODE_ERROR_WHILE_TOKEN_REQUEST_BUILDING, null, e);
+        }
     }
 
     private APIClientConfig buildAPIClientConfig() {

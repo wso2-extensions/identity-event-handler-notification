@@ -19,6 +19,8 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,7 +32,8 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.AuthProperty;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -44,7 +47,8 @@ import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementExcept
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,8 +70,9 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_HTTP_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_EXTERNAL_PROP_PREFIX;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_HEADER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_INTERNAL_PROP_PREFIX;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_HTTP_METHOD_PROPERTY;
@@ -208,20 +213,20 @@ public class NotificationSenderUtils {
     /**
      * Convert AuthProperty list to a map with proper prefixes.
      *
-     * @param authProperties List of AuthProperty.
-     * @return Map of AuthProperty with proper prefixes.
+     * @param authentication Authentication object.
+     * @param mapToBeUpdated Map to be updated with authentication properties.
      */
-    public static Map<String, String> convertAuthPropertiesToMap(List<AuthProperty> authProperties) {
+    public static void addAuthenticationProperties(Map<String, String> mapToBeUpdated, Authentication authentication) {
 
-        Map<String, String> authPropertiesMap = new HashMap<>();
-        for (AuthProperty property : authProperties) {
-            if (property.getScope() == AuthProperty.Scope.INTERNAL) {
-                authPropertiesMap.put(AUTH_INTERNAL_PROP_PREFIX + property.getName(), property.getValue());
-            } else {
-                authPropertiesMap.put(AUTH_EXTERNAL_PROP_PREFIX + property.getName(), property.getValue());
-            }
+        if (authentication != null) {
+            mapToBeUpdated.put(AUTH_TYPE_PREFIX, authentication.getType().name());
+            authentication.getProperties().forEach((propKey, propValue) ->
+                    mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + propKey, propValue)
+            );
+            authentication.getInternalProperties().forEach((propKey, propValue) ->
+                    mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey, propValue)
+            );
         }
-        return authPropertiesMap;
     }
 
     private static void addEventPublisherAttributes(EmailSenderDTO emailSender, Document document, Element root) {
@@ -400,12 +405,7 @@ public class NotificationSenderUtils {
         } else {
             adapterProperties.put(HTTP_URL_PROPERTY, StringUtils.EMPTY);
         }
-        if (smsSender.getAuthentication() != null) {
-            if (StringUtils.isNotEmpty(smsSender.getAuthentication().getType().getName())) {
-                adapterProperties.put(AUTH_TYPE, smsSender.getAuthentication().getType().getName());
-            }
-            adapterProperties.putAll(convertAuthPropertiesToMap(smsSender.getAuthentication().getProperties()));
-        }
+        addAuthenticationProperties(adapterProperties, smsSender.getAuthentication());
 
         // Default client method is httpPost. Can be changed by configuring properties.
         adapterProperties.put(CLIENT_HTTP_METHOD_PROPERTY, CONSTANT_HTTP_POST);
@@ -476,7 +476,7 @@ public class NotificationSenderUtils {
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .filter(attribute -> attribute.getValue() != null)
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
-        List<AuthProperty> internalAuthProperties = new ArrayList<>();
+        Map<String, String> internalAuthProp = new HashMap<>();
         attributesMap.forEach((key, value) -> {
             switch (key) {
                 case PROVIDER:
@@ -497,31 +497,27 @@ public class NotificationSenderUtils {
                 case CONTENT_TYPE:
                     smsSenderBuilder.contentType(value);
                     break;
-                case AUTH_TYPE:
+                case AUTH_TYPE_PREFIX:
                     smsSenderBuilder.authType(value);
                     break;
                 default:
-                    if (StringUtils.startsWith(key, AUTH_INTERNAL_PROP_PREFIX)) {
-                        AuthProperty internalAuthProperty = new AuthProperty.Builder(
-                                    StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX),
-                                    value,
-                                    AuthProperty.Scope.INTERNAL)
-                                .build();
-                        internalAuthProperties.add(internalAuthProperty);
+                    if (StringUtils.startsWith(key, AUTH_EXTERNAL_PROP_PREFIX)) {
+                        smsSenderBuilder.addAuthProperty(
+                                StringUtils.removeStart(key, AUTH_EXTERNAL_PROP_PREFIX), value);
                     } else if (StringUtils.startsWith(key, AUTH_INTERNAL_PROP_PREFIX)) {
-                        smsSenderBuilder.addAuthProperties(
-                                StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX), value);
+                        internalAuthProp.put(StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX), value);
                     } else {
                         smsSenderBuilder.addProperty(key, value);
                     }
+                    break;
             }
         });
 
         try {
             SMSSenderDTO smsSenderDTO = smsSenderBuilder.build();
-            internalAuthProperties.forEach(internalAuthProperty ->
-                smsSenderDTO.getAuthentication().setInternalAuthProperty(
-                        internalAuthProperty.getName(), internalAuthProperty.getValue())
+            internalAuthProp.keySet().forEach(internalAuthProperty ->
+                smsSenderDTO.getAuthentication().addInternalProperty(
+                        internalAuthProperty, internalAuthProp.get(internalAuthProperty))
                 );
             return smsSenderDTO;
         } catch (NotificationSenderManagementException e) {
@@ -693,5 +689,37 @@ public class NotificationSenderUtils {
         pushSenderData.setProperties(pushSenderDTO.getProperties());
         pushSenderData.setProviderId(pushSenderDTO.getProviderId());
         return pushSenderData;
+    }
+
+    /**
+     * Build authentication header.
+     *
+     * @param authType       Authentication type.
+     * @param authProperties Authentication properties.
+     * @return Header object.
+     */
+    public static Header buildAuthenticationHeader(Authentication.Type authType, Map<String, String> authProperties) {
+
+        switch (authType) {
+            case BASIC:
+                String credentials = authProperties.get(Property.USERNAME.getName()) + ":" +
+                        authProperties.get(Property.PASSWORD.getName());
+                byte[] encodedBytes = Base64.getEncoder().encode(credentials.getBytes(StandardCharsets.UTF_8));
+                return new org.apache.http.message.BasicHeader(
+                        AUTH_HEADER,
+                        "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
+            case BEARER:
+                return new BasicHeader(
+                        AUTH_HEADER,
+                        "Bearer " + authProperties.get(Property.ACCESS_TOKEN.toString())
+                );
+            case API_KEY:
+                return new BasicHeader(
+                        authProperties.get(Property.HEADER.toString()),
+                        authProperties.get(Property.VALUE.toString())
+                );
+            default:
+                return null;
+        }
     }
 }

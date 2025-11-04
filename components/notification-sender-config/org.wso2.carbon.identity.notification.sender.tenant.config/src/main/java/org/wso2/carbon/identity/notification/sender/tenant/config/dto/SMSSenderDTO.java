@@ -19,23 +19,24 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME_AUTH_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Type.BASIC;
-
 
 /**
  * DTO for SMS sender.
  */
 public class SMSSenderDTO {
-  
+
+    private static final Log LOG = LogFactory.getLog(SMSSenderDTO.class);
     private String name;
     private String provider;
     private String providerURL;
@@ -44,7 +45,7 @@ public class SMSSenderDTO {
     private String sender;
     private String contentType;
     private Map<String, String> properties = new HashMap<>();
-    private Authentication authentication;
+    private Authentication authentication = null;
 
     public String getName() {
 
@@ -136,24 +137,6 @@ public class SMSSenderDTO {
         return authentication;
     }
 
-    public void getToken() {
-
-        // check allowed grant to call
-        TokenManager tokenManager = new TokenManager();
-        Map<String, String> authProps = new HashMap<>();
-        authProps.put("client_id", "TESTID");
-        authProps.put("client_secret", "TESTSECRET");
-        authProps.put("scope", "testing");
-        Authentication tempAuth = new Authentication.AuthenticationBuilder(
-                Authentication.Type.CLIENT_CREDENTIAL.name(), authProps).build();
-        tokenManager.setAuthentication(tempAuth);
-        try {
-            tokenManager.getToken();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error while acquiring token for the SMS sender", e);
-        }
-    }
-
     /**
      * Builder for SMSSenderDTO.
      */
@@ -224,7 +207,7 @@ public class SMSSenderDTO {
             return this;
         }
 
-        public Builder addAuthProperties(String key, String value) {
+        public Builder addAuthProperty(String key, String value) {
 
             authProperties.put(key, value);
             return this;
@@ -232,14 +215,12 @@ public class SMSSenderDTO {
 
         public SMSSenderDTO build() throws NotificationSenderManagementException {
 
-            SMSSenderDTO smsSenderDTO = new SMSSenderDTO();
-            if (StringUtils.isNotEmpty(authType)) {
-                Authentication authentication = new Authentication.AuthenticationBuilder(
-                        authType, authProperties).build();
-                validateAuthConfig(authentication);
-                smsSenderDTO.setAuthentication(authentication);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Building SMSSenderDTO for provider: " + this.provider);
             }
 
+            SMSSenderDTO smsSenderDTO = new SMSSenderDTO();
+            smsSenderDTO.setAuthentication(buildAuthConfig());
             smsSenderDTO.setName(this.name);
             smsSenderDTO.setProvider(this.provider);
             smsSenderDTO.setProviderURL(this.providerURL);
@@ -248,26 +229,80 @@ public class SMSSenderDTO {
             smsSenderDTO.setSender(this.sender);
             smsSenderDTO.setContentType(this.contentType);
             smsSenderDTO.setProperties(this.properties);
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Successfully built SMSSenderDTO for provider: " + this.provider);
+            }
             return smsSenderDTO;
         }
 
-        private void validateAuthConfig(Authentication authentication) throws NotificationSenderManagementException {
+        private Authentication buildAuthConfig() throws NotificationSenderManagementException {
 
-            /* If key and secret are not provided in the DTO, fetch them from the authentication
-             configuration for only if the BASIC auth type is configured. */
-            if (StringUtils.isEmpty(key) && StringUtils.isEmpty(secret)) {
-                if (!BASIC.equals(authentication.getType())) {
-                    return;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Building authentication configuration for SMS sender. Auth type: " + authType);
+            }
+
+            Authentication authentication = null;
+            if (StringUtils.isNotEmpty(authType)) {
+                 authentication = new Authentication.AuthenticationBuilder(authType, authProperties).build();
+            }
+
+            if (authentication != null) {
+                boolean isBasic = BASIC.equals(authentication.getType());
+
+                // Non-basic: key or secret updates not allowed
+                if (!isBasic) {
+                    if (StringUtils.isNotEmpty(key) || StringUtils.isNotEmpty(secret)) {
+                        LOG.error("Key or secret updates not allowed for non-BASIC authentication type: " +
+                                authentication.getType());
+                        throw new NotificationSenderManagementClientException(
+                                ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
+                    }
+                    return authentication;
                 }
-                key(authentication.getProperty(USERNAME_AUTH_PROP).getValue());
-                secret(authentication.getProperty(PASSWORD_AUTH_PROP).getValue());
+
+                // BASIC: validate or assign key and secret
+                String existingKey = authentication.getProperty(Property.USERNAME.getName());
+                String existingSecret = authentication.getProperty(Property.PASSWORD.getName());
+
+                if (StringUtils.isNotBlank(key) && !StringUtils.equals(key, existingKey)) {
+                    LOG.error("Key update not allowed for BASIC authentication. Attempted to change existing key.");
+                    throw new NotificationSenderManagementClientException(
+                            ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
+                }
+                if (StringUtils.isBlank(key)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Key not provided. Using existing key from authentication configuration.");
+                    }
+                    key(existingKey);
+                }
+
+                if (StringUtils.isNotBlank(secret) && !StringUtils.equals(secret, existingSecret)) {
+                    LOG.error("Secret update not allowed for BASIC authentication. Attempted to change existing secret.");
+                    throw new NotificationSenderManagementClientException(
+                            ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
+                }
+                if (StringUtils.isBlank(secret)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Secret not provided. Using existing secret from authentication configuration.");
+                    }
+                    secret(existingSecret);
+                }
+
+                return authentication;
             }
 
-            if (!StringUtils.equals(key, authentication.getProperty(USERNAME_AUTH_PROP).getValue()) ||
-                    !StringUtils.equals(secret, authentication.getProperty(PASSWORD_AUTH_PROP).getValue())) {
-                throw new NotificationSenderManagementException(
-                        NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
+            // If authType not provided, then creating BASIC if key and secret provided
+            if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(secret)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Auth type not provided. Creating BASIC authentication with provided key and secret.");
+                }
+                Map<String, String> authProps = new HashMap<>();
+                authProps.put(Property.USERNAME.getName(), key);
+                authProps.put(Property.PASSWORD.getName(), secret);
+                return new Authentication.AuthenticationBuilder(BASIC.toString(), authProps).build();
             }
+            return null;
         }
     }
 }

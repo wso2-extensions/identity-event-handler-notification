@@ -19,33 +19,36 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
-
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.HEADER_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SCOPE_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME_AUTH_PROP;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.VALUE_AUTH_PROP;
 
 /**
  * Authentication configuration for the notification sending provider.
  */
 public class Authentication {
 
+    private static final Log LOG = LogFactory.getLog(Authentication.class);
     private final Type type;
-    private final List<AuthProperty> authProperties;
+    private final Map<String, String> authProperties;
+    private final Map<String, String> internalAuthProperties;
+    private Header authHeader;
 
     public Authentication(AuthenticationBuilder builder) {
 
         type = builder.authType;
         authProperties = builder.resolvedAuthProperties;
+        internalAuthProperties = builder.internalAuthProperties;
+        authHeader = builder.authHeader;
     }
 
     public Authentication.Type getType() {
@@ -53,22 +56,50 @@ public class Authentication {
         return type;
     }
 
-    public List<AuthProperty> getProperties() {
+    public Map<String, String> getProperties() {
 
         return authProperties;
     }
 
-    public AuthProperty getProperty(String propertyName) {
+    public String getProperty(String propertyName) {
 
-        return this.authProperties.stream()
-                .filter(property -> propertyName.equals(property.getName()))
-                .findFirst()
-                .orElse(null);
+        return authProperties.get(propertyName);
     }
 
-    public void setInternalAuthProperty(String key, String value) {
+    public void addInternalProperty(String propKey, String propValue) {
 
-        authProperties.add(new AuthProperty.Builder(key, value, AuthProperty.Scope.INTERNAL).build());
+        authProperties.put(propKey, propValue);
+    }
+
+    public Map<String, String> getInternalProperties() {
+
+        return internalAuthProperties;
+    }
+
+    public Header getAuthHeader() throws NotificationSenderManagementServerException {
+
+        if (type == Type.CLIENT_CREDENTIAL && authHeader == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Auth header is null for CLIENT_CREDENTIAL type. Building new auth header.");
+            }
+            authHeader = rebuildAuthHeader();
+        }
+        return authHeader;
+    }
+
+    public Header rebuildAuthHeader() throws NotificationSenderManagementServerException {
+
+        if (type == Type.CLIENT_CREDENTIAL) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Rebuilding auth header for CLIENT_CREDENTIAL authentication type.");
+            }
+            TokenManager.getInstance().retrieveToken(this);
+            authHeader = NotificationSenderUtils.buildAuthenticationHeader(type, internalAuthProperties);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Successfully rebuilt auth header for CLIENT_CREDENTIAL authentication type.");
+            }
+        }
+        return authHeader;
     }
 
     /**
@@ -78,62 +109,74 @@ public class Authentication {
 
         private final Type authType;
         private final Map<String, String> propertiesMap;
-        private final List<AuthProperty> resolvedAuthProperties = new ArrayList<>();
+        private final Map<String, String> resolvedAuthProperties = new HashMap<>();
+        private final Map<String, String> internalAuthProperties = new HashMap<>();
+        private Header authHeader;
 
-        public AuthenticationBuilder (String type, Map<String, String> authPropertiesMap) {
+        public AuthenticationBuilder (String type, Map<String, String> authPropertiesMap)
+                throws NotificationSenderManagementClientException {
 
             this.authType = Type.valueOfName(type);
             this.propertiesMap = authPropertiesMap;
         }
 
-        public AuthenticationBuilder setInternalAuthProperty(String key, String value) {
+        public AuthenticationBuilder internalAuthProperty(String propKey, String propValue) {
 
-            resolvedAuthProperties.add(new AuthProperty.Builder(key, value, AuthProperty.Scope.INTERNAL).build());
+            resolvedAuthProperties.put(propKey, propValue);
             return this;
         }
 
-        public Authentication build() {
+        public Authentication build() throws NotificationSenderManagementException {
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Building authentication configuration for type: " + authType);
+            }
 
             switch (authType) {
                 case BASIC:
-                    resolvedAuthProperties.add(getProperty(Type.BASIC, propertiesMap, USERNAME_AUTH_PROP));
-                    resolvedAuthProperties.add(getProperty(Type.BASIC, propertiesMap, PASSWORD_AUTH_PROP));
+                    resolvedAuthProperties.put(Property.USERNAME.getName(), getProperty(Property.USERNAME));
+                    resolvedAuthProperties.put(Property.PASSWORD.getName(), getProperty(Property.PASSWORD));
                     break;
                 case BEARER:
-                    resolvedAuthProperties.add(getProperty(Type.BEARER, propertiesMap, ACCESS_TOKEN_AUTH_PROP));
+                    resolvedAuthProperties.put(Property.ACCESS_TOKEN.getName(), getProperty(Property.ACCESS_TOKEN));
                     break;
                 case CLIENT_CREDENTIAL:
-                    resolvedAuthProperties.add(getProperty(Type.CLIENT_CREDENTIAL, propertiesMap, CLIENT_ID_AUTH_PROP));
-                    resolvedAuthProperties.add(
-                            getProperty(Type.CLIENT_CREDENTIAL, propertiesMap, CLIENT_SECRET_AUTH_PROP));
-                    resolvedAuthProperties.add(getProperty(Type.CLIENT_CREDENTIAL, propertiesMap, SCOPE_AUTH_PROP));
+                    resolvedAuthProperties.put(Property.CLIENT_ID.getName(), getProperty(Property.CLIENT_ID));
+                    resolvedAuthProperties.put(Property.CLIENT_SECRET.getName(), getProperty(Property.CLIENT_SECRET));
+                    resolvedAuthProperties.put(Property.SCOPE.getName(), getProperty(Property.SCOPE));
+                    resolvedAuthProperties.put(
+                            Property.TOKEN_ENDPOINT.getName(), getProperty(Property.TOKEN_ENDPOINT));
                     break;
                 case API_KEY:
-                    resolvedAuthProperties.add(getProperty(Type.BEARER, propertiesMap, HEADER_AUTH_PROP));
-                    resolvedAuthProperties.add(getProperty(Type.BEARER, propertiesMap, VALUE_AUTH_PROP));
+                    resolvedAuthProperties.put(Property.HEADER.getName(), getProperty(Property.HEADER));
+                    resolvedAuthProperties.put(Property.VALUE.getName(), getProperty(Property.VALUE));
                     break;
                 case NONE:
                     break;
-                default:
-                    throw new IllegalArgumentException(String.format("An invalid authentication type '%s' is " +
-                            "provided for the authentication configuration of the endpoint.", authType.name()));
+            }
+            authHeader = NotificationSenderUtils.buildAuthenticationHeader(authType, resolvedAuthProperties);
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Successfully built authentication configuration for type: " + authType);
             }
             return new Authentication(this);
         }
 
-        private AuthProperty getProperty(Type authType, Map<String, String> actionEndpointProperties,
-                                   String propName) {
+        private String getProperty(Property propName) throws NotificationSenderManagementClientException {
 
-            if (actionEndpointProperties != null && actionEndpointProperties.containsKey(propName)) {
-                String propValue = actionEndpointProperties.get(propName);
+            if (propertiesMap != null && propertiesMap.containsKey(propName.getName())) {
+                String propValue = propertiesMap.get(propName.getName());
                 if (StringUtils.isNotBlank(propValue)) {
-                    return new AuthProperty.Builder(propName, propValue, AuthProperty.Scope.EXTERNAL).build();
+                    return propValue;
                 }
-                throw new IllegalArgumentException(String.format("The Property %s cannot be blank.", propName));
+                LOG.error("Authentication property '" + propName.getName() + "' is blank.");
+                throw new NotificationSenderManagementClientException(
+                        ErrorMessage.ERROR_CODE_BLANK_AUTH_PROPERTY, propName.getName());
             }
 
-            throw new NoSuchElementException(String.format("The property %s must be provided as an authentication " +
-                    "property for the %s authentication type.", propName, authType.name()));
+            LOG.error("Required authentication property '" + propName.getName() + "' is missing.");
+            throw new NotificationSenderManagementClientException(
+                    ErrorMessage.ERROR_CODE_MISSING_AUTH_PROPERTY, propName.getName());
         }
     }
 
@@ -160,10 +203,12 @@ public class Authentication {
             return name;
         }
 
-        public static Type valueOfName(String name) {
+
+        public static Type valueOfName(String name) throws NotificationSenderManagementClientException {
 
             if (name == null || name.isEmpty()) {
-                throw new IllegalArgumentException("Authentication type cannot be null or empty.");
+                LOG.error("Authentication type is missing or empty.");
+                throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_MISSING_AUTH_TYPE, name);
             }
 
             for (Type type : Type.values()) {
@@ -171,7 +216,36 @@ public class Authentication {
                     return type;
                 }
             }
-            throw new IllegalArgumentException("Invalid authentication type: " + name);
+            LOG.error("Unsupported authentication type: " + name);
+            throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_UNSUPPORTED_AUTH_TYPE, name);
+        }
+    }
+
+    /**
+     * Authentication Property Enum.
+     */
+    public enum Property {
+
+        USERNAME("username"),
+        PASSWORD("password"),
+        HEADER("header"),
+        VALUE("value"),
+        ACCESS_TOKEN("accessToken"),
+        CLIENT_ID("client_id"),
+        CLIENT_SECRET("client_secret"),
+        SCOPE("scope"),
+        TOKEN_ENDPOINT("token_endpoint");
+
+        private final String name;
+
+        Property(String name) {
+
+            this.name = name;
+        }
+
+        public String getName() {
+
+            return name;
         }
     }
 }

@@ -36,14 +36,13 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterDeleteMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.AuthProperty;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
@@ -61,9 +60,6 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_EXTERNAL_PROP_PREFIX;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_INTERNAL_PROP_PREFIX;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CONTENT_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
@@ -263,11 +259,11 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(SENDER, smsSender.getSender());
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
+        NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
                         .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
                         .collect(Collectors.toList());
-        addSmsSenderAuthenticationToResource(smsSenderAttributes, smsSender.getAuthentication());
         resource.setAttributes(resourceAttributes);
         // Set file.
         ResourceFile file = new ResourceFile();
@@ -277,22 +273,6 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         resourceFiles.add(file);
         resource.setFiles(resourceFiles);
         return resource;
-    }
-
-    private void addSmsSenderAuthenticationToResource(
-            Map<String, String> smsSenderAttributes, Authentication authentication) {
-
-        if (authentication != null) {
-            smsSenderAttributes.put(AUTH_TYPE, authentication.getType().name());
-            for (AuthProperty property : authentication.getProperties()) {
-                if (property.getScope() == AuthProperty.Scope.INTERNAL) {
-                    smsSenderAttributes.put(AUTH_INTERNAL_PROP_PREFIX + property.getName(), property.getValue());
-                } else {
-                    smsSenderAttributes.put(AUTH_EXTERNAL_PROP_PREFIX + property.getName(), property.getValue());
-                }
-            }
-        }
-
     }
 
     private void reDeployEventPublisherConfiguration(Resource resource) {
