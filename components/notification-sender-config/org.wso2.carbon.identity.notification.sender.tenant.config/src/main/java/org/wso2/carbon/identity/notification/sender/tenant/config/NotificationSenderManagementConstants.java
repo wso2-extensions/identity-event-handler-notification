@@ -53,6 +53,12 @@ public class NotificationSenderManagementConstants {
     public static final String SMS_PROVIDER = "SMS_PROVIDER";
     public static final String PUSH_PROVIDER = "PUSH_PROVIDER";
 
+    // Notification sender authentication properties
+    public static final String AUTH_HEADER = "authorization";
+    public static final String AUTH_TYPE_PREFIX = "auth.authType";
+    public static final String AUTH_INTERNAL_PROP_PREFIX = "auth.internal.";
+    public static final String AUTH_EXTERNAL_PROP_PREFIX = "auth.external.";
+
     // Email Sender's main properties.
     public static final String NAME = "name";
     public static final String SMTP_SERVER_HOST = "smtpServerHost";
@@ -166,6 +172,14 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_CONNECTED_APPLICATION_EXISTS("60008",
                 "Unable to disable.",
                 "There are applications using this connection."),
+        ERROR_CODE_MISSING_AUTH_TYPE("60009", "Missing authentication type.",
+                "Authentication type must be provided in the authentication configuration."),
+        ERROR_CODE_UNSUPPORTED_AUTH_TYPE("60010", "Unsupported authentication type.",
+                "Unsupported authentication type is provided for authentication configuration."),
+        ERROR_CODE_BLANK_AUTH_PROPERTY("60011", "Blank authentication property value.",
+                "The authentication property %s cannot be blank or empty."),
+        ERROR_CODE_MISSING_AUTH_PROPERTY("60012", "Missing authentication property.",
+                "The property %s must be included as an authentication property."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",
@@ -227,7 +241,14 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS("65024", "Error while decrypting credentials.",
                 "Error while decrypting credentials for notification sender: %s."),
         ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS("65025", "Error while deleting credentials.",
-                "Error while deleting credentials for notification sender: %s.");
+                "Error while deleting credentials for notification sender: %s."),
+        ERROR_CODE_ERROR_UNSUPPORTED_AUTH_TYPE_FOR_TOKEN_RETRIEVAL("65026",
+                "Unsupported authentication type.", "Unsupported authentication type for access " +
+                "token request, only supported for client credential type"),
+        ERROR_CODE_ERROR_WHILE_TOKEN_REQUEST_BUILDING("65027", "Error while building token request.",
+                "Error while building token request context for Client Credential grant."),
+        ERROR_CODE_ERROR_WHILE_RETRIEVING_TOKEN("65028", "Error while retrieving access token.",
+                "Error occurred while retrieving access token for notification sender.");
 
         private final String code;
         private final String message;

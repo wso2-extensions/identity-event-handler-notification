@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.75-SNAPSHOT</version>
+    <version>1.8.3-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -121,13 +121,6 @@
                 <version>${carbon.commons.version}</version>
             </dependency>
 
-            <!--Carbon Utils Dependencies-->
-            <dependency>
-                <groupId>org.wso2.carbon.utils</groupId>
-                <artifactId>org.wso2.carbon.database.utils</artifactId>
-                <version>${org.wso2.carbon.database.utils.version}</version>
-            </dependency>
-
             <!--Carbon Identity Framework Dependencies-->
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -162,21 +155,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
-                <version>${carbon.identity.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.framework</groupId>
-                <artifactId>org.wso2.carbon.identity.application.common</artifactId>
-                <version>${carbon.identity.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.framework</groupId>
-                <artifactId>org.wso2.carbon.identity.secret.mgt.core</artifactId>
-                <version>${carbon.identity.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.framework</groupId>
-                <artifactId>org.wso2.carbon.identity.external.api.token.handler</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
 
@@ -268,19 +246,9 @@
                 <version>${identity.branding.preference.management.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity.notification.push</groupId>
-                <artifactId>org.wso2.carbon.identity.notification.push.provider</artifactId>
-                <version>${identity.notification.push.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-collections.wso2</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>${apache.common.collection.version}</version>
             </dependency>
 
             <dependency>
@@ -295,27 +263,11 @@
                 <version>${com.fasterxml.jackson.databind.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.httpcomponents.wso2</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${httpcore.version}</version>
-            </dependency>
-
             <!-- Organization management Dependencies -->
             <dependency>
                 <groupId>org.wso2.carbon.identity.organization.management.core</groupId>
                 <artifactId>org.wso2.carbon.identity.organization.management.service</artifactId>
                 <version>${identity.organization.management.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.organization.management</groupId>
-                <artifactId>org.wso2.carbon.identity.organization.resource.hierarchy.traverse.service</artifactId>
-                <version>${identity.organization.management.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.organization.management</groupId>
-                <artifactId>org.wso2.carbon.identity.organization.application.resource.hierarchy.traverse.service</artifactId>
-                <version>${identity.organization.management.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->
@@ -326,16 +278,28 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.core.version}</version>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-testng</artifactId>
+                <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- Common test utility -->
             <dependency>
-                <groupId>org.wso2.carbon.identity.framework</groupId>
-                <artifactId>org.wso2.carbon.identity.testutil</artifactId>
-                <version>${carbon.identity.framework.version}</version>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito.inline.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -354,16 +318,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-            </dependency>
-                <dependency>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -392,44 +346,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven.checkstyleplugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                    <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -471,31 +387,12 @@
                     </execution>
                 </executions>
             </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
+        </plugins>
     </build>
 
     <properties>
         <!--Identity Governance Version-->
-        <identity.governance.version>1.11.21</identity.governance.version>
+        <identity.governance.version>1.5.77</identity.governance.version>
         <identity.governance.imp.pkg.version.range>[1.0.0, 3.0.0)</identity.governance.imp.pkg.version.range>
 
         <!--Identity Event Handler Email Version-->
@@ -505,11 +402,8 @@
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
-        <identity.branding.preference.management.version>1.1.29</identity.branding.preference.management.version>
+        <identity.branding.preference.management.version>1.0.8</identity.branding.preference.management.version>
         <identity.branding.preference.management.version.range>[1.0.1, 2.0.0)</identity.branding.preference.management.version.range>
-
-        <identity.notification.push.version>1.0.5</identity.notification.push.version>
-        <identity.notification.push.version.range>[1.0.0, 2.0.0)</identity.notification.push.version.range>
 
         <!--Orbit Version-->
         <axis2.wso2.version>1.6.1-wso2v38</axis2.wso2.version>
@@ -523,11 +417,9 @@
         <commons.logging.imp.pkg.version.range>[1.2,2.0)</commons.logging.imp.pkg.version.range>
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <commons-lang.version.range>[2.6.0,3.0.0)</commons-lang.version.range>
-        <apache.common.collection.version>3.2.0.wso2v1</apache.common.collection.version>
-        <commons-collections.wso2.version.range>[3.2.0,4.0.0)</commons-collections.wso2.version.range>
 
         <!--Carbon Kernel Version-->
-        <carbon.kernel.version>4.10.25</carbon.kernel.version>
+        <carbon.kernel.version>4.9.10</carbon.kernel.version>
         <carbon.kernel.feature.version>4.9.10</carbon.kernel.feature.version>
         <carbon.kernel.imp.pkg.version.range>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version.range>
 
@@ -537,24 +429,17 @@
         <axis2.osgi.version.range>[1.6.1, 2.0.0)</axis2.osgi.version.range>
 
         <!--Carbon Commons Version-->
-        <carbon.commons.version>4.10.24</carbon.commons.version>
+        <carbon.commons.version>4.7.11</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.7.11, 5.0.0)</carbon.commons.imp.pkg.version>
 
-        <!--Carbon Database Utils Version-->
-        <org.wso2.carbon.database.utils.version>2.2.2</org.wso2.carbon.database.utils.version>
-        <org.wso2.carbon.database.utils.version.range>[2.1.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
-
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>7.8.596-SNAPSHOT</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version.range>[7.1.0, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.version>5.25.617</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 8.0.0)</carbon.identity.framework.imp.pkg.version.range>
 
         <!-- Organization management Version -->
-        <identity.organization.management.core.version>1.1.55</identity.organization.management.core.version>
+        <identity.organization.management.core.version>1.0.93</identity.organization.management.core.version>
         <org.wso2.identity.organization.mgt.core.imp.pkg.version.range>[1.0.0,2.0.0)
         </org.wso2.identity.organization.mgt.core.imp.pkg.version.range>
-        <identity.organization.management.version>2.0.0</identity.organization.management.version>
-        <org.wso2.identity.organization.mgt.imp.pkg.version.range>[1.0.0,3.0.0)
-        </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
         <carbon.analytics.common.version>5.2.10</carbon.analytics.common.version>
@@ -564,20 +449,19 @@
         <com.google.code.gson.version>2.9.0</com.google.code.gson.version>
         <com.google.code.gson.osgi.version.range>[2.3.1,3.0.0)</com.google.code.gson.osgi.version.range>
 
-        <httpcore.version>4.4.14.wso2v1</httpcore.version>
-        <httpcore.version.osgi.import.range>[4.3.0, 5.0.0)</httpcore.version.osgi.import.range>
-
         <!--Maven Plugin Version-->
-        <carbon.p2.plugin.version>5.1.2</carbon.p2.plugin.version>
-        <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
+        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+        <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
         <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
 
         <!-- Test Dependency Versions -->
-        <testng.version>7.4.0</testng.version>
-        <mockito.core.version>5.3.1</mockito.core.version>
-        <jacoco.version>0.8.7</jacoco.version>
-        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+        <testng.version>6.9.10</testng.version>
+        <powermock.version>1.7.0</powermock.version>
+        <mockito.version>1.10.19</mockito.version>
+        <mockito.inline.version>3.8.0</mockito.inline.version>
+        <jacoco.version>0.7.9</jacoco.version>
+        <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
 
         <!-- Pax Logging Version -->
         <pax.logging.api.version>1.10.1</pax.logging.api.version>
@@ -585,11 +469,8 @@
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
-        <findsecbugs-plugin.version>1.10.1</findsecbugs-plugin.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude-filter.xml</mavan.findbugsplugin.exclude.file>
 
-        <com.fasterxml.jackson.databind.version>2.13.4.2</com.fasterxml.jackson.databind.version>
-    
-        <jacoco.version>0.8.12</jacoco.version>
+        <com.fasterxml.jackson.databind.version>2.13.3</com.fasterxml.jackson.databind.version>
     </properties>
 </project>

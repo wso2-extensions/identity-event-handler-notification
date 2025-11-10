@@ -42,6 +42,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
@@ -258,6 +259,7 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(SENDER, smsSender.getSender());
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
+        NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
                         .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
