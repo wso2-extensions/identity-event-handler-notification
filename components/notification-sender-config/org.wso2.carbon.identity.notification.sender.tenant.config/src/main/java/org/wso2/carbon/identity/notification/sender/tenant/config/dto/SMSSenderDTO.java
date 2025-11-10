@@ -278,7 +278,8 @@ public class SMSSenderDTO {
                 }
 
                 if (StringUtils.isNotBlank(secret) && !StringUtils.equals(secret, existingSecret)) {
-                    LOG.error("Secret update not allowed for BASIC authentication. Attempted to change existing secret.");
+                    LOG.error("Secret update not allowed for BASIC authentication. " +
+                            "Attempted to change existing secret.");
                     throw new NotificationSenderManagementClientException(
                             ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED);
                 }

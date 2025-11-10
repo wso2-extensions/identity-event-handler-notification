@@ -22,8 +22,11 @@
 
     <test name="NotificationSenderTenantConfigTest" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.dto.AuthenticationTest"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTOTest"/>
             <class name="org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImplTest"/>
             <class name="org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandlerTest"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManagerTest"/>
         </classes>
     </test>
 </suite>
