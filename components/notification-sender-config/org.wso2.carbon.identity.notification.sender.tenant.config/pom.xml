@@ -70,6 +70,14 @@
             <groupId>org.wso2.carbon.identity.notification.push</groupId>
             <artifactId>org.wso2.carbon.identity.notification.push.provider</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+        </dependency>
         <!--Test dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
@@ -93,6 +101,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.secret.mgt.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.external.api.token.handler</artifactId>
         </dependency>
     </dependencies>
 
@@ -145,6 +157,11 @@
                             org.wso2.carbon.identity.application.common; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.application.common.util; version="${carbon.identity.framework.imp.pkg.version.range}",
 
+                            org.wso2.carbon.identity.external.api.token.handler.api.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.external.api.client.api.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.external.api.client.api.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.external.api.client.api.service; version="${carbon.identity.framework.imp.pkg.version.range}",
+
                             org.wso2.carbon.idp.mgt.model; version="${carbon.identity.framework.imp.pkg.version.range}",
 
                             org.wso2.carbon.identity.configuration.mgt.core;
@@ -181,6 +198,8 @@
                             org.wso2.carbon.identity.secret.mgt.core; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+
+                            org.apache.http.*; version="${httpcomponents-httpclient.imp.pkg.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>

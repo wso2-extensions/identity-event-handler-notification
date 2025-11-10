@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
+import org.apache.http.Header;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -193,6 +194,18 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     default PushSenderDTO updatePushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
+
+        return null;
+    }
+
+    /**
+     * Rebuild the authentication headers for the SMS sender.
+     *
+     * @param smsSender SMS sender's configurations.
+     * @return Authentication Header
+     * @throws NotificationSenderManagementException    Notification sender management exception.
+     */
+    default Header rebuildAuthenticationHeader(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
         return null;
     }
