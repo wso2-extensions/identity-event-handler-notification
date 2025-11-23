@@ -21,8 +21,6 @@ package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +33,6 @@ import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
-import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -49,8 +46,6 @@ import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementExcept
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,15 +60,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_PROPERTY_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_EMAIL_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_HTTP_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ADAPTER_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_EXTERNAL_PROP_PREFIX;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_HEADER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_INTERNAL_PROP_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
@@ -138,7 +130,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_VALUE;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property.ACCESS_TOKEN;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 
 /**
@@ -695,45 +686,5 @@ public class NotificationSenderUtils {
         pushSenderData.setProperties(pushSenderDTO.getProperties());
         pushSenderData.setProviderId(pushSenderDTO.getProviderId());
         return pushSenderData;
-    }
-
-    /**
-     * Build authentication header.
-     *
-     * @param authentication Authentication object.
-     * @return Header object.
-     */
-    public static Header buildAuthenticationHeader(Authentication authentication) {
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Building authentication header for auth type: " + authentication.getType());
-        }
-
-        switch (authentication.getType()) {
-            case BASIC:
-                String credentials = authentication.getProperty(Property.USERNAME.getName()) + ":" +
-                        authentication.getProperty(Property.PASSWORD.getName());
-                byte[] encodedBytes = Base64.getEncoder().encode(credentials.getBytes(StandardCharsets.UTF_8));
-                return new org.apache.http.message.BasicHeader(
-                        AUTH_HEADER,
-                        "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
-            case CLIENT_CREDENTIAL:
-                return new BasicHeader(
-                        AUTH_HEADER,
-                        "Bearer " + authentication.getInternalProperties().get(ACCESS_TOKEN_PROP)
-                );
-            case BEARER:
-                return new BasicHeader(
-                        AUTH_HEADER,
-                        "Bearer " + authentication.getProperty(ACCESS_TOKEN.getName())
-                );
-            case API_KEY:
-                return new BasicHeader(
-                        authentication.getProperty(Property.HEADER.toString()),
-                        authentication.getProperty(Property.VALUE.toString())
-                );
-            default:
-                return null;
-        }
     }
 }

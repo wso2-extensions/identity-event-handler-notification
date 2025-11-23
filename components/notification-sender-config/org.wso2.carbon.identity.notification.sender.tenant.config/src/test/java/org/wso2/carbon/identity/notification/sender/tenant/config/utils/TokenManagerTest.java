@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
-import org.apache.http.Header;
-import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,10 +28,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-
 /**
  * Unit tests for {@link TokenManager}.
  * Note: TokenManager is a singleton with complex initialization that depends on external configuration.
@@ -42,12 +36,10 @@ import static org.mockito.Mockito.mockStatic;
 public class TokenManagerTest {
 
     private Map<String, String> authProperties;
-    private Header mockHeader;
 
     @BeforeMethod
     public void setUp() {
         authProperties = new HashMap<>();
-        mockHeader = mock(Header.class);
     }
 
     @AfterMethod
@@ -62,20 +54,16 @@ public class TokenManagerTest {
         authProperties.put(Authentication.Property.SCOPE.getName(), "test-scope");
         authProperties.put(Authentication.Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Authentication.Type.CLIENT_CREDENTIAL);
-            Assert.assertEquals(auth.getProperty(Authentication.Property.CLIENT_ID.getName()), "test-client-id");
-            Assert.assertEquals(auth.getProperty(Authentication.Property.CLIENT_SECRET.getName()),
-                    "test-client-secret");
-            Assert.assertEquals(auth.getProperty(Authentication.Property.SCOPE.getName()), "test-scope");
-            Assert.assertEquals(auth.getProperty(Authentication.Property.TOKEN_ENDPOINT.getName()),
-                    "https://test.com/token");
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Authentication.Type.CLIENT_CREDENTIAL);
+        Assert.assertEquals(auth.getProperty(Authentication.Property.CLIENT_ID.getName()), "test-client-id");
+        Assert.assertEquals(auth.getProperty(Authentication.Property.CLIENT_SECRET.getName()),
+                "test-client-secret");
+        Assert.assertEquals(auth.getProperty(Authentication.Property.SCOPE.getName()), "test-scope");
+        Assert.assertEquals(auth.getProperty(Authentication.Property.TOKEN_ENDPOINT.getName()),
+                "https://test.com/token");
     }
 
     @Test
@@ -83,29 +71,21 @@ public class TokenManagerTest {
         authProperties.put(Authentication.Property.USERNAME.getName(), "testuser");
         authProperties.put(Authentication.Property.PASSWORD.getName(), "testpass");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Authentication.Type.BASIC);
-            Assert.assertNotEquals(auth.getType(), Authentication.Type.CLIENT_CREDENTIAL);
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Authentication.Type.BASIC);
+        Assert.assertNotEquals(auth.getType(), Authentication.Type.CLIENT_CREDENTIAL);
     }
 
     @Test
     public void testAuthenticationWithBearerType() throws Exception {
         authProperties.put(Authentication.Property.ACCESS_TOKEN.getName(), "test-access-token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("BEARER", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("BEARER", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Authentication.Type.BEARER);
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Authentication.Type.BEARER);
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -142,18 +122,14 @@ public class TokenManagerTest {
         authProperties.put(Authentication.Property.SCOPE.getName(), "test-scope");
         authProperties.put(Authentication.Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
+        // Test adding internal properties (simulating what TokenManager would do)
+        auth.addInternalProperty("AccessToken", "test-access-token");
+        auth.addInternalProperty("RefreshToken", "test-refresh-token");
 
-            // Test adding internal properties (simulating what TokenManager would do)
-            auth.addInternalProperty("AccessToken", "test-access-token");
-            auth.addInternalProperty("RefreshToken", "test-refresh-token");
-
-            Assert.assertEquals(auth.getInternalProperties().get("AccessToken"), "test-access-token");
-            Assert.assertEquals(auth.getInternalProperties().get("RefreshToken"), "test-refresh-token");
-        }
+        Assert.assertEquals(auth.getInternalProperties().get("AccessToken"), "test-access-token");
+        Assert.assertEquals(auth.getInternalProperties().get("RefreshToken"), "test-refresh-token");
     }
 
     @Test
@@ -163,13 +139,9 @@ public class TokenManagerTest {
         authProperties.put(Authentication.Property.SCOPE.getName(), "test-scope");
         authProperties.put(Authentication.Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
-
-            Map<String, String> internalProps = auth.getInternalProperties();
-            Assert.assertNotNull(internalProps);
-        }
+        Map<String, String> internalProps = auth.getInternalProperties();
+        Assert.assertNotNull(internalProps);
     }
 }

@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 
-import org.apache.http.Header;
-import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -27,14 +25,9 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Type;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 
 /**
  * Unit tests for {@link SMSSenderDTO}.
@@ -42,12 +35,10 @@ import static org.mockito.Mockito.mockStatic;
 public class SMSSenderDTOTest {
 
     private SMSSenderDTO.Builder builder;
-    private Header mockHeader;
 
     @BeforeMethod
     public void setUp() {
         builder = new SMSSenderDTO.Builder();
-        mockHeader = mock(Header.class);
     }
 
     @AfterMethod
@@ -76,84 +67,68 @@ public class SMSSenderDTOTest {
 
     @Test
     public void testBuildWithBasicAuthUsingKeyAndSecret() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        SMSSenderDTO dto = builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .key("testuser")
+                .secret("testpass")
+                .build();
 
-            SMSSenderDTO dto = builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .key("testuser")
-                    .secret("testpass")
-                    .build();
-
-            Assert.assertNotNull(dto);
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
-            Assert.assertEquals(dto.getKey(), "testuser");
-            Assert.assertEquals(dto.getSecret(), "testpass");
-        }
+        Assert.assertNotNull(dto);
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
+        Assert.assertEquals(dto.getKey(), "testuser");
+        Assert.assertEquals(dto.getSecret(), "testpass");
     }
 
     @Test
     public void testBuildWithBearerAuth() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        SMSSenderDTO dto = builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BEARER")
+                .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
+                .build();
 
-            SMSSenderDTO dto = builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BEARER")
-                    .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
-                    .build();
-
-            Assert.assertNotNull(dto);
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.BEARER);
-        }
+        Assert.assertNotNull(dto);
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.BEARER);
     }
 
     @Test
     public void testBuildWithClientCredentialAuth() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        SMSSenderDTO dto = builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("CLIENT_CREDENTIAL")
+                .addAuthProperty(Property.CLIENT_ID.getName(), "test-client-id")
+                .addAuthProperty(Property.CLIENT_SECRET.getName(), "test-client-secret")
+                .addAuthProperty(Property.SCOPE.getName(), "test-scope")
+                .addAuthProperty(Property.TOKEN_ENDPOINT.getName(), "https://test.com/token")
+                .build();
 
-            SMSSenderDTO dto = builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("CLIENT_CREDENTIAL")
-                    .addAuthProperty(Property.CLIENT_ID.getName(), "test-client-id")
-                    .addAuthProperty(Property.CLIENT_SECRET.getName(), "test-client-secret")
-                    .addAuthProperty(Property.SCOPE.getName(), "test-scope")
-                    .addAuthProperty(Property.TOKEN_ENDPOINT.getName(), "https://test.com/token")
-                    .build();
-
-            Assert.assertNotNull(dto);
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.CLIENT_CREDENTIAL);
-        }
+        Assert.assertNotNull(dto);
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.CLIENT_CREDENTIAL);
     }
 
     @Test
     public void testBuildWithApiKeyAuth() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        SMSSenderDTO dto = builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("API_KEY")
+                .addAuthProperty(Property.HEADER.getName(), "X-API-KEY")
+                .addAuthProperty(Property.VALUE.getName(), "test-api-key")
+                .build();
 
-            SMSSenderDTO dto = builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("API_KEY")
-                    .addAuthProperty(Property.HEADER.getName(), "X-API-KEY")
-                    .addAuthProperty(Property.VALUE.getName(), "test-api-key")
-                    .build();
-
-            Assert.assertNotNull(dto);
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.API_KEY);
-        }
+        Assert.assertNotNull(dto);
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.API_KEY);
     }
 
     @Test
@@ -175,91 +150,71 @@ public class SMSSenderDTOTest {
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
     public void testBuildWithNonBasicAuthAndKeyProvided() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
-
-            builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BEARER")
-                    .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
-                    .key("should-not-be-allowed")
-                    .build();
-        }
+        builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BEARER")
+                .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
+                .key("should-not-be-allowed")
+                .build();
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
     public void testBuildWithNonBasicAuthAndSecretProvided() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
-
-            builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BEARER")
-                    .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
-                    .secret("should-not-be-allowed")
-                    .build();
-        }
+        builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BEARER")
+                .addAuthProperty(Property.ACCESS_TOKEN.getName(), "test-token")
+                .secret("should-not-be-allowed")
+                .build();
     }
 
     @Test
     public void testBuildWithBasicAuthUsingExistingCredentials() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        // Build with BASIC auth and existing credentials
+        SMSSenderDTO dto = builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BASIC")
+                .addAuthProperty(Property.USERNAME.getName(), "existinguser")
+                .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
+                .build();
 
-            // Build with BASIC auth and existing credentials
-            SMSSenderDTO dto = builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BASIC")
-                    .addAuthProperty(Property.USERNAME.getName(), "existinguser")
-                    .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
-                    .build();
-
-            Assert.assertNotNull(dto);
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
-            Assert.assertEquals(dto.getKey(), "existinguser");
-            Assert.assertEquals(dto.getSecret(), "existingpass");
-        }
+        Assert.assertNotNull(dto);
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
+        Assert.assertEquals(dto.getKey(), "existinguser");
+        Assert.assertEquals(dto.getSecret(), "existingpass");
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
     public void testBuildWithBasicAuthKeyMismatch() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
-
-            builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BASIC")
-                    .addAuthProperty(Property.USERNAME.getName(), "existinguser")
-                    .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
-                    .key("differentuser")
-                    .build();
-        }
+        builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BASIC")
+                .addAuthProperty(Property.USERNAME.getName(), "existinguser")
+                .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
+                .key("differentuser")
+                .build();
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
     public void testBuildWithBasicAuthSecretMismatch() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
-
-            builder
-                    .name("TestSender")
-                    .provider("TestProvider")
-                    .providerURL("https://test.provider.com")
-                    .authType("BASIC")
-                    .addAuthProperty(Property.USERNAME.getName(), "existinguser")
-                    .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
-                    .secret("differentpass")
-                    .build();
-        }
+        builder
+                .name("TestSender")
+                .provider("TestProvider")
+                .providerURL("https://test.provider.com")
+                .authType("BASIC")
+                .addAuthProperty(Property.USERNAME.getName(), "existinguser")
+                .addAuthProperty(Property.PASSWORD.getName(), "existingpass")
+                .secret("differentpass")
+                .build();
     }
 
     @Test
@@ -316,19 +271,15 @@ public class SMSSenderDTOTest {
 
     @Test
     public void testSetAuthentication() throws Exception {
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put(Property.USERNAME.getName(), "testuser");
+        authProps.put(Property.PASSWORD.getName(), "testpass");
+        Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProps).build();
 
-            Map<String, String> authProps = new HashMap<>();
-            authProps.put(Property.USERNAME.getName(), "testuser");
-            authProps.put(Property.PASSWORD.getName(), "testpass");
-            Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProps).build();
+        SMSSenderDTO dto = new SMSSenderDTO();
+        dto.setAuthentication(auth);
 
-            SMSSenderDTO dto = new SMSSenderDTO();
-            dto.setAuthentication(auth);
-
-            Assert.assertNotNull(dto.getAuthentication());
-            Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
-        }
+        Assert.assertNotNull(dto.getAuthentication());
+        Assert.assertEquals(dto.getAuthentication().getType(), Type.BASIC);
     }
 }

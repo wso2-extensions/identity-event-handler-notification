@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.dto;
 
-import org.apache.http.Header;
-import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -27,14 +25,9 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Type;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 
 /**
  * Unit tests for {@link Authentication}.
@@ -42,12 +35,10 @@ import static org.mockito.Mockito.mockStatic;
 public class AuthenticationTest {
 
     private Map<String, String> authProperties;
-    private Header mockHeader;
 
     @BeforeMethod
     public void setUp() {
         authProperties = new HashMap<>();
-        mockHeader = mock(Header.class);
     }
 
     @AfterMethod
@@ -61,16 +52,12 @@ public class AuthenticationTest {
         authProperties.put(Property.USERNAME.getName(), "testuser");
         authProperties.put(Property.PASSWORD.getName(), "testpass");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Type.BASIC);
-            Assert.assertEquals(auth.getProperty(Property.USERNAME.getName()), "testuser");
-            Assert.assertEquals(auth.getProperty(Property.PASSWORD.getName()), "testpass");
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.BASIC);
+        Assert.assertEquals(auth.getProperty(Property.USERNAME.getName()), "testuser");
+        Assert.assertEquals(auth.getProperty(Property.PASSWORD.getName()), "testpass");
     }
 
     @Test
@@ -78,15 +65,11 @@ public class AuthenticationTest {
 
         authProperties.put(Property.ACCESS_TOKEN.getName(), "test-access-token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("BEARER", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("BEARER", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Type.BEARER);
-            Assert.assertEquals(auth.getProperty(Property.ACCESS_TOKEN.getName()), "test-access-token");
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.BEARER);
+        Assert.assertEquals(auth.getProperty(Property.ACCESS_TOKEN.getName()), "test-access-token");
     }
 
     @Test
@@ -97,18 +80,14 @@ public class AuthenticationTest {
         authProperties.put(Property.SCOPE.getName(), "test-scope");
         authProperties.put(Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Type.CLIENT_CREDENTIAL);
-            Assert.assertEquals(auth.getProperty(Property.CLIENT_ID.getName()), "test-client-id");
-            Assert.assertEquals(auth.getProperty(Property.CLIENT_SECRET.getName()), "test-client-secret");
-            Assert.assertEquals(auth.getProperty(Property.SCOPE.getName()), "test-scope");
-            Assert.assertEquals(auth.getProperty(Property.TOKEN_ENDPOINT.getName()), "https://test.com/token");
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.CLIENT_CREDENTIAL);
+        Assert.assertEquals(auth.getProperty(Property.CLIENT_ID.getName()), "test-client-id");
+        Assert.assertEquals(auth.getProperty(Property.CLIENT_SECRET.getName()), "test-client-secret");
+        Assert.assertEquals(auth.getProperty(Property.SCOPE.getName()), "test-scope");
+        Assert.assertEquals(auth.getProperty(Property.TOKEN_ENDPOINT.getName()), "https://test.com/token");
     }
 
     @Test
@@ -117,29 +96,21 @@ public class AuthenticationTest {
         authProperties.put(Property.HEADER.getName(), "X-API-KEY");
         authProperties.put(Property.VALUE.getName(), "test-api-key-value");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("API_KEY", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("API_KEY", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Type.API_KEY);
-            Assert.assertEquals(auth.getProperty(Property.HEADER.getName()), "X-API-KEY");
-            Assert.assertEquals(auth.getProperty(Property.VALUE.getName()), "test-api-key-value");
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.API_KEY);
+        Assert.assertEquals(auth.getProperty(Property.HEADER.getName()), "X-API-KEY");
+        Assert.assertEquals(auth.getProperty(Property.VALUE.getName()), "test-api-key-value");
     }
 
     @Test
     public void testAuthenticationBuilderWithNoneType() throws Exception {
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
+        Authentication auth = new Authentication.AuthenticationBuilder("NONE", authProperties).build();
 
-            Authentication auth = new Authentication.AuthenticationBuilder("NONE", authProperties).build();
-
-            Assert.assertNotNull(auth);
-            Assert.assertEquals(auth.getType(), Type.NONE);
-        }
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.NONE);
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -182,13 +153,9 @@ public class AuthenticationTest {
         authProperties.put(Property.USERNAME.getName(), "testuser");
         authProperties.put(Property.PASSWORD.getName(), "testpass");
 
-        try (MockedStatic<NotificationSenderUtils> mockedUtils = mockStatic(NotificationSenderUtils.class)) {
-            mockedUtils.when(() -> NotificationSenderUtils.buildAuthenticationHeader(any())).thenReturn(mockHeader);
-
-            Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
-            
-            auth.addInternalProperty("testKey", "testValue");
-            Assert.assertEquals(auth.getInternalProperties().get("testKey"), "testValue");
-        }
+        Authentication auth = new Authentication.AuthenticationBuilder("BASIC", authProperties).build();
+        
+        auth.addInternalProperty("testKey", "testValue");
+        Assert.assertEquals(auth.getInternalProperties().get("testKey"), "testValue");
     }
 }

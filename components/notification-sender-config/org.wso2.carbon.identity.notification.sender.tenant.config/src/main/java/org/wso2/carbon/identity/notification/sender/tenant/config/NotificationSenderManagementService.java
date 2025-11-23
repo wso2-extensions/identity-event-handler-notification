@@ -205,7 +205,7 @@ public interface NotificationSenderManagementService {
      * @return Authentication Header
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
-    default Header rebuildAuthenticationHeader(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
+    default Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
         return null;
     }

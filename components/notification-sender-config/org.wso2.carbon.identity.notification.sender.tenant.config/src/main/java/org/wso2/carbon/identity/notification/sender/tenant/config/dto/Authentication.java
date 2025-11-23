@@ -22,14 +22,20 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_HEADER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication.Property.ACCESS_TOKEN;
 
 /**
  * Authentication configuration for the notification sending provider.
@@ -80,8 +86,48 @@ public class Authentication {
             return authHeader;
         }
 
-        authHeader = NotificationSenderUtils.buildAuthenticationHeader(this);
+        // move the logic this class as private method
+        authHeader = buildAuthenticationHeader();
         return authHeader;
+    }
+
+    /**
+     * Build authentication header.
+     *
+     * @return Header object.
+     */
+    public Header buildAuthenticationHeader() {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Building authentication header for auth type: " + type);
+        }
+
+        switch (type) {
+            case BASIC:
+                String credentials = authProperties.get(Property.USERNAME.getName()) + ":" +
+                        authProperties.get(Property.PASSWORD.getName());
+                byte[] encodedBytes = Base64.getEncoder().encode(credentials.getBytes(StandardCharsets.UTF_8));
+                return new org.apache.http.message.BasicHeader(
+                        AUTH_HEADER,
+                        "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
+            case CLIENT_CREDENTIAL:
+                return new BasicHeader(
+                        AUTH_HEADER,
+                        "Bearer " + internalAuthProperties.get(ACCESS_TOKEN_PROP)
+                );
+            case BEARER:
+                return new BasicHeader(
+                        AUTH_HEADER,
+                        "Bearer " + authProperties.get(ACCESS_TOKEN.getName())
+                );
+            case API_KEY:
+                return new BasicHeader(
+                        authProperties.get(Property.HEADER.toString()),
+                        authProperties.get(Property.VALUE.toString())
+                );
+            default:
+                return null;
+        }
     }
 
     /**
@@ -219,6 +265,20 @@ public class Authentication {
         public String getName() {
 
             return name;
+        }
+
+        public static Property valueOfName(String name) {
+
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException("Authentication type cannot be null or empty.");
+            }
+
+            for (Property property : Property.values()) {
+                if (property.name.equalsIgnoreCase(name)) {
+                    return property;
+                }
+            }
+            throw new IllegalArgumentException("Invalid authentication type: " + name);
         }
     }
 }

@@ -61,37 +61,26 @@ public class TokenManager {
         return tokenManager;
     }
 
+    /**
+     * Retrieve a new access token using the refresh token and update the authentication object.
+     *
+     * @param authentication The authentication object containing necessary properties.
+     * @throws NotificationSenderManagementServerException If an error occurs during token retrieval.
+     */
     public void getNewAccessToken(Authentication authentication) throws NotificationSenderManagementServerException {
 
         TokenRequestContext tokenRequestContext = buildTokenRequestContext(authentication);
         tokenAcquirerService.setTokenRequestContext(tokenRequestContext);
 
-        TokenInvocationResult tokenInvocationResult;
-        String refreshToken = authentication.getInternalProperties().get(REFRESH_TOKEN_PROP);
-
         try {
-            if (refreshToken != null) {
-                try {
-                    tokenInvocationResult = tokenAcquirerService.getNewAccessTokenFromRefreshGrant(refreshToken);
-                    LOG.debug("Successfully retrieved access token using refresh token grant.");
-                } catch (TokenHandlerException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Failed to retrieve access token using refresh token grant. " +
-                                "Falling back to client credentials grant.", e);
-                    }
-                    tokenInvocationResult = tokenAcquirerService.getNewAccessToken();
-                    LOG.debug("Successfully retrieved access token using client credentials grant.");
-                }
-            } else {
-                tokenInvocationResult = tokenAcquirerService.getNewAccessToken();
-                LOG.debug("Successfully retrieved access token using client credentials grant.");
-            }
+            TokenInvocationResult tokenInvocationResult;
+            tokenInvocationResult = tokenAcquirerService
+                    .getNewAccessToken(authentication.getInternalProperties().get(REFRESH_TOKEN_PROP));
+            handleTokenInvocationResult(tokenInvocationResult, authentication);
         } catch (TokenHandlerException e) {
             throw new NotificationSenderManagementServerException(
                     ErrorMessage.ERROR_CODE_ERROR_WHILE_RETRIEVING_TOKEN, null, e);
         }
-
-        handleTokenInvocationResult(tokenInvocationResult, authentication);
     }
 
     private void handleTokenInvocationResult(TokenInvocationResult tokenInvocationResult, Authentication authentication)

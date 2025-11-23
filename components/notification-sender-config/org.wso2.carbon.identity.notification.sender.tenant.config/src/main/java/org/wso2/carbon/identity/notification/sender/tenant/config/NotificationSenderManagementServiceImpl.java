@@ -585,11 +585,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
-    public Header rebuildAuthenticationHeader(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
+    public Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
         Authentication authentication = smsSender.getAuthentication();
         if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL) {
-            return NotificationSenderUtils.buildAuthenticationHeader(authentication);
+            return authentication.buildAuthenticationHeader();
         }
 
         SMSSenderDTO newSmsSenderDTO = getSMSSender(smsSender.getName());
@@ -602,7 +602,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             updateSMSSender(newSmsSenderDTO);
         }
         authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
-        return NotificationSenderUtils.buildAuthenticationHeader(authentication);
+        return authentication.buildAuthenticationHeader();
     }
 
     private Optional<Resource> getPublisherResource(int tenantId, String resourceName)
