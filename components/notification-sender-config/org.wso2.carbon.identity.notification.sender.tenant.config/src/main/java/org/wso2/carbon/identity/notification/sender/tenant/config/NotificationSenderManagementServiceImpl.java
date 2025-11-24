@@ -24,6 +24,7 @@ import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -41,6 +42,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -50,6 +52,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
@@ -72,6 +75,7 @@ import javax.xml.transform.TransformerException;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
@@ -578,6 +582,27 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
                     pushSender.getName());
         }
+    }
+
+    @Override
+    public Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
+
+        Authentication authentication = smsSender.getAuthentication();
+        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL) {
+            return authentication.buildAuthenticationHeader();
+        }
+
+        SMSSenderDTO newSmsSenderDTO = getSMSSender(smsSender.getName());
+        String newAccessToken = newSmsSenderDTO.getAuthentication().getInternalProperties().get(ACCESS_TOKEN_PROP);
+
+        if (StringUtils.equals(newAccessToken, authentication.getInternalProperties().get(ACCESS_TOKEN_PROP))) {
+            TokenManager.getInstance().getNewAccessToken(authentication);
+            newAccessToken = authentication.getInternalProperties().get(ACCESS_TOKEN_PROP);
+            newSmsSenderDTO.getAuthentication().addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
+            updateSMSSender(newSmsSenderDTO);
+        }
+        authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
+        return authentication.buildAuthenticationHeader();
     }
 
     private Optional<Resource> getPublisherResource(int tenantId, String resourceName)
