@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.external.api.client.api.exception.APIClientConfigException;
 import org.wso2.carbon.identity.external.api.client.api.model.APIClientConfig;
 import org.wso2.carbon.identity.external.api.token.handler.api.exception.TokenHandlerException;
@@ -33,9 +35,16 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntConsumer;
 
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REFRESH_TOKEN_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_RETRIEVAL_HTTP_CONNECTION_REQUEST_TIMEOUT_IN_MILLIS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_RETRIEVAL_HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_RETRIEVAL_HTTP_READ_TIMEOUT_IN_MILLIS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_RETRIEVAL_MAX_PER_ROUTE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_RETRIEVAL_POOL_SIZE_TO_BE_SET;
+
 
 /**
  * Manager class for handling Client Credentials Token acquisition and management.
@@ -134,7 +143,37 @@ public class TokenManager {
 
     private APIClientConfig buildAPIClientConfig() throws APIClientConfigException {
 
-        APIClientConfig.Builder configBuilder = new APIClientConfig.Builder();
-        return configBuilder.build();
+        APIClientConfig.Builder builder = new APIClientConfig.Builder();
+
+        applyIfPositive(builder::httpConnectionTimeoutInMillis, TOKEN_RETRIEVAL_HTTP_CONNECTION_TIMEOUT_IN_MILLIS);
+        applyIfPositive(builder::httpReadTimeoutInMillis, TOKEN_RETRIEVAL_HTTP_READ_TIMEOUT_IN_MILLIS);
+        applyIfPositive(builder::httpConnectionRequestTimeoutInMillis,
+                TOKEN_RETRIEVAL_HTTP_CONNECTION_REQUEST_TIMEOUT_IN_MILLIS);
+        applyIfPositive(builder::poolSizeToBeSet, TOKEN_RETRIEVAL_POOL_SIZE_TO_BE_SET);
+        applyIfPositive(builder::defaultMaxPerRoute, TOKEN_RETRIEVAL_MAX_PER_ROUTE);
+
+        return builder.build();
+    }
+
+    private void applyIfPositive(IntConsumer setter, String propertyKey) {
+
+        int value = getIntProperty(propertyKey);
+        if (value > 0) {
+            setter.accept(value);
+        }
+    }
+
+    private int getIntProperty(String key) {
+
+        String configValue = IdentityUtil.getProperty(key);
+        if (StringUtils.isBlank(configValue)) {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(configValue.trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }
