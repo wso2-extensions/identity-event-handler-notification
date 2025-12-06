@@ -144,6 +144,18 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_SCOPES_PROPERTY = "mail.smtp.scopes";
     public static final String SMTP_AUTH_TYPE_PROPERTY = "mail.smtp.authType";
 
+    public static final String TOKEN_RETRIEVAL_HTTP_READ_TIMEOUT_IN_MILLIS =
+            "NotificationChannel.SMS.Custom.Authentication.OauthTokenRetrieval.HTTPReadTimeout";
+    public static final String TOKEN_RETRIEVAL_HTTP_CONNECTION_REQUEST_TIMEOUT_IN_MILLIS = "NotificationChannel.SMS" +
+            ".Custom.Authentication.OauthTokenRetrieval.HTTPConnectionRequestTimeout";
+    public static final String TOKEN_RETRIEVAL_HTTP_CONNECTION_TIMEOUT_IN_MILLIS = "NotificationChannel.SMS.Custom" +
+            ".Authentication.OauthTokenRetrieval.HTTPConnectionTimeout";
+    public static final String TOKEN_RETRIEVAL_POOL_SIZE_TO_BE_SET = "NotificationChannel.SMS.Custom" +
+            ".Authentication.OauthTokenRetrieval.HTTPConnectionPoolSize";
+    public static final String TOKEN_RETRIEVAL_MAX_PER_ROUTE = "NotificationChannel.SMS.Custom" +
+            ".Authentication.OauthTokenRetrieval.HTTPConnectionMaxPerRoute";
+
+
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
     public static final List<String> PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG =
