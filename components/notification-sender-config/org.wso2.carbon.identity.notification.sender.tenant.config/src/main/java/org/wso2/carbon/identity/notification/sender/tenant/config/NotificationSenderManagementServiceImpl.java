@@ -602,7 +602,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             updateSMSSender(newSmsSenderDTO);
         }
         authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
-        return authentication.buildAuthenticationHeader();
+        authentication.buildAuthenticationHeader();
+        return authentication.getAuthHeader();
     }
 
     private Optional<Resource> getPublisherResource(int tenantId, String resourceName)

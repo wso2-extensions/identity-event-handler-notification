@@ -111,6 +111,9 @@ public class Authentication {
                         AUTH_HEADER,
                         "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
             case CLIENT_CREDENTIAL:
+                if (internalAuthProperties.get(ACCESS_TOKEN_PROP) == null) {
+                    return null;
+                }
                 return new BasicHeader(
                         AUTH_HEADER,
                         "Bearer " + internalAuthProperties.get(ACCESS_TOKEN_PROP)
