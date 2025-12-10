@@ -90,13 +90,16 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             throw new IdentityEventException("Tenant domain is not found in the event properties.");
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling push notification event for " + tenantDomain);
+            LOG.debug("Handling push notification event for tenant: " + tenantDomain);
         }
 
         try {
             OrganizationManager organizationManager =
                     NotificationHandlerDataHolder.getInstance().getOrganizationManager();
             String organizationId = organizationManager.resolveOrganizationId(tenantDomain);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Resolved organization ID: " + organizationId + " for tenant domain: " + tenantDomain);
+            }
             event.getEventProperties().put(
                     NotificationConstants.EmailNotification.ORGANIZATION_ID_PLACEHOLDER, organizationId);
         } catch (OrganizationManagementException e) {
@@ -104,9 +107,11 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
         }
 
         if (!validatePushEventProperties(event)) {
+            LOG.debug("Push notification event properties validation failed.");
             throw new IdentityEventException("Event properties validation failed to proceed with the " +
                     "push notification sending through provider.");
         }
+        LOG.debug("Push notification event properties validated successfully.");
 
         try {
             /*
@@ -117,28 +122,53 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             List<PushSenderDTO>  pushSenders = NotificationHandlerDataHolder.getInstance()
                     .getNotificationSenderManagementService().getPushSenders(true);
             if (pushSenders != null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
+                }
                 for (PushSenderDTO pushSenderDTO : pushSenders) {
                     // This is to get the supported push providers. We can include push providers through OSGi.
                     PushProvider provider = NotificationHandlerDataHolder.getInstance()
                             .getPushProvider(pushSenderDTO.getProvider());
                     if (provider == null) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("No Push notification provider found for the name: " + pushSenderDTO.getName());
+                        }
                         throw new IdentityEventException("No Push notification provider found for the name: "
                                 + pushSenderDTO.getName());
                     }
                     String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
                     if (!registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider())) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("User is not registered to the Push notification provider: "
+                                    + pushSenderDTO.getName());
+                        }
                         throw new IdentityEventException("User is not registered to the Push notification provider: "
                                 + pushSenderDTO.getName());
                     }
 
                     PushNotificationData pushNotificationData = buildPushNotificationData(event);
                     provider.sendNotification(pushNotificationData, buildPushSenderData(pushSenderDTO), tenantDomain);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Push notification sent successfully through provider: "
+                                + pushSenderDTO.getProvider() + " for tenant: " + tenantDomain);
+                    }
+                }
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No push senders found for tenant: " + tenantDomain);
                 }
             }
         } catch (NotificationSenderManagementException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error while retrieving SMS Sender: "
+                        + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
+            }
             throw new IdentityEventException("Error while retrieving SMS Sender: "
                     + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
         } catch (PushProviderException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error while sending push notification.", e);
+            }
             throw new IdentityEventException(e.getErrorCode(), e.getMessage(), e);
         }
     }
