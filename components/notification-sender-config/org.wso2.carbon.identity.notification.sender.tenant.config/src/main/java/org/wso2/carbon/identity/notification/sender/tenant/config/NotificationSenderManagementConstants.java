@@ -143,6 +143,7 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_TOKEN_ENDPOINT_PROPERTY = "mail.smtp.tokenEndpoint";
     public static final String SMTP_SCOPES_PROPERTY = "mail.smtp.scopes";
     public static final String SMTP_AUTH_TYPE_PROPERTY = "mail.smtp.authType";
+    public static final String API_V1 = "v1";
 
     public static final String TOKEN_RETRIEVAL_HTTP_READ_TIMEOUT_IN_MILLIS =
             "NotificationChannel.SMS.Custom.Authentication.OauthTokenRetrieval.HTTPReadTimeout";

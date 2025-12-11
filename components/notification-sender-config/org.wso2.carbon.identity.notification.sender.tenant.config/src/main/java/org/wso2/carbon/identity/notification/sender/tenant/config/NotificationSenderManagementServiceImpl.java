@@ -156,7 +156,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        validateInputs(emailSender);
+        // Skip input validation for the Notification Sender V1 API.
+        if (!NotificationSenderManagementConstants.API_V1.equals(emailSender.getApiVersion())) {
+            validateInputs(emailSender);
+        }
 
         // Set the default publisher name if name is not defined.
         if (StringUtils.isEmpty(emailSender.getName())) {
@@ -509,7 +512,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        validateInputs(emailSender);
+        // Skip input validation for the Notification Sender V1 API.
+        if (!NotificationSenderManagementConstants.API_V1.equals(emailSender.getApiVersion())) {
+            validateInputs(emailSender);
+        }
 
         // Check whether a publisher exists to replace.
         Optional<Resource> resourceOptional = getPublisherResource(emailSender.getName());
@@ -858,6 +864,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
         for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
+            if (entry == null || StringUtils.isBlank(entry.getKey()) || StringUtils.equals(entry.getKey(), "null") ||
+                    StringUtils.isBlank(entry.getValue()) || StringUtils.equals(entry.getValue(), "null")) {
+                continue;
+            }
             String key = entry.getKey();
             String value = entry.getValue();
             switch (key) {

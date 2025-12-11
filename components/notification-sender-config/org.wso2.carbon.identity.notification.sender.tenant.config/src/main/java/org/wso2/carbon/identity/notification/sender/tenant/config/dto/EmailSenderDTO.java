@@ -33,6 +33,7 @@ public class EmailSenderDTO {
     private String username;
     private String password;
     private String authType;
+    private String apiVersion;
     private Map<String, String> properties = new HashMap<>();
 
     public String getName() {
@@ -114,5 +115,15 @@ public class EmailSenderDTO {
     public void setAuthType(String authType) {
 
         this.authType = authType;
+    }
+
+    public String getApiVersion() {
+
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+
+        this.apiVersion = apiVersion;
     }
 }
