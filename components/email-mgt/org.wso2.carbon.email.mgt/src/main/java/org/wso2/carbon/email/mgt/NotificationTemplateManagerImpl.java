@@ -21,6 +21,7 @@ package org.wso2.carbon.email.mgt;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.email.mgt.constants.TemplateMgtConstants;
 import org.wso2.carbon.email.mgt.store.SystemDefaultTemplateManager;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
@@ -28,7 +29,6 @@ import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerInternalException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
@@ -44,6 +44,13 @@ import static org.wso2.carbon.email.mgt.util.I18nEmailUtil.normalizeLocaleFormat
 /**
  * Provides functionality to manage notification templates.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.identity.governance.service.notification.NotificationTemplateManager",
+                "service.scope=singleton"
+        }
+)
 public class NotificationTemplateManagerImpl implements NotificationTemplateManager {
 
     private static final Log log = LogFactory.getLog(NotificationTemplateManagerImpl.class);
