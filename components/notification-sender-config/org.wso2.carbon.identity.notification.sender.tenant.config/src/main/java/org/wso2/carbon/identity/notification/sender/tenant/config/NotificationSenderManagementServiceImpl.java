@@ -156,8 +156,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        // Skip input validation for the Notification Sender V1 API.
-        if (!NotificationSenderManagementConstants.API_V1.equals(emailSender.getApiVersion())) {
+        return addEmailSender(emailSender, true);
+    }
+
+    @Override
+    public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender, boolean enforceInputValidation)
+            throws NotificationSenderManagementException {
+
+        if (enforceInputValidation) {
             validateInputs(emailSender);
         }
 
@@ -512,8 +518,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        // Skip input validation for the Notification Sender V1 API.
-        if (!NotificationSenderManagementConstants.API_V1.equals(emailSender.getApiVersion())) {
+        return updateEmailSender(emailSender, true);
+    }
+
+    @Override
+    public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender, boolean enforceInputValidation)
+            throws NotificationSenderManagementException {
+
+        if (enforceInputValidation) {
             validateInputs(emailSender);
         }
 
