@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.com).
+ * Copyright (c) 2022-2025, WSO2 Inc. (http://www.wso2.com).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -39,6 +39,20 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException;
+
+    /**
+     * Create an email sender resource with a resource file.
+     *
+     * @param emailSender            Email sender post request.
+     * @param enforceInputValidation Whether to enforce input validation.
+     * @return Email sender.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+    default EmailSenderDTO addEmailSender(EmailSenderDTO emailSender, boolean enforceInputValidation)
+            throws NotificationSenderManagementException {
+
+        return addEmailSender(emailSender);
+    }
 
     /**
      * Create a sms sender resource with a resource file.
@@ -176,6 +190,20 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException;
+
+    /**
+     * Update email sender details.
+     *
+     * @param emailSender            Email sender's updated configurations.
+     * @param enforceInputValidation Whether to enforce input validation.
+     * @return Updated email sender.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+    default EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender, boolean enforceInputValidation)
+            throws NotificationSenderManagementException {
+
+        return updateEmailSender(emailSender);
+    }
 
     /**
      * Update sms sender details.
