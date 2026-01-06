@@ -255,6 +255,12 @@
                 <version>${identity.organization.management.core.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.osgi.services</artifactId>
+                <version>${equinox.osgi.services.version}</version>
+            </dependency>
+
             <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -384,6 +390,8 @@
         <identity.event.handler.notification.exp.pkg.version>${project.version}</identity.event.handler.notification.exp.pkg.version>
         <identity.event.handler.notification.imp.pkg.version.range>[1.2.0, 2.0.0)</identity.event.handler.notification.imp.pkg.version.range>
 
+        <equinox.osgi.services.version>3.12.0</equinox.osgi.services.version>
+
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
 
@@ -437,7 +445,7 @@
         <!--Maven Plugin Version-->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
-        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>5.1.9</maven.bundle.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
 
         <!-- Test Dependency Versions -->
