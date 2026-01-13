@@ -69,7 +69,7 @@ public class OrgNotificationTemplateDAO {
     public void addNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        String displayName = notificationTemplate.getDisplayName();
+        String templateType = notificationTemplate.getType();
         String locale = notificationTemplate.getLocale();
         String channelName = notificationTemplate.getNotificationChannel();
 
@@ -82,7 +82,7 @@ public class OrgNotificationTemplateDAO {
                 preparedStatement.setString(LOCALE, locale);
                 preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
-                preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
+                preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
                 preparedStatement.setString(CHANNEL, channelName);
                 preparedStatement.setInt(TENANT_ID, tenantId);
                 preparedStatement.setInt(TENANT_ID, tenantId);
@@ -95,7 +95,7 @@ public class OrgNotificationTemplateDAO {
         } catch (DataAccessException e) {
             String error =
                     String.format("Error while adding %s template %s of type %s to %s tenant.", channelName,
-                            locale, displayName, tenantId);
+                            locale, templateType, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         } catch (IOException e) {
             throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);
@@ -209,7 +209,7 @@ public class OrgNotificationTemplateDAO {
     public void updateNotificationTemplate(NotificationTemplate notificationTemplate, int tenantId)
             throws NotificationTemplateManagerServerException {
 
-        String displayName = notificationTemplate.getDisplayName();
+        String templateType = notificationTemplate.getType();
         String locale = notificationTemplate.getLocale();
         String channelName = notificationTemplate.getNotificationChannel();
 
@@ -222,7 +222,7 @@ public class OrgNotificationTemplateDAO {
                         preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
-                        preparedStatement.setString(TYPE_KEY, displayName.toLowerCase());
+                        preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
@@ -232,7 +232,7 @@ public class OrgNotificationTemplateDAO {
         } catch (DataAccessException e) {
             String error =
                     String.format("Error while updating %s template %s of type %s from %s tenant.", channelName, locale,
-                            displayName, tenantId);
+                            templateType, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         } catch (IOException e) {
             throw new NotificationTemplateManagerServerException("Error while processing content stream.", e);

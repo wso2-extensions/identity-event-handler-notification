@@ -28,6 +28,7 @@ import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedNotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.NotificationTypeDAO;
 import org.wso2.carbon.email.mgt.store.dao.OrgNotificationTemplateDAO;
 import org.wso2.carbon.email.mgt.store.dao.cache.CacheBackedOrgNotificationTemplateDAO;
+import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -52,7 +53,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         notificationTypeDAO.addNotificationTemplateType(templateTypeKey, displayName, notificationChannel, tenantId);
@@ -67,7 +68,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         String templateTypeDisplayName =
@@ -101,7 +102,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     public void deleteNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         notificationTypeDAO.deleteNotificationTemplateType(templateTypeKey, notificationChannel, tenantId);
@@ -169,7 +170,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         boolean isNotificationTemplateExists;
@@ -203,7 +204,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                                         String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         NotificationTemplate notificationTemplate;
@@ -282,7 +283,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                            String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         if (StringUtils.isBlank(applicationUuid)) {
@@ -308,7 +309,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     public void deleteNotificationTemplates(String displayName, String notificationChannel, String applicationUuid,
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         if (StringUtils.isBlank(applicationUuid)) {
@@ -332,7 +333,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
     public void deleteAllNotificationTemplates(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        String templateTypeKey = displayName.toLowerCase();
+        String templateTypeKey = I18nEmailUtil.getNormalizedName(displayName);
         int tenantId = getTenantId(tenantDomain);
 
         orgNotificationTemplateDAO.removeNotificationTemplates(templateTypeKey, notificationChannel, tenantId);
