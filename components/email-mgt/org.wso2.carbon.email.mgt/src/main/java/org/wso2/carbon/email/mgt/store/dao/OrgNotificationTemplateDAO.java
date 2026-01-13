@@ -82,7 +82,7 @@ public class OrgNotificationTemplateDAO {
                 preparedStatement.setString(LOCALE, locale);
                 preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                 preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
-                preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
+                preparedStatement.setString(TYPE_KEY, templateType);
                 preparedStatement.setString(CHANNEL, channelName);
                 preparedStatement.setInt(TENANT_ID, tenantId);
                 preparedStatement.setInt(TENANT_ID, tenantId);
@@ -222,7 +222,7 @@ public class OrgNotificationTemplateDAO {
                         preparedStatement.setBinaryStream(CONTENT, contentStream, contentLength);
                         preparedStatement.setString(CONTENT_TYPE, notificationTemplate.getContentType());
                         preparedStatement.setString(TEMPLATE_KEY, locale.toLowerCase());
-                        preparedStatement.setString(TYPE_KEY, templateType.toLowerCase());
+                        preparedStatement.setString(TYPE_KEY, templateType);
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
