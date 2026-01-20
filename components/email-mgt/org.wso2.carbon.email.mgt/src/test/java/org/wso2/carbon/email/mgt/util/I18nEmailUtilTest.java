@@ -202,4 +202,45 @@ public class I18nEmailUtilTest {
         String result2 = I18nEmailUtil.getNotificationLocale();
         assertEquals(result2, I18nMgtConstants.DEFAULT_NOTIFICATION_LOCALE);
     }
+
+    @DataProvider(name = "provideNormalizedNameData")
+    public Object[][] provideNormalizedNameData() {
+
+        return new Object[][]{
+                {"TestTemplate", "testtemplate"},
+                {"Test Template", "testtemplate"},
+                {"Test  Template", "testtemplate"},
+                {"test template", "testtemplate"},
+                {"PASSWORD RESET", "passwordreset"},
+                {"Password Reset", "passwordreset"},
+                {"  Test  Template  ", "testtemplate"},
+                {"test\ttemplate", "testtemplate"},
+                {"test\ntemplate", "testtemplate"}
+        };
+    }
+
+    @Test(dataProvider = "provideNormalizedNameData")
+    public void testGetNormalizedName(String input, String expected) {
+
+        String result = I18nEmailUtil.getNormalizedName(input);
+        assertEquals(result, expected, "Normalized name should match expected value");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetNormalizedNameWithNull() {
+
+        I18nEmailUtil.getNormalizedName(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetNormalizedNameWithEmptyString() {
+
+        I18nEmailUtil.getNormalizedName("");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetNormalizedNameWithBlankString() {
+
+        I18nEmailUtil.getNormalizedName("   ");
+    }
 }
