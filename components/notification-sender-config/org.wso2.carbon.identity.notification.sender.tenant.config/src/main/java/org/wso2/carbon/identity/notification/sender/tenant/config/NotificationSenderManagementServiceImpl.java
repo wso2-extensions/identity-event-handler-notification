@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -141,6 +142,14 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 /**
  * OSGi service of Notification Sender Management operations.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.identity.notification.sender.tenant.config." +
+                        "NotificationSenderManagementService",
+                "service.scope=singleton"
+        }
+)
 public class NotificationSenderManagementServiceImpl implements NotificationSenderManagementService {
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
