@@ -125,33 +125,44 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
                 }
+
+                PushSenderDTO matchingPushSenderDTO = null;
+
                 for (PushSenderDTO pushSenderDTO : pushSenders) {
                     // This is to get the supported push providers. We can include push providers through OSGi.
-                    PushProvider provider = NotificationHandlerDataHolder.getInstance()
-                            .getPushProvider(pushSenderDTO.getProvider());
-                    if (provider == null) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("No Push notification provider found for the name: " + pushSenderDTO.getName());
-                        }
-                        throw new IdentityEventException("No Push notification provider found for the name: "
-                                + pushSenderDTO.getName());
-                    }
                     String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
-                    if (!registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider())) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("User is not registered to the Push notification provider: "
-                                    + pushSenderDTO.getName());
-                        }
-                        throw new IdentityEventException("User is not registered to the Push notification provider: "
-                                + pushSenderDTO.getName());
-                    }
 
-                    PushNotificationData pushNotificationData = buildPushNotificationData(event);
-                    provider.sendNotification(pushNotificationData, buildPushSenderData(pushSenderDTO), tenantDomain);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Push notification sent successfully through provider: "
-                                + pushSenderDTO.getProvider() + " for tenant: " + tenantDomain);
+                    if (registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider())) {
+                        matchingPushSenderDTO = pushSenderDTO;
+                        break;
                     }
+                }
+
+                if (matchingPushSenderDTO == null) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No matching Push sender found for tenant: " + tenantDomain);
+                    }
+                    throw new IdentityEventException("No matching Push sender found for tenant: " + tenantDomain);
+                }
+
+                PushProvider provider = NotificationHandlerDataHolder.getInstance()
+                        .getPushProvider(matchingPushSenderDTO.getProvider());
+                if (provider == null) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No Push notification provider found for the name: " +
+                                matchingPushSenderDTO.getName());
+                    }
+                    throw new IdentityEventException("No Push notification provider found for the name: "
+                            + matchingPushSenderDTO.getName());
+                }
+
+                PushNotificationData pushNotificationData = buildPushNotificationData(event);
+                provider.sendNotification(pushNotificationData,
+                        buildPushSenderData(matchingPushSenderDTO), tenantDomain);
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Push notification sent successfully through provider: "
+                            + matchingPushSenderDTO.getProvider() + " for tenant: " + tenantDomain);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
