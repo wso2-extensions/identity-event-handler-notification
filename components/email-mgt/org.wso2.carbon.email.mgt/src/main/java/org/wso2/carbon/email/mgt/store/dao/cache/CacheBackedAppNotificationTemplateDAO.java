@@ -48,7 +48,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         super.addNotificationTemplate(notificationTemplate, applicationUuid, tenantId);
 
         String locale = notificationTemplate.getLocale();
-        String type = notificationTemplate.getType();
+        String type = notificationTemplate.getDisplayName().toLowerCase();
         String channel = notificationTemplate.getNotificationChannel();
 
         AppNotificationTemplateCacheKey cacheKey =
@@ -153,7 +153,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         super.updateNotificationTemplate(notificationTemplate, applicationUuid, tenantId);
 
         String locale = notificationTemplate.getLocale();
-        String type = notificationTemplate.getType();
+        String type = notificationTemplate.getDisplayName().toLowerCase();
         String channel = notificationTemplate.getNotificationChannel();
 
         AppNotificationTemplateCacheKey cacheKey =
