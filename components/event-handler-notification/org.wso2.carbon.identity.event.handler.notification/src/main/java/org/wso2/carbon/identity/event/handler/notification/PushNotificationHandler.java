@@ -49,6 +49,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.CHALLENGE;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_HANDLE;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_ID;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_TOKEN;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.IP_ADDRESS;
@@ -276,6 +277,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 .setPushId((String) eventProperties.get(PUSH_ID))
                 .setDeviceToken((String) eventProperties.get(DEVICE_TOKEN))
                 .setDeviceId((String) eventProperties.get(DEVICE_ID))
+                .setDeviceHandle((String) eventProperties.get(DEVICE_HANDLE))
                 .setChallenge((String) eventProperties.get(CHALLENGE))
                 .setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE))
                 .setIpAddress((String) eventProperties.get(IP_ADDRESS))
