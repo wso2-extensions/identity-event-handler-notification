@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,24 +128,21 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                     LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
                 }
 
-                PushSenderDTO matchingPushSenderDTO = null;
+                Optional<PushSenderDTO> matchingPushSenderOptional = pushSenders.stream()
+                        .filter(pushSenderDTO -> {
+                            String registeredProvider = (String) event.getEventProperties()
+                                    .get(NOTIFICATION_PROVIDER);
+                            return registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider());
+                        }).findFirst();
 
-                for (PushSenderDTO pushSenderDTO : pushSenders) {
-                    // This is to get the supported push providers. We can include push providers through OSGi.
-                    String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
-
-                    if (registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider())) {
-                        matchingPushSenderDTO = pushSenderDTO;
-                        break;
-                    }
-                }
-
-                if (matchingPushSenderDTO == null) {
+                if (!matchingPushSenderOptional.isPresent()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No matching Push sender found for tenant: " + tenantDomain);
                     }
                     throw new IdentityEventException("No matching Push sender found for tenant: " + tenantDomain);
                 }
+
+                PushSenderDTO matchingPushSenderDTO = matchingPushSenderOptional.get();
 
                 PushProvider provider = NotificationHandlerDataHolder.getInstance()
                         .getPushProvider(matchingPushSenderDTO.getProvider());
