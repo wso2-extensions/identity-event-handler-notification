@@ -117,9 +117,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
 
         try {
             /*
-             * Get the registered Push notification senders from the database. This is done to support multiple push
-             * senders in the future. However, in the current implementation, only one push notification sender is
-             * supported through the UI.
+             * Get the registered Push notification senders from the database.
              */
             List<PushSenderDTO>  pushSenders = NotificationHandlerDataHolder.getInstance()
                     .getNotificationSenderManagementService().getPushSenders(true);
@@ -170,11 +168,11 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             }
         } catch (NotificationSenderManagementException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Error while retrieving SMS Sender: "
-                        + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
+                LOG.debug("Error while retrieving Push Sender for provider: "
+                        + event.getEventProperties().get(NOTIFICATION_PROVIDER), e);
             }
-            throw new IdentityEventException("Error while retrieving SMS Sender: "
-                    + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
+            throw new IdentityEventException("Error while retrieving Push Sender for provider: "
+                    + event.getEventProperties().get(NOTIFICATION_PROVIDER), e);
         } catch (PushProviderException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error while sending push notification.", e);
