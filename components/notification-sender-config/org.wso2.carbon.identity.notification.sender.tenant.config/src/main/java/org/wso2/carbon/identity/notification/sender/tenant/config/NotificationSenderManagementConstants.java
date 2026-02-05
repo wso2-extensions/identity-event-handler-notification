@@ -38,6 +38,7 @@ public class NotificationSenderManagementConstants {
     public static final String DEFAULT_EMAIL_PUBLISHER = "EmailPublisher";
     public static final String DEFAULT_SMS_PUBLISHER = "SMSPublisher";
     public static final String DEFAULT_PUSH_PUBLISHER = "PushPublisher";
+    public static final String PUSH_PUBLISHER_NAME_SUFFIX = "_PushPublisher";
     public static final String PUBLISHER_FILE_EXTENSION = ".xml";
     public static final String RESOURCE_NOT_EXISTS_ERROR_CODE = "CONFIGM_00017";
     public static final String PLACEHOLDER_IDENTIFIER = "$";

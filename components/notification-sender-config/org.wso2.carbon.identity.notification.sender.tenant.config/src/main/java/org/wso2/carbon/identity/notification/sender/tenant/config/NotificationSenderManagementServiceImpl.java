@@ -84,7 +84,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISPLAY_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PROVIDER;
@@ -116,6 +115,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_TYPE_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_NAME_SUFFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REPLY_TO_ADDRESS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
@@ -260,10 +260,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public PushSenderDTO addPushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
 
-        // Set the default publisher name if name is not defined.
-        if (StringUtils.isEmpty(pushSender.getName())) {
-            pushSender.setName(DEFAULT_PUSH_PUBLISHER);
-        }
+        // Set the push sender name based on the push provider name
+        pushSender.setName(buildPushSenderName(pushSender.getProvider()));
         Optional<Resource> resourceOptional = getPublisherResource(pushSender.getName());
         if (resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, pushSender.getName());
@@ -604,6 +602,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
         authentication.buildAuthenticationHeader();
         return authentication.getAuthHeader();
+    }
+
+    private static String buildPushSenderName(String provider) {
+
+        return provider + PUSH_PUBLISHER_NAME_SUFFIX;
     }
 
     private Optional<Resource> getPublisherResource(int tenantId, String resourceName)
