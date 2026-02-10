@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service of Notification Sender Management operations.
@@ -207,6 +208,33 @@ public interface NotificationSenderManagementService {
      */
     default Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
+        return null;
+    }
+
+    /**
+     * Set the configurations of the publisher of the tenant.
+     *
+     * @param publisherType Publisher type.
+     * @param configs Map of publisher configurations.
+     * @return Map of updated publisher configurations.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+
+    default Map<String, String> setNotiSenderConfigurations(String publisherType, Map<String, String> configs)
+            throws NotificationSenderManagementException {
+        return null;
+    }
+
+    /**
+     * Get the configurations of the publisher of the tenant.
+     *
+     * @param publisherType Publisher type.
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @return Map of publisher configurations.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+    default Map<String, String> getNotiSenderConfigurations(String publisherType, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
         return null;
     }
 }
