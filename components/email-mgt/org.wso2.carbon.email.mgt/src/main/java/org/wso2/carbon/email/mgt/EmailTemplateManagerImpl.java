@@ -21,6 +21,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtClientException;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
@@ -68,6 +69,13 @@ import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 /**
  * Provides functionality to manage email templates used in notification emails.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.email.mgt.EmailTemplateManager",
+                "service.scope=singleton"
+        }
+)
 public class EmailTemplateManagerImpl implements EmailTemplateManager, NotificationTemplateManager {
 
     private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
