@@ -226,33 +226,44 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
-                    <!--Exclude sources-->
-                    <excludeFilterFile>${mavan.findbugsplugin.exclude.file}</excludeFilterFile>
-                    <plugins>
-                        <plugin>
-                            <groupId>com.h3xstream.findsecbugs</groupId>
-                            <artifactId>findsecbugs-plugin</artifactId>
-                            <version>${findsecbugs-plugin.version}</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>analyze-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
+    <groupId>com.github.spotbugs</groupId>
+    <artifactId>spotbugs-maven-plugin</artifactId>
+    <configuration>
+        <effort>Max</effort>
+        <threshold>Low</threshold>
+
+        <!-- XML output (same as FindBugs) -->
+        <xmlOutput>true</xmlOutput>
+        <spotbugsXmlOutputDirectory>
+            ${project.build.directory}/spotbugs
+        </spotbugsXmlOutputDirectory>
+
+        <!-- Exclude filter (unchanged) -->
+        <excludeFilterFile>
+            ${mavan.findbugsplugin.exclude.file}
+        </excludeFilterFile>
+
+        <!-- Security rules (FindSecBugs equivalent) -->
+        <plugins>
+            <plugin>
+                <groupId>com.h3xstream.findsecbugs</groupId>
+                <artifactId>findsecbugs-plugin</artifactId>
+                <version>${findsecbugs-plugin.version}</version>
             </plugin>
+        </plugins>
+    </configuration>
+
+    <executions>
+        <execution>
+            <id>analyze-compile</id>
+            <phase>compile</phase>
+            <goals>
+                <goal>check</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
