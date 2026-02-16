@@ -52,8 +52,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -292,11 +294,14 @@ public class NotificationSenderManagementServiceImplTest {
         assert properties.equals(result.getProperties());
 
         verify(configurationManager, times(1)).getResource(any(String.class), any(String.class));
-        verify(configurationManager, times(1)).addResource(any(String.class), any(Resource.class));
-        verify(fcmPushProvider, times(1)).storePushProviderSecretProperties(any(PushSenderData.class));
+        verify(configurationManager, times(1))
+                .addResource(any(String.class), any(Resource.class));
+        verify(fcmPushProvider, times(1))
+                .storePushProviderSecretProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).preProcessProperties(any(PushSenderData.class));
         verify(fcmPushProvider, times(1)).postProcessProperties(any(PushSenderData.class));
-        verify(fcmPushProvider, times(1)).retrievePushProviderSecretProperties(any(PushSenderData.class));
+        verify(fcmPushProvider, times(1))
+                .retrievePushProviderSecretProperties(any(PushSenderData.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
@@ -626,6 +631,207 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test
+    public void testSetNotiSenderConfigurations()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+        Map<String, String> configs = createPushConfigurations();
+
+        Resource resource = createConfigResource("notification-sender-configs-push", configs);
+        resource.setResourceId("sampleConfigResourceId");
+
+        when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(resource);
+
+        Map<String, String> result = notificationSenderManagementService.setNotiSenderConfigurations(
+                publisherType, configs);
+
+        Assert.assertEquals(result, configs);
+        verify(configurationManager, times(1)).getResource(anyString(), anyString(), anyBoolean());
+        verify(configurationManager, times(1)).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testSetNotiSenderConfigurationsUpdate()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+        Map<String, String> existingConfigs = new HashMap<>();
+        existingConfigs.put("old.config.key", "old.value");
+        Map<String, String> newConfigs = createPushConfigurations();
+
+        Resource existingResource = createConfigResource("notification-sender-configs-push", existingConfigs);
+        existingResource.setResourceId("existingConfigResourceId");
+        existingResource.setResourceType("NotificationSenderConfigs");
+
+        when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(existingResource);
+
+        Map<String, String> result = notificationSenderManagementService.setNotiSenderConfigurations(
+                publisherType, newConfigs);
+
+        // Result should contain both existing and new configs merged
+        Map<String, String> expectedConfigs = new HashMap<>(existingConfigs);
+        expectedConfigs.putAll(newConfigs);
+        Assert.assertEquals(result, expectedConfigs);
+        verify(configurationManager, times(1)).getResource(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testSetNotiSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
+
+        String publisherType = "invalid-type";
+        Map<String, String> configs = createPushConfigurations();
+
+        notificationSenderManagementService.setNotiSenderConfigurations(publisherType, configs);
+    }
+
+    @Test
+    public void testGetNotiSenderConfigurations()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+        Map<String, String> configs = createPushConfigurations();
+
+        Resource resource = createConfigResource("notification-sender-configs-push", configs);
+        resource.setResourceId("sampleConfigResourceId");
+
+        when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(resource);
+
+        Map<String, String> result = notificationSenderManagementService.getNotiSenderConfigurations(
+                publisherType, false);
+
+        Assert.assertEquals(result, configs);
+        verify(configurationManager, times(1)).getResource(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testGetNotiSenderConfigurationsWithInheritance()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+        Map<String, String> configs = createPushConfigurations();
+
+        Resource resource = createConfigResource("notification-sender-configs-push", configs);
+        resource.setResourceId("parentConfigResourceId");
+
+        // Mock to return resource (inheritance is handled internally by ConfigurationManager)
+        when(configurationManager.getResource(anyString(), anyString(), eq(true))).thenReturn(resource);
+
+        Map<String, String> result = notificationSenderManagementService
+                .getNotiSenderConfigurations(publisherType, true);
+
+        Assert.assertEquals(result, configs);
+        verify(configurationManager, times(1)).getResource(anyString(), anyString(), eq(true));
+    }
+
+    @Test
+    public void testGetNotiSenderConfigurationsNoResource()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+
+        when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(null);
+
+        Map<String, String> result = notificationSenderManagementService.getNotiSenderConfigurations(
+                publisherType, false);
+
+        Assert.assertTrue(result.isEmpty());
+        verify(configurationManager, times(1)).getResource(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testGetNotiSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
+
+        String publisherType = "invalid-type";
+
+        notificationSenderManagementService.getNotiSenderConfigurations(publisherType, false);
+    }
+
+    @Test
+    public void testAddPushSenderWithMultipleProviders()
+            throws NotificationSenderManagementException, ConfigurationManagementException, PushProviderException {
+
+        // Test FCM provider
+        PushSenderDTO fcmPushSender = new PushSenderDTO();
+        fcmPushSender.setProvider("FCM");
+        Map<String, String> fcmProperties = new HashMap<>();
+        fcmProperties.put("key1", "value1");
+        fcmPushSender.setProperties(fcmProperties);
+
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(fcmProperties);
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
+
+        Resource fcmResource = new Resource();
+        fcmResource.setResourceName("FCM_PushPublisher");
+        fcmResource.setResourceId("fcmResourceId");
+        List<Attribute> fcmAttributes = new ArrayList<>();
+        fcmAttributes.add(new Attribute("key1", "value1"));
+        fcmAttributes.add(new Attribute("provider", "FCM"));
+        fcmResource.setAttributes(fcmAttributes);
+
+        when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(fcmResource);
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(fcmProperties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(fcmProperties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(fcmProperties);
+
+        PushSenderDTO fcmResult = notificationSenderManagementService.addPushSender(fcmPushSender);
+        assert "FCM_PushPublisher".equals(fcmResult.getName());
+        assert "FCM".equals(fcmResult.getProvider());
+    }
+
+    @Test
+    public void testAddPushSenderNameOverride()
+            throws NotificationSenderManagementException, ConfigurationManagementException, PushProviderException {
+
+        PushSenderDTO pushSender = new PushSenderDTO();
+        pushSender.setName("CustomName"); // This should be overridden
+        pushSender.setProvider("FCM");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("key1", "value1");
+        pushSender.setProperties(properties);
+
+        when(fcmPushProvider.preProcessProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
+
+        Resource resource = new Resource();
+        resource.setResourceName("FCM_PushPublisher");
+        resource.setResourceId("sampleResourceId");
+        List<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute("key1", "value1"));
+        attributes.add(new Attribute("provider", "FCM"));
+        resource.setAttributes(attributes);
+
+        when(configurationManager.addResource(any(String.class), any(Resource.class))).thenReturn(resource);
+        when(fcmPushProvider.storePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.retrievePushProviderSecretProperties(any(PushSenderData.class))).thenReturn(properties);
+        when(fcmPushProvider.postProcessProperties(any(PushSenderData.class))).thenReturn(properties);
+
+        PushSenderDTO result = notificationSenderManagementService.addPushSender(pushSender);
+
+        assert "FCM_PushPublisher".equals(result.getName());
+        assert !"CustomName".equals(result.getName());
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementException.class)
+    public void testSetNotiSenderConfigurationsConfigManagementException()
+            throws NotificationSenderManagementException, ConfigurationManagementException {
+
+        String publisherType = "push";
+        Map<String, String> configs = createPushConfigurations();
+
+        // Mock getResource to return null so it goes through add path
+        when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(null);
+        
+        // Mock addResource to throw exception
+        ConfigurationManagementException mockException =
+                new ConfigurationManagementException("Test error", "ERROR_CODE_TEST");
+        when(configurationManager.addResource(anyString(), any(Resource.class)))
+                .thenThrow(mockException);
+
+        notificationSenderManagementService.setNotiSenderConfigurations(publisherType, configs);
+    }
+
+    @Test
     public void testValidateInputsSuccessWithBasicAuthWithV1() throws NotificationSenderManagementClientException {
 
         EmailSenderDTO emailSender = new EmailSenderDTO();
@@ -830,5 +1036,23 @@ public class NotificationSenderManagementServiceImplTest {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+    }
+
+    private Map<String, String> createPushConfigurations() {
+
+        Map<String, String> configs = new HashMap<>();
+        configs.put("default.push.provider", "FCM");
+        configs.put("push.notification.enabled", "true");
+        return configs;
+    }
+
+    private Resource createConfigResource(String name, Map<String, String> configs) {
+
+        Resource resource = new Resource();
+        resource.setResourceName(name);
+        List<Attribute> attributes = new ArrayList<>();
+        configs.forEach((key, value) -> attributes.add(new Attribute(key, value)));
+        resource.setAttributes(attributes);
+        return resource;
     }
 }
