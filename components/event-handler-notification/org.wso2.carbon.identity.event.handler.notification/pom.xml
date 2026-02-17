@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.79-SNAPSHOT</version>
+        <version>1.12.1-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -163,11 +163,11 @@
                             javax.cache,
                             javax.xml.namespace,
 
-                            org.apache.axis2; version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.context; version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.engine; version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.description; version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.transport.http; version="${axis2.wso2.imp.pkg.version.range}",
+                            org.apache.axis2; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.context; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.engine; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.description; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.transport.http; version="${axis2.osgi.version.range}",
 
                             org.apache.axiom.*; version="${axiom.wso2.imp.pkg.version.range}",
                             org.apache.commons.logging; version="${commons.logging.imp.pkg.version.range}",

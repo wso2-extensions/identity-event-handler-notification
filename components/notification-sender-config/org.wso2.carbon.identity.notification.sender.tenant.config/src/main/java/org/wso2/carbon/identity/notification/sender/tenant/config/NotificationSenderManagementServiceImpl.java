@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
@@ -152,6 +153,14 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 /**
  * OSGi service of Notification Sender Management operations.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.identity.notification.sender.tenant.config." +
+                        "NotificationSenderManagementService",
+                "service.scope=singleton"
+        }
+)
 public class NotificationSenderManagementServiceImpl implements NotificationSenderManagementService {
 
     private static final Log log = LogFactory.getLog(NotificationSenderManagementServiceImpl.class);
@@ -167,7 +176,16 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        validateInputs(emailSender);
+        return addEmailSender(emailSender, false);
+    }
+
+    @Override
+    public EmailSenderDTO addEmailSender(EmailSenderDTO emailSender, boolean skipInputValidation)
+            throws NotificationSenderManagementException {
+
+        if (!skipInputValidation) {
+            validateInputs(emailSender);
+        }
 
         // Set the default publisher name if name is not defined.
         if (StringUtils.isEmpty(emailSender.getName())) {
@@ -518,7 +536,16 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender) throws NotificationSenderManagementException {
 
-        validateInputs(emailSender);
+        return updateEmailSender(emailSender, false);
+    }
+
+    @Override
+    public EmailSenderDTO updateEmailSender(EmailSenderDTO emailSender, boolean skipInputValidation)
+            throws NotificationSenderManagementException {
+
+        if (!skipInputValidation) {
+            validateInputs(emailSender);
+        }
 
         // Check whether a publisher exists to replace.
         Optional<Resource> resourceOptional = getPublisherResource(emailSender.getName());
@@ -1004,6 +1031,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
         for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
+            if (entry == null || StringUtils.isBlank(entry.getKey()) || StringUtils.equals(entry.getKey(), "null") ||
+                    StringUtils.isBlank(entry.getValue()) || StringUtils.equals(entry.getValue(), "null")) {
+                continue;
+            }
             String key = entry.getKey();
             String value = entry.getValue();
             switch (key) {

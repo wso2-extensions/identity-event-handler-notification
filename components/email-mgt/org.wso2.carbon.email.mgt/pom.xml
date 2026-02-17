@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.79-SNAPSHOT</version>
+        <version>1.12.1-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -32,6 +32,10 @@
     <description>A custom wso2 products or solution</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi.services</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
@@ -121,7 +125,6 @@
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -260,14 +263,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
         <artifactId>identity-event-handler-notification</artifactId>
-        <version>1.9.79-SNAPSHOT</version>
+        <version>1.12.1-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -81,9 +81,9 @@
                             org.wso2.carbon.email.mgt.ui.*;version="${identity.event.handler.notification.exp.pkg.version}",
                         </Export-Package>
                         <Import-Package>
-                            org.apache.axis2;version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.client;version="${axis2.wso2.imp.pkg.version.range}",
-                            org.apache.axis2.context;version="${axis2.wso2.imp.pkg.version.range}",
+                            org.apache.axis2;version="${axis2.osgi.version.range}",
+                            org.apache.axis2.client;version="${axis2.osgi.version.range}",
+                            org.apache.axis2.context;version="${axis2.osgi.version.range}",
                             org.apache.commons.logging;version="${commons.logging.imp.pkg.version.range}",
                             org.wso2.carbon.email.mgt.model.xsd.*;version="${identity.event.handler.notification.imp.pkg.version.range}",
                             org.wso2.carbon.email.mgt.stub.*;version="${identity.event.handler.notification.imp.pkg.version.range}",

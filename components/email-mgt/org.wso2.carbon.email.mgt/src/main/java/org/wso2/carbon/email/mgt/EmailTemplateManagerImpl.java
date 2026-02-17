@@ -21,6 +21,7 @@ package org.wso2.carbon.email.mgt;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManagerFactory;
 import org.wso2.carbon.email.mgt.store.TemplatePersistenceManager;
@@ -59,6 +60,13 @@ import static org.wso2.carbon.identity.base.IdentityValidationUtil.ValidatorPatt
 /**
  * Provides functionality to manage email templates used in notification emails.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.email.mgt.EmailTemplateManager",
+                "service.scope=singleton"
+        }
+)
 public class EmailTemplateManagerImpl implements EmailTemplateManager, NotificationTemplateManager {
 
     private TemplatePersistenceManager templatePersistenceManager;

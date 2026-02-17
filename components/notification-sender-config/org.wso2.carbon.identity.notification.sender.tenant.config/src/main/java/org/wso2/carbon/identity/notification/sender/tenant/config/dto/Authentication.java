@@ -125,8 +125,8 @@ public class Authentication {
                 );
             case API_KEY:
                 return new BasicHeader(
-                        authProperties.get(Property.HEADER.toString()),
-                        authProperties.get(Property.VALUE.toString())
+                        authProperties.get(Property.HEADER.getName()),
+                        authProperties.get(Property.VALUE.getName())
                 );
             default:
                 return null;
