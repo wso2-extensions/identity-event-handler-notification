@@ -19,7 +19,7 @@
     <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
     <artifactId>identity-event-handler-notification</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.37-SNAPSHOT</version>
+    <version>1.11.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <url>http://wso2.org</url>
 
@@ -269,27 +269,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
+                <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito.inline.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -450,10 +432,8 @@
 
         <!-- Test Dependency Versions -->
         <testng.version>6.9.10</testng.version>
-        <powermock.version>1.7.0</powermock.version>
-        <mockito.version>1.10.19</mockito.version>
-        <mockito.inline.version>3.8.0</mockito.inline.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <mockito.version>5.14.2</mockito.version>
+        <jacoco.version>0.8.11</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
 
         <!-- Pax Logging Version -->

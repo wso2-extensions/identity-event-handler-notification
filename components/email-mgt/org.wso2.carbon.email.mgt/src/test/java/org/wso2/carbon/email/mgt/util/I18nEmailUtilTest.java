@@ -18,9 +18,10 @@ package org.wso2.carbon.email.mgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
@@ -33,17 +34,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_CONTENT_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.TEMPLATE_TYPE_DISPLAY_NAME;
 
-@PrepareForTest({LogFactory.class, Resource.class})
-public class I18nEmailUtilTest extends PowerMockTestCase {
+public class I18nEmailUtilTest {
 
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TYPE = "templateType";
@@ -67,6 +68,26 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     @Mock
     private Log log;
 
+    private MockedStatic<LogFactory> mockedLogFactory;
+    private AutoCloseable closeable;
+
+    @BeforeMethod
+    public void setUp() {
+
+        closeable = openMocks(this);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+
+        if (closeable != null) {
+            closeable.close();
+        }
+        if (mockedLogFactory != null) {
+            mockedLogFactory.close();
+        }
+    }
+
     @DataProvider(name = "provideTestData")
     public Object[][] provideTestData() {
 
@@ -88,8 +109,8 @@ public class I18nEmailUtilTest extends PowerMockTestCase {
     @Test(dataProvider = "provideTestData")
     public void testGetEmailTemplate(Map<String, String> configMap, byte[] content, int caseNo) throws Exception {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
+        mockedLogFactory = mockStatic(LogFactory.class);
+        mockedLogFactory.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(log);
         doNothing().when(log).debug(any());
         doNothing().when(log).error(any());
         doNothing().when(log).error(any(), any(Throwable.class));
