@@ -15,30 +15,27 @@
  */
 package org.wso2.carbon.email.mgt;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static org.testng.Assert.*;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
-import org.testng.IObjectFactory;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.testng.Assert.*;
 
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
@@ -69,8 +66,7 @@ import javax.xml.stream.XMLStreamReader;
 /**
  * Class that contains the test cases for the implementation of Email Template Manager.
  */
-@PrepareForTest({ IdentityValidationUtil.class, I18nMgtDataHolder.class, CarbonUtils.class})
-public class EmailTemplateManagerImplTest extends PowerMockTestCase {
+public class EmailTemplateManagerImplTest {
 
     private EmailTemplateManagerImpl emailTemplateManager;
 
@@ -83,25 +79,45 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
     @Mock
     Resource resource;
 
-    @ObjectFactory
-    public IObjectFactory getObjectFactory() {
-
-        return new org.powermock.modules.testng.PowerMockObjectFactory();
-    }
+    private MockedStatic<I18nMgtDataHolder> mockedI18nMgtDataHolder;
+    private MockedStatic<IdentityValidationUtil> mockedIdentityValidationUtil;
+    private MockedStatic<CarbonUtils> mockedCarbonUtils;
 
     private String tenantDomain = "carbon.super";
+    private AutoCloseable closeable;
 
     @BeforeMethod
     public void setUp() {
 
-        initMocks(this);
-        mockStatic(I18nMgtDataHolder.class);
-        i18nMgtDataHolder = PowerMockito.mock(I18nMgtDataHolder.class);
-        when(I18nMgtDataHolder.getInstance()).thenReturn(i18nMgtDataHolder);
+        closeable = openMocks(this);
+        mockedI18nMgtDataHolder = mockStatic(I18nMgtDataHolder.class);
+        i18nMgtDataHolder = mock(I18nMgtDataHolder.class);
+        mockedI18nMgtDataHolder.when(I18nMgtDataHolder::getInstance).thenReturn(i18nMgtDataHolder);
 
         // Mock RegistryResourceMgtService.
         when(i18nMgtDataHolder.getRegistryResourceMgtService()).thenReturn(resourceMgtService);
         emailTemplateManager = new EmailTemplateManagerImpl();
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+
+        if (mockedCarbonUtils != null) {
+            mockedCarbonUtils.close();
+            mockedCarbonUtils = null;
+        }
+        if (mockedIdentityValidationUtil != null) {
+            mockedIdentityValidationUtil.close();
+            mockedIdentityValidationUtil = null;
+        }
+        if (mockedI18nMgtDataHolder != null) {
+            mockedI18nMgtDataHolder.close();
+            mockedI18nMgtDataHolder = null;
+        }
+        if (closeable != null) {
+            closeable.close();
+            closeable = null;
+        }
     }
 
     /**
@@ -190,10 +206,10 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
 
         try {
             if (scenarioCode == 2) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
+                when(resourceMgtService.isResourceExists(anyString(), anyString())).thenReturn(true);
             }
             if (scenarioCode == 3) {
-                when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+                when(resourceMgtService.isResourceExists(anyString(), anyString()))
                         .thenThrow(new IdentityRuntimeException("Test Error"));
             }
             emailTemplateManager
@@ -226,7 +242,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
             notificationTemplate = buildSampleNotificationTemplate(templateContent);
         }
         try {
-            when(resourceMgtService.isResourceExists(Matchers.anyString(), Matchers.anyString()))
+            when(resourceMgtService.isResourceExists(anyString(), anyString()))
                     .thenThrow(new IdentityRuntimeException("Test Error"));
             emailTemplateManager.addNotificationTemplate(notificationTemplate, tenantDomain);
             throw new Exception("Exception should be thrown for above testing scenarios");
@@ -396,7 +412,7 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
     private void mockRegistryResource(String notificationChannel, String displayName, String templateType,
             String locale, String contentType, byte[] templateContent) throws Exception {
 
-        when(resourceMgtService.getIdentityResource(Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
+        when(resourceMgtService.getIdentityResource(anyString(), anyString(), anyString()))
                 .thenReturn(resource);
 
         // Mock Resource properties.
@@ -417,16 +433,18 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      */
     private void mockIsValidTemplate(boolean isValidTemplate, boolean isValidLocale) {
 
-        mockStatic(IdentityValidationUtil.class);
+        if (mockedIdentityValidationUtil == null) {
+            mockedIdentityValidationUtil = mockStatic(IdentityValidationUtil.class);
+        }
 
         // Mock methods in validateTemplateType method.
-        when(IdentityValidationUtil
-                .isValid(Matchers.anyString(), Matchers.any(String[].class), Matchers.any(String[].class)))
+        mockedIdentityValidationUtil.when(() -> IdentityValidationUtil
+                .isValid(anyString(), any(String[].class), any(String[].class)))
                 .thenReturn(isValidTemplate);
 
         // Mock methods in validateLocale method.
-        when(IdentityValidationUtil.isValidOverBlackListPatterns(Matchers.anyString(), Matchers.anyString())).
-                thenReturn(isValidLocale);
+        mockedIdentityValidationUtil.when(() -> IdentityValidationUtil.isValidOverBlackListPatterns(anyString(), anyString()))
+                .thenReturn(isValidLocale);
     }
 
     /**
@@ -545,8 +563,10 @@ public class EmailTemplateManagerImplTest extends PowerMockTestCase {
      */
     private void mockNotificationChannelConfigPath(String baseDirectoryPath) {
 
-        mockStatic(CarbonUtils.class);
-        when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(baseDirectoryPath);
+        if (mockedCarbonUtils == null) {
+            mockedCarbonUtils = mockStatic(CarbonUtils.class);
+        }
+        mockedCarbonUtils.when(CarbonUtils::getCarbonConfigDirPath).thenReturn(baseDirectoryPath);
     }
 
     /**

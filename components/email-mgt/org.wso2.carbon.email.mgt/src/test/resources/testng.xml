@@ -16,12 +16,12 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="EmailMgtTestSuite" object-factory="org.powermock.modules.testng.PowerMockObjectFactory">
+<suite name="EmailMgtTestSuite">
 
     <test name="EmailMgtTests" preserve-order="true" parallel="false">
         <classes>
-            <!--<class name="org.wso2.carbon.email.mgt.EmailTemplateManagerImplTest"/>
-            <class name="org.wso2.carbon.email.mgt.util.I18nEmailUtilTest"/>-->
+            <class name="org.wso2.carbon.email.mgt.EmailTemplateManagerImplTest"/>
+            <class name="org.wso2.carbon.email.mgt.util.I18nEmailUtilTest"/>
         </classes>
     </test>
 
