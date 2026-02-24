@@ -31,7 +31,6 @@ import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
@@ -41,7 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,40 +124,46 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                     LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
                 }
 
-                Optional<PushSenderDTO> matchingPushSenderOptional = pushSenders.stream()
-                        .filter(pushSenderDTO -> {
-                            String registeredProvider = (String) event.getEventProperties()
-                                    .get(NOTIFICATION_PROVIDER);
-                            return registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider());
-                        }).findFirst();
+                PushSenderDTO matchingPushSender = null;
+                String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
 
-                if (!matchingPushSenderOptional.isPresent()) {
+                for (PushSenderDTO pushSender : pushSenders) {
+                    if (registeredProvider.equalsIgnoreCase(pushSender.getProvider())) {
+                        matchingPushSender = pushSender;
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Found matching Push sender: " + matchingPushSender.getName() +
+                                    " for provider: " + registeredProvider + " and tenant: " + tenantDomain);
+                        }
+                        break;
+                    }
+                }
+
+                if (matchingPushSender == null) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No matching Push sender found for tenant: " + tenantDomain);
                     }
                     throw new IdentityEventException("No matching Push sender found for tenant: " + tenantDomain);
                 }
 
-                PushSenderDTO matchingPushSenderDTO = matchingPushSenderOptional.get();
-
                 PushProvider provider = NotificationHandlerDataHolder.getInstance()
-                        .getPushProvider(matchingPushSenderDTO.getProvider());
+                        .getPushProvider(matchingPushSender.getProvider());
+
                 if (provider == null) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No Push notification provider found for the name: " +
-                                matchingPushSenderDTO.getName());
+                                matchingPushSender.getName());
                     }
                     throw new IdentityEventException("No Push notification provider found for the name: "
-                            + matchingPushSenderDTO.getName());
+                            + matchingPushSender.getName());
                 }
 
                 PushNotificationData pushNotificationData = buildPushNotificationData(event);
                 provider.sendNotification(pushNotificationData,
-                        buildPushSenderData(matchingPushSenderDTO), tenantDomain);
+                        buildPushSenderData(matchingPushSender), tenantDomain);
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Push notification sent successfully through provider: "
-                            + matchingPushSenderDTO.getProvider() + " for tenant: " + tenantDomain);
+                            + matchingPushSender.getProvider() + " for tenant: " + tenantDomain);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
