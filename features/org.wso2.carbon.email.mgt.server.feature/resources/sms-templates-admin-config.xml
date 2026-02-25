@@ -63,4 +63,7 @@
     <configuration type="askPasswordSetSuccess" display="askPasswordSetSuccess" locale="en_US">
         <body>Your account has been set up successfully.</body>
     </configuration>
+    <configuration type="CIBASMSAuthenticationNotification" display="CIBASMSAuthenticationNotification" locale="en_US">
+        <body>A request has been initiated to access your account. Ref: {{binding-message}}. Click to authorize: {{ciba-auth-url}}. This expires in {{expiry-time}}</body>
+    </configuration>
 </configurations>
