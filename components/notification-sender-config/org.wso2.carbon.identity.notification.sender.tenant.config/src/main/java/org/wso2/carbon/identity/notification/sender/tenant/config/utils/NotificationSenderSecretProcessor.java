@@ -23,7 +23,11 @@ import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementExcept
 import org.wso2.carbon.identity.secret.mgt.core.model.ResolvedSecret;
 import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BEARER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
@@ -93,7 +97,37 @@ public class NotificationSenderSecretProcessor {
 
         deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
         deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET);
+        deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+        deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
     }
+
+    /**
+     * Delete secrets by authentication type.
+     *
+     * @param notificationSender Notification Sender: EMAIL_PROVIDER.
+     * @param authType           Authentication Type.
+     * @throws SecretManagementException If an error occurs while deleting the secrets.
+     */
+   public static void deleteSecretsByAuthType(String notificationSender, String authType)
+                throws SecretManagementException {
+
+       switch (authType) {
+           case BASIC:
+               deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
+               break;
+           case CLIENT_CREDENTIAL:
+               deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET);
+               break;
+           case BEARER:
+               deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+               break;
+           case API_KEY:
+               deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
+               break;
+           default:
+               break;
+       }
+   }
 
     /**
      * Helper method to delete secrets for a specific authentication type.
