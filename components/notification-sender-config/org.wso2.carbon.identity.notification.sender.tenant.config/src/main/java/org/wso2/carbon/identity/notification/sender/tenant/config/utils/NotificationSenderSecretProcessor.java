@@ -18,15 +18,23 @@
 
 package org.wso2.carbon.identity.notification.sender.tenant.config.utils;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 import org.wso2.carbon.identity.secret.mgt.core.model.ResolvedSecret;
 import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 
+import java.util.Locale;
+
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BEARER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_ID;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_ACCESS_TOKEN;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
@@ -92,8 +100,54 @@ public class NotificationSenderSecretProcessor {
             throws SecretManagementException {
 
         deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
-        deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET);
+        deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                INTERNAL_ACCESS_TOKEN);
+        deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+        deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
     }
+
+    /**
+     * Delete secrets by authentication type.
+     *
+     * @param notificationSender Notification Sender: EMAIL_PROVIDER.
+     * @param authType           Authentication Type.
+     * @throws SecretManagementException If an error occurs while deleting the secrets.
+     */
+   public static void deleteSecretsByAuthType(String notificationSender, String authType)
+                throws SecretManagementException {
+
+       if (StringUtils.isBlank(authType)) {
+            return;
+       }
+       switch (authType.toUpperCase(Locale.ENGLISH)) {
+           case BASIC:
+               deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
+               break;
+           case CLIENT_CREDENTIAL:
+               deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                       INTERNAL_ACCESS_TOKEN);
+               break;
+           case BEARER:
+               deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+               break;
+           case API_KEY:
+               deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
+               break;
+           default:
+               break;
+       }
+   }
+
+   /**
+     * Delete internal access token secret.
+     *
+     * @param notificationSender Notification Sender.
+     * @throws SecretManagementException If an error occurs while deleting the secret.
+     */
+   public static void deleteInternalAccessTokenSecret(String notificationSender) throws SecretManagementException {
+
+       deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, INTERNAL_ACCESS_TOKEN);
+   }
 
     /**
      * Helper method to delete secrets for a specific authentication type.
@@ -110,7 +164,7 @@ public class NotificationSenderSecretProcessor {
             String secretName = buildSecretName(notificationSender, authType, property);
             String secretType = notificationSender + SECRET_PROPERTIES;
             if (!isSecretPropertyExists(secretType, secretName)) {
-                return;
+                continue;
             }
             NotificationSenderTenantConfigDataHolder.getInstance().getSecretManager().deleteSecret(secretType,
                     secretName);

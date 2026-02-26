@@ -19,12 +19,16 @@
 package org.wso2.carbon.identity.notification.sender.tenant.config;
 
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
+import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
+import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
@@ -43,6 +47,12 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.exception.Noti
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.handlers.ChannelConfigurationHandler;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
+import org.wso2.carbon.identity.secret.mgt.core.SecretManager;
+import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager;
+import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
+import org.wso2.carbon.identity.secret.mgt.core.model.ResolvedSecret;
+import org.wso2.carbon.identity.secret.mgt.core.model.SecretType;
+import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.idp.mgt.model.ConnectedAppsResult;
 
 import java.nio.file.Paths;
@@ -830,5 +840,715 @@ public class NotificationSenderManagementServiceImplTest {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant");
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
+    }
+
+    /**
+     * Sets up all mocks required for HTTP-based email sender operations.
+     * This configures EventPublisherService, ResourceManager, SecretManager and SecretResolveManager
+     * on the singleton DataHolder so that the static methods in NotificationSenderSecretProcessor work.
+     */
+    private void setupHttpEmailSenderMocks(String publisherName)
+            throws EventPublisherConfigurationException, SecretManagementException {
+
+        // Mock EventPublisherService for getDefaultPublisherProperties.
+        EventPublisherService eventPublisherService = Mockito.mock(EventPublisherService.class);
+        EventPublisherConfiguration mockPublisherConfig = Mockito.mock(EventPublisherConfiguration.class);
+        when(mockPublisherConfig.getEventPublisherName()).thenReturn(publisherName);
+        when(mockPublisherConfig.getFromStreamName()).thenReturn("id_gov_notify_stream");
+        when(mockPublisherConfig.getFromStreamVersion()).thenReturn("1.0.0");
+        List<EventPublisherConfiguration> publisherList = new ArrayList<>();
+        publisherList.add(mockPublisherConfig);
+        when(eventPublisherService.getAllActiveEventPublisherConfigurations()).thenReturn(publisherList);
+        NotificationSenderTenantConfigDataHolder.getInstance().setCarbonEventPublisherService(eventPublisherService);
+
+        // Mock ResourceManager for reDeployEventPublisherConfiguration.
+        ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        NotificationSenderTenantConfigDataHolder.getInstance().setResourceManager(resourceManager);
+
+        // Mock SecretManager for encrypt/decrypt/delete credential operations.
+        SecretManager secretManager = Mockito.mock(SecretManager.class);
+        SecretType mockSecretType = Mockito.mock(SecretType.class);
+        when(mockSecretType.getId()).thenReturn("mock-secret-type-id");
+        when(secretManager.getSecretType(anyString())).thenReturn(mockSecretType);
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(true);
+        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
+
+        // Mock SecretResolveManager for decryptCredential operations.
+        SecretResolveManager secretResolveManager = Mockito.mock(SecretResolveManager.class);
+        ResolvedSecret resolvedSecret = Mockito.mock(ResolvedSecret.class);
+        when(resolvedSecret.getResolvedSecretValue()).thenReturn("decrypted-value");
+        when(secretResolveManager.getResolvedSecret(anyString(), anyString())).thenReturn(resolvedSecret);
+        NotificationSenderTenantConfigDataHolder.getInstance().setSecretResolveManager(secretResolveManager);
+    }
+
+    /**
+     * Constructs an HTTP-based EmailSenderDTO with the given auth type and properties.
+     */
+    private EmailSenderDTO constructHttpEmailSender(String name, String authType, Map<String, String> extraProperties) {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName(name);
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.email-provider.com/send");
+        emailSender.setFromAddress("noreply@example.com");
+        emailSender.setAuthType(authType);
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        if (extraProperties != null) {
+            properties.putAll(extraProperties);
+        }
+        emailSender.setProperties(properties);
+        return emailSender;
+    }
+
+    /**
+     * Constructs a Resource with attributes representing a persisted HTTP email sender.
+     */
+    private Resource constructHttpEmailSenderResource(String name, String authType) {
+
+        Resource resource = new Resource();
+        resource.setResourceName(name);
+        List<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute("provider", "HTTP"));
+        attributes.add(new Attribute("providerURL", "https://api.email-provider.com/send"));
+        attributes.add(new Attribute("fromAddress", "noreply@example.com"));
+        attributes.add(new Attribute("authType", authType));
+        attributes.add(new Attribute("type", "email"));
+        attributes.add(new Attribute("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}"));
+        resource.setAttributes(attributes);
+        resource.setFiles(new ArrayList<>());
+        return resource;
+    }
+
+    @Test
+    public void testAddHttpEmailSenderWithBasicAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("userName", "user1");
+        authProps.put("password", "pass1");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "BASIC", authProps);
+
+        Resource addedResource = constructHttpEmailSenderResource(name, "BASIC");
+        addedResource.getAttributes().add(new Attribute("userName", "encrypted-ref"));
+        addedResource.getAttributes().add(new Attribute("password", "encrypted-ref"));
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(addedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.addEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getName(), name);
+        Assert.assertEquals(result.getProvider(), "HTTP");
+        Assert.assertEquals(result.getAuthType(), "BASIC");
+        verify(configurationManager).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testAddHttpEmailSenderWithClientCredentialAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("clientId", "my-client-id");
+        authProps.put("clientSecret", "my-client-secret");
+        authProps.put("tokenEndpoint", "https://auth.example.com/token");
+        authProps.put("scopes", "email.send");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "CLIENT_CREDENTIAL", authProps);
+
+        Resource addedResource = constructHttpEmailSenderResource(name, "CLIENT_CREDENTIAL");
+        addedResource.getAttributes().add(new Attribute("clientId", "encrypted-ref"));
+        addedResource.getAttributes().add(new Attribute("tokenEndpoint", "https://auth.example.com/token"));
+        addedResource.getAttributes().add(new Attribute("scopes", "email.send"));
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(addedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.addEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "CLIENT_CREDENTIAL");
+        verify(configurationManager).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testAddHttpEmailSenderWithBearerAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("accessToken", "my-bearer-token");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "BEARER", authProps);
+
+        Resource addedResource = constructHttpEmailSenderResource(name, "BEARER");
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(addedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.addEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "BEARER");
+        verify(configurationManager).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testAddHttpEmailSenderWithApiKeyAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("apiKeyHeader", "X-API-Key");
+        authProps.put("apiKeyValue", "my-api-key-value");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "API_KEY", authProps);
+
+        Resource addedResource = constructHttpEmailSenderResource(name, "API_KEY");
+        addedResource.getAttributes().add(new Attribute("apiKeyHeader", "X-API-Key"));
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(addedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.addEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "API_KEY");
+        verify(configurationManager).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testAddHttpEmailSenderWithNoAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "NONE", null);
+
+        Resource addedResource = constructHttpEmailSenderResource(name, "NONE");
+        when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(addedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.addEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "NONE");
+        verify(configurationManager).addResource(anyString(), any(Resource.class));
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailWhenAlreadyExists() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        when(configurationManager.getResource(anyString(), anyString()))
+                .thenReturn(constructHttpEmailSenderResource(name, "BASIC"));
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("userName", "user1");
+        authProps.put("password", "pass1");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "BASIC", authProps);
+
+        notificationSenderManagementService.addEmailSender(emailSender, true);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailMissingProviderURL() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        // providerURL intentionally not set
+        emailSender.setAuthType("NONE");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailMissingBody() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("NONE");
+        // body intentionally not set in properties
+        emailSender.setProperties(new HashMap<>());
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailBasicAuthMissingPassword() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("BASIC");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("userName", "user1");
+        // password intentionally missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailClientCredentialMissingScopes() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("CLIENT_CREDENTIAL");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("clientId", "cid");
+        properties.put("clientSecret", "csecret");
+        properties.put("tokenEndpoint", "https://auth.example.com/token");
+        // scopes intentionally missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailBearerAuthMissingToken() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("BEARER");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        // accessToken intentionally missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailApiKeyMissingHeader() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("API_KEY");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("apiKeyValue", "key-value");
+        // apiKeyHeader intentionally missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAddHttpEmailSenderFailUnsupportedAuthType() throws Exception {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName("HttpEmailPublisher");
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("UNSUPPORTED_TYPE");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.addEmailSender(emailSender);
+    }
+
+    @Test
+    public void testGetHttpEmailSenderWithBasicAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource resource = constructHttpEmailSenderResource(name, "BASIC");
+        resource.getAttributes().add(new Attribute("userName", "encrypted-ref"));
+        resource.getAttributes().add(new Attribute("password", "encrypted-ref"));
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+
+        EmailSenderDTO result = notificationSenderManagementService.getEmailSender(name);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getName(), name);
+        Assert.assertEquals(result.getProvider(), "HTTP");
+        Assert.assertEquals(result.getProviderURL(), "https://api.email-provider.com/send");
+        Assert.assertEquals(result.getAuthType(), "BASIC");
+        // Username/password should be decrypted via SecretResolveManager mock.
+        Assert.assertEquals(result.getUsername(), "decrypted-value");
+        Assert.assertEquals(result.getPassword(), "decrypted-value");
+    }
+
+    @Test
+    public void testGetHttpEmailSenderWithClientCredentialAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource resource = constructHttpEmailSenderResource(name, "CLIENT_CREDENTIAL");
+        resource.getAttributes().add(new Attribute("clientId", "encrypted-ref"));
+        resource.getAttributes().add(new Attribute("clientSecret", "encrypted-ref"));
+        resource.getAttributes().add(new Attribute("tokenEndpoint", "https://auth.example.com/token"));
+        resource.getAttributes().add(new Attribute("scopes", "email.send"));
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+
+        EmailSenderDTO result = notificationSenderManagementService.getEmailSender(name);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "CLIENT_CREDENTIAL");
+        // clientId is decrypted; clientSecret is skipped in the response.
+        Assert.assertEquals(result.getProperties().get("clientId"), "decrypted-value");
+        Assert.assertNull(result.getProperties().get("clientSecret"));
+        Assert.assertEquals(result.getProperties().get("tokenEndpoint"), "https://auth.example.com/token");
+        Assert.assertEquals(result.getProperties().get("scopes"), "email.send");
+    }
+
+    @Test
+    public void testGetHttpEmailSenderWithApiKeyAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource resource = constructHttpEmailSenderResource(name, "API_KEY");
+        resource.getAttributes().add(new Attribute("apiKeyHeader", "X-API-Key"));
+        resource.getAttributes().add(new Attribute("apiKeyValue", "encrypted-ref"));
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+
+        EmailSenderDTO result = notificationSenderManagementService.getEmailSender(name);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "API_KEY");
+        Assert.assertEquals(result.getProperties().get("apiKeyHeader"), "X-API-Key");
+        // apiKeyValue is skipped in the response (sensitive).
+        Assert.assertNull(result.getProperties().get("apiKeyValue"));
+    }
+
+    @Test
+    public void testGetHttpEmailSenderWithNoneAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource resource = constructHttpEmailSenderResource(name, "NONE");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+
+        EmailSenderDTO result = notificationSenderManagementService.getEmailSender(name);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "NONE");
+        Assert.assertEquals(result.getFromAddress(), "noreply@example.com");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testGetHttpEmailSenderFailNotFound() throws Exception {
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
+        notificationSenderManagementService.getEmailSender("NonExistentPublisher");
+    }
+
+    @Test
+    public void testUpdateHttpEmailSenderSameAuthType() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        // Existing resource with BASIC auth.
+        Resource existingResource = constructHttpEmailSenderResource(name, "BASIC");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        // Updated sender still with BASIC auth.
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("userName", "updatedUser");
+        authProps.put("password", "updatedPass");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "BASIC", authProps);
+
+        Resource replacedResource = constructHttpEmailSenderResource(name, "BASIC");
+        replacedResource.getAttributes().add(new Attribute("userName", "encrypted-ref"));
+        replacedResource.getAttributes().add(new Attribute("password", "encrypted-ref"));
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(replacedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.updateEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "BASIC");
+        verify(configurationManager).replaceResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testUpdateHttpEmailSenderChangeAuthTypeFromBasicToBearer() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        // Existing resource with BASIC auth.
+        Resource existingResource = constructHttpEmailSenderResource(name, "BASIC");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        // Updated sender with BEARER auth.
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("accessToken", "new-bearer-token");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "BEARER", authProps);
+
+        Resource replacedResource = constructHttpEmailSenderResource(name, "BEARER");
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(replacedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.updateEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "BEARER");
+        verify(configurationManager).replaceResource(anyString(), any(Resource.class));
+    }
+
+    @Test
+    public void testUpdateHttpEmailSenderChangeAuthTypeFromBearerToApiKey() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource existingResource = constructHttpEmailSenderResource(name, "BEARER");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("apiKeyHeader", "X-API-Key");
+        authProps.put("apiKeyValue", "new-api-key");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "API_KEY", authProps);
+
+        Resource replacedResource = constructHttpEmailSenderResource(name, "API_KEY");
+        replacedResource.getAttributes().add(new Attribute("apiKeyHeader", "X-API-Key"));
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(replacedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.updateEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "API_KEY");
+    }
+
+    @Test
+    public void testUpdateHttpEmailSenderChangeAuthTypeToNone() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource existingResource = constructHttpEmailSenderResource(name, "API_KEY");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "NONE", null);
+
+        Resource replacedResource = constructHttpEmailSenderResource(name, "NONE");
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(replacedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.updateEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "NONE");
+    }
+
+    @Test
+    public void testUpdateHttpEmailSenderChangeAuthTypeToClientCredential() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource existingResource = constructHttpEmailSenderResource(name, "NONE");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("clientId", "cid");
+        authProps.put("clientSecret", "csecret");
+        authProps.put("tokenEndpoint", "https://auth.example.com/token");
+        authProps.put("scopes", "email.send");
+        EmailSenderDTO emailSender = constructHttpEmailSender(name, "CLIENT_CREDENTIAL", authProps);
+
+        Resource replacedResource = constructHttpEmailSenderResource(name, "CLIENT_CREDENTIAL");
+        replacedResource.getAttributes().add(new Attribute("clientId", "encrypted-ref"));
+        replacedResource.getAttributes().add(new Attribute("tokenEndpoint", "https://auth.example.com/token"));
+        replacedResource.getAttributes().add(new Attribute("scopes", "email.send"));
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(replacedResource);
+
+        EmailSenderDTO result = notificationSenderManagementService.updateEmailSender(emailSender, true);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getAuthType(), "CLIENT_CREDENTIAL");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testUpdateHttpEmailSenderFailNotFound() throws Exception {
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("userName", "user1");
+        authProps.put("password", "pass1");
+        EmailSenderDTO emailSender = constructHttpEmailSender("NonExistentPublisher", "BASIC", authProps);
+
+        notificationSenderManagementService.updateEmailSender(emailSender, true);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testUpdateHttpEmailSenderFailInvalidBasicAuth() throws Exception {
+
+        String name = "HttpEmailPublisher";
+
+        Resource existingResource = constructHttpEmailSenderResource(name, "BASIC");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        // Missing password for BASIC auth (with validation enabled).
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName(name);
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("BASIC");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("userName", "user1");
+        // password missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.updateEmailSender(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testUpdateHttpEmailSenderFailMissingProviderURL() throws Exception {
+
+        String name = "HttpEmailPublisher";
+
+        Resource existingResource = constructHttpEmailSenderResource(name, "NONE");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setName(name);
+        emailSender.setProvider("HTTP");
+        // providerURL missing
+        emailSender.setAuthType("NONE");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.updateEmailSender(emailSender);
+    }
+
+    @Test
+    public void testDeleteHttpEmailSender() throws Exception {
+
+        String name = "HttpEmailPublisher";
+        setupHttpEmailSenderMocks(name);
+
+        Resource resource = constructHttpEmailSenderResource(name, "BASIC");
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(resource);
+        doNothing().when(defaultChannelConfigurationHandler).deleteNotificationSender(anyString());
+
+        notificationSenderManagementService.deleteNotificationSender(name);
+
+        verify(defaultChannelConfigurationHandler).deleteNotificationSender(name);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testDeleteHttpEmailSenderFailNotFound() throws Exception {
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
+        notificationSenderManagementService.deleteNotificationSender("NonExistentPublisher");
+    }
+
+    @Test
+    public void testValidateInputsHttpProviderWithNoneAuth() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("NONE");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test
+    public void testValidateInputsHttpProviderWithBearerAuth() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("BEARER");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("accessToken", "my-token");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test
+    public void testValidateInputsHttpProviderWithApiKeyAuth() throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("API_KEY");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("apiKeyHeader", "X-API-Key");
+        properties.put("apiKeyValue", "my-api-key");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsHttpProviderFailApiKeyMissingValue()
+            throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("API_KEY");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("apiKeyHeader", "X-API-Key");
+        // apiKeyValue missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsHttpProviderFailBearerMissingToken()
+            throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("BEARER");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        // accessToken missing
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsHttpProviderFailClientCredentialMissingTokenEndpoint()
+            throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.example.com/send");
+        emailSender.setAuthType("CLIENT_CREDENTIAL");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("clientId", "cid");
+        properties.put("clientSecret", "csecret");
+        // tokenEndpoint missing
+        properties.put("scopes", "email.send");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
     }
 }
