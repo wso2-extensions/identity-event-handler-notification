@@ -39,6 +39,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
@@ -85,7 +86,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_EMAIL_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISPLAY_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PROVIDER;
@@ -98,9 +98,14 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_INVALID_SENDER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_RESOURCE_EXISTS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PARSER_CONFIG_EXCEPTION;
@@ -114,9 +119,13 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MY_ACCOUNT_SMS_RESOURCE_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MY_ACCOUNT_SMS_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_TYPE_PROPERTY;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_NOTIFICATION_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_NAME_SUFFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REPLY_TO_ADDRESS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
@@ -131,11 +140,13 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildNotiSenderConfigsResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.deletePushSenderSecretProperties;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getNotiSenderConfigResourceName;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getPushProvider;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.updatePushSenderCredentials;
 
@@ -278,10 +289,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public PushSenderDTO addPushSender(PushSenderDTO pushSender) throws NotificationSenderManagementException {
 
-        // Set the default publisher name if name is not defined.
-        if (StringUtils.isEmpty(pushSender.getName())) {
-            pushSender.setName(DEFAULT_PUSH_PUBLISHER);
-        }
+        // Set the push sender name based on the push provider name
+        pushSender.setName(buildPushSenderName(pushSender.getProvider()));
         Optional<Resource> resourceOptional = getPublisherResource(pushSender.getName());
         if (resourceOptional.isPresent()) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFLICT_PUBLISHER, pushSender.getName());
@@ -631,6 +640,143 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
         authentication.buildAuthenticationHeader();
         return authentication.getAuthHeader();
+    }
+
+    @Override
+    public Map<String, String> setNotiSenderConfigurations(String publisherType, Map<String, String> configs)
+            throws NotificationSenderManagementException {
+        String configResourceName = getNotiSenderConfigResourceName(publisherType);
+        if (StringUtils.isEmpty(configResourceName)) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_SENDER_TYPE, publisherType);
+        }
+        Optional<Resource> resourceOptional = getNotiSenderConfigResource(configResourceName, false);
+        Resource configuredResource;
+        if (resourceOptional.isPresent()) {
+            // Update existing resource flow
+            Resource pushConfigResource = resourceOptional.get();
+            configuredResource = updateNotificationSenderConfigAttributes(pushConfigResource, configs);
+        } else {
+            // Add new resource flow
+            Resource pushConfigResource = buildNotiSenderConfigsResource(configResourceName, configs);
+            configuredResource = addNotificationSenderConfigsResource(pushConfigResource);
+        }
+        if (configuredResource.getAttributes() == null) {
+            return new HashMap<>();
+        }
+        return configuredResource.getAttributes().stream()
+                .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue, (v1, v2) -> v2));
+    }
+
+    @Override
+    public Map<String, String> getNotiSenderConfigurations(String publisherType, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+        String configResourceName = getNotiSenderConfigResourceName(publisherType);
+        if (StringUtils.isEmpty(configResourceName)) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_SENDER_TYPE, publisherType);
+        }
+        Optional<Resource> resourceOptional = getNotiSenderConfigResource(configResourceName, inheritTenantSettings);
+        if (resourceOptional.isPresent()) {
+            Resource pushConfigResource = resourceOptional.get();
+            if (pushConfigResource.getAttributes() == null) {
+                return new HashMap<>();
+            }
+            return pushConfigResource.getAttributes().stream()
+                    .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue, (v1, v2) -> v2));
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    private Optional<Resource> getNotiSenderConfigResource(String configResourceName,
+                                                            boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+        try {
+            return Optional.ofNullable(NotificationSenderTenantConfigDataHolder.getInstance()
+                    .getConfigurationManager()
+                    .getResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, configResourceName,
+                            inheritTenantSettings));
+        } catch (ConfigurationManagementException e) {
+            if (e.getErrorCode().equals(RESOURCE_NOT_EXISTS_ERROR_CODE) ||
+                    e.getErrorCode().equals(ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode())) {
+                return Optional.empty();
+            }
+            throw handleConfigurationMgtException(e,
+                    ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG, PUSH_NOTIFICATION_CONFIGS);
+        }
+    }
+
+    private Resource addNotificationSenderConfigsResource(Resource resource)
+            throws NotificationSenderManagementException {
+        Resource addedResource = null;
+        try {
+            addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .addResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, resource);
+        } catch (ConfigurationManagementException e) {
+            if (e.getErrorCode().equals(ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode())) {
+                ResourceTypeAdd resourceTypeAdd = new ResourceTypeAdd();
+                resourceTypeAdd.setName(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE);
+                resourceTypeAdd.setDescription(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION);
+                try {
+                    NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                            .addResourceType(resourceTypeAdd);
+                    addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                            .addResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, resource);
+                } catch (ConfigurationManagementException ex) {
+                    throw handleConfigurationMgtException(ex,
+                            ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE,
+                            NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE);
+                }
+            } else {
+                throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG,
+                        resource.getResourceName() != null ? resource.getResourceName() : "unknown");
+            }
+        }
+        return addedResource;
+    }
+
+    private Resource updateNotificationSenderConfigAttributes(Resource resource, Map<String, String> newConfigs)
+            throws NotificationSenderManagementException {
+        try {
+            List<Attribute> attributesToAdd = new ArrayList<>();
+            for (Map.Entry<String, String> config : newConfigs.entrySet()) {
+                Optional<Attribute> attribute = resource.getAttributes().stream().filter(
+                        attr -> attr.getKey().equals(config.getKey())).findFirst();
+                if (attribute.isPresent()) {
+                    if (config.getValue() == null) {
+                        // If the new value is null, remove the attribute.
+                        NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                                .deleteAttribute(resource.getResourceType(),
+                                        resource.getResourceName(), attribute.get().getKey());
+                        resource.getAttributes().remove(attribute.get());
+                        continue;
+                    }
+                    attribute.get().setValue(config.getValue());
+                    NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                            .updateAttribute(resource.getResourceType(), resource.getResourceName(), attribute.get());
+                } else {
+                    if (config.getValue() == null) {
+                        continue;
+                    }
+                    Attribute newAttribute = new Attribute();
+                    newAttribute.setKey(config.getKey());
+                    newAttribute.setValue(config.getValue());
+                    attributesToAdd.add(newAttribute);
+                    NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                            .addAttribute(resource.getResourceType(), resource.getResourceName(), newAttribute);
+                }
+            }
+            // Add new attributes after iteration to avoid ConcurrentModificationException
+            resource.getAttributes().addAll(attributesToAdd);
+        } catch (ConfigurationManagementException e) {
+            throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS,
+                    resource.getResourceName() != null ? resource.getResourceName() : "unknown");
+        }
+        return resource;
+    }
+
+    private static String buildPushSenderName(String provider) {
+
+        return provider + PUSH_PUBLISHER_NAME_SUFFIX;
     }
 
     private Optional<Resource> getPublisherResource(int tenantId, String resourceName)

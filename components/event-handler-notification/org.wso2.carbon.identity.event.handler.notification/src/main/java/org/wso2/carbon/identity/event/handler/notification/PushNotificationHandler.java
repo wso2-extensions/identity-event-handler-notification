@@ -31,7 +31,6 @@ import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
-import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
@@ -49,6 +48,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification.ORGANIZATION_NAME_PLACEHOLDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.CHALLENGE;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_HANDLE;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_ID;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.DEVICE_TOKEN;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.IP_ADDRESS;
@@ -115,9 +115,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
 
         try {
             /*
-             * Get the registered Push notification senders from the database. This is done to support multiple push
-             * senders in the future. However, in the current implementation, only one push notification sender is
-             * supported through the UI.
+             * Get the registered Push notification senders from the database.
              */
             List<PushSenderDTO>  pushSenders = NotificationHandlerDataHolder.getInstance()
                     .getNotificationSenderManagementService().getPushSenders(true);
@@ -125,33 +123,47 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
                 }
-                for (PushSenderDTO pushSenderDTO : pushSenders) {
-                    // This is to get the supported push providers. We can include push providers through OSGi.
-                    PushProvider provider = NotificationHandlerDataHolder.getInstance()
-                            .getPushProvider(pushSenderDTO.getProvider());
-                    if (provider == null) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("No Push notification provider found for the name: " + pushSenderDTO.getName());
-                        }
-                        throw new IdentityEventException("No Push notification provider found for the name: "
-                                + pushSenderDTO.getName());
-                    }
-                    String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
-                    if (!registeredProvider.equalsIgnoreCase(pushSenderDTO.getProvider())) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("User is not registered to the Push notification provider: "
-                                    + pushSenderDTO.getName());
-                        }
-                        throw new IdentityEventException("User is not registered to the Push notification provider: "
-                                + pushSenderDTO.getName());
-                    }
 
-                    PushNotificationData pushNotificationData = buildPushNotificationData(event);
-                    provider.sendNotification(pushNotificationData, buildPushSenderData(pushSenderDTO), tenantDomain);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Push notification sent successfully through provider: "
-                                + pushSenderDTO.getProvider() + " for tenant: " + tenantDomain);
+                PushSenderDTO matchingPushSender = null;
+                String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
+
+                for (PushSenderDTO pushSender : pushSenders) {
+                    if (registeredProvider.equalsIgnoreCase(pushSender.getProvider())) {
+                        matchingPushSender = pushSender;
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Found matching Push sender: " + matchingPushSender.getName() +
+                                    " for provider: " + registeredProvider + " and tenant: " + tenantDomain);
+                        }
+                        break;
                     }
+                }
+
+                if (matchingPushSender == null) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No matching Push sender found for tenant: " + tenantDomain);
+                    }
+                    throw new IdentityEventException("No matching Push sender found for tenant: " + tenantDomain);
+                }
+
+                PushProvider provider = NotificationHandlerDataHolder.getInstance()
+                        .getPushProvider(matchingPushSender.getProvider());
+
+                if (provider == null) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No Push notification provider found for the name: " +
+                                matchingPushSender.getName());
+                    }
+                    throw new IdentityEventException("No Push notification provider found for the name: "
+                            + matchingPushSender.getName());
+                }
+
+                PushNotificationData pushNotificationData = buildPushNotificationData(event);
+                provider.sendNotification(pushNotificationData,
+                        buildPushSenderData(matchingPushSender), tenantDomain);
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Push notification sent successfully through provider: "
+                            + matchingPushSender.getProvider() + " for tenant: " + tenantDomain);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -160,11 +172,11 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             }
         } catch (NotificationSenderManagementException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Error while retrieving SMS Sender: "
-                        + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
+                LOG.debug("Error while retrieving Push Sender for provider: "
+                        + event.getEventProperties().get(NOTIFICATION_PROVIDER), e);
             }
-            throw new IdentityEventException("Error while retrieving SMS Sender: "
-                    + NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER, e);
+            throw new IdentityEventException("Error while retrieving Push Sender for provider: "
+                    + event.getEventProperties().get(NOTIFICATION_PROVIDER), e);
         } catch (PushProviderException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error while sending push notification.", e);
@@ -265,6 +277,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 .setPushId((String) eventProperties.get(PUSH_ID))
                 .setDeviceToken((String) eventProperties.get(DEVICE_TOKEN))
                 .setDeviceId((String) eventProperties.get(DEVICE_ID))
+                .setDeviceHandle((String) eventProperties.get(DEVICE_HANDLE))
                 .setChallenge((String) eventProperties.get(CHALLENGE))
                 .setNumberChallenge((String) eventProperties.get(NUMBER_CHALLENGE))
                 .setIpAddress((String) eventProperties.get(IP_ADDRESS))

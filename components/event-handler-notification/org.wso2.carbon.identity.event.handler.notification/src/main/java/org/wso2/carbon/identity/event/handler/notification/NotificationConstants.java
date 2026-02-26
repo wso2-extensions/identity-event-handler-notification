@@ -144,6 +144,7 @@ public class NotificationConstants {
         public static final String REQUEST_DEVICE_OS = "deviceOS";
         public static final String REQUEST_DEVICE_BROWSER = "browser";
         public static final String DEVICE_ID = "deviceId";
+        public static final String DEVICE_HANDLE = "deviceHandle";
     }
 
     /**
