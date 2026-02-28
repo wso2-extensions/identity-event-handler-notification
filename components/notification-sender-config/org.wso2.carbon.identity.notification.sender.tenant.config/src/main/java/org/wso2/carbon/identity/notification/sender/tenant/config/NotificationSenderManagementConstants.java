@@ -61,6 +61,10 @@ public class NotificationSenderManagementConstants {
     public static final String ACCESS_TOKEN_PROP = "accessToken";
     public static final String REFRESH_TOKEN_PROP = "refreshToken";
 
+    // Email Sender Types.
+    public static final String SMTP = "SMTP";
+    public static final String HTTP = "HTTP";
+
     // Email Sender's main properties.
     public static final String NAME = "name";
     public static final String SMTP_SERVER_HOST = "smtpServerHost";
@@ -70,6 +74,7 @@ public class NotificationSenderManagementConstants {
     public static final String AUTH_TYPE = "authType";
     public static final String REPLY_TO_ADDRESS = "mail.smtp.replyTo";
     public static final String DISPLAY_NAME = "mail.smtp.signature";
+    public static final String BODY = "body";
 
     // Email Sender's additional properties.
     public static final String CLIENT_ID = "clientId";
@@ -78,10 +83,15 @@ public class NotificationSenderManagementConstants {
     public static final String SCOPES = "scopes";
     public static final String USERNAME = "userName";
     public static final String PASSWORD = "password";
+    public static final String API_KEY_HEADER = "apiKeyHeader";
+    public static final String API_KEY_VALUE = "apiKeyValue";
 
     // Email Sender Authentication types.
     public static final String BASIC = "BASIC";
     public static final String CLIENT_CREDENTIAL = "CLIENT_CREDENTIAL";
+    public static final String BEARER = "BEARER";
+    public static final String API_KEY = "API_KEY";
+    public static final String NONE = "NONE";
 
     // SMS Sender's main properties.
     public static final String PROVIDER = "provider";
@@ -94,6 +104,9 @@ public class NotificationSenderManagementConstants {
     public static final String SMS_PUBLISHER_TYPE = "sms";
     public static final String MY_ACCOUNT_SMS_RESOURCE_TYPE = "myaccount";
     public static final String MY_ACCOUNT_SMS_RESOURCE_NAME = "myaccount-2FA-config";
+
+    // Supported HTTP Methods.
+    public static final String PUT = "PUT";
 
     // Push Sender's main properties.
     public static final String PUSH_PUBLISHER_TYPE = "push";
@@ -115,6 +128,8 @@ public class NotificationSenderManagementConstants {
     public static final String CUSTOM_MAPPING_KEY = "customMapping";
     public static final String MAPPING_TYPE_KEY = "type";
     public static final String TEXT = "text";
+    public static final String JSON = "json";
+    public static final String FORM = "form";
     public static final String INLINE = "inline";
     public static final String EMAIL_INLINE_BODY = "{{body}}{{footer}}";
     public static final String TO = "to";
@@ -136,6 +151,7 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_PORT_PROPERTY = "mail.smtp.port";
     public static final String HTTP_URL_PROPERTY = "http.url";
     public static final String CONSTANT_HTTP_POST = "HttpPost";
+    public static final String CONSTANT_HTTP_PUT = "HttpPut";
     public static final String CHANNEL_TYPE_PROPERTY = "channel.type";
     public static final String DEFAULT_HANDLER_NAME = "default";
     public static final String SMTP_CLIENT_ID_PROPERTY = "mail.smtp.clientId";
@@ -143,6 +159,18 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_TOKEN_ENDPOINT_PROPERTY = "mail.smtp.tokenEndpoint";
     public static final String SMTP_SCOPES_PROPERTY = "mail.smtp.scopes";
     public static final String SMTP_AUTH_TYPE_PROPERTY = "mail.smtp.authType";
+
+    // Constants for HTTP-based eventPublisher file generation.
+    public static final String HTTP_AUTH_TYPE_PROPERTY = "http.authType";
+    public static final String HTTP_USERNAME_PROPERTY = "http.username";
+    public static final String HTTP_PASSWORD_PROPERTY = "http.password";
+    public static final String HTTP_CLIENT_ID_PROPERTY = "http.clientId";
+    public static final String HTTP_CLIENT_SECRET_PROPERTY = "http.clientSecret";
+    public static final String HTTP_TOKEN_ENDPOINT_PROPERTY = "http.tokenEndpoint";
+    public static final String HTTP_SCOPES_PROPERTY = "http.scopes";
+    public static final String HTTP_ACCESS_TOKEN_PROPERTY = "http.accessToken";
+    public static final String HTTP_API_KEY_HEADER_PROPERTY = "http.apiKeyHeader";
+    public static final String HTTP_API_KEY_VALUE_PROPERTY = "http.apiKeyValue";
 
     public static final String TOKEN_RETRIEVAL_HTTP_READ_TIMEOUT_IN_MILLIS =
             "NotificationChannel.SMS.Custom.Authentication.OauthTokenRetrieval.HTTPReadTimeout";
@@ -161,6 +189,9 @@ public class NotificationSenderManagementConstants {
     public static final List<String> PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG =
             Collections.unmodifiableList(
                     Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY, INLINE_BODY_PROPERTY));
+    public static final List<String> PROPERTIES_TO_SKIP_AT_HTTP_ADAPTER_CONFIG =
+            Collections.unmodifiableList(Arrays.asList(USERNAME, PASSWORD, CLIENT_ID, CLIENT_SECRET, SCOPES,
+                    TOKEN_ENDPOINT, ACCESS_TOKEN_PROP, API_KEY_HEADER, API_KEY_VALUE, CONTENT_TYPE, FROM_ADDRESS));
 
     /**
      * Enums for error messages.
