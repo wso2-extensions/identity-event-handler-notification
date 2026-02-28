@@ -610,11 +610,11 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
                     emailSender.getName());
         }
-        if (StringUtils.isNotBlank(previousAuthType) &&
+        if (StringUtils.isNotBlank(previousAuthType) && StringUtils.isNotBlank(emailSender.getAuthType()) &&
                 !StringUtils.equalsIgnoreCase(emailSender.getAuthType(), previousAuthType)) {
             try {
                 if (log.isDebugEnabled()) {
-                    log.info("Auth type changed from " + previousAuthType + " to " + emailSender.getAuthType() +
+                    log.debug("Auth type changed from " + previousAuthType + " to " + emailSender.getAuthType() +
                             " for email sender: " + emailSender.getName() + ". Hence deleting the secrets associated" +
                             " with the previous auth type.");
                 }

@@ -23,6 +23,8 @@ import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementExcept
 import org.wso2.carbon.identity.secret.mgt.core.model.ResolvedSecret;
 import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 
+import java.util.Locale;
+
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ACCESS_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY_VALUE;
@@ -111,7 +113,7 @@ public class NotificationSenderSecretProcessor {
    public static void deleteSecretsByAuthType(String notificationSender, String authType)
                 throws SecretManagementException {
 
-       switch (authType) {
+       switch (authType.toUpperCase(Locale.ENGLISH)) {
            case BASIC:
                deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, USERNAME);
                break;
