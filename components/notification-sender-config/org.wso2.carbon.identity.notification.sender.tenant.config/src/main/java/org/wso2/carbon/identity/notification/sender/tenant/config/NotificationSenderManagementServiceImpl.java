@@ -643,7 +643,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
-    public Map<String, String> setNotiSenderConfigurations(String publisherType, Map<String, String> configs)
+    public Map<String, String> setNotificationSenderConfigurations(String publisherType, Map<String, String> configs)
             throws NotificationSenderManagementException {
         String configResourceName = getNotiSenderConfigResourceName(publisherType);
         if (StringUtils.isEmpty(configResourceName)) {
@@ -668,7 +668,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     }
 
     @Override
-    public Map<String, String> getNotiSenderConfigurations(String publisherType, boolean inheritTenantSettings)
+    public Map<String, String> getNotificationSenderConfigurations(String publisherType, boolean inheritTenantSettings)
             throws NotificationSenderManagementException {
         String configResourceName = getNotiSenderConfigResourceName(publisherType);
         if (StringUtils.isEmpty(configResourceName)) {

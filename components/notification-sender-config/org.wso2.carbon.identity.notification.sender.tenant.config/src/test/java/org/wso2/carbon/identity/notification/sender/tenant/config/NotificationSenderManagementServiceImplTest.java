@@ -631,7 +631,7 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test
-    public void testSetNotiSenderConfigurations()
+    public void testSetNotificationSenderConfigurations()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
@@ -643,7 +643,7 @@ public class NotificationSenderManagementServiceImplTest {
         when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(null);
         when(configurationManager.addResource(anyString(), any(Resource.class))).thenReturn(resource);
 
-        Map<String, String> result = notificationSenderManagementService.setNotiSenderConfigurations(
+        Map<String, String> result = notificationSenderManagementService.setNotificationSenderConfigurations(
                 publisherType, configs);
 
         Assert.assertEquals(result, configs);
@@ -652,7 +652,7 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test
-    public void testSetNotiSenderConfigurationsUpdate()
+    public void testSetNotificationSenderConfigurationsUpdate()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
@@ -666,7 +666,7 @@ public class NotificationSenderManagementServiceImplTest {
 
         when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(existingResource);
 
-        Map<String, String> result = notificationSenderManagementService.setNotiSenderConfigurations(
+        Map<String, String> result = notificationSenderManagementService.setNotificationSenderConfigurations(
                 publisherType, newConfigs);
 
         // Result should contain both existing and new configs merged
@@ -677,16 +677,16 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
-    public void testSetNotiSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
+    public void testSetNotificationSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
 
         String publisherType = "invalid-type";
         Map<String, String> configs = createPushConfigurations();
 
-        notificationSenderManagementService.setNotiSenderConfigurations(publisherType, configs);
+        notificationSenderManagementService.setNotificationSenderConfigurations(publisherType, configs);
     }
 
     @Test
-    public void testGetNotiSenderConfigurations()
+    public void testGetNotificationSenderConfigurations()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
@@ -697,7 +697,7 @@ public class NotificationSenderManagementServiceImplTest {
 
         when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(resource);
 
-        Map<String, String> result = notificationSenderManagementService.getNotiSenderConfigurations(
+        Map<String, String> result = notificationSenderManagementService.getNotificationSenderConfigurations(
                 publisherType, false);
 
         Assert.assertEquals(result, configs);
@@ -705,7 +705,7 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test
-    public void testGetNotiSenderConfigurationsWithInheritance()
+    public void testGetNotificationSenderConfigurationsWithInheritance()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
@@ -718,21 +718,21 @@ public class NotificationSenderManagementServiceImplTest {
         when(configurationManager.getResource(anyString(), anyString(), eq(true))).thenReturn(resource);
 
         Map<String, String> result = notificationSenderManagementService
-                .getNotiSenderConfigurations(publisherType, true);
+                .getNotificationSenderConfigurations(publisherType, true);
 
         Assert.assertEquals(result, configs);
         verify(configurationManager, times(1)).getResource(anyString(), anyString(), eq(true));
     }
 
     @Test
-    public void testGetNotiSenderConfigurationsNoResource()
+    public void testGetNotificationSenderConfigurationsNoResource()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
 
         when(configurationManager.getResource(anyString(), anyString(), anyBoolean())).thenReturn(null);
 
-        Map<String, String> result = notificationSenderManagementService.getNotiSenderConfigurations(
+        Map<String, String> result = notificationSenderManagementService.getNotificationSenderConfigurations(
                 publisherType, false);
 
         Assert.assertTrue(result.isEmpty());
@@ -740,11 +740,11 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
-    public void testGetNotiSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
+    public void testGetNotificationSenderConfigurationsInvalidType() throws NotificationSenderManagementException {
 
         String publisherType = "invalid-type";
 
-        notificationSenderManagementService.getNotiSenderConfigurations(publisherType, false);
+        notificationSenderManagementService.getNotificationSenderConfigurations(publisherType, false);
     }
 
     @Test
@@ -813,7 +813,7 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test(expectedExceptions = NotificationSenderManagementException.class)
-    public void testSetNotiSenderConfigurationsConfigManagementException()
+    public void testSetNotificationSenderConfigurationsConfigManagementException()
             throws NotificationSenderManagementException, ConfigurationManagementException {
 
         String publisherType = "push";
@@ -828,7 +828,7 @@ public class NotificationSenderManagementServiceImplTest {
         when(configurationManager.addResource(anyString(), any(Resource.class)))
                 .thenThrow(mockException);
 
-        notificationSenderManagementService.setNotiSenderConfigurations(publisherType, configs);
+        notificationSenderManagementService.setNotificationSenderConfigurations(publisherType, configs);
     }
 
     @Test
