@@ -744,6 +744,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         try {
             List<Attribute> attributesToAdd = new ArrayList<>();
+            List<Attribute> attributesToRemove = new ArrayList<>();
+
             for (Map.Entry<String, String> config : newConfigs.entrySet()) {
                 Optional<Attribute> attribute = resource.getAttributes().stream().filter(
                         attr -> attr.getKey().equals(config.getKey())).findFirst();
@@ -753,7 +755,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                                 .deleteAttribute(resource.getResourceType(),
                                         resource.getResourceName(), attribute.get().getKey());
-                        resource.getAttributes().remove(attribute.get());
+                        attributesToRemove.add(attribute.get());
                         continue;
                     }
                     attribute.get().setValue(config.getValue());
@@ -773,6 +775,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             }
             // Add new attributes after iteration to avoid ConcurrentModificationException
             resource.getAttributes().addAll(attributesToAdd);
+
+            // Remove attributes with null values after iteration to avoid ConcurrentModificationException
+            resource.getAttributes().removeAll(attributesToRemove);
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS,
                     resource.getResourceName() != null ? resource.getResourceName() : "unknown");
