@@ -124,46 +124,48 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                     LOG.debug("Retrieved " + pushSenders.size() + " push sender(s) for tenant: " + tenantDomain);
                 }
 
-                PushSenderDTO matchingPushSender = null;
+                PushSenderDTO resolvedPushSender = null;
                 String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
 
                 for (PushSenderDTO pushSender : pushSenders) {
                     if (registeredProvider.equalsIgnoreCase(pushSender.getProvider())) {
-                        matchingPushSender = pushSender;
+                        resolvedPushSender = pushSender;
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Found matching Push sender: " + matchingPushSender.getName() +
+                            LOG.debug("Found matching Push sender: " + resolvedPushSender.getName() +
                                     " for provider: " + registeredProvider + " and tenant: " + tenantDomain);
                         }
                         break;
                     }
                 }
 
-                if (matchingPushSender == null) {
+                if (resolvedPushSender == null) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("No matching Push sender found for tenant: " + tenantDomain);
+                        LOG.debug("No push sender found for provider: " + registeredProvider
+                                + " and tenant: " + tenantDomain);
                     }
-                    throw new IdentityEventException("No matching Push sender found for tenant: " + tenantDomain);
+                    throw new IdentityEventException("No push sender found for provider: " + registeredProvider
+                                + " and tenant: " + tenantDomain);
                 }
 
                 PushProvider provider = NotificationHandlerDataHolder.getInstance()
-                        .getPushProvider(matchingPushSender.getProvider());
+                        .getPushProvider(resolvedPushSender.getProvider());
 
                 if (provider == null) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No Push notification provider found for the name: " +
-                                matchingPushSender.getName());
+                                resolvedPushSender.getName());
                     }
                     throw new IdentityEventException("No Push notification provider found for the name: "
-                            + matchingPushSender.getName());
+                            + resolvedPushSender.getName());
                 }
 
                 PushNotificationData pushNotificationData = buildPushNotificationData(event);
                 provider.sendNotification(pushNotificationData,
-                        buildPushSenderData(matchingPushSender), tenantDomain);
+                        buildPushSenderData(resolvedPushSender), tenantDomain);
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Push notification sent successfully through provider: "
-                            + matchingPushSender.getProvider() + " for tenant: " + tenantDomain);
+                            + resolvedPushSender.getProvider() + " for tenant: " + tenantDomain);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
