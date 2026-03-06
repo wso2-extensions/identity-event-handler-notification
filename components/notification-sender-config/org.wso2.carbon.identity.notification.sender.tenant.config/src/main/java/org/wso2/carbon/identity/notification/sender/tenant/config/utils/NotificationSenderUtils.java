@@ -700,8 +700,9 @@ public class NotificationSenderUtils {
      * @param pushSenderConfigs Map of default push sender configurations to be set as attributes of the resource.
      * @return Default PushSender Resource
      */
-    public static Resource buildNotiSenderConfigsResource(
+    public static Resource buildNotificationSenderConfigsResource(
             String configResourceName, Map<String, String> pushSenderConfigs) {
+
         Resource resource = new Resource();
         resource.setResourceName(configResourceName);
         List<Attribute> resourceAttributes =
@@ -713,7 +714,7 @@ public class NotificationSenderUtils {
         return resource;
     }
 
-    public static String getNotiSenderConfigResourceName(String senderType) {
+    public static String getNotificationSenderConfigResourceName(String senderType) {
 
         switch (senderType) {
             case PUSH_PUBLISHER_TYPE:

@@ -140,13 +140,13 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildNotiSenderConfigsResource;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildNotificationSenderConfigsResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.deletePushSenderSecretProperties;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getNotiSenderConfigResourceName;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getNotificationSenderConfigResourceName;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.getPushProvider;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.updatePushSenderCredentials;
 
@@ -645,11 +645,12 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public Map<String, String> setNotificationSenderConfigurations(String publisherType, Map<String, String> configs)
             throws NotificationSenderManagementException {
-        String configResourceName = getNotiSenderConfigResourceName(publisherType);
+
+        String configResourceName = getNotificationSenderConfigResourceName(publisherType);
         if (StringUtils.isEmpty(configResourceName)) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_SENDER_TYPE, publisherType);
         }
-        Optional<Resource> resourceOptional = getNotiSenderConfigResource(configResourceName, false);
+        Optional<Resource> resourceOptional = getNotificationSenderConfigResource(configResourceName, false);
         Resource configuredResource;
         if (resourceOptional.isPresent()) {
             // Update existing resource flow
@@ -657,7 +658,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             configuredResource = updateNotificationSenderConfigAttributes(pushConfigResource, configs);
         } else {
             // Add new resource flow
-            Resource pushConfigResource = buildNotiSenderConfigsResource(configResourceName, configs);
+            Resource pushConfigResource = buildNotificationSenderConfigsResource(configResourceName, configs);
             configuredResource = addNotificationSenderConfigsResource(pushConfigResource);
         }
         if (configuredResource.getAttributes() == null) {
@@ -670,11 +671,13 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     @Override
     public Map<String, String> getNotificationSenderConfigurations(String publisherType, boolean inheritTenantSettings)
             throws NotificationSenderManagementException {
-        String configResourceName = getNotiSenderConfigResourceName(publisherType);
+
+        String configResourceName = getNotificationSenderConfigResourceName(publisherType);
         if (StringUtils.isEmpty(configResourceName)) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_SENDER_TYPE, publisherType);
         }
-        Optional<Resource> resourceOptional = getNotiSenderConfigResource(configResourceName, inheritTenantSettings);
+        Optional<Resource> resourceOptional =
+                getNotificationSenderConfigResource(configResourceName, inheritTenantSettings);
         if (resourceOptional.isPresent()) {
             Resource pushConfigResource = resourceOptional.get();
             if (pushConfigResource.getAttributes() == null) {
@@ -687,9 +690,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         }
     }
 
-    private Optional<Resource> getNotiSenderConfigResource(String configResourceName,
-                                                            boolean inheritTenantSettings)
+    private Optional<Resource> getNotificationSenderConfigResource(String configResourceName,
+                                                                   boolean inheritTenantSettings)
             throws NotificationSenderManagementException {
+
         try {
             return Optional.ofNullable(NotificationSenderTenantConfigDataHolder.getInstance()
                     .getConfigurationManager()
@@ -707,6 +711,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private Resource addNotificationSenderConfigsResource(Resource resource)
             throws NotificationSenderManagementException {
+
         Resource addedResource = null;
         try {
             addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
@@ -736,6 +741,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
     private Resource updateNotificationSenderConfigAttributes(Resource resource, Map<String, String> newConfigs)
             throws NotificationSenderManagementException {
+
         try {
             List<Attribute> attributesToAdd = new ArrayList<>();
             for (Map.Entry<String, String> config : newConfigs.entrySet()) {

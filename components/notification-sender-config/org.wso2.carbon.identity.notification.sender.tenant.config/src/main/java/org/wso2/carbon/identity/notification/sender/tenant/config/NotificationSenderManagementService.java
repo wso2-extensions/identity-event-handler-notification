@@ -247,9 +247,9 @@ public interface NotificationSenderManagementService {
      * @return Map of updated publisher configurations.
      * @throws NotificationSenderManagementException Notification sender management exception.
      */
-
     default Map<String, String> setNotificationSenderConfigurations(String publisherType, Map<String, String> configs)
             throws NotificationSenderManagementException {
+
         return null;
     }
 
@@ -263,6 +263,7 @@ public interface NotificationSenderManagementService {
      */
     default Map<String, String> getNotificationSenderConfigurations(String publisherType, boolean inheritTenantSettings)
             throws NotificationSenderManagementException {
+
         return null;
     }
 }
