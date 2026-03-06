@@ -27,6 +27,8 @@ import java.util.Map;
 public class EmailSenderDTO {
   
     private String name;
+    private String provider;
+    private String providerURL;
     private String smtpServerHost;
     private Integer smtpPort;
     private String fromAddress;
@@ -43,6 +45,26 @@ public class EmailSenderDTO {
     public void setName(String name) {
 
         this.name = name;
+    }
+
+    public String getProvider() {
+
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+
+        this.provider = provider;
+    }
+
+    public String getProviderURL() {
+
+        return providerURL;
+    }
+
+    public void setProviderURL(String providerURL) {
+
+        this.providerURL = providerURL;
     }
 
     public String getSmtpServerHost() {
