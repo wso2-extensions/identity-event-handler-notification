@@ -32,6 +32,7 @@ import org.wso2.carbon.identity.notification.push.provider.exception.PushProvide
 import org.wso2.carbon.identity.notification.push.provider.model.PushNotificationData;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
+import org.wso2.carbon.identity.event.handler.notification.util.NotificationEventHandlerAuditLogger;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
 import java.util.Arrays;
@@ -68,6 +69,8 @@ import static org.wso2.carbon.identity.event.handler.notification.util.Notificat
 public class PushNotificationHandler extends DefaultNotificationHandler {
 
     private static final Log LOG = LogFactory.getLog(PushNotificationHandler.class);
+    private static final NotificationEventHandlerAuditLogger AUDIT_LOGGER =
+            new NotificationEventHandlerAuditLogger();
 
     @Override
     public boolean canHandle(MessageContext messageContext) throws IdentityRuntimeException {
@@ -113,11 +116,16 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
         }
         LOG.debug("Push notification event properties validated successfully.");
 
+        // This variable is used to track whether the notification was sent successfully for logging purposes.
+        boolean notificationSent = false;
+
+        String registeredProvider = (String) event.getEventProperties()
+                .get(NotificationConstants.PushNotification.NOTIFICATION_PROVIDER);
         try {
             /*
              * Get the registered Push notification senders from the database.
              */
-            List<PushSenderDTO>  pushSenders = NotificationHandlerDataHolder.getInstance()
+            List<PushSenderDTO> pushSenders = NotificationHandlerDataHolder.getInstance()
                     .getNotificationSenderManagementService().getPushSenders(true);
             if (pushSenders != null) {
                 if (LOG.isDebugEnabled()) {
@@ -125,7 +133,6 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 }
 
                 PushSenderDTO resolvedPushSender = null;
-                String registeredProvider = (String) event.getEventProperties().get(NOTIFICATION_PROVIDER);
 
                 for (PushSenderDTO pushSender : pushSenders) {
                     if (registeredProvider.equalsIgnoreCase(pushSender.getProvider())) {
@@ -144,7 +151,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                                 + " and tenant: " + tenantDomain);
                     }
                     throw new IdentityEventException("No push sender found for provider: " + registeredProvider
-                                + " and tenant: " + tenantDomain);
+                            + " and tenant: " + tenantDomain);
                 }
 
                 PushProvider provider = NotificationHandlerDataHolder.getInstance()
@@ -163,6 +170,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 provider.sendNotification(pushNotificationData,
                         buildPushSenderData(resolvedPushSender), tenantDomain);
 
+                notificationSent = true;
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Push notification sent successfully through provider: "
                             + resolvedPushSender.getProvider() + " for tenant: " + tenantDomain);
@@ -184,6 +192,18 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 LOG.debug("Error while sending push notification.", e);
             }
             throw new IdentityEventException(e.getErrorCode(), e.getMessage(), e);
+        } finally {
+            String userId = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_ID);
+            String targetId = (String) event.getEventProperties().get(DEVICE_ID);
+            if (notificationSent) {
+                AUDIT_LOGGER.printPushAuditLog(
+                        NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_SUCCESS,
+                        targetId, userId, registeredProvider, tenantDomain);
+            } else {
+                AUDIT_LOGGER.printPushAuditLog(
+                        NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_FAILURE,
+                        targetId, userId, registeredProvider, tenantDomain);
+            }
         }
     }
 

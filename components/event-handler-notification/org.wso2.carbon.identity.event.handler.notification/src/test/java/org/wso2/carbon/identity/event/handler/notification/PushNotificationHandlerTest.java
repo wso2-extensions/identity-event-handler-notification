@@ -19,13 +19,18 @@
 package org.wso2.carbon.identity.event.handler.notification;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.bean.IdentityEventMessageContext;
 import org.wso2.carbon.identity.event.event.Event;
@@ -39,15 +44,16 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSe
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_GETTING_NOTIFICATION_SENDERS_BY_TYPE;
-
-import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,6 +65,12 @@ import static org.mockito.Mockito.when;
 public class PushNotificationHandlerTest {
 
     private static final String SAMPLE_ORGANIZATION_NAME = "Great Hospital";
+
+    private MockedStatic<CarbonContext> mockedCarbonContext;
+    private MockedStatic<UserCoreUtil> mockedUserCoreUtil;
+    private MockedStatic<MultitenantUtils> mockedMultitenantUtils;
+    private MockedStatic<IdentityUtil> mockedIdentityUtil;
+    private MockedStatic<LoggerUtils> mockedLoggerUtils;
 
     @InjectMocks
     private PushNotificationHandler pushNotificationHandler;
@@ -90,7 +102,72 @@ public class PushNotificationHandlerTest {
     @BeforeMethod
     public void setUp() {
 
+        System.setProperty("carbon.home", ".");
         MockitoAnnotations.openMocks(this);
+
+        mockedCarbonContext = mockStatic(CarbonContext.class);
+        mockedUserCoreUtil = mockStatic(UserCoreUtil.class);
+        mockedMultitenantUtils = mockStatic(MultitenantUtils.class);
+        mockedIdentityUtil = mockStatic(IdentityUtil.class);
+        mockedLoggerUtils = mockStatic(LoggerUtils.class);
+
+        CarbonContext carbonContext = mock(CarbonContext.class);
+        mockedCarbonContext.when(CarbonContext::getThreadLocalCarbonContext).thenReturn(carbonContext);
+        when(carbonContext.getUsername()).thenReturn("testUser");
+        when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
+
+        mockedUserCoreUtil.when(() -> UserCoreUtil.addTenantDomainToEntry(anyString(), anyString()))
+                .thenAnswer(invocation -> {
+                    String username = invocation.getArgument(0);
+                    String tenantDomain = invocation.getArgument(1);
+                    if (username == null) {
+                        return null;
+                    }
+                    return username + "@" + tenantDomain;
+                });
+
+        mockedMultitenantUtils.when(() -> MultitenantUtils.getTenantAwareUsername(anyString()))
+                .thenAnswer(invocation -> {
+                    String username = invocation.getArgument(0);
+                    if (username == null) {
+                        return null;
+                    }
+                    return username.contains("@") ? username.split("@")[0] : username;
+                });
+
+        mockedMultitenantUtils.when(() -> MultitenantUtils.getTenantDomain(anyString()))
+                .thenAnswer(invocation -> {
+                    String username = invocation.getArgument(0);
+                    if (username == null) {
+                        return "carbon.super";
+                    }
+                    return username.contains("@") ? username.split("@")[1] : "carbon.super";
+                });
+
+        mockedIdentityUtil.when(() -> IdentityUtil.getInitiatorId(anyString(), anyString()))
+                .thenReturn("initiator-id-test");
+
+        mockedLoggerUtils.when(() -> LoggerUtils.getMaskedContent(anyString())).thenReturn("masked-content");
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        if (mockedCarbonContext != null) {
+            mockedCarbonContext.close();
+        }
+        if (mockedUserCoreUtil != null) {
+            mockedUserCoreUtil.close();
+        }
+        if (mockedMultitenantUtils != null) {
+            mockedMultitenantUtils.close();
+        }
+        if (mockedIdentityUtil != null) {
+            mockedIdentityUtil.close();
+        }
+        if (mockedLoggerUtils != null) {
+            mockedLoggerUtils.close();
+        }
     }
 
     @Test
