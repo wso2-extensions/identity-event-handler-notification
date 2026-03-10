@@ -191,15 +191,18 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             throw new IdentityEventException(e.getErrorCode(), e.getMessage(), e);
         } finally {
             String userId = (String) event.getEventProperties().get(IdentityEventConstants.EventProperty.USER_ID);
-            String targetId = (String) event.getEventProperties().get(DEVICE_ID);
 
-            NotificationEventHandlerAuditLogger.Operation operation = isNotificationSuccessful ?
-                    NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_SUCCESS :
-                    NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_FAILURE;
+            if (StringUtils.isNotEmpty(userId)) {
+                String targetId = (String) event.getEventProperties().get(DEVICE_ID);
 
-            AUDIT_LOGGER.printPushAuditLog(
-                    operation,
-                    targetId, userId, registeredProvider, tenantDomain);
+                NotificationEventHandlerAuditLogger.Operation operation = isNotificationSuccessful ?
+                        NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_SUCCESS :
+                        NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_FAILURE;
+
+                AUDIT_LOGGER.printPushAuditLog(
+                        operation,
+                        targetId, userId, registeredProvider, tenantDomain);
+            }
         }
     }
 
