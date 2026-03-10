@@ -679,11 +679,20 @@ public class NotificationSenderManagementServiceImplTest {
         Map<String, String> result = notificationSenderManagementService.setNotificationSenderConfigurations(
                 publisherType, newConfigs);
 
+        // Mock the update/replace operation
+        Map<String, String> mergedConfigs = new HashMap<>(existingConfigs);
+        mergedConfigs.putAll(newConfigs);
+        Resource updatedResource = createConfigResource("notification-sender-configs-push", mergedConfigs);
+        updatedResource.setResourceId("existingConfigResourceId");
+        when(configurationManager.replaceResource(anyString(), any(Resource.class))).thenReturn(updatedResource);
+
+
         // Result should contain both existing and new configs merged
         Map<String, String> expectedConfigs = new HashMap<>(existingConfigs);
         expectedConfigs.putAll(newConfigs);
         Assert.assertEquals(result, expectedConfigs);
         verify(configurationManager, times(1)).getResource(anyString(), anyString(), anyBoolean());
+        verify(configurationManager, times(1)).replaceResource(anyString(), any(Resource.class));
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
