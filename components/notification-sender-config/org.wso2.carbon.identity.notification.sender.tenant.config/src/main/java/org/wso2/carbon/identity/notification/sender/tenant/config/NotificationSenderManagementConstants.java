@@ -237,7 +237,7 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_INVALID_SENDER_TYPE("60013",
                 "Invalid sender type.",
                 "The sender type for the notification configuration is invalid: %s."),
-        ERROR_CODE_INVALID_NOTIFICATION_CONFIGS("60013",
+        ERROR_CODE_INVALID_NOTIFICATION_CONFIGS("60014",
                 "Invalid notification sender configurations.",
                 "The notification configurations provided is invalid."),
 
