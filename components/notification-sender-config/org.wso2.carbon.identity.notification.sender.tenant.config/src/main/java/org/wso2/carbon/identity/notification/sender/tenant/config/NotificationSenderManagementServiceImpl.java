@@ -821,12 +821,17 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 try {
                     NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
                             .addResourceType(resourceTypeAdd);
-                    addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                            .addResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, resource);
                 } catch (ConfigurationManagementException ex) {
                     throw handleConfigurationMgtException(ex,
                             ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE,
                             NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE);
+                }
+                try {
+                    addedResource = NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                            .addResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, resource);
+                } catch (ConfigurationManagementException ex) {
+                    throw handleConfigurationMgtException(ex, ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG,
+                            resource.getResourceName() != null ? resource.getResourceName() : "unknown");
                 }
             } else {
                 throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG,
