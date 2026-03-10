@@ -311,16 +311,16 @@ public class NotificationSenderManagementConstants {
                 "Error occurred while retrieving access token for notification sender."),
         ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE("65029",
                 "Error adding sender configurations type.",
-                "Error while adding notification sender configurations type"),
+                "Error while adding notification sender configurations type: %s."),
         ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG("65030",
                 "Error adding sender configurations.",
-                "Error while adding notification sender configurations"),
+                "Error while adding notification sender configurations: %s."),
         ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS("65031",
                 "Error updating sender configurations.",
-                "Error while updating notification sender configurations"),
+                "Error while updating notification sender configurations: %s."),
         ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG("65032",
                 "Error retrieving sender configuration.",
-                "Error while retrieving notification sender configuration");
+                "Error while retrieving notification sender configuration: %s.");
 
         private final String code;
         private final String message;
