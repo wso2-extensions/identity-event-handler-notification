@@ -35,8 +35,8 @@ public class NotificationSenderManagementConstants {
     public static final String NOTIFICATION_SENDER_CONTEXT_PATH = "/notification-senders";
     public static final String PUBLISHER_RESOURCE_TYPE = "Publisher";
     public static final String NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE = "NotificationSenderConfigs";
-    public static final String NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION
-            = "Resource type for notification sender configurations";
+    public static final String NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION =
+            "Resource type for notification sender configurations";
     public static final String PUBLISHER_TYPE_PROPERTY = "type";
     public static final String DEFAULT_EMAIL_PUBLISHER = "EmailPublisher";
     public static final String DEFAULT_SMS_PUBLISHER = "SMSPublisher";
@@ -234,6 +234,12 @@ public class NotificationSenderManagementConstants {
                 "The authentication property %s cannot be blank or empty."),
         ERROR_CODE_MISSING_AUTH_PROPERTY("60012", "Missing authentication property.",
                 "The property %s must be included as an authentication property."),
+        ERROR_CODE_INVALID_SENDER_TYPE("60013",
+                "Invalid sender type.",
+                "The sender type for the notification configuration is invalid: %s."),
+        ERROR_CODE_INVALID_NOTIFICATION_CONFIGS("60013",
+                "Invalid notification sender configurations.",
+                "The notification configurations provided is invalid."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",
@@ -304,20 +310,17 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_WHILE_RETRIEVING_TOKEN("65028", "Error while retrieving access token.",
                 "Error occurred while retrieving access token for notification sender."),
         ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE("65029",
-                "Error while adding notification sender configurations type.",
+                "Error adding sender configurations type.",
                 "Error while adding notification sender configurations type"),
         ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG("65030",
-                "Error while adding notification sender configurations.",
+                "Error adding sender configurations.",
                 "Error while adding notification sender configurations"),
         ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS("65031",
-                "Error while updating notification sender configurations.",
+                "Error updating sender configurations.",
                 "Error while updating notification sender configurations"),
         ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG("65032",
-                "Error while retrieving notification sender configuration.",
-                "Error while retrieving notification sender configuration"),
-        ERROR_CODE_INVALID_SENDER_TYPE("65033",
-                "Invalid sender type.",
-                "The sender type is invalid: %s.");
+                "Error retrieving sender configuration.",
+                "Error while retrieving notification sender configuration");
 
         private final String code;
         private final String message;
