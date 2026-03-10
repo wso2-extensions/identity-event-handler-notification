@@ -840,41 +840,26 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throws NotificationSenderManagementException {
 
         try {
-            List<Attribute> attributesToAdd = new ArrayList<>();
-            List<Attribute> attributesToRemove = new ArrayList<>();
 
-            for (Map.Entry<String, String> config : newConfigs.entrySet()) {
-                Optional<Attribute> attribute = resource.getAttributes().stream().filter(
-                        attr -> attr.getKey().equals(config.getKey())).findFirst();
-                if (attribute.isPresent()) {
-                    if (config.getValue() == null) {
-                        // If the new value is null, remove the attribute.
-                        NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                                .deleteAttribute(resource.getResourceType(),
-                                        resource.getResourceName(), attribute.get().getKey());
-                        attributesToRemove.add(attribute.get());
-                        continue;
-                    }
-                    attribute.get().setValue(config.getValue());
-                    NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                            .updateAttribute(resource.getResourceType(), resource.getResourceName(), attribute.get());
+            Map<String, String> mergedConfigs = resource.getAttributes() == null ? new HashMap<> () :
+                    resource.getAttributes().stream()
+                            .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue, (left, right) -> right));
+
+            newConfigs.forEach((key, value) -> {
+                if (value == null) {
+                    mergedConfigs.remove(key);
                 } else {
-                    if (config.getValue() == null) {
-                        continue;
-                    }
-                    Attribute newAttribute = new Attribute();
-                    newAttribute.setKey(config.getKey());
-                    newAttribute.setValue(config.getValue());
-                    attributesToAdd.add(newAttribute);
-                    NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
-                            .addAttribute(resource.getResourceType(), resource.getResourceName(), newAttribute);
+                    mergedConfigs.put(key, value);
                 }
-            }
-            // Add new attributes after iteration to avoid ConcurrentModificationException
-            resource.getAttributes().addAll(attributesToAdd);
+            });
 
-            // Remove attributes with null values after iteration to avoid ConcurrentModificationException
-            resource.getAttributes().removeAll(attributesToRemove);
+            resource.setAttributes(mergedConfigs.entrySet().stream()
+                    .map(entry -> new Attribute(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList()));
+
+            NotificationSenderTenantConfigDataHolder.getInstance().getConfigurationManager()
+                    .replaceResource(NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE, resource);
+
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS,
                     resource.getResourceName() != null ? resource.getResourceName() : "unknown");
