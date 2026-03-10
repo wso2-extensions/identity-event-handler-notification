@@ -111,6 +111,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_INVALID_NOTIFICATION_CONFIGS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_INVALID_SENDER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_RESOURCE_EXISTS;
@@ -139,7 +140,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_TYPE_PROPERTY;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_NOTIFICATION_CONFIGS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_NAME_SUFFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUSH_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUT;
@@ -747,6 +747,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (StringUtils.isEmpty(configResourceName)) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_SENDER_TYPE, publisherType);
         }
+        if (configs == null) {
+            throw new NotificationSenderManagementClientException(ERROR_CODE_INVALID_NOTIFICATION_CONFIGS);
+        }
         Optional<Resource> resourceOptional = getNotificationSenderConfigResource(configResourceName, false);
         Resource configuredResource;
         if (resourceOptional.isPresent()) {
@@ -802,7 +805,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 return Optional.empty();
             }
             throw handleConfigurationMgtException(e,
-                    ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG, PUSH_NOTIFICATION_CONFIGS);
+                    ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG, configResourceName);
         }
     }
 
