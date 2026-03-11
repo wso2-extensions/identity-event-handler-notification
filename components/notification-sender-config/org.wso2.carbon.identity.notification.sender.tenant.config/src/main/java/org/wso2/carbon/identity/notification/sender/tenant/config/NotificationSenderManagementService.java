@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, WSO2 Inc. (http://www.wso2.com).
+ * Copyright (c) 2022-2026, WSO2 Inc. (http://www.wso2.com).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service of Notification Sender Management operations.
@@ -234,6 +235,34 @@ public interface NotificationSenderManagementService {
      * @throws NotificationSenderManagementException    Notification sender management exception.
      */
     default Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
+
+        return null;
+    }
+
+    /**
+     * Set the configurations of the publisher of the tenant.
+     *
+     * @param publisherType Publisher type.
+     * @param configs Map of publisher configurations.
+     * @return Map of updated publisher configurations.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+    default Map<String, String> setNotificationSenderConfigurations(String publisherType, Map<String, String> configs)
+            throws NotificationSenderManagementException {
+
+        return null;
+    }
+
+    /**
+     * Get the configurations of the publisher of the tenant.
+     *
+     * @param publisherType Publisher type.
+     * @param inheritTenantSettings Whether to retrieve inherit tenant settings.
+     * @return Map of publisher configurations.
+     * @throws NotificationSenderManagementException Notification sender management exception.
+     */
+    default Map<String, String> getNotificationSenderConfigurations(String publisherType, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
 
         return null;
     }

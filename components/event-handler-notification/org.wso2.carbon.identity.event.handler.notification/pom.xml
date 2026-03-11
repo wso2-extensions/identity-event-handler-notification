@@ -95,6 +95,10 @@
             <artifactId>org.wso2.carbon.identity.central.log.mgt</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity.event.handler.notification</groupId>
             <artifactId>org.wso2.carbon.identity.notification.sender.tenant.config</artifactId>
         </dependency>
@@ -160,6 +164,7 @@
                             org.wso2.carbon.identity.event.handler.notification.*;version="${identity.event.handler.notification.exp.pkg.version}",
                         </Export-Package>
                         <Import-Package>
+                            org.json,
                             javax.cache,
                             javax.xml.namespace,
 

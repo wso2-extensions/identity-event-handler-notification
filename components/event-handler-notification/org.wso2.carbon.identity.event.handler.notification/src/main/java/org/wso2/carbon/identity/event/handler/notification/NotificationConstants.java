@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2016-2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -144,6 +144,7 @@ public class NotificationConstants {
         public static final String REQUEST_DEVICE_OS = "deviceOS";
         public static final String REQUEST_DEVICE_BROWSER = "browser";
         public static final String DEVICE_ID = "deviceId";
+        public static final String DEVICE_HANDLE = "deviceHandle";
     }
 
     /**

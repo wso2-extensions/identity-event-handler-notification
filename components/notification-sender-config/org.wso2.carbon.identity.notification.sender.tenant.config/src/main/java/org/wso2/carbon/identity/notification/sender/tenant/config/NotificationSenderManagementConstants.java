@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2022-2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -34,10 +34,14 @@ public class NotificationSenderManagementConstants {
     public static final String NOTIFICATION_SENDER_ERROR_PREFIX = "NSM-";
     public static final String NOTIFICATION_SENDER_CONTEXT_PATH = "/notification-senders";
     public static final String PUBLISHER_RESOURCE_TYPE = "Publisher";
+    public static final String NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE = "NotificationSenderConfigs";
+    public static final String NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION =
+            "Resource type for notification sender configurations";
     public static final String PUBLISHER_TYPE_PROPERTY = "type";
     public static final String DEFAULT_EMAIL_PUBLISHER = "EmailPublisher";
     public static final String DEFAULT_SMS_PUBLISHER = "SMSPublisher";
     public static final String DEFAULT_PUSH_PUBLISHER = "PushPublisher";
+    public static final String PUSH_PUBLISHER_NAME_SUFFIX = "_PushPublisher";
     public static final String PUBLISHER_FILE_EXTENSION = ".xml";
     public static final String RESOURCE_NOT_EXISTS_ERROR_CODE = "CONFIGM_00017";
     public static final String PLACEHOLDER_IDENTIFIER = "$";
@@ -71,6 +75,7 @@ public class NotificationSenderManagementConstants {
     public static final String SMTP_PORT = "smtpPort";
     public static final String FROM_ADDRESS = "fromAddress";
     public static final String EMAIL_PUBLISHER_TYPE = "email";
+    public static final String EMAIL_NOTIFICATION_CONFIGS = "EmailNotificationConfigs";
     public static final String AUTH_TYPE = "authType";
     public static final String REPLY_TO_ADDRESS = "mail.smtp.replyTo";
     public static final String DISPLAY_NAME = "mail.smtp.signature";
@@ -103,6 +108,7 @@ public class NotificationSenderManagementConstants {
     public static final String CONTENT_TYPE = "contentType";
     public static final String CLIENT_HTTP_METHOD_PROPERTY = "http.client.method";
     public static final String SMS_PUBLISHER_TYPE = "sms";
+    public static final String SMS_NOTIFICATION_CONFIGS = "SMSNotificationConfigs";
     public static final String MY_ACCOUNT_SMS_RESOURCE_TYPE = "myaccount";
     public static final String MY_ACCOUNT_SMS_RESOURCE_NAME = "myaccount-2FA-config";
 
@@ -112,6 +118,7 @@ public class NotificationSenderManagementConstants {
 
     // Push Sender's main properties.
     public static final String PUSH_PUBLISHER_TYPE = "push";
+    public static final String PUSH_NOTIFICATION_CONFIGS = "PushNotificationConfigs";
 
     // Constant for eventPublisher file generation.
     public static final String ROOT_ELEMENT = "eventPublisher";
@@ -227,6 +234,12 @@ public class NotificationSenderManagementConstants {
                 "The authentication property %s cannot be blank or empty."),
         ERROR_CODE_MISSING_AUTH_PROPERTY("60012", "Missing authentication property.",
                 "The property %s must be included as an authentication property."),
+        ERROR_CODE_INVALID_SENDER_TYPE("60013",
+                "Invalid sender type.",
+                "The sender type for the notification configuration is invalid: %s."),
+        ERROR_CODE_INVALID_NOTIFICATION_CONFIGS("60014",
+                "Invalid notification sender configurations.",
+                "The notification configurations provided is invalid."),
 
         // Server errors 650xx.
         ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND("65001", "No active notification senders found.",
@@ -295,7 +308,19 @@ public class NotificationSenderManagementConstants {
         ERROR_CODE_ERROR_WHILE_TOKEN_REQUEST_BUILDING("65027", "Error while building token request.",
                 "Error while building token request context for Client Credential grant."),
         ERROR_CODE_ERROR_WHILE_RETRIEVING_TOKEN("65028", "Error while retrieving access token.",
-                "Error occurred while retrieving access token for notification sender.");
+                "Error occurred while retrieving access token for notification sender."),
+        ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIGS_TYPE("65029",
+                "Error adding sender configurations type.",
+                "Error while adding notification sender configurations type: %s."),
+        ERROR_CODE_ERROR_WHILE_ADDING_NOTIFICATION_SENDER_CONFIG("65030",
+                "Error adding sender configurations.",
+                "Error while adding notification sender configurations: %s."),
+        ERROR_CODE_ERROR_WHILE_UPDATING_NOTIFICATION_SENDER_CONFIGS("65031",
+                "Error updating sender configurations.",
+                "Error while updating notification sender configurations: %s."),
+        ERROR_CODE_ERROR_WHILE_RETRIEVING_NOTIFICATION_SENDER_CONFIG("65032",
+                "Error retrieving sender configuration.",
+                "Error while retrieving notification sender configuration: %s.");
 
         private final String code;
         private final String message;
