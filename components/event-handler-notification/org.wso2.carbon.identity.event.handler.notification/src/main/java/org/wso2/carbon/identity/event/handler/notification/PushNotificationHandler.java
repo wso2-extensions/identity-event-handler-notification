@@ -199,9 +199,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                         NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_SUCCESS :
                         NotificationEventHandlerAuditLogger.Operation.SEND_PUSH_NOTIFICATION_FAILURE;
 
-                AUDIT_LOGGER.printPushAuditLog(
-                        operation,
-                        targetId, userId, registeredProvider, tenantDomain);
+                AUDIT_LOGGER.printPushAuditLog(operation, targetId, userId, registeredProvider, tenantDomain);
             }
         }
     }
