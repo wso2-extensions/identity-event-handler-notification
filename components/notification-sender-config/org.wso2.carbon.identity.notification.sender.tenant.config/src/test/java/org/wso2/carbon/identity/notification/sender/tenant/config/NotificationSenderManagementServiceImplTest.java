@@ -1329,7 +1329,7 @@ public class NotificationSenderManagementServiceImplTest {
     }
 
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
-    public void testAddHttpEmailSenderFailClientCredentialMissingScopes() throws Exception {
+    public void testAddHttpEmailSenderFailClientCredentialMissingClientId() throws Exception {
 
         EmailSenderDTO emailSender = new EmailSenderDTO();
         emailSender.setName("HttpEmailPublisher");
@@ -1338,10 +1338,9 @@ public class NotificationSenderManagementServiceImplTest {
         emailSender.setAuthType("CLIENT_CREDENTIAL");
         Map<String, String> properties = new HashMap<>();
         properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
-        properties.put("clientId", "cid");
+        // Client Id intentionally missing.
         properties.put("clientSecret", "csecret");
         properties.put("tokenEndpoint", "https://auth.example.com/token");
-        // scopes intentionally missing
         emailSender.setProperties(properties);
 
         notificationSenderManagementService.addEmailSender(emailSender);
