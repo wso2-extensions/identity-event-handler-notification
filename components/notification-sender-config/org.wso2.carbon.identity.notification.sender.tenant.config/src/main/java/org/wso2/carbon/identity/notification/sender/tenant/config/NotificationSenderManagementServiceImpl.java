@@ -145,7 +145,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REPLY_TO_ADDRESS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SCOPES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_PORT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_SERVER_HOST;
@@ -309,8 +308,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (CLIENT_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType())) {
             if (StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(CLIENT_SECRET)) ||
-                    StringUtils.isBlank(emailSender.getProperties().get(TOKEN_ENDPOINT)) ||
-                    StringUtils.isBlank(emailSender.getProperties().get(SCOPES))) {
+                    StringUtils.isBlank(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
                 throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_INVALID_INPUTS);
             }
             return;
