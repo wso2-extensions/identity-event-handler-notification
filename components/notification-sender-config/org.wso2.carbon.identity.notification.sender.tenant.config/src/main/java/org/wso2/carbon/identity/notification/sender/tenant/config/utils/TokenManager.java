@@ -121,10 +121,10 @@ public class TokenManager {
             grantTypeProperties.put(
                     GrantContext.Property.CLIENT_SECRET.getName(),
                     authentication.getProperty(Authentication.Property.CLIENT_SECRET.getName()));
-            grantTypeProperties.put(
-                    GrantContext.Property.SCOPE.getName(),
-                    authentication.getProperty(Authentication.Property.SCOPE.getName()));
-
+            String scope = authentication.getProperty(Authentication.Property.SCOPE.getName());
+            if (StringUtils.isNotBlank(scope)) {
+                grantTypeProperties.put(GrantContext.Property.SCOPE.getName(), scope);
+            }
             GrantContext grantContext = new GrantContext.Builder()
                     .grantType(GrantContext.GrantType.CLIENT_CREDENTIAL)
                     .properties(grantTypeProperties)
