@@ -167,7 +167,10 @@ public class Authentication {
                 case CLIENT_CREDENTIAL:
                     resolvedAuthProperties.put(Property.CLIENT_ID.getName(), getProperty(Property.CLIENT_ID));
                     resolvedAuthProperties.put(Property.CLIENT_SECRET.getName(), getProperty(Property.CLIENT_SECRET));
-                    resolvedAuthProperties.put(Property.SCOPE.getName(), getProperty(Property.SCOPE));
+                    String scope = propertiesMap != null ? propertiesMap.get(Property.SCOPE.getName()) : null;
+                    if (StringUtils.isNotBlank(scope)) {
+                        resolvedAuthProperties.put(Property.SCOPE.getName(), scope);
+                    }
                     resolvedAuthProperties.put(
                             Property.TOKEN_ENDPOINT.getName(), getProperty(Property.TOKEN_ENDPOINT));
                     break;
