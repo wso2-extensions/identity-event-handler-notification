@@ -16724,10 +16724,10 @@
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
                                                                                         There is a request to update your email address for the below account in the organization <b>{{organization-name}}</b>.<br>
-                                                                                        Username: <b>{{user-name}}</b>
-                                                                                        To proceed, use the following One-Time Password (OTP).</b>
+                                                                                        Username: <b>{{user-name}}</b></br></br>
+                                                                                        To proceed, use the following One-Time Password (OTP).
                                                                                     </p>
-                                                                                     <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
+                                                                                    <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
                                                                                         font-size: 24px;
                                                                                         font-weight: bold;
                                                                                         letter-spacing: normal;
@@ -16740,7 +16740,7 @@
                                                                                         border-radius: 5px;
                                                                                         display: inline-block;">
                                                                                             <b>{{OTPCode}}</b>
-                                                                                     </p>
+                                                                                    </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
                                                                                     style="color: {{organization.font.color}} !important; line-height: 140%; text-align: left; word-wrap: break-word;">
@@ -16805,7 +16805,6 @@
 
             </html>]]></body>
     </configuration>
-
     <configuration type="notifyOnExistingEmailUpdateWithoutVerification" display="notifyOnExistingEmailUpdateWithoutVerification" locale="en_US" emailContentType="text/html">
         <subject>Request received to update email</subject>
         <body><![CDATA[<!DOCTYPE html
