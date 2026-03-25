@@ -553,6 +553,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 .getResourcesByType(PUBLISHER_RESOURCE_TYPE);
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String accessingOrgID = PrivilegedCarbonContext.getThreadLocalCarbonContext().getAccessingOrganizationId();
+        if (StringUtils.isNotEmpty(accessingOrgID)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Resolving tenant domain for accessing organization ID: " + accessingOrgID);
+            }
+            tenantDomain = NotificationSenderTenantConfigDataHolder.getInstance()
+                    .getOrganizationManager().resolveTenantDomain(accessingOrgID);
+        }
         if (inheritTenantSettings && OrganizationManagementUtil.isOrganization(tenantDomain) &&
                 publisherResources.getResources().isEmpty()) {
             publisherResources = NotificationSenderTenantConfigDataHolder.getInstance()
