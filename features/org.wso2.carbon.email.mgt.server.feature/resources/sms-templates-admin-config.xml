@@ -67,9 +67,9 @@
         <body>A request has been initiated to access your account. Ref: {{binding-message}}. Click to authorize: {{ciba-auth-url}}. This expires in {{expiry-time}}</body>
     </configuration>
     <configuration type="WorkflowApproverNotification" display="WorkflowApproverNotification" locale="en_US">
-        <body>Approval needed for {{workflowType}} in {{organization-name}}. Review: {{approvalActionUrl}}</body>
+        <body>Action required for {{workflowType}} in {{organization-name}}. Review: {{approvalActionUrl}}</body>
     </configuration>
     <configuration type="WorkflowInitiatorNotification" display="WorkflowInitiatorNotification" locale="en_US">
-        <body>Your request {{workflowType}} in {{organization-name}} has been {{decision}}</body>
+        <body>Your {{workflowType}} request in {{organization-name}} has been {{decision}}</body>
     </configuration>
 </configurations>
