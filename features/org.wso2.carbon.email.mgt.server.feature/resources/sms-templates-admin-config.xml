@@ -70,6 +70,6 @@
         <body>Approval needed for {{workflowType}} in {{organization-name}}. Review: {{approvalActionUrl}}</body>
     </configuration>
     <configuration type="WorkflowInitiatorNotification" display="WorkflowInitiatorNotification" locale="en_US">
-        <body>Your workflow request {{workflowType}} in {{organization-name}} has been {{decision}}</body>
+        <body>Your request {{workflowType}} in {{organization-name}} has been {{decision}}</body>
     </configuration>
 </configurations>
