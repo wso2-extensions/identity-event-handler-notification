@@ -16724,7 +16724,7 @@
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
                                                                                         There is a request to update your email address for the below account in the organization <b>{{organization-name}}</b>.<br>
-                                                                                        Username: <b>{{user-name}}</b></br></br>
+                                                                                        Username: <b>{{user-name}}</b><br><br>
                                                                                         To proceed, use the following One-Time Password (OTP).
                                                                                     </p>
                                                                                     <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
