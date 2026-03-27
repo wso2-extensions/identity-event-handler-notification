@@ -24413,7 +24413,7 @@
         </html>]]></body>
     </configuration>
     <configuration type="WorkflowApproverNotification" display="WorkflowApproverNotification" locale="en_US" emailContentType="text/html">
-        <subject>Action Required: Approve workflow request {{workflowId}}</subject>
+        <subject>Action Required: A request needs your review</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -24727,7 +24727,7 @@
                                                         <tr>
                                                             <td class="wso2_orange preheaderContent"
                                                                 style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
-                                                                valign="top" align="left">A workflow request requires your approval. Request ID: {{workflowId}}.</td>
+                                                                valign="top" align="left">A new request is awaiting your review. Request ID: {{workflowRequestId}}.</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -24780,7 +24780,7 @@
                                                                                         Hi {{approverName}},</p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
-                                                                                        A new workflow request requires your approval.</p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 14px;text-align: left;"><span style="color:#6b7280;">Organization:</span> <b>{{organization-name}}</b><br/><span style="color:#6b7280;">Request ID:</span> <b>{{workflowId}}</b><br/><span style="color:#6b7280;">Request Type:</span> <b>{{workflowType}}</b><br/><span style="color:#6b7280;">Requested By:</span> <b>{{initiatorName}}</b><br/></p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">Please click the following button to review and take action:</p>
+                                                                                        A new request is awaiting your review.</p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 14px;text-align: left;"><span style="color:#6b7280;">Organization:</span> <b>{{organization-name}}</b><br/><span style="color:#6b7280;">Request ID:</span> <b>{{workflowRequestId}}</b><br/><span style="color:#6b7280;">Request Type:</span> <b>{{workflowType}}</b><br/><span style="color:#6b7280;">Requested By:</span> <b>{{initiatorName}}</b><br/></p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">Please click the following button to review and take action:</p>
                                                                                     <table align="center" cellpadding="0"
                                                                                         cellspacing="0" border="0" width="100%"
                                                                                         style="vertical-align:top;border-collapse:collapse;line-height:inherit;background-color:{{organization.theme.background.color}};">
@@ -24864,7 +24864,7 @@
             </html>]]></body>
     </configuration>
     <configuration type="WorkflowInitiatorNotification" display="WorkflowInitiatorNotification" locale="en_US" emailContentType="text/html">
-        <subject>Workflow request {{workflowId}} {{decision}}</subject>
+        <subject>Your request has been {{decision}}</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -25178,7 +25178,7 @@
                                                         <tr>
                                                             <td class="wso2_orange preheaderContent"
                                                                 style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
-                                                                valign="top" align="left">Your workflow request has been updated. Request ID: {{workflowId}}.</td>
+                                                                valign="top" align="left">Your request has been {{decision}}. Request ID: {{workflowRequestId}}.</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -25231,7 +25231,7 @@
                                                                                         Hi {{initiatorName}},</p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 0;text-align: left;">
-                                                                                        Your workflow request has been updated.</p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 14px;text-align: left;"><span style="color:#6b7280;">Organization:</span> <b>{{organization-name}}</b><br/><span style="color:#6b7280;">Request ID:</span> <b>{{workflowId}}</b><br/><span style="color:#6b7280;">Request Type:</span> <b>{{workflowType}}</b><br/><span style="color:#6b7280;">Decision:</span> <span style="display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f3f4f6; color: #111827;">{{decision}}</span></p>
+                                                                                        Your request has been {{decision}}.</p><p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 14px;text-align: left;"><span style="color:#6b7280;">Organization:</span> <b>{{organization-name}}</b><br/><span style="color:#6b7280;">Request ID:</span> <b>{{workflowRequestId}}</b><br/><span style="color:#6b7280;">Request Type:</span> <b>{{workflowType}}</b><br/><span style="color:#6b7280;">Decision:</span> <span style="display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f3f4f6; color: #111827;">{{decision}}</span></p>
                                                                                     </div>
                                                                                 <div class="v-text-align"
                                                                                     style="color: {{organization.font.color}} !important;; line-height: 140%; text-align: left; word-wrap: break-word;">
