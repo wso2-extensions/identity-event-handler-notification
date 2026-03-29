@@ -191,8 +191,14 @@ public class NotificationSenderManagementConstants {
             ".Authentication.OauthTokenRetrieval.HTTPConnectionPoolSize";
     public static final String TOKEN_RETRIEVAL_MAX_PER_ROUTE = "NotificationChannel.SMS.Custom" +
             ".Authentication.OauthTokenRetrieval.HTTPConnectionMaxPerRoute";
-
-
+    public static final List<String> PROP_NAME_TO_ENCRYPT = Collections.unmodifiableList(
+            Arrays.asList(
+                    PASSWORD,
+                    CLIENT_SECRET,
+                    API_KEY_VALUE,
+                    ACCESS_TOKEN_PROP,
+                    REFRESH_TOKEN_PROP
+            ));
     public static final List<String> INTERNAL_PROPERTIES =
             Collections.unmodifiableList(Arrays.asList(STREAM_NAME, STREAM_VERSION, PUBLISHER_TYPE_PROPERTY));
     public static final List<String> PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG =

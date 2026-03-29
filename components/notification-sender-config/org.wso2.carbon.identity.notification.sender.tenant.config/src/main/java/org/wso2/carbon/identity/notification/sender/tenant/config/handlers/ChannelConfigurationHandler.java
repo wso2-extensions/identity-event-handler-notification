@@ -149,8 +149,21 @@ public abstract class ChannelConfigurationHandler {
      * @param resource SMS sender resource object.
      * @return SMS sender response.
      */
+    @Deprecated
     protected SMSSenderDTO buildSmsSenderFromResource(Resource resource) {
 
         return NotificationSenderUtils.buildSmsSenderFromResource(resource);
+    }
+
+    /**
+     * Build an SMS sender response from SMS sender's resource object with credential being encrypted.
+     *
+     * @param resource SMS sender resource object.
+     * @return SMS sender response.
+     */
+    protected SMSSenderDTO buildSmsSenderFromResourceWithEncryptedCred(Resource resource)
+            throws NotificationSenderManagementServerException {
+
+        return NotificationSenderUtils.buildSmsSenderFromResourceWithEncryptedCred(resource);
     }
 }
