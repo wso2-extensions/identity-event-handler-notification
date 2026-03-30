@@ -24421,7 +24421,7 @@
             <head>
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-                <title>Workflow Approval Required</title>
+                <title>Review Required</title>
 
                 <!-- [if mso]>
                 <style type="text/css">
@@ -24757,7 +24757,7 @@
                                                                 valign="top" align="left">
                                                                 <h1
                                                                     style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 36px;font-weight: bold;line-height: 42px;color: {{organization.color.primary}};text-align: left;">
-                                                                    Approval Required
+                                                                    Review Required
                                                                 </h1>
                                                             </td>
                                                         </tr>
