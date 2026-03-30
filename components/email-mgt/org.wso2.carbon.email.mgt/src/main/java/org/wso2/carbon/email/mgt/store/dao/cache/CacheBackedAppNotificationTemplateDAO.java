@@ -86,7 +86,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
 
         appNotificationTemplate =
                 super.getNotificationTemplate(locale, templateType, channelName, applicationUuid, tenantId);
-        appNotificationTemplateCache.addToCache(key, appNotificationTemplate, tenantId);
+        appNotificationTemplateCache.addToCacheOnRead(key, appNotificationTemplate, tenantId);
 
         return appNotificationTemplate;
     }
@@ -141,7 +141,7 @@ public class CacheBackedAppNotificationTemplateDAO extends AppNotificationTempla
         }
 
         notificationTemplates = super.listNotificationTemplates(templateType, channelName, applicationUuid, tenantId);
-        templateListCache.addToCache(key, (ArrayList<NotificationTemplate>) notificationTemplates, tenantId);
+        templateListCache.addToCacheOnRead(key, (ArrayList<NotificationTemplate>) notificationTemplates, tenantId);
 
         return notificationTemplates;
     }

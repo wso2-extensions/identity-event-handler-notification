@@ -83,7 +83,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         }
 
         templateTypeDisplayName = super.getNotificationTemplateType(type, channelName, tenantId);
-        notificationTypeCache.addToCache(cacheKey, templateTypeDisplayName, tenantId);
+        notificationTypeCache.addToCacheOnRead(cacheKey, templateTypeDisplayName, tenantId);
 
         return templateTypeDisplayName;
     }
@@ -108,7 +108,7 @@ public class CacheBackedNotificationTypeDAO extends NotificationTypeDAO {
         }
 
         templateTypes = super.listNotificationTemplateTypes(channelName, tenantId);
-        notificationTypeListCache.addToCache(channelName, (ArrayList<String>) templateTypes, tenantId);
+        notificationTypeListCache.addToCacheOnRead(channelName, (ArrayList<String>) templateTypes, tenantId);
 
         return templateTypes;
     }
