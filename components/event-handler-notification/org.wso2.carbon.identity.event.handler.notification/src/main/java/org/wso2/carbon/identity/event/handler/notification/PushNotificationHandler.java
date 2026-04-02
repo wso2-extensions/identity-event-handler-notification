@@ -266,13 +266,9 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             placeholderValues.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
         }
 
-        /*
-         * If the tenant domain is different from the organization name, then it is an organization user. Hence,
-         * the organization ID is the tenant domain.
-         */
         String organizationId = null;
-        if (!tenantDomain.equals(organizationName)) {
-            organizationId = tenantDomain;
+        if (NotificationUtil.isOrganization(tenantDomain)) {
+            organizationId = NotificationUtil.getOrganizationUUID(tenantDomain);
         } else {
             // If tenant user, organizationName is null.
             organizationName = null;
