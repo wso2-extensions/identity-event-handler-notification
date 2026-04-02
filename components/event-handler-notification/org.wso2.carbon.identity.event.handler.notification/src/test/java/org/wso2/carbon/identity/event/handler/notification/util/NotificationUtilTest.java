@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2022-2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -43,13 +43,20 @@ import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.internal.component.IdentityCoreServiceComponent;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.organization.management.service.util.Utils;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -129,6 +136,9 @@ public class NotificationUtilTest {
     private static final String SAMPLE_ORGANIZATION_NAME = "OrganizationA";
     private static final String SAMPLE_LOCALE = "fr-FR";
     private static final String SAMPLE_EMAIL_BODY = "SampleEmailBody";
+    private static final String SAMPLE_TENANT_DOMAIN = "sample.com";
+    private static final String SAMPLE_ORG_UUID = "673b507c-6e29-40e1-8e87-0b24e9a97e12";
+    private static final int SAMPLE_TENANT_ID = 5;
 
     private static final String ACCOUNT_RECOVERY_ENDPOINT_URL = "https://example.com/account/recovery";
     private static final String AUTHENTICATION_ENDPOINT_URL = "https://example.com/authentication";
@@ -520,5 +530,108 @@ public class NotificationUtilTest {
         carbonUtils.when(() -> CarbonUtils.getTransportProxyPort(axisConfiguration, null)).thenReturn(-1);
         carbonUtils.when(() -> CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
         carbonUtils.when(CarbonUtils::getManagementTransport).thenReturn(DUMMY_PROTOCOL);
+    }
+
+    @DataProvider(name = "isOrganizationDataProvider")
+    public Object[][] isOrganizationDataProvider() {
+
+        return new Object[][] {
+                {true},
+                {false}
+        };
+    }
+
+    @Test(dataProvider = "isOrganizationDataProvider")
+    public void testIsOrganization(boolean expected) throws IdentityEventException {
+
+        try (MockedStatic<OrganizationManagementUtil> mockedOrgManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            mockedOrgManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(SAMPLE_TENANT_DOMAIN))
+                    .thenReturn(expected);
+
+            boolean result = NotificationUtil.isOrganization(SAMPLE_TENANT_DOMAIN);
+            assertEquals(result, expected);
+        }
+    }
+
+    @Test(expectedExceptions = IdentityEventException.class)
+    public void testIsOrganizationThrowsException() throws IdentityEventException {
+
+        try (MockedStatic<OrganizationManagementUtil> mockedOrgManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            mockedOrgManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(SAMPLE_TENANT_DOMAIN))
+                    .thenThrow(new OrganizationManagementException("Organization management error"));
+
+            NotificationUtil.isOrganization(SAMPLE_TENANT_DOMAIN);
+        }
+    }
+
+    @DataProvider(name = "getOrganizationUUIDDataProvider")
+    public Object[][] getOrganizationUUIDDataProvider() {
+
+        return new Object[][] {
+                // {tenantExists, associatedOrgUUID, expectedResult}
+                {true, SAMPLE_ORG_UUID, SAMPLE_ORG_UUID},
+                {false, null, null},
+                {true, null, null}
+        };
+    }
+
+    @Test(dataProvider = "getOrganizationUUIDDataProvider")
+    public void testGetOrganizationUUID(boolean tenantExists, String associatedOrgUUID, String expectedResult)
+            throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class);
+             MockedStatic<IdentityTenantUtil> mockedIdentityTenantUtil =
+                     mockStatic(IdentityTenantUtil.class)) {
+
+            NotificationHandlerDataHolder mockDataHolderInstance = mock(NotificationHandlerDataHolder.class);
+            RealmService mockRealmService = mock(RealmService.class);
+            TenantManager mockTenantManager = mock(TenantManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolderInstance);
+            when(mockDataHolderInstance.getRealmService()).thenReturn(mockRealmService);
+            mockedIdentityTenantUtil.when(() -> IdentityTenantUtil.getTenantId(SAMPLE_TENANT_DOMAIN))
+                    .thenReturn(SAMPLE_TENANT_ID);
+            when(mockRealmService.getTenantManager()).thenReturn(mockTenantManager);
+
+            if (tenantExists) {
+                Tenant mockTenant = mock(Tenant.class);
+                when(mockTenant.getAssociatedOrganizationUUID()).thenReturn(associatedOrgUUID);
+                when(mockTenantManager.getTenant(SAMPLE_TENANT_ID)).thenReturn(mockTenant);
+            } else {
+                when(mockTenantManager.getTenant(SAMPLE_TENANT_ID)).thenReturn(null);
+            }
+
+            String result = NotificationUtil.getOrganizationUUID(SAMPLE_TENANT_DOMAIN);
+            assertEquals(result, expectedResult);
+        }
+    }
+
+    @Test(expectedExceptions = IdentityEventException.class)
+    public void testGetOrganizationUUIDThrowsException() throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class);
+             MockedStatic<IdentityTenantUtil> mockedIdentityTenantUtil =
+                     mockStatic(IdentityTenantUtil.class)) {
+
+            NotificationHandlerDataHolder mockDataHolderInstance = mock(NotificationHandlerDataHolder.class);
+            RealmService mockRealmService = mock(RealmService.class);
+            TenantManager mockTenantManager = mock(TenantManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolderInstance);
+            when(mockDataHolderInstance.getRealmService()).thenReturn(mockRealmService);
+            mockedIdentityTenantUtil.when(() -> IdentityTenantUtil.getTenantId(SAMPLE_TENANT_DOMAIN))
+                    .thenReturn(SAMPLE_TENANT_ID);
+            when(mockRealmService.getTenantManager()).thenReturn(mockTenantManager);
+            when(mockTenantManager.getTenant(SAMPLE_TENANT_ID))
+                    .thenThrow(new UserStoreException("User store error"));
+
+            NotificationUtil.getOrganizationUUID(SAMPLE_TENANT_DOMAIN);
+        }
     }
 }

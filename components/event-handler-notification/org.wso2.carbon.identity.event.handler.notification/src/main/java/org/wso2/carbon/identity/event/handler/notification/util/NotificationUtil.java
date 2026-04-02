@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2026, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -867,6 +867,46 @@ public class NotificationUtil {
             throw new IdentityEventException(e.getMessage(), e);
         }
         return organizationName;
+    }
+
+    /**
+     * Check whether the given tenant domain belongs to an organization.
+     *
+     * @param tenetDomain Tenant domain.
+     * @return true if the tenant domain belongs to an organization, false otherwise.
+     * @throws IdentityEventException Error while checking whether the tenant domain belongs to an organization.
+     */
+    public static boolean isOrganization(String tenetDomain) throws IdentityEventException {
+
+        try {
+            return OrganizationManagementUtil.isOrganization(tenetDomain);
+        } catch (OrganizationManagementException e) {
+            throw new IdentityEventException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get the organization UUID for the given tenant domain.
+     *
+     * @param tenantDomain Tenant domain.
+     * @return Organization UUID for the given tenant domain, or null if the tenant domain does not belong to an organization.
+     * @throws IdentityEventException Error while retrieving the organization UUID for the given tenant domain.
+     */
+    public static String getOrganizationUUID(String tenantDomain) throws IdentityEventException {
+
+        String organizationUUID = null;
+        try {
+            RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
+            int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+            Tenant tenant = realmService.getTenantManager().getTenant(tenantId);
+            if (tenant == null) {
+                return null;
+            }
+            organizationUUID = tenant.getAssociatedOrganizationUUID();
+        } catch (UserStoreException e) {
+            throw new IdentityEventException(e.getMessage(), e);
+        }
+        return organizationUUID;
     }
 
     /**
