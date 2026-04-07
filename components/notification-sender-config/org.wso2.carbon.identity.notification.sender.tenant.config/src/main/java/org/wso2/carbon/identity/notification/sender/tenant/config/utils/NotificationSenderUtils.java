@@ -263,8 +263,7 @@ public class NotificationSenderUtils {
         try {
             addToElementToSMSEventPublisher(smsSender, properties, document, root);
         } catch (NotificationSenderManagementServerException e) {
-            throw new ParserConfigurationException("Error while encrypting credentials for notification sender: " +
-                    e.getMessage());
+            throw new TransformerException("Error while encrypting credentials for notification sender.", e);
         }
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
