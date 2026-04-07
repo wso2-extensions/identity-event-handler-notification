@@ -21,14 +21,17 @@ package org.wso2.carbon.identity.event.handler.notification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventException;
@@ -755,6 +758,159 @@ public class PushNotificationHandlerTest {
                 any(PushNotificationData.class),
                 any(PushSenderData.class),
                 eq("carbon.super"));
+    }
+
+    @Test
+    public void testHandleEventOrganizationTenantWithAccessingOrgId() throws Exception {
+
+        String orgTenantDomain = "org-tenant";
+        String orgId = "org-uuid-123";
+        String primaryOrgTenantDomain = "primary-tenant";
+
+        Event event = createPushNotificationEvent("FCM", orgTenantDomain);
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder = mockStatic(
+                NotificationHandlerDataHolder.class);
+             MockedStatic<NotificationUtil> mockedNotificationUtil = mockStatic(NotificationUtil.class);
+             MockedStatic<PrivilegedCarbonContext> mockedPrivilegedCarbonContext =
+                     mockStatic(PrivilegedCarbonContext.class)) {
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance)
+                    .thenReturn(notificationHandlerDataHolder);
+            when(notificationHandlerDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+            when(organizationManager.resolveOrganizationId(orgTenantDomain)).thenReturn(orgId);
+
+            mockedNotificationUtil.when(() -> NotificationUtil.resolveHumanReadableOrganizationName(anyString()))
+                    .thenReturn(SAMPLE_ORGANIZATION_NAME);
+            mockedNotificationUtil.when(() -> NotificationUtil.isOrganization(orgTenantDomain))
+                    .thenReturn(true);
+            mockedNotificationUtil.when(() -> NotificationUtil.getPrimaryTenantDomain(orgId))
+                    .thenReturn(primaryOrgTenantDomain);
+
+            PrivilegedCarbonContext mockPrivilegedContext = mock(PrivilegedCarbonContext.class);
+            mockedPrivilegedCarbonContext.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                    .thenReturn(mockPrivilegedContext);
+            when(mockPrivilegedContext.getAccessingOrganizationId()).thenReturn("accessing-org-id");
+
+            when(notificationHandlerDataHolder.getNotificationSenderManagementService())
+                    .thenReturn(notificationSenderManagementService);
+            PushSenderDTO sender = new PushSenderDTO();
+            sender.setName("PushPublisher");
+            sender.setProvider("FCM");
+            sender.setProviderId("fcm-provider-id");
+            List<PushSenderDTO> pushSenders = new ArrayList<>();
+            pushSenders.add(sender);
+            when(notificationSenderManagementService.getPushSenders(true)).thenReturn(pushSenders);
+            when(notificationHandlerDataHolder.getPushProvider("FCM")).thenReturn(pushProvider);
+
+            pushNotificationHandler.handleEvent(event);
+
+            ArgumentCaptor<PushNotificationData> captor = ArgumentCaptor.forClass(PushNotificationData.class);
+            verify(pushProvider).sendNotification(captor.capture(), any(PushSenderData.class),
+                    eq(orgTenantDomain));
+            PushNotificationData data = captor.getValue();
+            Assert.assertEquals(data.getOrganizationId(), orgId);
+            Assert.assertEquals(data.getPrimaryTenantDomain(), primaryOrgTenantDomain);
+            Assert.assertEquals(data.getOrganizationName(), SAMPLE_ORGANIZATION_NAME);
+        }
+    }
+
+    @Test
+    public void testHandleEventOrganizationTenantWithoutAccessingOrgId() throws Exception {
+
+        String orgTenantDomain = "org-tenant";
+        String orgId = "org-uuid-123";
+
+        Event event = createPushNotificationEvent("FCM", orgTenantDomain);
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder = mockStatic(
+                NotificationHandlerDataHolder.class);
+             MockedStatic<NotificationUtil> mockedNotificationUtil = mockStatic(NotificationUtil.class);
+             MockedStatic<PrivilegedCarbonContext> mockedPrivilegedCarbonContext =
+                     mockStatic(PrivilegedCarbonContext.class)) {
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance)
+                    .thenReturn(notificationHandlerDataHolder);
+            when(notificationHandlerDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+            when(organizationManager.resolveOrganizationId(orgTenantDomain)).thenReturn(orgId);
+
+            mockedNotificationUtil.when(() -> NotificationUtil.resolveHumanReadableOrganizationName(anyString()))
+                    .thenReturn(SAMPLE_ORGANIZATION_NAME);
+            mockedNotificationUtil.when(() -> NotificationUtil.isOrganization(orgTenantDomain))
+                    .thenReturn(true);
+
+            PrivilegedCarbonContext mockPrivilegedContext = mock(PrivilegedCarbonContext.class);
+            mockedPrivilegedCarbonContext.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                    .thenReturn(mockPrivilegedContext);
+            when(mockPrivilegedContext.getAccessingOrganizationId()).thenReturn(null);
+
+            when(notificationHandlerDataHolder.getNotificationSenderManagementService())
+                    .thenReturn(notificationSenderManagementService);
+            PushSenderDTO sender = new PushSenderDTO();
+            sender.setName("PushPublisher");
+            sender.setProvider("FCM");
+            sender.setProviderId("fcm-provider-id");
+            List<PushSenderDTO> pushSenders = new ArrayList<>();
+            pushSenders.add(sender);
+            when(notificationSenderManagementService.getPushSenders(true)).thenReturn(pushSenders);
+            when(notificationHandlerDataHolder.getPushProvider("FCM")).thenReturn(pushProvider);
+
+            pushNotificationHandler.handleEvent(event);
+
+            ArgumentCaptor<PushNotificationData> captor = ArgumentCaptor.forClass(PushNotificationData.class);
+            verify(pushProvider).sendNotification(captor.capture(), any(PushSenderData.class),
+                    eq(orgTenantDomain));
+            PushNotificationData data = captor.getValue();
+            Assert.assertEquals(data.getOrganizationId(), orgId);
+            Assert.assertNull(data.getPrimaryTenantDomain());
+            Assert.assertEquals(data.getOrganizationName(), SAMPLE_ORGANIZATION_NAME);
+        }
+    }
+
+    /**
+     * Test that when the tenant domain is not an organization, the built PushNotificationData has
+     * null organizationId, organizationName, and primaryTenantDomain.
+     */
+    @Test
+    public void testHandleEventNonOrganizationTenant() throws Exception {
+
+        Event event = createPushNotificationEvent("FCM", "carbon.super");
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder = mockStatic(
+                NotificationHandlerDataHolder.class);
+             MockedStatic<NotificationUtil> mockedNotificationUtil = mockStatic(NotificationUtil.class)) {
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance)
+                    .thenReturn(notificationHandlerDataHolder);
+            when(notificationHandlerDataHolder.getOrganizationManager()).thenReturn(organizationManager);
+            when(organizationManager.resolveOrganizationId(anyString())).thenReturn("orgId");
+
+            mockedNotificationUtil.when(() -> NotificationUtil.resolveHumanReadableOrganizationName(anyString()))
+                    .thenReturn(SAMPLE_ORGANIZATION_NAME);
+            mockedNotificationUtil.when(() -> NotificationUtil.isOrganization("carbon.super"))
+                    .thenReturn(false);
+
+            when(notificationHandlerDataHolder.getNotificationSenderManagementService())
+                    .thenReturn(notificationSenderManagementService);
+            PushSenderDTO sender = new PushSenderDTO();
+            sender.setName("PushPublisher");
+            sender.setProvider("FCM");
+            sender.setProviderId("fcm-provider-id");
+            List<PushSenderDTO> pushSenders = new ArrayList<>();
+            pushSenders.add(sender);
+            when(notificationSenderManagementService.getPushSenders(true)).thenReturn(pushSenders);
+            when(notificationHandlerDataHolder.getPushProvider("FCM")).thenReturn(pushProvider);
+
+            pushNotificationHandler.handleEvent(event);
+
+            ArgumentCaptor<PushNotificationData> captor = ArgumentCaptor.forClass(PushNotificationData.class);
+            verify(pushProvider).sendNotification(captor.capture(), any(PushSenderData.class),
+                    eq("carbon.super"));
+            PushNotificationData data = captor.getValue();
+            Assert.assertNull(data.getOrganizationId());
+            Assert.assertNull(data.getOrganizationName());
+            Assert.assertNull(data.getPrimaryTenantDomain());
+        }
     }
 
     // ==================== Helper Methods ====================
