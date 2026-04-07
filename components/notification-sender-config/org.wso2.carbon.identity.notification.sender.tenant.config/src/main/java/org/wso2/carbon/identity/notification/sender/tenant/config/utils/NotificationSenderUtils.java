@@ -171,7 +171,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 public class NotificationSenderUtils {
 
     private static final Log LOG = LogFactory.getLog(NotificationSenderUtils.class);
-    private static final String IS_ENCRYPTED = "auth.isEncrypted";
 
     /**
      * Generate EmailPublisher.xml input stream.
@@ -287,7 +286,6 @@ public class NotificationSenderUtils {
             for (Map.Entry<String, String> entry : authentication.getInternalProperties().entrySet()) {
                 mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + entry.getKey(), encryptedValue(entry, authentication));
             }
-            authentication.addInternalProperty(IS_ENCRYPTED, "true");
         }
     }
 
@@ -762,9 +760,8 @@ public class NotificationSenderUtils {
             return;
         }
 
-        boolean isEncrypted = StringUtils.equalsIgnoreCase(internalAuthProperties.get(IS_ENCRYPTED), "true");
         for (Map.Entry<String, String> property : authProperties.entrySet()) {
-            if (PROP_NAME_TO_ENCRYPT.contains(property.getKey()) && isEncrypted) {
+            if (PROP_NAME_TO_ENCRYPT.contains(property.getKey())) {
                 authProperties.put(property.getKey(), decryptCredential(SMS_PROVIDER, authType, property.getKey()));
             }
         }
