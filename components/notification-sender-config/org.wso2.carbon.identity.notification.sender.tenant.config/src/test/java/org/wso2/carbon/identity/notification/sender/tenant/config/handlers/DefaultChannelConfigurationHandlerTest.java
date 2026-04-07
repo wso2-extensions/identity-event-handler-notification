@@ -141,7 +141,8 @@ public class DefaultChannelConfigurationHandlerTest {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
+        notificationSenderUtilsStatic.when(
+                () -> NotificationSenderUtils.buildSmsSenderFromResourceWithEncryptedCred(any()))
                 .thenReturn(smsSenderDTO);
 
         SMSSenderDTO response = defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO);
@@ -403,7 +404,8 @@ public class DefaultChannelConfigurationHandlerTest {
         doNothing().when(resourceManager).addEventPublisherConfiguration(any(ResourceFile.class));
         when(clusteringAgent.sendMessage(any(ClusteringMessage.class), anyBoolean())).thenReturn(new ArrayList<>());
 
-        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.buildSmsSenderFromResource(any()))
+        notificationSenderUtilsStatic.when(
+                () -> NotificationSenderUtils.buildSmsSenderFromResourceWithEncryptedCred(any()))
                 .thenReturn(smsSenderDTORequestObject);
 
         SMSSenderDTO smsSenderDTOResponseObject = defaultChannelConfigurationHandler

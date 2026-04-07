@@ -261,7 +261,8 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(SENDER, smsSender.getSender());
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
-        NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(
+                smsSenderAttributes, smsSender.getAuthentication());
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
                         .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
