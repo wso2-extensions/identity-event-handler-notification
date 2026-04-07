@@ -611,15 +611,4 @@ public class NotificationUtilTest {
             NotificationUtil.getPrimaryTenantDomain(SAMPLE_ORG_UUID);
         }
     }
-
-    @DataProvider(name = "getOrganizationUUIDDataProvider")
-    public Object[][] getOrganizationUUIDDataProvider() {
-
-        return new Object[][] {
-                // {tenantExists, associatedOrgUUID, expectedResult}
-                {true, SAMPLE_ORG_UUID, SAMPLE_ORG_UUID},
-                {false, null, null},
-                {true, null, null}
-        };
-    }
 }
