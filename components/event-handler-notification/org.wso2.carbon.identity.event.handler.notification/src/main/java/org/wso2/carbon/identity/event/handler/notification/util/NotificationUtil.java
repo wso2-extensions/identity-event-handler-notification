@@ -872,14 +872,14 @@ public class NotificationUtil {
     /**
      * Check whether the given tenant domain belongs to an organization.
      *
-     * @param tenetDomain Tenant domain.
+     * @param tenantDomain Tenant domain.
      * @return true if the tenant domain belongs to an organization, false otherwise.
      * @throws IdentityEventException Error while checking whether the tenant domain belongs to an organization.
      */
-    public static boolean isOrganization(String tenetDomain) throws IdentityEventException {
+    public static boolean isOrganization(String tenantDomain) throws IdentityEventException {
 
         try {
-            return OrganizationManagementUtil.isOrganization(tenetDomain);
+            return OrganizationManagementUtil.isOrganization(tenantDomain);
         } catch (OrganizationManagementException e) {
             throw new IdentityEventException(e.getMessage(), e);
         }
