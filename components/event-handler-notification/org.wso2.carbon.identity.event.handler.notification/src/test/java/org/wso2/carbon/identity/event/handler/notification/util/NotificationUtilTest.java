@@ -43,20 +43,17 @@ import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.internal.component.IdentityCoreServiceComponent;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.organization.management.service.util.Utils;
-import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -568,6 +565,53 @@ public class NotificationUtilTest {
         }
     }
 
+    /**
+     * Test getPrimaryTenantDomain returns the correct tenant domain when both
+     * getPrimaryOrganizationId and resolveTenantDomain succeed.
+     */
+    @Test
+    public void testGetPrimaryTenantDomain() throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class)) {
+
+            NotificationHandlerDataHolder mockDataHolder = mock(NotificationHandlerDataHolder.class);
+            OrganizationManager mockOrgManager = mock(OrganizationManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolder);
+            when(mockDataHolder.getOrganizationManager()).thenReturn(mockOrgManager);
+            when(mockOrgManager.getPrimaryOrganizationId(SAMPLE_ORG_UUID)).thenReturn("primary-org-id");
+            when(mockOrgManager.resolveTenantDomain("primary-org-id")).thenReturn(SAMPLE_TENANT_DOMAIN);
+
+            String result = NotificationUtil.getPrimaryTenantDomain(SAMPLE_ORG_UUID);
+            assertEquals(result, SAMPLE_TENANT_DOMAIN);
+        }
+    }
+
+    /**
+     * Test getPrimaryTenantDomain throws IdentityEventException when
+     * resolveTenantDomain fails with OrganizationManagementException.
+     */
+    @Test(expectedExceptions = IdentityEventException.class)
+    public void testGetPrimaryTenantDomainThrowsWhenResolveTenantDomainFails()
+            throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class)) {
+
+            NotificationHandlerDataHolder mockDataHolder = mock(NotificationHandlerDataHolder.class);
+            OrganizationManager mockOrgManager = mock(OrganizationManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolder);
+            when(mockDataHolder.getOrganizationManager()).thenReturn(mockOrgManager);
+            when(mockOrgManager.getPrimaryOrganizationId(SAMPLE_ORG_UUID)).thenReturn("primary-org-id");
+            when(mockOrgManager.resolveTenantDomain("primary-org-id"))
+                    .thenThrow(new OrganizationManagementServerException("Error resolving tenant domain"));
+
+            NotificationUtil.getPrimaryTenantDomain(SAMPLE_ORG_UUID);
+        }
+    }
+
     @DataProvider(name = "getOrganizationUUIDDataProvider")
     public Object[][] getOrganizationUUIDDataProvider() {
 
@@ -577,61 +621,5 @@ public class NotificationUtilTest {
                 {false, null, null},
                 {true, null, null}
         };
-    }
-
-    @Test(dataProvider = "getOrganizationUUIDDataProvider")
-    public void testGetOrganizationUUID(boolean tenantExists, String associatedOrgUUID, String expectedResult)
-            throws Exception {
-
-        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
-                     mockStatic(NotificationHandlerDataHolder.class);
-             MockedStatic<IdentityTenantUtil> mockedIdentityTenantUtil =
-                     mockStatic(IdentityTenantUtil.class)) {
-
-            NotificationHandlerDataHolder mockDataHolderInstance = mock(NotificationHandlerDataHolder.class);
-            RealmService mockRealmService = mock(RealmService.class);
-            TenantManager mockTenantManager = mock(TenantManager.class);
-
-            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolderInstance);
-            when(mockDataHolderInstance.getRealmService()).thenReturn(mockRealmService);
-            mockedIdentityTenantUtil.when(() -> IdentityTenantUtil.getTenantId(SAMPLE_TENANT_DOMAIN))
-                    .thenReturn(SAMPLE_TENANT_ID);
-            when(mockRealmService.getTenantManager()).thenReturn(mockTenantManager);
-
-            if (tenantExists) {
-                Tenant mockTenant = mock(Tenant.class);
-                when(mockTenant.getAssociatedOrganizationUUID()).thenReturn(associatedOrgUUID);
-                when(mockTenantManager.getTenant(SAMPLE_TENANT_ID)).thenReturn(mockTenant);
-            } else {
-                when(mockTenantManager.getTenant(SAMPLE_TENANT_ID)).thenReturn(null);
-            }
-
-            String result = NotificationUtil.getOrganizationUUID(SAMPLE_TENANT_DOMAIN);
-            assertEquals(result, expectedResult);
-        }
-    }
-
-    @Test(expectedExceptions = IdentityEventException.class)
-    public void testGetOrganizationUUIDThrowsException() throws Exception {
-
-        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
-                     mockStatic(NotificationHandlerDataHolder.class);
-             MockedStatic<IdentityTenantUtil> mockedIdentityTenantUtil =
-                     mockStatic(IdentityTenantUtil.class)) {
-
-            NotificationHandlerDataHolder mockDataHolderInstance = mock(NotificationHandlerDataHolder.class);
-            RealmService mockRealmService = mock(RealmService.class);
-            TenantManager mockTenantManager = mock(TenantManager.class);
-
-            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolderInstance);
-            when(mockDataHolderInstance.getRealmService()).thenReturn(mockRealmService);
-            mockedIdentityTenantUtil.when(() -> IdentityTenantUtil.getTenantId(SAMPLE_TENANT_DOMAIN))
-                    .thenReturn(SAMPLE_TENANT_ID);
-            when(mockRealmService.getTenantManager()).thenReturn(mockTenantManager);
-            when(mockTenantManager.getTenant(SAMPLE_TENANT_ID))
-                    .thenThrow(new UserStoreException("User store error"));
-
-            NotificationUtil.getOrganizationUUID(SAMPLE_TENANT_DOMAIN);
-        }
     }
 }
