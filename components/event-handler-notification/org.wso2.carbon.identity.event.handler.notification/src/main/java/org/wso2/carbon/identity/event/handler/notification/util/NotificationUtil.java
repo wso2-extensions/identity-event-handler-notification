@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2026, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -867,6 +867,41 @@ public class NotificationUtil {
             throw new IdentityEventException(e.getMessage(), e);
         }
         return organizationName;
+    }
+
+    /**
+     * Check whether the given tenant domain belongs to an organization.
+     *
+     * @param tenantDomain Tenant domain.
+     * @return true if the tenant domain belongs to an organization, false otherwise.
+     * @throws IdentityEventException Error while checking whether the tenant domain belongs to an organization.
+     */
+    public static boolean isOrganization(String tenantDomain) throws IdentityEventException {
+
+        try {
+            return OrganizationManagementUtil.isOrganization(tenantDomain);
+        } catch (OrganizationManagementException e) {
+            throw new IdentityEventException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get the primary tenant domain of the given organization ID.
+     *
+     * @param organizationId Organization ID.
+     * @return Primary tenant domain.
+     * @throws IdentityEventException If an error occurred while getting the primary tenant domain.
+     */
+    public static String getPrimaryTenantDomain(String organizationId) throws IdentityEventException {
+
+        try {
+            OrganizationManager organizationManager = NotificationHandlerDataHolder.getInstance()
+                    .getOrganizationManager();
+            String primaryOrgId = organizationManager.getPrimaryOrganizationId(organizationId);
+            return organizationManager.resolveTenantDomain(primaryOrgId);
+        } catch (OrganizationManagementException e) {
+            throw new IdentityEventException(e.getMessage(), e);
+        }
     }
 
     /**
