@@ -886,27 +886,22 @@ public class NotificationUtil {
     }
 
     /**
-     * Get the organization UUID for the given tenant domain.
+     * Get the primary tenant domain of the given organization ID.
      *
-     * @param tenantDomain Tenant domain.
-     * @return Organization UUID for the given tenant domain, or null if the tenant domain does not belong to an organization.
-     * @throws IdentityEventException Error while retrieving the organization UUID for the given tenant domain.
+     * @param organizationId Organization ID.
+     * @return Primary tenant domain.
+     * @throws IdentityEventException If an error occurred while getting the primary tenant domain.
      */
-    public static String getOrganizationUUID(String tenantDomain) throws IdentityEventException {
+    public static String getPrimaryTenantDomain(String organizationId) throws IdentityEventException {
 
-        String organizationUUID = null;
         try {
-            RealmService realmService = NotificationHandlerDataHolder.getInstance().getRealmService();
-            int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-            Tenant tenant = realmService.getTenantManager().getTenant(tenantId);
-            if (tenant == null) {
-                return null;
-            }
-            organizationUUID = tenant.getAssociatedOrganizationUUID();
-        } catch (UserStoreException e) {
+            OrganizationManager organizationManager = NotificationHandlerDataHolder.getInstance()
+                    .getOrganizationManager();
+            String primaryOrgId = organizationManager.getPrimaryOrganizationId(organizationId);
+            return organizationManager.resolveTenantDomain(primaryOrgId);
+        } catch (OrganizationManagementException e) {
             throw new IdentityEventException(e.getMessage(), e);
         }
-        return organizationUUID;
     }
 
     /**
