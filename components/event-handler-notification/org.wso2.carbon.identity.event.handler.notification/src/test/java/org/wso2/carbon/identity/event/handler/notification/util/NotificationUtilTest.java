@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2022-2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -48,6 +48,10 @@ import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
+import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
 import org.wso2.carbon.identity.organization.management.service.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -129,6 +133,9 @@ public class NotificationUtilTest {
     private static final String SAMPLE_ORGANIZATION_NAME = "OrganizationA";
     private static final String SAMPLE_LOCALE = "fr-FR";
     private static final String SAMPLE_EMAIL_BODY = "SampleEmailBody";
+    private static final String SAMPLE_TENANT_DOMAIN = "sample.com";
+    private static final String SAMPLE_ORG_UUID = "673b507c-6e29-40e1-8e87-0b24e9a97e12";
+    private static final int SAMPLE_TENANT_ID = 5;
 
     private static final String ACCOUNT_RECOVERY_ENDPOINT_URL = "https://example.com/account/recovery";
     private static final String AUTHENTICATION_ENDPOINT_URL = "https://example.com/authentication";
@@ -520,5 +527,88 @@ public class NotificationUtilTest {
         carbonUtils.when(() -> CarbonUtils.getTransportProxyPort(axisConfiguration, null)).thenReturn(-1);
         carbonUtils.when(() -> CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
         carbonUtils.when(CarbonUtils::getManagementTransport).thenReturn(DUMMY_PROTOCOL);
+    }
+
+    @DataProvider(name = "isOrganizationDataProvider")
+    public Object[][] isOrganizationDataProvider() {
+
+        return new Object[][] {
+                {true},
+                {false}
+        };
+    }
+
+    @Test(dataProvider = "isOrganizationDataProvider")
+    public void testIsOrganization(boolean expected) throws IdentityEventException {
+
+        try (MockedStatic<OrganizationManagementUtil> mockedOrgManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            mockedOrgManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(SAMPLE_TENANT_DOMAIN))
+                    .thenReturn(expected);
+
+            boolean result = NotificationUtil.isOrganization(SAMPLE_TENANT_DOMAIN);
+            assertEquals(result, expected);
+        }
+    }
+
+    @Test(expectedExceptions = IdentityEventException.class)
+    public void testIsOrganizationThrowsException() throws IdentityEventException {
+
+        try (MockedStatic<OrganizationManagementUtil> mockedOrgManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            mockedOrgManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(SAMPLE_TENANT_DOMAIN))
+                    .thenThrow(new OrganizationManagementException("Organization management error"));
+
+            NotificationUtil.isOrganization(SAMPLE_TENANT_DOMAIN);
+        }
+    }
+
+    /**
+     * Test getPrimaryTenantDomain returns the correct tenant domain when both
+     * getPrimaryOrganizationId and resolveTenantDomain succeed.
+     */
+    @Test
+    public void testGetPrimaryTenantDomain() throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class)) {
+
+            NotificationHandlerDataHolder mockDataHolder = mock(NotificationHandlerDataHolder.class);
+            OrganizationManager mockOrgManager = mock(OrganizationManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolder);
+            when(mockDataHolder.getOrganizationManager()).thenReturn(mockOrgManager);
+            when(mockOrgManager.getPrimaryOrganizationId(SAMPLE_ORG_UUID)).thenReturn("primary-org-id");
+            when(mockOrgManager.resolveTenantDomain("primary-org-id")).thenReturn(SAMPLE_TENANT_DOMAIN);
+
+            String result = NotificationUtil.getPrimaryTenantDomain(SAMPLE_ORG_UUID);
+            assertEquals(result, SAMPLE_TENANT_DOMAIN);
+        }
+    }
+
+    /**
+     * Test getPrimaryTenantDomain throws IdentityEventException when
+     * resolveTenantDomain fails with OrganizationManagementException.
+     */
+    @Test(expectedExceptions = IdentityEventException.class)
+    public void testGetPrimaryTenantDomainThrowsWhenResolveTenantDomainFails()
+            throws Exception {
+
+        try (MockedStatic<NotificationHandlerDataHolder> mockedDataHolder =
+                     mockStatic(NotificationHandlerDataHolder.class)) {
+
+            NotificationHandlerDataHolder mockDataHolder = mock(NotificationHandlerDataHolder.class);
+            OrganizationManager mockOrgManager = mock(OrganizationManager.class);
+
+            mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(mockDataHolder);
+            when(mockDataHolder.getOrganizationManager()).thenReturn(mockOrgManager);
+            when(mockOrgManager.getPrimaryOrganizationId(SAMPLE_ORG_UUID)).thenReturn("primary-org-id");
+            when(mockOrgManager.resolveTenantDomain("primary-org-id"))
+                    .thenThrow(new OrganizationManagementServerException("Error resolving tenant domain"));
+
+            NotificationUtil.getPrimaryTenantDomain(SAMPLE_ORG_UUID);
+        }
     }
 }

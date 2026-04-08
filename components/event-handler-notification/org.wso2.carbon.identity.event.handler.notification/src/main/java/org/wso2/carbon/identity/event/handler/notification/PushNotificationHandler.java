@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.event.handler.notification;
 
 import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -266,15 +267,32 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
             placeholderValues.put(ORGANIZATION_NAME_PLACEHOLDER, organizationName);
         }
 
-        /*
-         * If the tenant domain is different from the organization name, then it is an organization user. Hence,
-         * the organization ID is the tenant domain.
-         */
         String organizationId = null;
-        if (!tenantDomain.equals(organizationName)) {
-            organizationId = tenantDomain;
+        String primaryTenantDomain = null;
+
+        if (NotificationUtil.isOrganization(tenantDomain)) {
+            LOG.debug("Tenant domain is an organization.");
+            try {
+                organizationId = NotificationHandlerDataHolder.getInstance()
+                        .getOrganizationManager().resolveOrganizationId(tenantDomain);
+            } catch (OrganizationManagementException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error while resolving organization ID for tenant domain: " + tenantDomain, e);
+                }
+                throw new IdentityEventException(e.getMessage(), e);
+            }
+
+            /* If an accessing organization ID is present, this flow is for a tenant organization path
+             * (/t/{tenant-domain}/o/{org-id}).
+             * Therefore, include the primary tenant domain in the PushNotificationData. */
+            if (StringUtils.isNotEmpty(PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .getAccessingOrganizationId())) {
+                LOG.debug("Adding primary tenant domain to the push notification data.");
+                primaryTenantDomain = NotificationUtil.getPrimaryTenantDomain(organizationId);
+            }
         } else {
             // If tenant user, organizationName is null.
+            LOG.debug("Tenant domain is not an organization.");
             organizationName = null;
         }
 
@@ -289,6 +307,7 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 .setTenantDomain(tenantDomain)
                 .setOrganizationId(organizationId)
                 .setOrganizationName(organizationName)
+                .setPrimaryTenantDomain(primaryTenantDomain)
                 .setUserStoreDomain((String) eventProperties.get(
                         IdentityEventConstants.EventProperty.USER_STORE_DOMAIN))
                 .setApplicationName((String) eventProperties.get(IdentityEventConstants.EventProperty.APPLICATION_NAME))
