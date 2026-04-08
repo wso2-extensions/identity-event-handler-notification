@@ -99,6 +99,8 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FORM;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM;
@@ -126,6 +128,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROCESSING_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROPERTIES_TO_SKIP_AT_HTTP_ADAPTER_CONFIG;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROP_NAME_TO_ENCRYPT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_NAME;
@@ -137,6 +140,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_NOTIFICATION_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_AUTH_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_CLIENT_ID_PROPERTY;
@@ -158,6 +162,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_VALUE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 
 /**
@@ -255,7 +260,11 @@ public class NotificationSenderUtils {
         // Add 'Mapping' element (output mapping details) to event publisher.
         addMappingElementToSMSEventPublisher(smsSender, properties, document, root);
         // Add 'To' element (event adapter details) to event publisher.
-        addToElementToSMSEventPublisher(smsSender, properties, document, root);
+        try {
+            addToElementToSMSEventPublisher(smsSender, properties, document, root);
+        } catch (NotificationSenderManagementServerException e) {
+            throw new TransformerException("Error while encrypting credentials for notification sender.", e);
+        }
         DOMSource xmlSource = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(outputStream);
@@ -270,6 +279,7 @@ public class NotificationSenderUtils {
      * @param authentication Authentication object.
      * @param mapToBeUpdated Map to be updated with authentication properties.
      */
+    @Deprecated
     public static void addAuthenticationProperties(Map<String, String> mapToBeUpdated, Authentication authentication) {
 
         if (authentication != null) {
@@ -281,6 +291,45 @@ public class NotificationSenderUtils {
                     mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey, propValue)
             );
         }
+    }
+
+    /**
+     * Convert AuthProperty list to a map with proper prefixes and encrypt the values of the properties which are
+     * needed to be encrypted.
+     *
+     * @param authentication Authentication object.
+     * @param mapToBeUpdated Map to be updated with authentication properties.
+     */
+    public static void addAuthenticationPropertiesWithEncryption(
+            Map<String, String> mapToBeUpdated, Authentication authentication)
+            throws NotificationSenderManagementServerException {
+
+        if (authentication != null) {
+            mapToBeUpdated.put(AUTH_TYPE_PREFIX, authentication.getType().name());
+            for (Map.Entry<String, String> entry : authentication.getProperties().entrySet()) {
+                mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + entry.getKey(), encryptedValue(entry, authentication));
+            }
+            for (Map.Entry<String, String> entry : authentication.getInternalProperties().entrySet()) {
+                mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + entry.getKey(), encryptedValue(entry, authentication));
+            }
+        }
+    }
+
+    private static String encryptedValue(Map.Entry<String, String> entry, Authentication authentication)
+            throws NotificationSenderManagementServerException {
+
+        String propertyName = entry.getKey();
+        String propertyValue = entry.getValue();
+        if (PROP_NAME_TO_ENCRYPT.contains(propertyName)) {
+            try {
+                propertyValue = encryptCredential(
+                        SMS_PROVIDER, authentication.getType().name(), propertyName, entry.getValue());
+            } catch (SecretManagementException e) {
+                throw new NotificationSenderManagementServerException(
+                        ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS, authentication.getType().name(), e);
+            }
+        }
+        return propertyValue;
     }
 
     private static void addEventPublisherAttributes(EmailSenderDTO emailSender, Document document, Element root) {
@@ -563,7 +612,8 @@ public class NotificationSenderUtils {
     }
 
     private static void addToElementToSMSEventPublisher(SMSSenderDTO smsSender, Map<String, String> properties,
-                                                        Document document, Element root) {
+                                                        Document document, Element root)
+            throws NotificationSenderManagementServerException {
 
         Element to = document.createElement(TO);
         root.appendChild(to);
@@ -578,7 +628,7 @@ public class NotificationSenderUtils {
         } else {
             adapterProperties.put(HTTP_URL_PROPERTY, StringUtils.EMPTY);
         }
-        addAuthenticationProperties(adapterProperties, smsSender.getAuthentication());
+        addAuthenticationPropertiesWithEncryption(adapterProperties, smsSender.getAuthentication());
 
         // Default client method is httpPost. Can be changed by configuring properties.
         adapterProperties.put(CLIENT_HTTP_METHOD_PROPERTY, CONSTANT_HTTP_POST);
@@ -638,7 +688,24 @@ public class NotificationSenderUtils {
      * @param resource SMS sender resource object.
      * @return SMS sender response.
      */
+    @Deprecated
     public static SMSSenderDTO buildSmsSenderFromResource(Resource resource) {
+
+        try {
+            return buildSmsSenderFromResourceWithEncryptedCred(resource);
+        } catch (NotificationSenderManagementServerException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error while decrypting credentials for SMS sender: " + resource.getResourceName() +
+                        ". Returning the SMS sender details without decrypted credentials.", e);
+            }
+            // This exception won't occur as deprecated method is used with no authentication details.
+            return null;
+        }
+
+    }
+
+    public static SMSSenderDTO buildSmsSenderFromResourceWithEncryptedCred(Resource resource)
+            throws NotificationSenderManagementServerException {
 
         SMSSenderDTO.Builder smsSenderBuilder = new SMSSenderDTO.Builder();
         smsSenderBuilder.name(resource.getResourceName());
@@ -649,8 +716,12 @@ public class NotificationSenderUtils {
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .filter(attribute -> attribute.getValue() != null)
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        String authType = null;
+        Map<String, String> authProp = new HashMap<>();
         Map<String, String> internalAuthProp = new HashMap<>();
-        attributesMap.forEach((key, value) -> {
+        for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
             switch (key) {
                 case PROVIDER:
                     smsSenderBuilder.provider(value);
@@ -672,21 +743,26 @@ public class NotificationSenderUtils {
                     break;
                 case AUTH_TYPE_PREFIX:
                     smsSenderBuilder.authType(value);
+                    authType = value;
                     break;
                 default:
                     if (StringUtils.startsWith(key, AUTH_EXTERNAL_PROP_PREFIX)) {
-                        smsSenderBuilder.addAuthProperty(
+                        authProp.put(
                                 StringUtils.removeStart(key, AUTH_EXTERNAL_PROP_PREFIX), value);
                     } else if (StringUtils.startsWith(key, AUTH_INTERNAL_PROP_PREFIX)) {
-                        internalAuthProp.put(StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX), value);
+                        internalAuthProp.put(
+                                StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX), value);
                     } else {
                         smsSenderBuilder.addProperty(key, value);
                     }
                     break;
             }
-        });
+        }
 
         try {
+            decryptSensitiveProperties(authType, authProp);
+            authProp.forEach(smsSenderBuilder::addAuthProperty);
+
             SMSSenderDTO smsSenderDTO = smsSenderBuilder.build();
             internalAuthProp.keySet().forEach(internalAuthProperty ->
                 smsSenderDTO.getAuthentication().addInternalProperty(
@@ -696,6 +772,24 @@ public class NotificationSenderUtils {
         } catch (NotificationSenderManagementException e) {
             // This exception won't occur as we are not setting any invalid values.
             return null;
+        } catch (SecretManagementException e) {
+            throw new NotificationSenderManagementServerException(
+                    ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS, resource.getResourceName(), e);
+        }
+    }
+
+    private static void decryptSensitiveProperties(String authType, Map<String, String> authProperties)
+            throws SecretManagementException {
+
+        if (authType == null) {
+            return;
+        }
+
+        Map<String, String> authPropertiesToDecrypt = new HashMap<>(authProperties);
+        for (Map.Entry<String, String> property : authPropertiesToDecrypt.entrySet()) {
+            if (PROP_NAME_TO_ENCRYPT.contains(property.getKey())) {
+                authProperties.put(property.getKey(), decryptCredential(SMS_PROVIDER, authType, property.getKey()));
+            }
         }
     }
 

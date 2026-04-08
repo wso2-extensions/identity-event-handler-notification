@@ -86,6 +86,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.STREAM_VERSION;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResourceWithEncryptedCred;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateSMSPublisher;
 
 /**
@@ -144,7 +145,7 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         } catch (ConfigurationManagementException e) {
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER, smsSender.getName());
         }
-        return buildSmsSenderFromResource(smsSenderResource);
+        return buildSmsSenderFromResourceWithEncryptedCred(smsSenderResource);
     }
 
     @Override
@@ -194,7 +195,7 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
             throw handleConfigurationMgtException(e, ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER,
                     smsSender.getName());
         }
-        return buildSmsSenderFromResource(smsSenderResource);
+        return buildSmsSenderFromResourceWithEncryptedCred(smsSenderResource);
     }
 
     private void validateSMSSender(SMSSenderDTO smsSender) throws NotificationSenderManagementClientException {
@@ -260,7 +261,8 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(SENDER, smsSender.getSender());
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
-        NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(
+                smsSenderAttributes, smsSender.getAuthentication());
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
                         .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))
