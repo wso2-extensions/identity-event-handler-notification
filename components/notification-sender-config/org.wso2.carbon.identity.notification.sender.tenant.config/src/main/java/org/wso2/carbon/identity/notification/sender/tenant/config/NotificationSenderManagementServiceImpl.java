@@ -160,7 +160,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.N
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildNotificationSenderConfigsResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildResourceFromPushSender;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResource;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildSmsSenderFromResourceWithEncryptedCred;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.deletePushSenderSecretProperties;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateEmailPublisher;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.generateHTTPBasedEmailPublisher;
@@ -437,7 +437,7 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
         }
         Resource resource = resourceOptional.get();
-        return buildSmsSenderFromResource(resource);
+        return buildSmsSenderFromResourceWithEncryptedCred(resource);
     }
 
     @Override
@@ -448,14 +448,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (resourceOptional.isPresent()) {
                 Resource resource = resourceOptional.get();
-                return buildSmsSenderFromResource(resource);
+                return buildSmsSenderFromResourceWithEncryptedCred(resource);
             }
             if (OrganizationManagementUtil.isOrganization(tenantDomain)) {
                 resourceOptional =
                         getPublisherResource(NotificationSenderUtils.getPrimaryTenantId(tenantDomain), senderName);
                 if (resourceOptional.isPresent()) {
                     Resource resource = resourceOptional.get();
-                    return buildSmsSenderFromResource(resource);
+                    return buildSmsSenderFromResourceWithEncryptedCred(resource);
                 }
             }
             throw new NotificationSenderManagementClientException(ERROR_CODE_PUBLISHER_NOT_EXISTS, senderName);
@@ -571,14 +571,19 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         return publisherResources;
     }
 
-    private List<SMSSenderDTO> extractSMSSenders(Resources publisherResources) {
+    private List<SMSSenderDTO> extractSMSSenders(Resources publisherResources)
+            throws NotificationSenderManagementServerException {
 
-        return publisherResources.getResources().stream()
-                .filter(resource -> resource.getAttributes().stream()
-                        .anyMatch(attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
-                                SMS_PUBLISHER_TYPE.equals(attribute.getValue())))
-                .map(NotificationSenderUtils::buildSmsSenderFromResource)
-                .collect(Collectors.toList());
+        List<SMSSenderDTO> smsSenders = new ArrayList<>();
+        for (Resource resource : publisherResources.getResources()) {
+            boolean isSmsPublisher = resource.getAttributes().stream()
+                    .anyMatch(attribute -> PUBLISHER_TYPE_PROPERTY.equals(attribute.getKey()) &&
+                            SMS_PUBLISHER_TYPE.equals(attribute.getValue()));
+            if (isSmsPublisher) {
+                smsSenders.add(buildSmsSenderFromResourceWithEncryptedCred(resource));
+            }
+        }
+        return smsSenders;
     }
 
     @Override
