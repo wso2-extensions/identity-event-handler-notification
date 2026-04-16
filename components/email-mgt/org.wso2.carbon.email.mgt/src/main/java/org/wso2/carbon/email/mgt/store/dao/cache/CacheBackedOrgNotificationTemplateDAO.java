@@ -81,7 +81,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         }
 
         orgNotificationTemplate = super.getNotificationTemplate(locale, templateType, channelName, tenantId);
-        orgNotificationTemplateCache.addToCache(key, orgNotificationTemplate, tenantId);
+        orgNotificationTemplateCache.addToCacheOnRead(key, orgNotificationTemplate, tenantId);
 
         return orgNotificationTemplate;
     }
@@ -130,7 +130,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         }
 
         notificationTemplates = super.listNotificationTemplates(templateType, channelName, tenantId);
-        templateListCache.addToCache(key, (ArrayList<NotificationTemplate>) notificationTemplates, tenantId);
+        templateListCache.addToCacheOnRead(key, (ArrayList<NotificationTemplate>) notificationTemplates, tenantId);
 
         return notificationTemplates;
     }
