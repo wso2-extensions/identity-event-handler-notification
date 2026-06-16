@@ -136,7 +136,6 @@ public class NotificationConstants {
             // HTTP adapter error codes.
             public static final String HTTP_CLIENT_INIT_FAILED = "HTTP-OA-65000";
             public static final String HTTP_CLIENT_NOT_INITIALIZED = "HTTP-OA-65001";
-            public static final String HTTP_PUBLISH_FAILED_WITH_RESPONSE = "HTTP-OA-65002";
             public static final String HTTP_PUBLISH_UNAUTHORIZED = "HTTP-OA-65003";
             public static final String HTTP_PUBLISH_FORBIDDEN = "HTTP-OA-65004";
             public static final String HTTP_PUBLISH_BAD_REQUEST = "HTTP-OA-65005";

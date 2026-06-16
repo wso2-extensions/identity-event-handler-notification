@@ -185,6 +185,7 @@ public class NotificationHandler extends DefaultNotificationHandler {
         String tenantDomain = placeHolderDataMap.get(NotificationConstants.TENANT_DOMAIN);
         Decision aquireDecision = CircuitBreakerManager.getInstance().tryAcquire(tenantDomain, TenantService.EMAIL_NOTIFICATION);
         if (aquireDecision.isAllowed()) {
+            boolean publishSucceeded = true;
             try {
                 service.publishAndNotifyErrors(buildDatabridgeEvent(notification, placeHolderDataMap));
             } catch (EventStreamException e) {
@@ -198,16 +199,12 @@ public class NotificationHandler extends DefaultNotificationHandler {
                     resolved = resolveConsumerFailure((ConsumerFailureException) e);
                 }
                 if (resolved != null) {
-                    CircuitBreakerManager.getInstance().onComplete(
-                            tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, false);
-                    aquireDecision = null;
+                    publishSucceeded = false;
                     throw resolved;
                 }
             } finally {
-                if (aquireDecision != null) {
-                    CircuitBreakerManager.getInstance().onComplete(
-                        tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, true);
-                }
+                CircuitBreakerManager.getInstance().onComplete(
+                    tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, publishSucceeded);
             }
         } else {
             throw new IdentityEventException(
@@ -235,7 +232,8 @@ public class NotificationHandler extends DefaultNotificationHandler {
 
         if (errorCode == null) {
             return new IdentityEventException(
-                    EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage(), cause);
+                EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode(),
+                EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage(), cause);
         }
         switch (errorCode) {
             case EmailNotification.AdapterErrorCodes.EMAIL_SEND_FAILED:
