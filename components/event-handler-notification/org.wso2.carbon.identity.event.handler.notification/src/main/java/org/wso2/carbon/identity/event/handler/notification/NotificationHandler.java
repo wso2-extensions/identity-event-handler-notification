@@ -28,6 +28,9 @@ import org.wso2.carbon.event.stream.core.exception.AggregatedConsumerFailureExce
 import org.wso2.carbon.event.stream.core.exception.ConsumerFailureException;
 import org.wso2.carbon.event.stream.core.exception.EventStreamException;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
+import org.wso2.carbon.identity.core.circuitbreaker.CircuitBreakerManager;
+import org.wso2.carbon.identity.core.circuitbreaker.Decision;
+import org.wso2.carbon.identity.core.circuitbreaker.TenantService;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
@@ -179,22 +182,37 @@ public class NotificationHandler extends DefaultNotificationHandler {
             Map<String, String> placeHolderDataMap) throws IdentityEventException {
 
         EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
-        try {
-            service.publishAndNotifyErrors(buildDatabridgeEvent(notification, placeHolderDataMap));
-        } catch (EventStreamException e) {
-            if (e instanceof AggregatedConsumerFailureException) {
-                for (ConsumerFailureException failure : ((AggregatedConsumerFailureException) e).getFailures()) {
-                    IdentityEventException resolved = resolveConsumerFailure(failure);
-                    if (resolved != null) {
-                        throw resolved;
+        String tenantDomain = placeHolderDataMap.get(NotificationConstants.TENANT_DOMAIN);
+        Decision aquireDecision = CircuitBreakerManager.getInstance().tryAcquire(tenantDomain, TenantService.EMAIL_NOTIFICATION);
+        if (aquireDecision.isAllowed()) {
+            try {
+                service.publishAndNotifyErrors(buildDatabridgeEvent(notification, placeHolderDataMap));
+            } catch (EventStreamException e) {
+                IdentityEventException resolved = null;
+                if (e instanceof AggregatedConsumerFailureException) {
+                    for (ConsumerFailureException failure : ((AggregatedConsumerFailureException) e).getFailures()) {
+                        resolved = resolveConsumerFailure(failure);
+                        if (resolved != null) break;
                     }
+                } else if (e instanceof ConsumerFailureException) {
+                    resolved = resolveConsumerFailure((ConsumerFailureException) e);
                 }
-            } else if (e instanceof ConsumerFailureException) {
-                IdentityEventException resolved = resolveConsumerFailure((ConsumerFailureException) e);
                 if (resolved != null) {
+                    CircuitBreakerManager.getInstance().onComplete(
+                            tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, false);
+                    aquireDecision = null;
                     throw resolved;
                 }
+            } finally {
+                if (aquireDecision != null) {
+                    CircuitBreakerManager.getInstance().onComplete(
+                        tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, true);
+                }
             }
+        } else {
+            throw new IdentityEventException(
+                    EmailNotification.ErrorMessages.EMAIL_NOTIFICATION_THROTTLED.getCode(),
+                    EmailNotification.ErrorMessages.EMAIL_NOTIFICATION_THROTTLED.getMessage());
         }
     }
 

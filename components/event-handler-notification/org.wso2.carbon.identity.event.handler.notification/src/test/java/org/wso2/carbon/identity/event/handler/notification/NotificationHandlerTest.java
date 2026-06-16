@@ -35,12 +35,15 @@ import org.wso2.carbon.event.stream.core.exception.AggregatedConsumerFailureExce
 import org.wso2.carbon.event.stream.core.exception.ConsumerFailureException;
 import org.wso2.carbon.event.stream.core.exception.EventStreamException;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
+import org.wso2.carbon.identity.core.circuitbreaker.CircuitBreakerManager;
+import org.wso2.carbon.identity.core.circuitbreaker.TenantService;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.notification.NotificationConstants.EmailNotification;
 import org.wso2.carbon.identity.event.handler.notification.email.bean.Notification;
 import org.wso2.carbon.identity.event.handler.notification.internal.NotificationHandlerDataHolder;
 import org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,12 +70,17 @@ public class NotificationHandlerTest {
     @Mock
     private EventStreamService eventStreamService;
 
+    @Mock
+    private OrganizationManager organizationManager;
+
     private MockedStatic<NotificationHandlerDataHolder> mockedDataHolder;
     private MockedStatic<LoggerUtils> mockedLoggerUtils;
     private MockedStatic<NotificationUtil> mockedNotificationUtil;
     private MockedStatic<I18nEmailUtil> mockedI18nEmailUtil;
 
     private TestNotificationHandler handler;
+
+    private final String TENANT_DOMAIN = "test";
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -87,6 +95,7 @@ public class NotificationHandlerTest {
 
         mockedDataHolder.when(NotificationHandlerDataHolder::getInstance).thenReturn(dataHolder);
         when(dataHolder.getEventStreamService()).thenReturn(eventStreamService);
+        when(dataHolder.getOrganizationManager()).thenReturn(organizationManager);
         mockedLoggerUtils.when(LoggerUtils::isDiagnosticLogsEnabled).thenReturn(false);
         mockedI18nEmailUtil.when(() -> I18nEmailUtil.getNormalizedName(anyString())).thenReturn("TestTemplate");
     }
@@ -98,6 +107,7 @@ public class NotificationHandlerTest {
         mockedLoggerUtils.close();
         mockedNotificationUtil.close();
         mockedI18nEmailUtil.close();
+        CircuitBreakerManager.getInstance().invalidateTenantService(TENANT_DOMAIN, TenantService.EMAIL_NOTIFICATION);
     }
 
     @Test
@@ -135,6 +145,7 @@ public class NotificationHandlerTest {
         Notification notification = buildMockNotification();
         Event event = new Event("TEST_EVENT", new HashMap<>());
         event.getEventProperties().put(EmailNotification.SYNC_EMAIL_NOTIFICATION, "true");
+        event.getEventProperties().put(NotificationConstants.TENANT_DOMAIN, TENANT_DOMAIN);
         mockedNotificationUtil.when(() -> NotificationUtil.buildNotification(any(Event.class), any()))
                 .thenReturn(notification);
 
@@ -150,6 +161,7 @@ public class NotificationHandlerTest {
         Notification notification = buildMockNotification();
         Event event = new Event("TEST_EVENT", new HashMap<>());
         event.getEventProperties().put(EmailNotification.SYNC_EMAIL_NOTIFICATION, "true");
+        event.getEventProperties().put(NotificationConstants.TENANT_DOMAIN, TENANT_DOMAIN);
         mockedNotificationUtil.when(() -> NotificationUtil.buildNotification(any(Event.class), any()))
                 .thenReturn(notification);
 
@@ -352,6 +364,41 @@ public class NotificationHandlerTest {
     }
 
     @Test
+    public void testPublishToStreamAndNotifyErrors_circuitBreakerOpensAfterHighFailureRate() throws Exception {
+
+        ConsumerFailureException failure = buildConsumerFailure(EmailNotification.AdapterErrorCodes.EMAIL_SEND_FAILED);
+        doThrow(failure).when(eventStreamService).publishAndNotifyErrors(any());
+
+        int totalCalls = 16;
+        int emailSendFailedCount = 0;
+        int throttledCount = 0;
+        boolean circuitOpened = false;
+
+        for (int i = 0; i < totalCalls; i++) {
+            try {
+                handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+                Assert.fail("Expected IdentityEventException on call " + (i + 1));
+            } catch (IdentityEventException e) {
+                String errorCode = e.getErrorCode();
+                if (EmailNotification.ErrorMessages.EMAIL_NOTIFICATION_THROTTLED.getCode().equals(errorCode)) {
+                    circuitOpened = true;
+                    throttledCount++;
+                } else {
+                    Assert.assertFalse(circuitOpened,
+                            "Expected throttled error after circuit opened but got " + errorCode + " on call " + (i + 1));
+                    Assert.assertEquals(errorCode, EmailNotification.ErrorMessages.EMAIL_SEND_FAILED.getCode(),
+                            "Unexpected error code on call " + (i + 1));
+                    emailSendFailedCount++;
+                }
+            }
+        }
+
+        Assert.assertEquals(emailSendFailedCount, 15);
+        Assert.assertEquals(throttledCount, 1);
+        Assert.assertTrue(circuitOpened);
+    }
+
+    @Test
     public void testPublishToStreamAndNotifyErrors_nullAdapterErrorCode_mapsToUnknownErrorMessage() throws Exception {
 
         OutputEventAdapterException adapterEx = new OutputEventAdapterException((String) null, "adapter error");
@@ -378,6 +425,7 @@ public class NotificationHandlerTest {
 
         Map<String, String> map = new HashMap<>();
         map.put("tmp-stream-id", "id_gov_notify_stream:1.0.0");
+        map.put(NotificationConstants.TENANT_DOMAIN, TENANT_DOMAIN);
         return map;
     }
 

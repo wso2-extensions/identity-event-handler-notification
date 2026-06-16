@@ -200,7 +200,10 @@ public class NotificationConstants {
                             + "Please contact your administrator to verify the email service credentials."),
             UNKNOWN_ERROR("ENH-65017",
                     "The notification could not be delivered due to an unexpected error. "
-                            + "Please try again or contact support.");
+                            + "Please try again or contact support."),
+            EMAIL_NOTIFICATION_THROTTLED("ENH-65018",
+                    "The email could not be delivered because the email service is temporarily suspended "
+                            + "due to repeated failures. Please try again later or contact support.");
 
             private final String code;
             private final String message;
