@@ -590,7 +590,7 @@
         </org.wso2.identity.organization.mgt.imp.pkg.version.range>
 
         <!--Carbon Analytics Common Version-->
-        <carbon.analytics.common.version>5.2.10</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.5.7</carbon.analytics.common.version>
         <carbon.analytics.common.version.range>[5.2.10,6.0.0)</carbon.analytics.common.version.range>
 
         <!-- GSON version -->
