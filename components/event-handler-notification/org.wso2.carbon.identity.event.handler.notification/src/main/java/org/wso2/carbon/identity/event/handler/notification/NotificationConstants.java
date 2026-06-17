@@ -84,6 +84,10 @@ public class NotificationConstants {
         public static final String ARBITRARY_BODY = "body";
         public static final String ARBITRARY_FOOTER = "footer";
 
+        public static final String SYNC_EMAIL_NOTIFICATION = "syncEmailNotification";
+        public static final String EMAIL_SYNC = "email.sync";
+        public static final String HTTP_SYNC = "http.sync";
+
         public static final String CARBON_PRODUCT_URL_TEMPLATE_PLACEHOLDER = "carbon.product-url";
         public static final String ACCOUNT_RECOVERY_ENDPOINT_PLACEHOLDER = "account.recovery.endpoint-url";
         public static final String AUTHENTICATION_ENDPOINT_PLACEHOLDER = "authentication.endpoint-url";
@@ -113,6 +117,112 @@ public class NotificationConstants {
         public static final String NEW_LINE_CHARACTER_STRING = "\\n";
         public static final String NEW_LINE_CHARACTER_HTML = "<br>";
 
+        /**
+         * Error codes from the event output adapters used for email notification delivery.
+         */
+        public static class AdapterErrorCodes {
+
+            private AdapterErrorCodes() {
+                                
+            }
+
+            // Email adapter error codes.
+            public static final String EMAIL_SEND_FAILED = "EMAIL-OA-65000";
+            public static final String EMAIL_MISSING_ADDRESS = "EMAIL-OA-65001";
+            public static final String EMAIL_ENCODING_FAILED = "EMAIL-OA-65002";
+            public static final String EMAIL_AUTH_FAILED = "EMAIL-OA-65003";
+            public static final String EMAIL_SEND_REJECTED = "EMAIL-OA-65004";
+
+            // HTTP adapter error codes.
+            public static final String HTTP_CLIENT_INIT_FAILED = "HTTP-OA-65000";
+            public static final String HTTP_CLIENT_NOT_INITIALIZED = "HTTP-OA-65001";
+            public static final String HTTP_PUBLISH_UNAUTHORIZED = "HTTP-OA-65003";
+            public static final String HTTP_PUBLISH_FORBIDDEN = "HTTP-OA-65004";
+            public static final String HTTP_PUBLISH_BAD_REQUEST = "HTTP-OA-65005";
+            public static final String HTTP_PUBLISH_TOO_MANY_REQUESTS = "HTTP-OA-65006";
+            public static final String HTTP_PUBLISH_SERVICE_UNAVAILABLE = "HTTP-OA-65007";
+            public static final String HTTP_PUBLISH_SERVER_ERROR = "HTTP-OA-65008";
+            public static final String HTTP_PUBLISH_FAILED_IO = "HTTP-OA-65009";
+            public static final String HTTP_TOKEN_REFRESH_MISSING_CREDS = "HTTP-OA-65010";
+            public static final String HTTP_TOKEN_FETCH_FAILED = "HTTP-OA-65011";
+        }
+
+        public enum ErrorMessages {
+
+            EMAIL_SEND_FAILED("EP-65001",
+                    "Your email could not be sent due to a mail server issue. "
+                            + "Please try again or contact support if the problem persists."),
+            EMAIL_MISSING_ADDRESS("EP-65002",
+                    "Your email could not be sent because no recipient address was provided. "
+                            + "Please try again."),
+            EMAIL_ENCODING_FAILED("EP-65003",
+                    "Your email could not be sent because the recipient address contains unsupported characters. "
+                            + "Please check the email address and try again."),
+            EMAIL_AUTH_FAILED("EP-65004",
+                    "Your email could not be sent because the mail server could not verify the sender. "
+                            + "Please contact your administrator to check the email server settings."),
+            EMAIL_SEND_REJECTED("EP-65005",
+                    "Your email could not be sent because the recipient address was not accepted by the mail "
+                            + "server. Please verify the email address and try again."),
+            HTTP_CLIENT_INIT_FAILED("EP-65006",
+                    "The email service is not ready. Please contact your administrator to check "
+                            + "the email service configuration."),
+            HTTP_CLIENT_NOT_INITIALIZED("EP-65007",
+                    "The email service is not ready. Please contact your administrator to check "
+                            + "the email service configuration."),
+            HTTP_PUBLISH_UNAUTHORIZED("EP-65008",
+                    "The email could not be delivered because access was denied. Please contact your "
+                            + "administrator to verify the email service credentials."),
+            HTTP_PUBLISH_FORBIDDEN("EP-65009",
+                    "The email could not be delivered because the configured account does not have the "
+                            + "required permissions. Please contact your administrator."),
+            HTTP_PUBLISH_BAD_REQUEST("EP-65010",
+                    "The email could not be delivered because the email service did not accept "
+                            + "the request. Please contact your administrator."),
+            HTTP_PUBLISH_TOO_MANY_REQUESTS("EP-65011",
+                    "The email could not be delivered because the email service is receiving too "
+                            + "many requests. Please try again in a few moments."),
+            HTTP_PUBLISH_SERVER_ERROR("EP-65012",
+                    "The email could not be delivered because the email service encountered an "
+                            + "unexpected error. Please try again or contact support."),
+            HTTP_PUBLISH_SERVICE_UNAVAILABLE("EP-65013",
+                    "The email could not be delivered because the email service is temporarily "
+                            + "unavailable. Please try again in a few moments."),
+            HTTP_PUBLISH_FAILED_IO("EP-65014",
+                    "The email could not be delivered because a connection to the email service "
+                            + "could not be established. Please try again or contact support."),
+            HTTP_TOKEN_REFRESH_MISSING_CREDS("EP-65015",
+                    "The email could not be delivered because the service authentication failed. "
+                            + "Please contact your administrator to verify the email service credentials."),
+            HTTP_TOKEN_FETCH_FAILED("EP-65016",
+                    "The email could not be delivered because the service authentication failed. "
+                            + "Please contact your administrator to verify the email service credentials."),
+            UNKNOWN_ERROR("EP-65017",
+                    "The notification could not be delivered due to an unexpected error. "
+                            + "Please try again or contact support."),
+            EMAIL_NOTIFICATION_THROTTLED("EP-65018",
+                    "The email could not be delivered because the email service is temporarily suspended "
+                            + "due to repeated failures. Please try again later or contact support.");
+
+            private final String code;
+            private final String message;
+
+            ErrorMessages(String code, String message) {
+
+                this.code = code;
+                this.message = message;
+            }
+
+            public String getCode() {
+
+                return code;
+            }
+
+            public String getMessage() {
+
+                return message;
+            }
+        }
     }
 
     public static class SMSNotification {
@@ -226,6 +336,7 @@ public class NotificationConstants {
             }
 
             public static final String HANDLE_EVENT = "handle-event";
+            public static final String PUBLISH_SYNC_EMAIL_NOTIFICATION = "publish-sync-email-notification";
         }
 
         /**
