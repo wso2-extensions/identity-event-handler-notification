@@ -160,47 +160,40 @@ public class NotificationConstants {
                             + "Please check the email address and try again."),
             EMAIL_AUTH_FAILED("EP-65004",
                     "Your email could not be sent because the mail server could not verify the sender. "
-                            + "Please contact your administrator to check the email server settings."),
+                            + "Please contact your administrator."),
             EMAIL_SEND_REJECTED("EP-65005",
                     "Your email could not be sent because the recipient address was not accepted by the mail "
                             + "server. Please verify the email address and try again."),
             HTTP_CLIENT_INIT_FAILED("EP-65006",
-                    "The email service is not ready. Please contact your administrator to check "
-                            + "the email service configuration."),
-            HTTP_CLIENT_NOT_INITIALIZED("EP-65007",
-                    "The email service is not ready. Please contact your administrator to check "
-                            + "the email service configuration."),
-            HTTP_PUBLISH_UNAUTHORIZED("EP-65008",
+                    "The email service is not ready. Please contact your administrator."),
+            HTTP_PUBLISH_UNAUTHORIZED("EP-65007",
                     "The email could not be delivered because access was denied. Please contact your "
-                            + "administrator to verify the email service credentials."),
-            HTTP_PUBLISH_FORBIDDEN("EP-65009",
+                            + "administrator."),
+            HTTP_PUBLISH_FORBIDDEN("EP-65008",
                     "The email could not be delivered because the configured account does not have the "
                             + "required permissions. Please contact your administrator."),
-            HTTP_PUBLISH_BAD_REQUEST("EP-65010",
+            HTTP_PUBLISH_BAD_REQUEST("EP-65009",
                     "The email could not be delivered because the email service did not accept "
                             + "the request. Please contact your administrator."),
-            HTTP_PUBLISH_TOO_MANY_REQUESTS("EP-65011",
+            HTTP_PUBLISH_TOO_MANY_REQUESTS("EP-65010",
                     "The email could not be delivered because the email service is receiving too "
                             + "many requests. Please try again in a few moments."),
-            HTTP_PUBLISH_SERVER_ERROR("EP-65012",
+            HTTP_PUBLISH_SERVER_ERROR("EP-65011",
                     "The email could not be delivered because the email service encountered an "
                             + "unexpected error. Please try again or contact support."),
-            HTTP_PUBLISH_SERVICE_UNAVAILABLE("EP-65013",
+            HTTP_PUBLISH_SERVICE_UNAVAILABLE("EP-65012",
                     "The email could not be delivered because the email service is temporarily "
                             + "unavailable. Please try again in a few moments."),
-            HTTP_PUBLISH_FAILED_IO("EP-65014",
+            HTTP_PUBLISH_FAILED_IO("EP-65013",
                     "The email could not be delivered because a connection to the email service "
                             + "could not be established. Please try again or contact support."),
-            HTTP_TOKEN_REFRESH_MISSING_CREDS("EP-65015",
+            HTTP_TOKEN_REFRESH_MISSING_CREDS("EP-65014",
                     "The email could not be delivered because the service authentication failed. "
-                            + "Please contact your administrator to verify the email service credentials."),
-            HTTP_TOKEN_FETCH_FAILED("EP-65016",
-                    "The email could not be delivered because the service authentication failed. "
-                            + "Please contact your administrator to verify the email service credentials."),
-            UNKNOWN_ERROR("EP-65017",
+                            + "Please contact your administrator."),
+            UNKNOWN_ERROR("EP-65015",
                     "The notification could not be delivered due to an unexpected error. "
                             + "Please try again or contact support."),
-            EMAIL_NOTIFICATION_THROTTLED("EP-65018",
+            EMAIL_NOTIFICATION_THROTTLED("EP-65016",
                     "The email could not be delivered because the email service is temporarily suspended "
                             + "due to repeated failures. Please try again later or contact support.");
 

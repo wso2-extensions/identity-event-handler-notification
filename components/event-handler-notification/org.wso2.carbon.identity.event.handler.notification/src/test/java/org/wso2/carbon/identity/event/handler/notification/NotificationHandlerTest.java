@@ -335,7 +335,7 @@ public class NotificationHandlerTest {
             { EmailNotification.AdapterErrorCodes.HTTP_CLIENT_INIT_FAILED,
                     EmailNotification.ErrorMessages.HTTP_CLIENT_INIT_FAILED },
             { EmailNotification.AdapterErrorCodes.HTTP_CLIENT_NOT_INITIALIZED,
-                    EmailNotification.ErrorMessages.HTTP_CLIENT_NOT_INITIALIZED },
+                    EmailNotification.ErrorMessages.HTTP_CLIENT_INIT_FAILED },
             { EmailNotification.AdapterErrorCodes.HTTP_PUBLISH_UNAUTHORIZED,
                     EmailNotification.ErrorMessages.HTTP_PUBLISH_UNAUTHORIZED },
             { EmailNotification.AdapterErrorCodes.HTTP_PUBLISH_FORBIDDEN,
@@ -353,7 +353,7 @@ public class NotificationHandlerTest {
             { EmailNotification.AdapterErrorCodes.HTTP_TOKEN_REFRESH_MISSING_CREDS,
                     EmailNotification.ErrorMessages.HTTP_TOKEN_REFRESH_MISSING_CREDS },
             { EmailNotification.AdapterErrorCodes.HTTP_TOKEN_FETCH_FAILED,
-                    EmailNotification.ErrorMessages.HTTP_TOKEN_FETCH_FAILED },
+                    EmailNotification.ErrorMessages.HTTP_TOKEN_REFRESH_MISSING_CREDS },
         };
     }
 
