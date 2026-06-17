@@ -345,13 +345,10 @@ public class NotificationHandler extends DefaultNotificationHandler {
                         EmailNotification.ErrorMessages.EMAIL_SEND_REJECTED.getCode(),
                         EmailNotification.ErrorMessages.EMAIL_SEND_REJECTED.getMessage(), cause);
             case EmailNotification.AdapterErrorCodes.HTTP_CLIENT_INIT_FAILED:
+            case EmailNotification.AdapterErrorCodes.HTTP_CLIENT_NOT_INITIALIZED:
                 return new IdentityEventException(
                         EmailNotification.ErrorMessages.HTTP_CLIENT_INIT_FAILED.getCode(),
                         EmailNotification.ErrorMessages.HTTP_CLIENT_INIT_FAILED.getMessage(), cause);
-            case EmailNotification.AdapterErrorCodes.HTTP_CLIENT_NOT_INITIALIZED:
-                return new IdentityEventException(
-                        EmailNotification.ErrorMessages.HTTP_CLIENT_NOT_INITIALIZED.getCode(),
-                        EmailNotification.ErrorMessages.HTTP_CLIENT_NOT_INITIALIZED.getMessage(), cause);
             case EmailNotification.AdapterErrorCodes.HTTP_PUBLISH_UNAUTHORIZED:
                 return new IdentityEventException(
                         EmailNotification.ErrorMessages.HTTP_PUBLISH_UNAUTHORIZED.getCode(),
@@ -382,14 +379,11 @@ public class NotificationHandler extends DefaultNotificationHandler {
                         EmailNotification.ErrorMessages.HTTP_PUBLISH_FAILED_IO.getCode(),
                         EmailNotification.ErrorMessages.HTTP_PUBLISH_FAILED_IO.getMessage(), cause);
             case EmailNotification.AdapterErrorCodes.HTTP_TOKEN_REFRESH_MISSING_CREDS:
+            case EmailNotification.AdapterErrorCodes.HTTP_TOKEN_FETCH_FAILED:
                 return new IdentityEventException(
                         EmailNotification.ErrorMessages.HTTP_TOKEN_REFRESH_MISSING_CREDS.getCode(),
                         EmailNotification.ErrorMessages.HTTP_TOKEN_REFRESH_MISSING_CREDS.getMessage(),
                         cause);
-            case EmailNotification.AdapterErrorCodes.HTTP_TOKEN_FETCH_FAILED:
-                return new IdentityEventException(
-                        EmailNotification.ErrorMessages.HTTP_TOKEN_FETCH_FAILED.getCode(),
-                        EmailNotification.ErrorMessages.HTTP_TOKEN_FETCH_FAILED.getMessage(), cause);
             default:
                 return new IdentityEventException(
                         EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode(),
