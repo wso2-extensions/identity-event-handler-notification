@@ -123,7 +123,7 @@ public class NotificationConstants {
         public static class AdapterErrorCodes {
 
             private AdapterErrorCodes() {
-                
+                                
             }
 
             // Email adapter error codes.
@@ -336,6 +336,7 @@ public class NotificationConstants {
             }
 
             public static final String HANDLE_EVENT = "handle-event";
+            public static final String PUBLISH_SYNC_EMAIL_NOTIFICATION = "publish-sync-email-notification";
         }
 
         /**

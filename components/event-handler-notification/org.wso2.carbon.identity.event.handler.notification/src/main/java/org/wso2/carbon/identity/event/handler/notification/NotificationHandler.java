@@ -178,38 +178,123 @@ public class NotificationHandler extends DefaultNotificationHandler {
         service.publish(buildDatabridgeEvent(notification, placeHolderDataMap));
     }
 
+    /**
+     * Publishes a notification event to the event stream, propagating consumer errors back to the caller.
+     * Unlike {@link #publishToStream}, this method uses the circuit breaker to throttle requests per tenant
+     * and throws an {@link IdentityEventException} if the publish fails or is throttled.
+     *
+     * @param notification       the notification to be published.
+     * @param placeHolderDataMap placeholder data map containing template variables, including the tenant domain.
+     * @throws IdentityEventException if the circuit breaker throttles the request, or if the event stream
+     *                                consumer reports a known or unknown failure.
+     */
     protected void publishToStreamAndNotifyErrors(Notification notification,
             Map<String, String> placeHolderDataMap) throws IdentityEventException {
 
         EventStreamService service = NotificationHandlerDataHolder.getInstance().getEventStreamService();
         String tenantDomain = placeHolderDataMap.get(NotificationConstants.TENANT_DOMAIN);
-        Decision aquireDecision = CircuitBreakerManager.getInstance().tryAcquire(tenantDomain, TenantService.EMAIL_NOTIFICATION);
-        if (aquireDecision.isAllowed()) {
+        Decision acquireDecision = CircuitBreakerManager.getInstance().tryAcquire(tenantDomain, TenantService.EMAIL_NOTIFICATION);
+        if (acquireDecision.isAllowed()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Circuit breaker allowed sync email notification for tenant: " + tenantDomain
+                        + ". Attempting to publish.");
+            }
             boolean publishSucceeded = false;
             try {
                 service.publishAndNotifyErrors(buildDatabridgeEvent(notification, placeHolderDataMap));
                 publishSucceeded = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Sync email notification published successfully for tenant: " + tenantDomain);
+                }
+                if (LoggerUtils.isDiagnosticLogsEnabled()) {
+                    DiagnosticLog.DiagnosticLogBuilder diagnosticLogBuilder =
+                            new DiagnosticLog.DiagnosticLogBuilder(
+                                    NotificationConstants.LogConstants.NOTIFICATION_HANDLER_SERVICE,
+                                    NotificationConstants.LogConstants.ActionIDs.PUBLISH_SYNC_EMAIL_NOTIFICATION);
+                    diagnosticLogBuilder
+                            .inputParam(NotificationConstants.LogConstants.InputKeys.TENANT_DOMAIN, tenantDomain)
+                            .resultMessage("Sync email notification published successfully.")
+                            .resultStatus(DiagnosticLog.ResultStatus.SUCCESS)
+                            .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
+                    LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
+                }
             } catch (EventStreamException e) {
                 IdentityEventException resolved = null;
                 if (e instanceof AggregatedConsumerFailureException) {
+                    int failureCount = ((AggregatedConsumerFailureException) e).getFailures().size();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sync email notification encountered " + failureCount
+                                + " aggregated consumer failure(s) for tenant: " + tenantDomain);
+                    }
                     for (ConsumerFailureException failure : ((AggregatedConsumerFailureException) e).getFailures()) {
                         resolved = resolveConsumerFailure(failure);
                         if (resolved != null) break;
                     }
                 } else if (e instanceof ConsumerFailureException) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sync email notification encountered a consumer failure for tenant: "
+                                + tenantDomain);
+                    }
                     resolved = resolveConsumerFailure((ConsumerFailureException) e);
                 }
                 if (resolved != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Resolved sync email consumer failure for tenant: " + tenantDomain
+                                + ". Error: " + resolved.getMessage());
+                    }
+                    if (LoggerUtils.isDiagnosticLogsEnabled()) {
+                        DiagnosticLog.DiagnosticLogBuilder diagnosticLogBuilder =
+                                new DiagnosticLog.DiagnosticLogBuilder(
+                                        NotificationConstants.LogConstants.NOTIFICATION_HANDLER_SERVICE,
+                                        NotificationConstants.LogConstants.ActionIDs.PUBLISH_SYNC_EMAIL_NOTIFICATION);
+                        diagnosticLogBuilder
+                                .inputParam(NotificationConstants.LogConstants.InputKeys.TENANT_DOMAIN, tenantDomain)
+                                .resultMessage("Sync email notification failed: " + resolved.getMessage())
+                                .resultStatus(DiagnosticLog.ResultStatus.FAILED)
+                                .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
+                        LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
+                    }
                     throw resolved;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Unresolvable consumer failure during sync email notification for tenant: "
+                            + tenantDomain, e);
+                }
+                if (LoggerUtils.isDiagnosticLogsEnabled()) {
+                    DiagnosticLog.DiagnosticLogBuilder diagnosticLogBuilder =
+                            new DiagnosticLog.DiagnosticLogBuilder(
+                                    NotificationConstants.LogConstants.NOTIFICATION_HANDLER_SERVICE,
+                                    NotificationConstants.LogConstants.ActionIDs.PUBLISH_SYNC_EMAIL_NOTIFICATION);
+                    diagnosticLogBuilder
+                            .inputParam(NotificationConstants.LogConstants.InputKeys.TENANT_DOMAIN, tenantDomain)
+                            .resultMessage("Sync email notification failed due to an unexpected consumer error.")
+                            .resultStatus(DiagnosticLog.ResultStatus.FAILED)
+                            .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
+                    LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
                 }
                 throw new IdentityEventException(
                     EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode(),
                     EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage(), e);
             } finally {
                 CircuitBreakerManager.getInstance().onComplete(
-                    tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, publishSucceeded);
+                    tenantDomain, TenantService.EMAIL_NOTIFICATION, acquireDecision, publishSucceeded);
             }
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Sync email notification throttled by circuit breaker for tenant: " + tenantDomain);
+            }
+            if (LoggerUtils.isDiagnosticLogsEnabled()) {
+                DiagnosticLog.DiagnosticLogBuilder diagnosticLogBuilder =
+                        new DiagnosticLog.DiagnosticLogBuilder(
+                                NotificationConstants.LogConstants.NOTIFICATION_HANDLER_SERVICE,
+                                NotificationConstants.LogConstants.ActionIDs.PUBLISH_SYNC_EMAIL_NOTIFICATION);
+                diagnosticLogBuilder
+                        .inputParam(NotificationConstants.LogConstants.InputKeys.TENANT_DOMAIN, tenantDomain)
+                        .resultMessage("Sync email notification throttled by circuit breaker.")
+                        .resultStatus(DiagnosticLog.ResultStatus.FAILED)
+                        .logDetailLevel(DiagnosticLog.LogDetailLevel.INTERNAL_SYSTEM);
+                LoggerUtils.triggerDiagnosticLogEvent(diagnosticLogBuilder);
+            }
             throw new IdentityEventException(
                     EmailNotification.ErrorMessages.EMAIL_NOTIFICATION_THROTTLED.getCode(),
                     EmailNotification.ErrorMessages.EMAIL_NOTIFICATION_THROTTLED.getMessage());
