@@ -185,9 +185,10 @@ public class NotificationHandler extends DefaultNotificationHandler {
         String tenantDomain = placeHolderDataMap.get(NotificationConstants.TENANT_DOMAIN);
         Decision aquireDecision = CircuitBreakerManager.getInstance().tryAcquire(tenantDomain, TenantService.EMAIL_NOTIFICATION);
         if (aquireDecision.isAllowed()) {
-            boolean publishSucceeded = true;
+            boolean publishSucceeded = false;
             try {
                 service.publishAndNotifyErrors(buildDatabridgeEvent(notification, placeHolderDataMap));
+                publishSucceeded = true;
             } catch (EventStreamException e) {
                 IdentityEventException resolved = null;
                 if (e instanceof AggregatedConsumerFailureException) {
@@ -199,9 +200,11 @@ public class NotificationHandler extends DefaultNotificationHandler {
                     resolved = resolveConsumerFailure((ConsumerFailureException) e);
                 }
                 if (resolved != null) {
-                    publishSucceeded = false;
                     throw resolved;
                 }
+                throw new IdentityEventException(
+                    EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode(),
+                    EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage(), e);
             } finally {
                 CircuitBreakerManager.getInstance().onComplete(
                     tenantDomain, TenantService.EMAIL_NOTIFICATION, aquireDecision, publishSucceeded);

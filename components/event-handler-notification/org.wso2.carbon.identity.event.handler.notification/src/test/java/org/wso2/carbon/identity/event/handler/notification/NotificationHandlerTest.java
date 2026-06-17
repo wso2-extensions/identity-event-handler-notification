@@ -232,18 +232,25 @@ public class NotificationHandlerTest {
     }
 
     @Test
-    public void testPublishToStreamAndNotifyErrors_aggregatedFailure_nonEventStreamCause_swallowed() throws Exception {
+    public void testPublishToStreamAndNotifyErrors_aggregatedFailure_nonEventStreamCause_throwsUnknownError()
+            throws Exception {
 
         ConsumerFailureException failure = new ConsumerFailureException("type", "stream",
                 new RuntimeException("not EventStreamException"));
         doThrow(new AggregatedConsumerFailureException(Collections.singletonList(failure)))
                 .when(eventStreamService).publishAndNotifyErrors(any());
 
-        handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+        try {
+            handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+            Assert.fail("Expected IdentityEventException");
+        } catch (IdentityEventException e) {
+            Assert.assertEquals(e.getErrorCode(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode());
+            Assert.assertEquals(e.getMessage(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage());
+        }
     }
 
     @Test
-    public void testPublishToStreamAndNotifyErrors_aggregatedFailure_noAdapterExceptionCause_swallowed()
+    public void testPublishToStreamAndNotifyErrors_aggregatedFailure_noAdapterExceptionCause_throwsUnknownError()
             throws Exception {
 
         EventStreamException streamEx = new EventStreamException("stream error with no adapter cause");
@@ -251,7 +258,13 @@ public class NotificationHandlerTest {
         doThrow(new AggregatedConsumerFailureException(Collections.singletonList(failure)))
                 .when(eventStreamService).publishAndNotifyErrors(any());
 
-        handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+        try {
+            handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+            Assert.fail("Expected IdentityEventException");
+        } catch (IdentityEventException e) {
+            Assert.assertEquals(e.getErrorCode(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode());
+            Assert.assertEquals(e.getMessage(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage());
+        }
     }
 
     @Test
@@ -272,25 +285,37 @@ public class NotificationHandlerTest {
     }
 
     @Test
-    public void testPublishToStreamAndNotifyErrors_singleConsumerFailure_nonEventStreamCause_swallowed()
+    public void testPublishToStreamAndNotifyErrors_singleConsumerFailure_nonEventStreamCause_throwsUnknownError()
             throws Exception {
 
         ConsumerFailureException failure = new ConsumerFailureException("type", "stream",
                 new RuntimeException("not EventStreamException"));
         doThrow(failure).when(eventStreamService).publishAndNotifyErrors(any());
 
-        handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+        try {
+            handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+            Assert.fail("Expected IdentityEventException");
+        } catch (IdentityEventException e) {
+            Assert.assertEquals(e.getErrorCode(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode());
+            Assert.assertEquals(e.getMessage(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage());
+        }
     }
 
     @Test
-    public void testPublishToStreamAndNotifyErrors_singleConsumerFailure_noAdapterExceptionCause_swallowed()
+    public void testPublishToStreamAndNotifyErrors_singleConsumerFailure_noAdapterExceptionCause_throwsUnknownError()
             throws Exception {
 
         EventStreamException streamEx = new EventStreamException("stream error");
         ConsumerFailureException failure = new ConsumerFailureException("type", "stream", streamEx);
         doThrow(failure).when(eventStreamService).publishAndNotifyErrors(any());
 
-        handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+        try {
+            handler.publishToStreamAndNotifyErrors(buildMockNotification(), buildPlaceholderMap());
+            Assert.fail("Expected IdentityEventException");
+        } catch (IdentityEventException e) {
+            Assert.assertEquals(e.getErrorCode(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getCode());
+            Assert.assertEquals(e.getMessage(), EmailNotification.ErrorMessages.UNKNOWN_ERROR.getMessage());
+        }
     }
 
     @DataProvider(name = "adapterErrorCodeMappings")
