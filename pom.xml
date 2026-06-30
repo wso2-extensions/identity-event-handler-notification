@@ -618,7 +618,7 @@
         <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
         <mavan.findbugsplugin.exclude.file>spotbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
 
-        <com.fasterxml.jackson.databind.version>2.13.4.2</com.fasterxml.jackson.databind.version>
+        <com.fasterxml.jackson.databind.version>2.22.0</com.fasterxml.jackson.databind.version>
     
         <jacoco.version>0.8.12</jacoco.version>
     </properties>
