@@ -102,35 +102,44 @@ public class Authentication {
             LOG.debug("Building authentication header for auth type: " + type);
         }
 
+        Header header;
         switch (type) {
             case BASIC:
                 String credentials = authProperties.get(Property.USERNAME.getName()) + ":" +
                         authProperties.get(Property.PASSWORD.getName());
                 byte[] encodedBytes = Base64.getEncoder().encode(credentials.getBytes(StandardCharsets.UTF_8));
-                return new org.apache.http.message.BasicHeader(
+                header = new org.apache.http.message.BasicHeader(
                         AUTH_HEADER,
                         "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
+                break;
             case CLIENT_CREDENTIAL:
                 if (internalAuthProperties.get(ACCESS_TOKEN_PROP) == null) {
-                    return null;
+                    header = null;
+                    break;
                 }
-                return new BasicHeader(
+                header = new BasicHeader(
                         AUTH_HEADER,
                         "Bearer " + internalAuthProperties.get(ACCESS_TOKEN_PROP)
                 );
+                break;
             case BEARER:
-                return new BasicHeader(
+                header = new BasicHeader(
                         AUTH_HEADER,
                         "Bearer " + authProperties.get(ACCESS_TOKEN.getName())
                 );
+                break;
             case API_KEY:
-                return new BasicHeader(
+                header = new BasicHeader(
                         authProperties.get(Property.HEADER.getName()),
                         authProperties.get(Property.VALUE.getName())
                 );
+                break;
             default:
-                return null;
+                header = null;
         }
+        // Refresh the cache so a subsequent getAuthHeader() returns the freshly built header.
+        this.authHeader = header;
+        return header;
     }
 
     /**

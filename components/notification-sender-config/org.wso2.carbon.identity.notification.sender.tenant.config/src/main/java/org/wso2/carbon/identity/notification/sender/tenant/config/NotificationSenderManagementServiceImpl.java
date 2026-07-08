@@ -29,6 +29,7 @@ import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementClientException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementServerException;
@@ -41,6 +42,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.notification.push.provider.PushProvider;
 import org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage;
 import org.wso2.carbon.identity.notification.sender.tenant.config.clustering.EventPublisherClusterInvalidationMessage;
@@ -738,11 +740,44 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             TokenManager.getInstance().getNewAccessToken(authentication);
             newAccessToken = authentication.getInternalProperties().get(ACCESS_TOKEN_PROP);
             newSmsSenderDTO.getAuthentication().addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
-            updateSMSSender(newSmsSenderDTO);
+            updateSMSSender(newSmsSenderDTO, true);
         }
         authentication.addInternalProperty(ACCESS_TOKEN_PROP, newAccessToken);
         authentication.buildAuthenticationHeader();
         return authentication.getAuthHeader();
+    }
+
+    /**
+     * Persist the SMS sender to the owning tenant (primary org for an inherited sender, else the current tenant).
+     *
+     * @param smsSender             SMS sender to persist.
+     * @param inheritTenantSettings Whether to persist an inherited sender to its owning primary organization.
+     * @throws NotificationSenderManagementException If the update fails.
+     */
+    private void updateSMSSender(SMSSenderDTO smsSender, boolean inheritTenantSettings)
+            throws NotificationSenderManagementException {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            // Sub-org inheriting the sender from the primary organization- persist to that owning (root) tenant.
+            if (inheritTenantSettings && OrganizationManagementUtil.isOrganization(tenantDomain)
+                    && getPublisherResource(smsSender.getName()).isEmpty()) {
+                int primaryTenantId = NotificationSenderUtils.getPrimaryTenantId(tenantDomain);
+                String primaryTenantDomain = IdentityTenantUtil.getTenantDomain(primaryTenantId);
+                try {
+                    FrameworkUtils.startTenantFlow(primaryTenantDomain);
+                    updateSMSSender(smsSender);
+                    return;
+                } finally {
+                    FrameworkUtils.endTenantFlow();
+                }
+            }
+        } catch (OrganizationManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_SERVER_ERRORS_GETTING_EVENT_PUBLISHER,
+                    e.getMessage(), e);
+        }
+        // Persist to the current tenant.
+        updateSMSSender(smsSender);
     }
 
     @Override
