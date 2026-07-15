@@ -236,6 +236,7 @@ public class NotificationConstants {
         public static final String PUSH_NOTIFICATION_HANDLER_NAME = "PushNotificationHandler";
         public static final String PUSH_PUBLISHER_NAME = "PushPublisher";
         public static final String PUSH_AUTHENTICATION_SCENARIO = "AUTHENTICATION";
+        public static final String PUSH_DEVICE_REGISTRATION_SCENARIO = "DEVICE_REGISTRATION";
 
         public static final String NOTIFICATION_SCENARIO = "NOTIFICATION_SCENARIO";
         public static final String NOTIFICATION_PROVIDER = "notificationProvider";
@@ -258,7 +259,12 @@ public class NotificationConstants {
         AUTHENTICATION(
                 PushNotification.PUSH_AUTHENTICATION_SCENARIO,
                 "Authentication Request",
-                "{{user-name}} from {{organization-name}} is trying to login");
+                "{{user-name}} from {{organization-name}} is trying to login"),
+        DEVICE_REGISTRATION(
+                PushNotification.PUSH_DEVICE_REGISTRATION_SCENARIO,
+                "New Device Registered",
+                "A new device, {{push-device-name}} ({{push-device-model}}), was registered to your account at "
+                        + "{{registration-time}}.");
 
         private String scenario;
         private String title;
@@ -296,7 +302,10 @@ public class NotificationConstants {
         USER_GIVEN_NAME("user.claim.givenname"),
         USER_STORE_DOMAIN("userstore-domain"),
         ORGANIZATION_NAME("organization-name"),
-        TENANT_DOMAIN("tenant-domain"),;
+        TENANT_DOMAIN("tenant-domain"),
+        PUSH_DEVICE_NAME("push-device-name"),
+        PUSH_DEVICE_MODEL("push-device-model"),
+        REGISTRATION_TIME("registration-time");
 
         private String placeholder;
 
