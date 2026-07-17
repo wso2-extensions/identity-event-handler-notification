@@ -57,11 +57,15 @@ import static org.wso2.carbon.identity.event.handler.notification.NotificationCo
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NOTIFICATION_PROVIDER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NOTIFICATION_SCENARIO;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.NUMBER_CHALLENGE;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.PUSH_DEVICE_REGISTRATION_SCENARIO;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.PUSH_ID;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.PUSH_NOTIFICATION_EVENT;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.PUSH_NOTIFICATION_HANDLER_NAME;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.REQUEST_DEVICE_BROWSER;
 import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotification.REQUEST_DEVICE_OS;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotificationPlaceholder.PUSH_DEVICE_MODEL;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotificationPlaceholder.PUSH_DEVICE_NAME;
+import static org.wso2.carbon.identity.event.handler.notification.NotificationConstants.PushNotificationPlaceholder.REGISTRATION_TIME;
 import static org.wso2.carbon.identity.event.handler.notification.util.NotificationUtil.extractPlaceHolders;
 
 /**
@@ -223,6 +227,24 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 return false;
             }
         }
+
+        /*
+            checks if the required properties for device registration scenario are present when the scenario is device
+            registration.
+         */
+        String scenario = (String) eventProperties.get(NOTIFICATION_SCENARIO);
+        if (PUSH_DEVICE_REGISTRATION_SCENARIO.equals(scenario)) {
+            String[] deviceRegistrationRequiredProperties = {
+                PUSH_DEVICE_NAME.getPlaceholder(),
+                PUSH_DEVICE_MODEL.getPlaceholder(),
+                REGISTRATION_TIME.getPlaceholder()
+            };
+            for (String property : deviceRegistrationRequiredProperties) {
+                if (eventProperties.get(property) == null) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -321,6 +343,9 @@ public class PushNotificationHandler extends DefaultNotificationHandler {
                 .setIpAddress((String) eventProperties.get(IP_ADDRESS))
                 .setDeviceOS((String) eventProperties.get(REQUEST_DEVICE_OS))
                 .setBrowser((String) eventProperties.get(REQUEST_DEVICE_BROWSER))
+                .setPushDeviceName((String) eventProperties.get(PUSH_DEVICE_NAME.getPlaceholder()))
+                .setPushDeviceModel((String) eventProperties.get(PUSH_DEVICE_MODEL.getPlaceholder()))
+                .setRegistrationTime((String) eventProperties.get(REGISTRATION_TIME.getPlaceholder()))
                 .build();
     }
 
