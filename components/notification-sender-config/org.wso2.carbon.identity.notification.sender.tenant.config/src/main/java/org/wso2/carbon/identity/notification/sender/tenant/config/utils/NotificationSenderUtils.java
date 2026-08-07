@@ -122,6 +122,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.MAPPING_TYPE_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PLACEHOLDER_IDENTIFIER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROCESSING_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROPERTIES_TO_SKIP_AT_ADAPTER_CONFIG;
@@ -504,24 +505,29 @@ public class NotificationSenderUtils {
         }
 
         try {
+            boolean isPasswordGrant = PASSWORD_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType());
             if (StringUtils.isNotEmpty(emailSender.getAuthType())) {
                 adapterProperties.put(HTTP_AUTH_TYPE_PROPERTY, emailSender.getAuthType());
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(USERNAME))) {
-                adapterProperties.put(HTTP_USERNAME_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, USERNAME,
+                adapterProperties.put(HTTP_USERNAME_PROPERTY, encryptCredential(EMAIL_PROVIDER,
+                        isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, USERNAME,
                         emailSender.getProperties().get(USERNAME)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(PASSWORD))) {
-                adapterProperties.put(HTTP_PASSWORD_PROPERTY, encryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD,
+                adapterProperties.put(HTTP_PASSWORD_PROPERTY, encryptCredential(EMAIL_PROVIDER,
+                        isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, PASSWORD,
                         emailSender.getProperties().get(PASSWORD)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_ID))) {
-                adapterProperties.put(HTTP_CLIENT_ID_PROPERTY, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
-                        CLIENT_ID, emailSender.getProperties().get(CLIENT_ID)));
+                adapterProperties.put(HTTP_CLIENT_ID_PROPERTY, encryptCredential(EMAIL_PROVIDER,
+                        isPasswordGrant ? PASSWORD_CREDENTIAL : CLIENT_CREDENTIAL, CLIENT_ID,
+                        emailSender.getProperties().get(CLIENT_ID)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(CLIENT_SECRET))) {
-                adapterProperties.put(HTTP_CLIENT_SECRET_PROPERTY, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
-                        CLIENT_SECRET, emailSender.getProperties().get(CLIENT_SECRET)));
+                adapterProperties.put(HTTP_CLIENT_SECRET_PROPERTY, encryptCredential(EMAIL_PROVIDER,
+                        isPasswordGrant ? PASSWORD_CREDENTIAL : CLIENT_CREDENTIAL, CLIENT_SECRET,
+                        emailSender.getProperties().get(CLIENT_SECRET)));
             }
             if (StringUtils.isNotEmpty(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
                 adapterProperties.put(HTTP_TOKEN_ENDPOINT_PROPERTY, emailSender.getProperties().get(TOKEN_ENDPOINT));

@@ -91,6 +91,38 @@ public class AuthenticationTest {
     }
 
     @Test
+    public void testAuthenticationBuilderWithPasswordGrant() throws Exception {
+
+        authProperties.put(Property.CLIENT_ID.getName(), "test-client-id");
+        authProperties.put(Property.CLIENT_SECRET.getName(), "test-client-secret");
+        authProperties.put(Property.USERNAME.getName(), "test-username");
+        authProperties.put(Property.PASSWORD.getName(), "test-password");
+        authProperties.put(Property.SCOPE.getName(), "test-scope");
+        authProperties.put(Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
+
+        Authentication auth = new Authentication.AuthenticationBuilder("PASSWORD_CREDENTIAL", authProperties).build();
+
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Type.PASSWORD_CREDENTIAL);
+        Assert.assertEquals(auth.getProperty(Property.CLIENT_ID.getName()), "test-client-id");
+        Assert.assertEquals(auth.getProperty(Property.CLIENT_SECRET.getName()), "test-client-secret");
+        Assert.assertEquals(auth.getProperty(Property.USERNAME.getName()), "test-username");
+        Assert.assertEquals(auth.getProperty(Property.PASSWORD.getName()), "test-password");
+        Assert.assertEquals(auth.getProperty(Property.SCOPE.getName()), "test-scope");
+        Assert.assertEquals(auth.getProperty(Property.TOKEN_ENDPOINT.getName()), "https://test.com/token");
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testAuthenticationBuilderWithPasswordGrantMissingProperty() throws Exception {
+
+        authProperties.put(Property.CLIENT_ID.getName(), "test-client-id");
+        authProperties.put(Property.CLIENT_SECRET.getName(), "test-client-secret");
+        authProperties.put(Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
+
+        new Authentication.AuthenticationBuilder("PASSWORD_CREDENTIAL", authProperties).build();
+    }
+
+    @Test
     public void testAuthenticationBuilderWithApiKey() throws Exception {
 
         authProperties.put(Property.HEADER.getName(), "X-API-KEY");

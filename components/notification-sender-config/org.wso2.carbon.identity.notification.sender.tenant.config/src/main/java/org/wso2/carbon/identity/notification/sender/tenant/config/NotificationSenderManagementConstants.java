@@ -97,6 +97,7 @@ public class NotificationSenderManagementConstants {
     public static final String CLIENT_CREDENTIAL = "CLIENT_CREDENTIAL";
     public static final String BEARER = "BEARER";
     public static final String API_KEY = "API_KEY";
+    public static final String PASSWORD_CREDENTIAL = "PASSWORD_CREDENTIAL";
     public static final String NONE = "NONE";
 
     // SMS Sender's main properties.

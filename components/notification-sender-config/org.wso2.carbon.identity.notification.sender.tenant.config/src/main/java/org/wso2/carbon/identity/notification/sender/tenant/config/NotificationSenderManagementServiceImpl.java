@@ -137,6 +137,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.NOTIFICATION_SENDER_CONFIGS_RESOURCE_TYPE_DESCRIPTION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.POST;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PROVIDER_URL;
@@ -310,6 +311,19 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (CLIENT_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType())) {
             if (StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(CLIENT_SECRET)) ||
+                    StringUtils.isBlank(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
+                throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_INVALID_INPUTS);
+            }
+            return;
+        }
+
+        // If authType is set to PASSWORD, client_id, client_secret, username, password & token_endpoint
+        // should be set in the properties. i.e. ensuring Email Provider is updated via notification sender v2 API.
+        if (PASSWORD_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType())) {
+            if (StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
+                    StringUtils.isBlank(emailSender.getProperties().get(CLIENT_SECRET)) ||
+                    StringUtils.isBlank(emailSender.getProperties().get(USERNAME)) ||
+                    StringUtils.isBlank(emailSender.getProperties().get(PASSWORD)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(TOKEN_ENDPOINT))) {
                 throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_INVALID_INPUTS);
             }
@@ -665,11 +679,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                         + e.getMessage(), e);
             }
         }
-        if (StringUtils.equalsIgnoreCase(CLIENT_CREDENTIAL, emailSender.getAuthType())) {
-            // If the new auth type is client credential, delete the internal access token secret to generate a new one
-            // with the updated credential properties.
+        if (StringUtils.equalsIgnoreCase(CLIENT_CREDENTIAL, emailSender.getAuthType()) ||
+                StringUtils.equalsIgnoreCase(PASSWORD_CREDENTIAL, emailSender.getAuthType())) {
+            // If the new auth type is client credential or password grant, delete the internal access token
+            // secret to generate a new one with the updated credential properties.
+            String tokenBasedAuthType = StringUtils.equalsIgnoreCase(CLIENT_CREDENTIAL, emailSender.getAuthType())
+                    ? CLIENT_CREDENTIAL : PASSWORD_CREDENTIAL;
             try {
-                deleteInternalAccessTokenSecret(EMAIL_PROVIDER);
+                deleteInternalAccessTokenSecret(EMAIL_PROVIDER, tokenBasedAuthType);
             } catch (SecretManagementException e) {
                 log.warn("Error occurred while deleting internal access token secret of email sender: " +
                         emailSender.getName() + ". Error: " + e.getMessage(), e);
@@ -729,7 +746,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
     public Header rebuildAuthHeaderWithNewToken(SMSSenderDTO smsSender) throws NotificationSenderManagementException {
 
         Authentication authentication = smsSender.getAuthentication();
-        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL) {
+        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL
+                && authentication.getType() != Authentication.Type.PASSWORD_CREDENTIAL) {
             return authentication.buildAuthenticationHeader();
         }
 
@@ -1110,22 +1128,25 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     continue;
                 }
                 String key = entry.getKey();
+                boolean isPasswordGrant = PASSWORD_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType());
                 switch (key) {
                     case USERNAME:
-                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, BASIC, USERNAME,
-                                entry.getValue())));
+                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, USERNAME, entry.getValue())));
                         break;
                     case PASSWORD:
-                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD,
-                                entry.getValue())));
+                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, PASSWORD, entry.getValue())));
                         break;
                     case CLIENT_SECRET:
-                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
-                                CLIENT_SECRET, entry.getValue())));
+                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : CLIENT_CREDENTIAL, CLIENT_SECRET,
+                                entry.getValue())));
                         break;
                     case CLIENT_ID:
-                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL,
-                                CLIENT_ID, entry.getValue())));
+                        resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : CLIENT_CREDENTIAL, CLIENT_ID,
+                                entry.getValue())));
                         break;
                     case ACCESS_TOKEN_PROP:
                         resourceAttributes.add(new Attribute(key, encryptCredential(EMAIL_PROVIDER, BEARER,
@@ -1200,6 +1221,9 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 resource.getAttributes().stream()
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        // Read ahead since iteration order over attributesMap is not guaranteed, and USERNAME/PASSWORD/CLIENT_ID
+        // decryption below needs to know the auth type to look up the secret under the matching tag.
+        boolean isPasswordGrant = PASSWORD_CREDENTIAL.equalsIgnoreCase(attributesMap.get(AUTH_TYPE));
         for (Map.Entry<String, String> entry : attributesMap.entrySet()) {
             if (entry == null || StringUtils.isBlank(entry.getKey()) || StringUtils.equals(entry.getKey(), "null") ||
                     StringUtils.isBlank(entry.getValue()) || StringUtils.equals(entry.getValue(), "null")) {
@@ -1227,7 +1251,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                 // response.
                 case USERNAME:
                     try {
-                        value = decryptCredential(EMAIL_PROVIDER, BASIC, USERNAME);
+                        value = decryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, USERNAME);
                     } catch (SecretManagementException e) {
                         // Do nothing. As there are existing credentials in plain text.
                     }
@@ -1235,7 +1260,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     break;
                 case PASSWORD:
                     try {
-                        value = decryptCredential(EMAIL_PROVIDER, BASIC, PASSWORD);
+                        value = decryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : BASIC, PASSWORD);
                     } catch (SecretManagementException e) {
                         // Do nothing. As there are existing credentials in plain text.
                     }
@@ -1243,7 +1269,8 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     break;
                 case CLIENT_ID:
                     try {
-                        value = decryptCredential(EMAIL_PROVIDER, CLIENT_CREDENTIAL, CLIENT_ID);
+                        value = decryptCredential(EMAIL_PROVIDER,
+                                isPasswordGrant ? PASSWORD_CREDENTIAL : CLIENT_CREDENTIAL, CLIENT_ID);
                     } catch (SecretManagementException e) {
                         throw new NotificationSenderManagementServerException(
                                 ERROR_CODE_ERROR_WHILE_DECRYPTING_CREDENTIALS, e.getMessage(), e);

@@ -36,6 +36,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CLIENT_SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_ACCESS_TOKEN;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_CREDENTIAL;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 
@@ -104,6 +105,8 @@ public class NotificationSenderSecretProcessor {
                 INTERNAL_ACCESS_TOKEN);
         deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
         deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
+        deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET, USERNAME, PASSWORD,
+                INTERNAL_ACCESS_TOKEN);
     }
 
     /**
@@ -133,6 +136,10 @@ public class NotificationSenderSecretProcessor {
            case API_KEY:
                deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
                break;
+           case PASSWORD_CREDENTIAL:
+               deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET, USERNAME,
+                       PASSWORD, INTERNAL_ACCESS_TOKEN);
+               break;
            default:
                break;
        }
@@ -142,11 +149,13 @@ public class NotificationSenderSecretProcessor {
      * Delete internal access token secret.
      *
      * @param notificationSender Notification Sender.
+     * @param authType           Authentication Type owning the cached token (CLIENT_CREDENTIAL or PASSWORD).
      * @throws SecretManagementException If an error occurs while deleting the secret.
      */
-   public static void deleteInternalAccessTokenSecret(String notificationSender) throws SecretManagementException {
+   public static void deleteInternalAccessTokenSecret(String notificationSender, String authType)
+           throws SecretManagementException {
 
-       deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, INTERNAL_ACCESS_TOKEN);
+       deleteSecretsForAuthType(notificationSender, authType, INTERNAL_ACCESS_TOKEN);
    }
 
     /**
