@@ -319,6 +319,10 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
 
         // If authType is set to PASSWORD, client_id, client_secret, username, password & token_endpoint
         // should be set in the properties. i.e. ensuring Email Provider is updated via notification sender v2 API.
+        // Note: this is accepted for both HTTP-based and SMTP-based senders, but only the HTTP-based send path
+        // (carbon-analytics-common's HTTPEventAdapter) currently acts on PASSWORD_CREDENTIAL. The SMTP send path
+        // (EmailEventAdapter) only supports CLIENT_CREDENTIAL via XOAUTH2; an SMTP sender configured with
+        // PASSWORD_CREDENTIAL will not use OAuth2 authentication when sending.
         if (PASSWORD_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType())) {
             if (StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(CLIENT_SECRET)) ||
