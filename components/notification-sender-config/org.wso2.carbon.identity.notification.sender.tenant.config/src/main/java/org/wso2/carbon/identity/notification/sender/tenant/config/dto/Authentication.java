@@ -113,6 +113,7 @@ public class Authentication {
                         "Basic " + new String(encodedBytes, StandardCharsets.UTF_8));
                 break;
             case CLIENT_CREDENTIAL:
+            case PASSWORD_CREDENTIAL:
                 if (internalAuthProperties.get(ACCESS_TOKEN_PROP) == null) {
                     header = null;
                     break;
@@ -187,6 +188,19 @@ public class Authentication {
                     resolvedAuthProperties.put(Property.HEADER.getName(), getProperty(Property.HEADER));
                     resolvedAuthProperties.put(Property.VALUE.getName(), getProperty(Property.VALUE));
                     break;
+                case PASSWORD_CREDENTIAL:
+                    resolvedAuthProperties.put(Property.CLIENT_ID.getName(), getProperty(Property.CLIENT_ID));
+                    resolvedAuthProperties.put(Property.CLIENT_SECRET.getName(), getProperty(Property.CLIENT_SECRET));
+                    resolvedAuthProperties.put(Property.USERNAME.getName(), getProperty(Property.USERNAME));
+                    resolvedAuthProperties.put(Property.PASSWORD.getName(), getProperty(Property.PASSWORD));
+                    String passwordGrantScope =
+                            propertiesMap != null ? propertiesMap.get(Property.SCOPE.getName()) : null;
+                    if (StringUtils.isNotBlank(passwordGrantScope)) {
+                        resolvedAuthProperties.put(Property.SCOPE.getName(), passwordGrantScope);
+                    }
+                    resolvedAuthProperties.put(
+                            Property.TOKEN_ENDPOINT.getName(), getProperty(Property.TOKEN_ENDPOINT));
+                    break;
                 case NONE:
                     break;
             }
@@ -224,7 +238,8 @@ public class Authentication {
         BEARER("BEARER"),
         CLIENT_CREDENTIAL("CLIENT_CREDENTIAL"),
         BASIC("BASIC"),
-        API_KEY("API_KEY");
+        API_KEY("API_KEY"),
+        PASSWORD_CREDENTIAL("PASSWORD_CREDENTIAL");
 
         private final String name;
 

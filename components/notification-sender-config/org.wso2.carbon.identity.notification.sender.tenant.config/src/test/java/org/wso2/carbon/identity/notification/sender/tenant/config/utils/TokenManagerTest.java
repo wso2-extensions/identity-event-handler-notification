@@ -67,6 +67,23 @@ public class TokenManagerTest {
     }
 
     @Test
+    public void testAuthenticationWithPasswordGrant() throws Exception {
+        authProperties.put(Authentication.Property.CLIENT_ID.getName(), "test-client-id");
+        authProperties.put(Authentication.Property.CLIENT_SECRET.getName(), "test-client-secret");
+        authProperties.put(Authentication.Property.USERNAME.getName(), "test-username");
+        authProperties.put(Authentication.Property.PASSWORD.getName(), "test-password");
+        authProperties.put(Authentication.Property.SCOPE.getName(), "test-scope");
+        authProperties.put(Authentication.Property.TOKEN_ENDPOINT.getName(), "https://test.com/token");
+
+        Authentication auth = new Authentication.AuthenticationBuilder("PASSWORD_CREDENTIAL", authProperties).build();
+
+        Assert.assertNotNull(auth);
+        Assert.assertEquals(auth.getType(), Authentication.Type.PASSWORD_CREDENTIAL);
+        Assert.assertEquals(auth.getProperty(Authentication.Property.USERNAME.getName()), "test-username");
+        Assert.assertEquals(auth.getProperty(Authentication.Property.PASSWORD.getName()), "test-password");
+    }
+
+    @Test
     public void testAuthenticationWithBasicType() throws Exception {
         authProperties.put(Authentication.Property.USERNAME.getName(), "testuser");
         authProperties.put(Authentication.Property.PASSWORD.getName(), "testpass");

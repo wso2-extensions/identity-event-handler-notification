@@ -108,7 +108,8 @@ public class TokenManager {
     private TokenRequestContext buildTokenRequestContext(Authentication authentication)
             throws NotificationSenderManagementServerException {
 
-        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL) {
+        if (authentication.getType() != Authentication.Type.CLIENT_CREDENTIAL
+                && authentication.getType() != Authentication.Type.PASSWORD_CREDENTIAL) {
             throw new NotificationSenderManagementServerException(
                     ErrorMessage.ERROR_CODE_ERROR_UNSUPPORTED_AUTH_TYPE_FOR_TOKEN_RETRIEVAL, null);
         }
@@ -125,8 +126,22 @@ public class TokenManager {
             if (StringUtils.isNotBlank(scope)) {
                 grantTypeProperties.put(GrantContext.Property.SCOPE.getName(), scope);
             }
+
+            GrantContext.GrantType grantType;
+            if (authentication.getType() == Authentication.Type.PASSWORD_CREDENTIAL) {
+                grantType = GrantContext.GrantType.PASSWORD;
+                grantTypeProperties.put(
+                        GrantContext.Property.USERNAME.getName(),
+                        authentication.getProperty(Authentication.Property.USERNAME.getName()));
+                grantTypeProperties.put(
+                        GrantContext.Property.PASSWORD.getName(),
+                        authentication.getProperty(Authentication.Property.PASSWORD.getName()));
+            } else {
+                grantType = GrantContext.GrantType.CLIENT_CREDENTIAL;
+            }
+
             GrantContext grantContext = new GrantContext.Builder()
-                    .grantType(GrantContext.GrantType.CLIENT_CREDENTIAL)
+                    .grantType(grantType)
                     .properties(grantTypeProperties)
                     .build();
 
