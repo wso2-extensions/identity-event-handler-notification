@@ -317,18 +317,12 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
             return;
         }
 
-        // If authType is set to PASSWORD, client_id, client_secret, username, password & token_endpoint
-        // should be set in the properties. i.e. ensuring Email Provider is updated via notification sender v2 API.
-        // PASSWORD_CREDENTIAL is restricted to HTTP-based senders: the SMTP send path (EmailEventAdapter) only
-        // supports CLIENT_CREDENTIAL via XOAUTH2, and addToElementToEmailEventPublisher's SMTP-context property
-        // loop does not exclude these keys from the generated publisher config (unlike the HTTP-context loop,
-        // which uses PROPERTIES_TO_SKIP_AT_HTTP_ADAPTER_CONFIG) - accepting this for SMTP would leak the raw
-        // resource-owner credentials into the generated XML.
+        // If authType is set to PASSWORD_CREDENTIAL, restrict to HTTP-based senders (SMTP would leak the raw
+        // credentials into the generated publisher XML), and require client_id, client_secret, username,
+        // password & token_endpoint in the properties.
         if (PASSWORD_CREDENTIAL.equalsIgnoreCase(emailSender.getAuthType())) {
-            if (!StringUtils.equalsIgnoreCase(emailSender.getProvider(), HTTP)) {
-                throw new NotificationSenderManagementClientException(ErrorMessage.ERROR_CODE_INVALID_INPUTS);
-            }
-            if (StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
+            if (!StringUtils.equalsIgnoreCase(emailSender.getProvider(), HTTP) ||
+                    StringUtils.isBlank(emailSender.getProperties().get(CLIENT_ID)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(CLIENT_SECRET)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(USERNAME)) ||
                     StringUtils.isBlank(emailSender.getProperties().get(PASSWORD)) ||
