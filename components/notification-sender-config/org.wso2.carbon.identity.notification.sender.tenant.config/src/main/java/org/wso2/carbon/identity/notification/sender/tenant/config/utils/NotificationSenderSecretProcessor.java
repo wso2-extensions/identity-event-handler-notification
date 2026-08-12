@@ -149,7 +149,19 @@ public class NotificationSenderSecretProcessor {
      * Delete internal access token secret.
      *
      * @param notificationSender Notification Sender.
-     * @param authType           Authentication Type owning the cached token (CLIENT_CREDENTIAL or PASSWORD).
+     * @throws SecretManagementException If an error occurs while deleting the secret.
+     */
+   public static void deleteInternalAccessTokenSecret(String notificationSender) throws SecretManagementException {
+
+       deleteInternalAccessTokenSecret(notificationSender, CLIENT_CREDENTIAL);
+   }
+
+   /**
+     * Delete internal access token secret owned by a specific authentication type.
+     *
+     * @param notificationSender Notification Sender.
+     * @param authType           Authentication Type owning the cached token (CLIENT_CREDENTIAL or
+     *                            PASSWORD_CREDENTIAL).
      * @throws SecretManagementException If an error occurs while deleting the secret.
      */
    public static void deleteInternalAccessTokenSecret(String notificationSender, String authType)
