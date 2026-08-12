@@ -911,6 +911,56 @@ public class NotificationSenderManagementServiceImplTest {
         notificationSenderManagementService.validateInputs(emailSender);
     }
 
+    @Test
+    public void testValidateInputsSuccessWithPasswordCredentialAuthOnHttpProvider()
+            throws NotificationSenderManagementClientException {
+
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("HTTP");
+        emailSender.setProviderURL("https://api.email-provider.com/send");
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType("PASSWORD_CREDENTIAL");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("body", "{\"to\":\"{{to}}\",\"subject\":\"{{subject}}\",\"body\":\"{{body}}\"}");
+        properties.put("clientId", "clientId");
+        properties.put("clientSecret", "clientSecret");
+        properties.put("userName", "testUser");
+        properties.put("password", "testPassword");
+        properties.put("tokenEndpoint", "https://example.com/token");
+        properties.put("scopes", "email");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
+    @Test(expectedExceptions = NotificationSenderManagementClientException.class)
+    public void testValidateInputsRejectsPasswordCredentialAuthOnSmtpProvider()
+            throws NotificationSenderManagementClientException {
+
+        // All other required SMTP fields are deliberately valid here, so the only possible failure reason
+        // is the PASSWORD_CREDENTIAL + SMTP provider rejection this test is meant to isolate.
+        EmailSenderDTO emailSender = new EmailSenderDTO();
+        emailSender.setProvider("SMTP");
+        emailSender.setSmtpServerHost("smtp.example.com");
+        emailSender.setSmtpPort(587);
+        emailSender.setFromAddress("test@example.com");
+        emailSender.setAuthType("PASSWORD_CREDENTIAL");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("mail.smtp.signature", "Test Display Name");
+        properties.put("mail.smtp.replyTo", "reply@example.com");
+        properties.put("clientId", "clientId");
+        properties.put("clientSecret", "clientSecret");
+        properties.put("userName", "testUser");
+        properties.put("password", "testPassword");
+        properties.put("tokenEndpoint", "https://example.com/token");
+        properties.put("scopes", "email");
+        emailSender.setProperties(properties);
+
+        notificationSenderManagementService.validateInputs(emailSender);
+    }
+
     @Test(expectedExceptions = NotificationSenderManagementClientException.class)
     public void testValidateInputsMissingRequiredFields() throws NotificationSenderManagementClientException {
 
