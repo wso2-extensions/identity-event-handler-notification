@@ -74,6 +74,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 
 /**
  * Unit tests for {@link NotificationSenderManagementServiceImpl}.
@@ -1735,6 +1737,26 @@ public class NotificationSenderManagementServiceImplTest {
 
         when(configurationManager.getResource(anyString(), anyString())).thenReturn(null);
         notificationSenderManagementService.deleteNotificationSender("NonExistentPublisher");
+    }
+
+    @Test
+    public void testDeleteSMSSenderInvokesSecretCleanup() throws Exception {
+
+        SecretManager secretManager = Mockito.mock(SecretManager.class);
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(true);
+        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(new Resource());
+        doNothing().when(defaultChannelConfigurationHandler).deleteNotificationSender(anyString());
+
+        notificationSenderManagementService.deleteNotificationSender(DEFAULT_SMS_PUBLISHER);
+
+        // BASIC's password/username secrets are a representative sample - deleteAssociatedSMSSecrets()
+        // itself is covered exhaustively in NotificationSenderSecretProcessorTest; this test only locks in
+        // that the SMS deletion branch actually invokes it (and under SMS_PROVIDER, not EMAIL_PROVIDER).
+        verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:password");
+        verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:username");
+        verify(defaultChannelConfigurationHandler).deleteNotificationSender(DEFAULT_SMS_PUBLISHER);
     }
 
     @Test

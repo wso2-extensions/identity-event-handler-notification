@@ -24,10 +24,14 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.core.ResourceManager;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
@@ -52,6 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 
 /**
@@ -149,6 +154,42 @@ public class DefaultChannelConfigurationHandlerTest {
         Assert.assertEquals(response.getName(), smsSenderDTO.getName());
         Assert.assertEquals(response.getProvider(), smsSenderDTO.getProvider());
 
+    }
+
+    @Test
+    public void testAddSMSSenderWrapsCredentialEncryptionFailureAsServerException() throws Exception {
+
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDTO("SMSPublisher", "Twilio",
+                "Your one-time password for the {{application-name}} is {{otpToken}}. This expires in "
+                        + "{{otp-expiry-time}} minutes",
+                "https://api.twilio.com/2010-04-01/Accounts/AC247e7b734c1e2dc380b9fa8fb444762d/Messages.json");
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("username", "admin");
+        authProps.put("password", "admin-password");
+        smsSenderDTO.setAuthentication(new Authentication.AuthenticationBuilder("BASIC", authProps).build());
+
+        SMSProviderTemplate smsProviderTemplate = constructSMSProviderTemplate();
+        List<EventPublisherConfiguration> eventPublisherConfigurationList = new ArrayList<>();
+        eventPublisherConfigurationList.add(constructEventPublisherConfiguration("SMSPublisher"));
+
+        when(smsProviderPayloadTemplateManager
+                .getSMSProviderPayloadTemplateByProvider(smsSenderDTO.getProvider()))
+                .thenReturn(smsProviderTemplate);
+        when(configurationManager.getResource(PUBLISHER_RESOURCE_TYPE, "SMSPublisher"))
+                .thenReturn(null);
+        when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
+                .thenReturn(eventPublisherConfigurationList);
+
+        // The real addAuthenticationProperties() (not otherwise stubbed here) throws the unchecked
+        // SecretManagementCredentialException on encryption failure - buildResourceFromSmsSender must catch
+        // it and surface it as the checked NotificationSenderManagementServerException it always threw,
+        // rather than letting the crash escape as an unhandled RuntimeException.
+        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.addAuthenticationProperties(any(), any()))
+                .thenThrow(new SecretManagementCredentialException(ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS,
+                        new SecretManagementException("secret store unavailable")));
+
+        assertThrows(NotificationSenderManagementServerException.class,
+                () -> defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO));
     }
 
     @DataProvider(name = "addSMSSenderDataProvider")

@@ -27,6 +27,8 @@
             <class name="org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementServiceImplTest"/>
             <class name="org.wso2.carbon.identity.notification.sender.tenant.config.handlers.DefaultChannelConfigurationHandlerTest"/>
             <class name="org.wso2.carbon.identity.notification.sender.tenant.config.utils.TokenManagerTest"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtilsTest"/>
+            <class name="org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessorTest"/>
         </classes>
     </test>
 </suite>

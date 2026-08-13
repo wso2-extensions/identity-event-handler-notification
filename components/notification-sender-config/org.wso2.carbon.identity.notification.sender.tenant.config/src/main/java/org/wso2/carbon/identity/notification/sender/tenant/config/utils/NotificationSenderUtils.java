@@ -100,6 +100,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FORM;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM;
@@ -139,6 +140,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_NOTIFICATION_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_AUTH_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_CLIENT_ID_PROPERTY;
@@ -157,11 +159,9 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TO;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_ENDPOINT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TRACE_KEY;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_VALUE;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 
