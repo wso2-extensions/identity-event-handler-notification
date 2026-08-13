@@ -41,6 +41,7 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
+import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
@@ -260,7 +261,11 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(SENDER, smsSender.getSender());
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
-        NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
+        try {
+            NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
+        } catch (SecretManagementCredentialException e) {
+            throw new NotificationSenderManagementServerException(e.getErrorMessage(), smsSender.getName(), e);
+        }
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)
                         .map(attribute -> new Attribute(attribute.getKey(), attribute.getValue()))

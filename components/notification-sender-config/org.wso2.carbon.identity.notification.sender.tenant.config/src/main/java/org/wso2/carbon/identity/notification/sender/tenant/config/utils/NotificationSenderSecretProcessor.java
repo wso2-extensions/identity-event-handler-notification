@@ -45,6 +45,10 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
  */
 public class NotificationSenderSecretProcessor {
 
+    // SMS's own Authentication.Property.USERNAME is the literal "username" (lowercase) - distinct from the
+    // shared NotificationSenderManagementConstants.USERNAME ("userName", camelCase) that Email's schema uses.
+    private static final String SMS_USERNAME_PROPERTY = "username";
+
     /**
      * Encrypt secret property.
      *
@@ -107,6 +111,26 @@ public class NotificationSenderSecretProcessor {
         deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
         deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET, USERNAME, PASSWORD,
                 INTERNAL_ACCESS_TOKEN);
+    }
+
+    /**
+     * Delete secret property for an SMS sender. Unlike email senders, the SMS sender's cached internal
+     * access token is keyed by {@code ACCESS_TOKEN_PROP} ("accessToken"), not {@code INTERNAL_ACCESS_TOKEN}
+     * ("internalAccessToken") - so it needs its own cleanup rather than reusing {@link #deleteAssociatedSecrets}.
+     *
+     * @param notificationSender Notification Sender: SMS_PROVIDER.
+     * @throws SecretManagementException If an error occurs while deleting the secret.
+     */
+    public static void deleteAssociatedSMSSecrets(String notificationSender)
+            throws SecretManagementException {
+
+        deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, SMS_USERNAME_PROPERTY);
+        deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                ACCESS_TOKEN_PROP);
+        deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+        deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
+        deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP);
     }
 
     /**

@@ -97,6 +97,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DISPLAY_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PROVIDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.EMAIL_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CHANNEL_TYPE_UPDATE_NOT_ALLOWED;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND;
@@ -156,6 +157,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_ENDPOINT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSMSSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteInternalAccessTokenSecret;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteSecretsByAuthType;
@@ -405,6 +407,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (StringUtils.equals(DEFAULT_EMAIL_PUBLISHER, senderName)) {
             try {
                 deleteAssociatedSecrets(EMAIL_PROVIDER);
+            } catch (SecretManagementException e) {
+                throw new NotificationSenderManagementClientException(ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS,
+                        e.getMessage(), e);
+            }
+        }
+        if (StringUtils.equals(DEFAULT_SMS_PUBLISHER, senderName)) {
+            try {
+                deleteAssociatedSMSSecrets(SMS_PROVIDER);
             } catch (SecretManagementException e) {
                 throw new NotificationSenderManagementClientException(ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS,
                         e.getMessage(), e);
