@@ -327,10 +327,10 @@ public class NotificationSenderUtils {
     }
 
     /**
-     * Decrypt an SMS authentication property that is expected to be secret-manager encrypted (the sensitive
-     * external properties, and the internal access token, which are always encrypted on write). Falls back to
-     * the raw stored value if decryption fails - covering senders configured before secret-manager based
-     * storage was introduced for SMS, whose values are still plain text.
+     * Decrypt an SMS *external* authentication property that is expected to be secret-manager encrypted (only
+     * the sensitive ones - not every external property is encrypted, e.g. {@code tokenEndpoint}/{@code scopes}
+     * never are). Falls back to the raw stored value if decryption fails - covering senders configured before
+     * secret-manager based storage was introduced for SMS, whose values are still plain text.
      *
      * @param propertyKey Authentication property key (unprefixed).
      * @param value       Stored value (a secret reference, or a legacy plain-text value).
@@ -342,6 +342,27 @@ public class NotificationSenderUtils {
         if (!isSensitiveSMSAuthProperty(propertyKey)) {
             return value;
         }
+        return decryptSMSAuthPropertyOrFallback(propertyKey, value, authType);
+    }
+
+    /**
+     * Decrypt an SMS *internal* authentication property (the cached access token, refresh token, etc.).
+     * Unlike external properties, every internal property is unconditionally encrypted on write - so, unlike
+     * {@link #decryptIfSensitiveSMSAuthProperty}, there's no per-property sensitivity check here: decryption is
+     * always attempted, with the same plaintext fallback for legacy data.
+     *
+     * @param propertyKey Authentication internal property key (unprefixed).
+     * @param value       Stored value (a secret reference, or a legacy plain-text value).
+     * @param authType    Authentication type the property was persisted under.
+     * @return The decrypted value, or the original value if it isn't (or is no longer) encrypted.
+     */
+    private static String decryptInternalSMSAuthProperty(String propertyKey, String value, String authType) {
+
+        return decryptSMSAuthPropertyOrFallback(propertyKey, value, authType);
+    }
+
+    private static String decryptSMSAuthPropertyOrFallback(String propertyKey, String value, String authType) {
+
         try {
             return decryptCredential(SMS_PROVIDER, authType, propertyKey);
         } catch (SecretManagementException e) {
@@ -757,7 +778,7 @@ public class NotificationSenderUtils {
                                 decryptIfSensitiveSMSAuthProperty(propKey, value, authType));
                     } else if (StringUtils.startsWith(key, AUTH_INTERNAL_PROP_PREFIX)) {
                         String propKey = StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX);
-                        internalAuthProp.put(propKey, decryptIfSensitiveSMSAuthProperty(propKey, value, authType));
+                        internalAuthProp.put(propKey, decryptInternalSMSAuthProperty(propKey, value, authType));
                     } else {
                         smsSenderBuilder.addProperty(key, value);
                     }

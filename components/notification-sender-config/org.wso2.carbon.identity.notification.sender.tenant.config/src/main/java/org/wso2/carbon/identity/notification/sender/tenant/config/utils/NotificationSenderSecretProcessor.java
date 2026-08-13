@@ -37,6 +37,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_ACCESS_TOKEN;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_CREDENTIAL;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REFRESH_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 
@@ -157,7 +158,7 @@ public class NotificationSenderSecretProcessor {
                 break;
             case CLIENT_CREDENTIAL:
                 deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
-                        ACCESS_TOKEN_PROP);
+                        ACCESS_TOKEN_PROP, REFRESH_TOKEN_PROP);
                 break;
             case BEARER:
                 deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
@@ -167,7 +168,7 @@ public class NotificationSenderSecretProcessor {
                 break;
             case PASSWORD_CREDENTIAL:
                 deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
-                        SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP);
+                        SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP, REFRESH_TOKEN_PROP);
                 break;
             default:
                 break;

@@ -52,6 +52,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_INTERNAL_PROP_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REFRESH_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 
 /**
@@ -167,6 +168,89 @@ public class NotificationSenderUtilsTest {
         Map<String, String> mapToBeUpdated = new HashMap<>();
         NotificationSenderUtils.addAuthenticationProperties(mapToBeUpdated, null);
         Assert.assertTrue(mapToBeUpdated.isEmpty());
+    }
+
+    @Test
+    public void testAddAuthenticationPropertiesEncryptsRefreshTokenDespiteNotBeingExternallySensitive()
+            throws Exception {
+
+        // REFRESH_TOKEN_PROP has no external-property counterpart (unlike ACCESS_TOKEN_PROP, which doubles as
+        // BEARER's external static token), so it can never appear in isSensitiveSMSAuthProperty's list - yet
+        // every internal property must still be encrypted unconditionally on write.
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(false);
+
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("clientId", "my-client-id");
+        authProps.put("clientSecret", "my-client-secret");
+        authProps.put("tokenEndpoint", "https://idp.example.com/oauth2/token");
+        Authentication authentication =
+                new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProps).build();
+        authentication.addInternalProperty(REFRESH_TOKEN_PROP, "a-real-refresh-token");
+
+        Map<String, String> mapToBeUpdated = new HashMap<>();
+        NotificationSenderUtils.addAuthenticationProperties(mapToBeUpdated, authentication);
+
+        Assert.assertEquals(mapToBeUpdated.get(AUTH_INTERNAL_PROP_PREFIX + REFRESH_TOKEN_PROP),
+                MOCK_SECRET_TYPE_ID + ":" + SMS_PROVIDER + ":CLIENT_CREDENTIAL:" + REFRESH_TOKEN_PROP);
+    }
+
+    @Test
+    public void testBuildSmsSenderFromResourceDecryptsInternalRefreshToken() throws Exception {
+
+        // Regression test: internal properties must be decrypted unconditionally on read, mirroring the
+        // unconditional encryption on write - decryptIfSensitiveSMSAuthProperty's external-property sensitivity
+        // gate must never be applied to internal properties like refreshToken, or they'd be written encrypted
+        // but read back as the raw (undecrypted) secret reference string instead of the real value.
+        when(secretManager.isSecretExist(anyString(),
+                org.mockito.ArgumentMatchers.eq(SMS_PROVIDER + ":CLIENT_CREDENTIAL:" + REFRESH_TOKEN_PROP)))
+                .thenReturn(true);
+        ResolvedSecret resolvedRefreshToken = Mockito.mock(ResolvedSecret.class);
+        when(resolvedRefreshToken.getResolvedSecretValue()).thenReturn("a-real-refresh-token");
+        when(secretResolveManager.getResolvedSecret(SMS_PROVIDER + "_SECRET_PROPERTIES",
+                SMS_PROVIDER + ":CLIENT_CREDENTIAL:" + REFRESH_TOKEN_PROP)).thenReturn(resolvedRefreshToken);
+
+        Resource resource = new Resource();
+        resource.setResourceName("SMSPublisher");
+        List<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute(AUTH_TYPE_PREFIX, "CLIENT_CREDENTIAL"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "clientId", "my-client-id"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "clientSecret", "my-client-secret"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "tokenEndpoint",
+                "https://idp.example.com/oauth2/token"));
+        attributes.add(new Attribute(AUTH_INTERNAL_PROP_PREFIX + REFRESH_TOKEN_PROP,
+                MOCK_SECRET_TYPE_ID + ":" + SMS_PROVIDER + ":CLIENT_CREDENTIAL:" + REFRESH_TOKEN_PROP));
+        resource.setAttributes(attributes);
+
+        SMSSenderDTO smsSenderDTO = NotificationSenderUtils.buildSmsSenderFromResource(resource);
+
+        Assert.assertEquals(
+                smsSenderDTO.getAuthentication().getInternalProperties().get(REFRESH_TOKEN_PROP),
+                "a-real-refresh-token");
+    }
+
+    @Test
+    public void testBuildSmsSenderFromResourceFallsBackToPlaintextForLegacyInternalRefreshToken() throws Exception {
+
+        // Pre-fix/legacy data: no secret was ever created for this internal property - decrypt must fail fast
+        // and fall back to the stored value, same guarantee as external properties.
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(false);
+
+        Resource resource = new Resource();
+        resource.setResourceName("SMSPublisher");
+        List<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute(AUTH_TYPE_PREFIX, "CLIENT_CREDENTIAL"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "clientId", "my-client-id"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "clientSecret", "my-client-secret"));
+        attributes.add(new Attribute(AUTH_EXTERNAL_PROP_PREFIX + "tokenEndpoint",
+                "https://idp.example.com/oauth2/token"));
+        attributes.add(new Attribute(AUTH_INTERNAL_PROP_PREFIX + REFRESH_TOKEN_PROP, "legacy-plaintext-refresh"));
+        resource.setAttributes(attributes);
+
+        SMSSenderDTO smsSenderDTO = NotificationSenderUtils.buildSmsSenderFromResource(resource);
+
+        Assert.assertEquals(
+                smsSenderDTO.getAuthentication().getInternalProperties().get(REFRESH_TOKEN_PROP),
+                "legacy-plaintext-refresh");
     }
 
     @Test(expectedExceptions = SecretManagementCredentialException.class)

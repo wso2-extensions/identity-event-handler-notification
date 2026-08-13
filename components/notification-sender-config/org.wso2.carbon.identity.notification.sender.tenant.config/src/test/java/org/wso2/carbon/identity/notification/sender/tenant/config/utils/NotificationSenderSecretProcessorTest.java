@@ -66,11 +66,12 @@ public class NotificationSenderSecretProcessorTest {
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":BASIC:password");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":BASIC:username");
 
-        // CLIENT_CREDENTIAL: clientId, clientSecret, and the cached token under "accessToken" (SMS's own
-        // key, not Email's "internalAccessToken").
+        // CLIENT_CREDENTIAL: clientId, clientSecret, and the cached access + refresh tokens ("accessToken"/
+        // "refreshToken" - SMS's own keys, not Email's "internalAccessToken").
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":CLIENT_CREDENTIAL:clientId");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":CLIENT_CREDENTIAL:clientSecret");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":CLIENT_CREDENTIAL:accessToken");
+        verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":CLIENT_CREDENTIAL:refreshToken");
 
         // BEARER: the static access token.
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":BEARER:accessToken");
@@ -78,15 +79,17 @@ public class NotificationSenderSecretProcessorTest {
         // API_KEY: the api key value, keyed "value" (SMS's own key, not Email's "apiKeyValue").
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":API_KEY:value");
 
-        // PASSWORD_CREDENTIAL: clientId, clientSecret, username, password, and the cached token.
+        // PASSWORD_CREDENTIAL: clientId, clientSecret, username, password, and the cached access + refresh
+        // tokens.
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:clientId");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:clientSecret");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:username");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:password");
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:accessToken");
+        verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:refreshToken");
 
-        // Exactly 12 secrets total across all five auth types - no extras, no omissions.
-        verify(secretManager, times(12)).deleteSecret(eq(SECRET_TYPE), anyString());
+        // Exactly 14 secrets total across all five auth types - no extras, no omissions.
+        verify(secretManager, times(14)).deleteSecret(eq(SECRET_TYPE), anyString());
     }
 
     @Test
