@@ -310,10 +310,11 @@ public class NotificationSenderUtils {
      * Whether the given SMS authentication property key holds a value sensitive enough to require
      * secret-manager encryption rather than plain config-attribute storage.
      *
-     * <p>Note: SMS's own {@link Authentication.Property#USERNAME} is the literal "username" (lowercase),
-     * distinct from the shared {@code NotificationSenderManagementConstants.USERNAME} ("userName",
-     * camelCase) that Email's schema uses - comparing against the wrong one would silently skip
-     * encrypting the SMS resource-owner username.
+     * <p>Note: SMS's own {@link Authentication.Property#USERNAME} and {@link Authentication.Property#VALUE}
+     * are the literals "username" and "value" - distinct from the shared
+     * {@code NotificationSenderManagementConstants.USERNAME} ("userName") and {@code API_KEY_VALUE}
+     * ("apiKeyValue") that Email's schema uses. Comparing against Email's constants here would silently skip
+     * encrypting SMS's resource-owner username and API key value.
      *
      * @param propertyKey Authentication property key (unprefixed).
      * @return true if the property should be encrypted before persisting.
@@ -321,7 +322,8 @@ public class NotificationSenderUtils {
     private static boolean isSensitiveSMSAuthProperty(String propertyKey) {
 
         return CLIENT_ID.equals(propertyKey) || CLIENT_SECRET.equals(propertyKey)
-                || Authentication.Property.USERNAME.getName().equals(propertyKey) || PASSWORD.equals(propertyKey);
+                || Authentication.Property.USERNAME.getName().equals(propertyKey) || PASSWORD.equals(propertyKey)
+                || ACCESS_TOKEN_PROP.equals(propertyKey) || Authentication.Property.VALUE.getName().equals(propertyKey);
     }
 
     /**
@@ -337,7 +339,7 @@ public class NotificationSenderUtils {
      */
     private static String decryptIfSensitiveSMSAuthProperty(String propertyKey, String value, String authType) {
 
-        if (!isSensitiveSMSAuthProperty(propertyKey) && !ACCESS_TOKEN_PROP.equals(propertyKey)) {
+        if (!isSensitiveSMSAuthProperty(propertyKey)) {
             return value;
         }
         try {

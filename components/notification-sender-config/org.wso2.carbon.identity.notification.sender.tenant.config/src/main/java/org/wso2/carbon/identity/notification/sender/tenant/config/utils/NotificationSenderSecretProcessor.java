@@ -49,6 +49,10 @@ public class NotificationSenderSecretProcessor {
     // shared NotificationSenderManagementConstants.USERNAME ("userName", camelCase) that Email's schema uses.
     private static final String SMS_USERNAME_PROPERTY = "username";
 
+    // SMS's own Authentication.Property.VALUE is the literal "value" - distinct from the shared
+    // NotificationSenderManagementConstants.API_KEY_VALUE ("apiKeyValue") that Email's schema uses.
+    private static final String SMS_API_KEY_VALUE_PROPERTY = "value";
+
     /**
      * Encrypt secret property.
      *
@@ -124,13 +128,50 @@ public class NotificationSenderSecretProcessor {
     public static void deleteAssociatedSMSSecrets(String notificationSender)
             throws SecretManagementException {
 
-        deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, SMS_USERNAME_PROPERTY);
-        deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
-                ACCESS_TOKEN_PROP);
-        deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
-        deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
-        deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
-                SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP);
+        deleteSecretsBySMSAuthType(notificationSender, BASIC);
+        deleteSecretsBySMSAuthType(notificationSender, CLIENT_CREDENTIAL);
+        deleteSecretsBySMSAuthType(notificationSender, BEARER);
+        deleteSecretsBySMSAuthType(notificationSender, API_KEY);
+        deleteSecretsBySMSAuthType(notificationSender, PASSWORD_CREDENTIAL);
+    }
+
+    /**
+     * Delete SMS secrets for a single authentication type. Used both by {@link #deleteAssociatedSMSSecrets}
+     * (sender deletion, all auth types) and by the SMS update flow (a single auth type, when the sender's
+     * auth type changes - to avoid leaving the previous auth type's secrets orphaned). Uses SMS's own key
+     * names, unlike {@link #deleteSecretsByAuthType} which is Email-keyed and must not be reused for SMS.
+     *
+     * @param notificationSender Notification Sender: SMS_PROVIDER.
+     * @param authType           Authentication Type.
+     * @throws SecretManagementException If an error occurs while deleting the secrets.
+     */
+    public static void deleteSecretsBySMSAuthType(String notificationSender, String authType)
+            throws SecretManagementException {
+
+        if (StringUtils.isBlank(authType)) {
+            return;
+        }
+        switch (authType.toUpperCase(Locale.ENGLISH)) {
+            case BASIC:
+                deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, SMS_USERNAME_PROPERTY);
+                break;
+            case CLIENT_CREDENTIAL:
+                deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                        ACCESS_TOKEN_PROP);
+                break;
+            case BEARER:
+                deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+                break;
+            case API_KEY:
+                deleteSecretsForAuthType(notificationSender, API_KEY, SMS_API_KEY_VALUE_PROPERTY);
+                break;
+            case PASSWORD_CREDENTIAL:
+                deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                        SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP);
+                break;
+            default:
+                break;
+        }
     }
 
     /**

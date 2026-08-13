@@ -75,8 +75,8 @@ public class NotificationSenderSecretProcessorTest {
         // BEARER: the static access token.
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":BEARER:accessToken");
 
-        // API_KEY: the api key value.
-        verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":API_KEY:apiKeyValue");
+        // API_KEY: the api key value, keyed "value" (SMS's own key, not Email's "apiKeyValue").
+        verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":API_KEY:value");
 
         // PASSWORD_CREDENTIAL: clientId, clientSecret, username, password, and the cached token.
         verify(secretManager).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:clientId");
@@ -103,6 +103,7 @@ public class NotificationSenderSecretProcessorTest {
                 .deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":CLIENT_CREDENTIAL:internalAccessToken");
         verify(secretManager, never())
                 .deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:userName");
+        verify(secretManager, never()).deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":API_KEY:apiKeyValue");
         verify(secretManager, never())
                 .deleteSecret(SECRET_TYPE, SMS_PROVIDER + ":PASSWORD_CREDENTIAL:internalAccessToken");
     }

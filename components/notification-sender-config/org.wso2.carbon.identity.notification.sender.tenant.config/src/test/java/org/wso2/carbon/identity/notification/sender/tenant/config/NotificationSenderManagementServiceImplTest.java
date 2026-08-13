@@ -39,6 +39,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.notification.push.provider.exception.PushProviderException;
 import org.wso2.carbon.identity.notification.push.provider.impl.FCMPushProvider;
 import org.wso2.carbon.identity.notification.push.provider.model.PushSenderData;
+import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.EmailSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
@@ -68,10 +69,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_PUSH_PUBLISHER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_SMS_PUBLISHER;
@@ -1757,6 +1760,59 @@ public class NotificationSenderManagementServiceImplTest {
         verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:password");
         verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:username");
         verify(defaultChannelConfigurationHandler).deleteNotificationSender(DEFAULT_SMS_PUBLISHER);
+    }
+
+    @Test
+    public void testUpdateSMSSenderCleansUpPreviousAuthTypeSecretsOnAuthTypeChange() throws Exception {
+
+        SecretManager secretManager = Mockito.mock(SecretManager.class);
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(true);
+        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
+
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDto(DEFAULT_HANDLER_NAME);
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("clientId", "my-client-id");
+        authProps.put("clientSecret", "my-client-secret");
+        authProps.put("tokenEndpoint", "https://idp.example.com/oauth2/token");
+        smsSenderDTO.setAuthentication(
+                new Authentication.AuthenticationBuilder("CLIENT_CREDENTIAL", authProps).build());
+
+        Resource existingResource = constructResource(DEFAULT_HANDLER_NAME, false);
+        existingResource.getAttributes().add(new Attribute(AUTH_TYPE_PREFIX, "BASIC"));
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+        when(defaultChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class))).thenReturn(smsSenderDTO);
+
+        notificationSenderManagementService.updateSMSSender(smsSenderDTO);
+
+        // The sender switched from BASIC to CLIENT_CREDENTIAL - BASIC's now-unused secrets must be cleaned
+        // up so they don't remain orphaned in the secret store indefinitely.
+        verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:password");
+        verify(secretManager).deleteSecret(SMS_PROVIDER + "_SECRET_PROPERTIES", SMS_PROVIDER + ":BASIC:username");
+    }
+
+    @Test
+    public void testUpdateSMSSenderDoesNotCleanUpSecretsWhenAuthTypeUnchanged() throws Exception {
+
+        SecretManager secretManager = Mockito.mock(SecretManager.class);
+        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(true);
+        NotificationSenderTenantConfigDataHolder.getInstance().setSecretManager(secretManager);
+
+        SMSSenderDTO smsSenderDTO = constructSMSSenderDto(DEFAULT_HANDLER_NAME);
+        Map<String, String> authProps = new HashMap<>();
+        authProps.put("username", "admin");
+        authProps.put("password", "admin-password");
+        smsSenderDTO.setAuthentication(new Authentication.AuthenticationBuilder("BASIC", authProps).build());
+
+        Resource existingResource = constructResource(DEFAULT_HANDLER_NAME, false);
+        existingResource.getAttributes().add(new Attribute(AUTH_TYPE_PREFIX, "BASIC"));
+
+        when(configurationManager.getResource(anyString(), anyString())).thenReturn(existingResource);
+        when(defaultChannelConfigurationHandler.updateSMSSender(any(SMSSenderDTO.class))).thenReturn(smsSenderDTO);
+
+        notificationSenderManagementService.updateSMSSender(smsSenderDTO);
+
+        verify(secretManager, never()).deleteSecret(anyString(), anyString());
     }
 
     @Test
