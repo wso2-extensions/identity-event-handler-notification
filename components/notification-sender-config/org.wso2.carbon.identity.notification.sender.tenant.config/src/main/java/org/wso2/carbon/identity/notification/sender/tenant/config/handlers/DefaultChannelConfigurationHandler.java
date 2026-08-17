@@ -41,9 +41,9 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderD
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementClientException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
+import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementClientException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementException;
 import org.wso2.carbon.identity.tenant.resource.manager.exception.TenantResourceManagementServerException;
@@ -68,6 +68,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_ADDING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_NOTIFICATION_SENDER;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_NO_ACTIVE_PUBLISHERS_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PARSER_CONFIG_EXCEPTION;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_PUBLISHER_NOT_EXISTS_IN_SUPER_TENANT;
@@ -262,9 +263,11 @@ public class DefaultChannelConfigurationHandler extends ChannelConfigurationHand
         smsSenderAttributes.put(CONTENT_TYPE, smsSender.getContentType());
         smsSenderAttributes.putAll(smsSender.getProperties());
         try {
-            NotificationSenderUtils.addAuthenticationProperties(smsSenderAttributes, smsSender.getAuthentication());
-        } catch (SecretManagementCredentialException e) {
-            throw new NotificationSenderManagementServerException(e.getErrorMessage(), smsSender.getName(), e);
+            NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(smsSenderAttributes,
+                    smsSender.getAuthentication());
+        } catch (SecretManagementException e) {
+            throw new NotificationSenderManagementServerException(ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS,
+                    smsSender.getName(), e);
         }
         List<Attribute> resourceAttributes =
                 smsSenderAttributes.entrySet().stream().filter(attribute -> attribute.getValue() != null)

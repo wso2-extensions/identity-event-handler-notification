@@ -28,7 +28,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentica
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
@@ -56,7 +55,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.DEFAULT_HANDLER_NAME;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUBLISHER_RESOURCE_TYPE;
 
 /**
@@ -180,13 +178,12 @@ public class DefaultChannelConfigurationHandlerTest {
         when(carbonEventPublisherService.getAllActiveEventPublisherConfigurations())
                 .thenReturn(eventPublisherConfigurationList);
 
-        // The real addAuthenticationProperties() (not otherwise stubbed here) throws the unchecked
-        // SecretManagementCredentialException on encryption failure - buildResourceFromSmsSender must catch
-        // it and surface it as the checked NotificationSenderManagementServerException it always threw,
-        // rather than letting the crash escape as an unhandled RuntimeException.
-        notificationSenderUtilsStatic.when(() -> NotificationSenderUtils.addAuthenticationProperties(any(), any()))
-                .thenThrow(new SecretManagementCredentialException(ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS,
-                        new SecretManagementException("secret store unavailable")));
+        // addAuthenticationPropertiesWithEncryption() throws the checked SecretManagementException on
+        // encryption failure - buildResourceFromSmsSender must catch it and surface it as the
+        // NotificationSenderManagementServerException it always threw.
+        notificationSenderUtilsStatic.when(() ->
+                        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(any(), any()))
+                .thenThrow(new SecretManagementException("secret store unavailable"));
 
         assertThrows(NotificationSenderManagementServerException.class,
                 () -> defaultChannelConfigurationHandler.addSMSSender(smsSenderDTO));

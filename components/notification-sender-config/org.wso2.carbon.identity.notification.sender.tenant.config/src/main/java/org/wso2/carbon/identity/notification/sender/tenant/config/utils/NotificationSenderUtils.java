@@ -38,7 +38,6 @@ import org.wso2.carbon.identity.notification.sender.tenant.config.dto.PushSender
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.exception.NotificationSenderManagementServerException;
-import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
@@ -100,7 +99,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_DELETING_NOTIFICATION_SENDER_SECRETS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_PROCESSING_PUSH_SENDER_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_UPDATING_PUSH_SENDER_PROPERTIES;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_MATCHING_PUSH_PROVIDER_NOT_FOUND;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FORM;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.FROM;
@@ -270,38 +268,55 @@ public class NotificationSenderUtils {
     }
 
     /**
+     * Convert AuthProperty list to a map with proper prefixes.
+     *
+     * @param authentication Authentication object.
+     * @param mapToBeUpdated Map to be updated with authentication properties.
+     * @deprecated Does not encrypt sensitive properties before persisting them. Use
+     * {@link #addAuthenticationPropertiesWithEncryption(Map, Authentication)} instead.
+     */
+    @Deprecated
+    public static void addAuthenticationProperties(Map<String, String> mapToBeUpdated, Authentication authentication) {
+
+        if (authentication != null) {
+            mapToBeUpdated.put(AUTH_TYPE_PREFIX, authentication.getType().name());
+            authentication.getProperties().forEach((propKey, propValue) ->
+                    mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + propKey, propValue)
+            );
+            authentication.getInternalProperties().forEach((propKey, propValue) ->
+                    mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey, propValue)
+            );
+        }
+    }
+
+    /**
      * Convert AuthProperty list to a map with proper prefixes. Sensitive properties (client credentials,
      * resource-owner credentials, and the cached internal access token) are encrypted and stored via the
      * secret manager rather than as plain config attributes - matching how the HTTP-based Email sender
      * already persists these same kinds of properties.
      *
-     * <p>Public method signature intentionally unchanged (no new checked exception): a
-     * {@link SecretManagementCredentialException} (unchecked) is thrown instead on encryption failure, so
-     * existing external callers of this public API keep compiling as-is.
-     *
      * @param authentication Authentication object.
      * @param mapToBeUpdated Map to be updated with authentication properties.
+     * @throws SecretManagementException If an error occurs while encrypting a sensitive property.
      */
-    public static void addAuthenticationProperties(Map<String, String> mapToBeUpdated, Authentication authentication) {
+    public static void addAuthenticationPropertiesWithEncryption(Map<String, String> mapToBeUpdated,
+                                                                  Authentication authentication)
+            throws SecretManagementException {
 
         if (authentication != null) {
             String authType = authentication.getType().name();
             mapToBeUpdated.put(AUTH_TYPE_PREFIX, authType);
-            try {
-                for (Map.Entry<String, String> entry : authentication.getProperties().entrySet()) {
-                    String propKey = entry.getKey();
-                    String propValue = isSensitiveSMSAuthProperty(propKey)
-                            ? encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue())
-                            : entry.getValue();
-                    mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + propKey, propValue);
-                }
-                for (Map.Entry<String, String> entry : authentication.getInternalProperties().entrySet()) {
-                    String propKey = entry.getKey();
-                    mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey,
-                            encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue()));
-                }
-            } catch (SecretManagementException e) {
-                throw new SecretManagementCredentialException(ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS, e);
+            for (Map.Entry<String, String> entry : authentication.getProperties().entrySet()) {
+                String propKey = entry.getKey();
+                String propValue = isSensitiveSMSAuthProperty(propKey)
+                        ? encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue())
+                        : entry.getValue();
+                mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + propKey, propValue);
+            }
+            for (Map.Entry<String, String> entry : authentication.getInternalProperties().entrySet()) {
+                String propKey = entry.getKey();
+                mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey,
+                        encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue()));
             }
         }
     }

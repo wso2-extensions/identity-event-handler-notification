@@ -28,7 +28,6 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.Authentication;
 import org.wso2.carbon.identity.notification.sender.tenant.config.dto.SMSSenderDTO;
-import org.wso2.carbon.identity.notification.sender.tenant.config.exception.SecretManagementCredentialException;
 import org.wso2.carbon.identity.notification.sender.tenant.config.internal.NotificationSenderTenantConfigDataHolder;
 import org.wso2.carbon.identity.secret.mgt.core.SecretManager;
 import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager;
@@ -51,7 +50,6 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_EXTERNAL_PROP_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_INTERNAL_PROP_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
-import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.ErrorMessage.ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REFRESH_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 
@@ -93,7 +91,7 @@ public class NotificationSenderUtilsTest {
         }
 
         Map<String, String> mapToBeUpdated = new HashMap<>();
-        NotificationSenderUtils.addAuthenticationProperties(mapToBeUpdated, authentication);
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(mapToBeUpdated, authentication);
 
         Assert.assertEquals(mapToBeUpdated.get(AUTH_TYPE_PREFIX), authType);
 
@@ -163,10 +161,10 @@ public class NotificationSenderUtilsTest {
     }
 
     @Test
-    public void testAddAuthenticationPropertiesNullAuthenticationIsNoOp() {
+    public void testAddAuthenticationPropertiesNullAuthenticationIsNoOp() throws Exception {
 
         Map<String, String> mapToBeUpdated = new HashMap<>();
-        NotificationSenderUtils.addAuthenticationProperties(mapToBeUpdated, null);
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(mapToBeUpdated, null);
         Assert.assertTrue(mapToBeUpdated.isEmpty());
     }
 
@@ -188,7 +186,7 @@ public class NotificationSenderUtilsTest {
         authentication.addInternalProperty(REFRESH_TOKEN_PROP, "a-real-refresh-token");
 
         Map<String, String> mapToBeUpdated = new HashMap<>();
-        NotificationSenderUtils.addAuthenticationProperties(mapToBeUpdated, authentication);
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(mapToBeUpdated, authentication);
 
         Assert.assertEquals(mapToBeUpdated.get(AUTH_INTERNAL_PROP_PREFIX + REFRESH_TOKEN_PROP),
                 MOCK_SECRET_TYPE_ID + ":" + SMS_PROVIDER + ":CLIENT_CREDENTIAL:" + REFRESH_TOKEN_PROP);
@@ -253,8 +251,8 @@ public class NotificationSenderUtilsTest {
                 "legacy-plaintext-refresh");
     }
 
-    @Test(expectedExceptions = SecretManagementCredentialException.class)
-    public void testAddAuthenticationPropertiesWrapsEncryptionFailureAsUnchecked() throws Exception {
+    @Test(expectedExceptions = SecretManagementException.class)
+    public void testAddAuthenticationPropertiesWithEncryptionPropagatesSecretManagementException() throws Exception {
 
         when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(false);
         doThrow(new SecretManagementException("secret store unavailable"))
@@ -265,27 +263,7 @@ public class NotificationSenderUtilsTest {
         authProps.put("password", "admin-password");
         Authentication authentication = new Authentication.AuthenticationBuilder("BASIC", authProps).build();
 
-        NotificationSenderUtils.addAuthenticationProperties(new HashMap<>(), authentication);
-    }
-
-    @Test
-    public void testAddAuthenticationPropertiesWrapsEncryptionFailurePreservesErrorCode() throws Exception {
-
-        when(secretManager.isSecretExist(anyString(), anyString())).thenReturn(false);
-        doThrow(new SecretManagementException("secret store unavailable"))
-                .when(secretManager).addSecret(anyString(), org.mockito.ArgumentMatchers.any());
-
-        Map<String, String> authProps = new HashMap<>();
-        authProps.put("username", "admin");
-        authProps.put("password", "admin-password");
-        Authentication authentication = new Authentication.AuthenticationBuilder("BASIC", authProps).build();
-
-        try {
-            NotificationSenderUtils.addAuthenticationProperties(new HashMap<>(), authentication);
-            Assert.fail("Expected SecretManagementCredentialException to be thrown");
-        } catch (SecretManagementCredentialException e) {
-            Assert.assertEquals(e.getErrorMessage(), ERROR_CODE_ERROR_WHILE_ENCRYPTING_CREDENTIALS);
-        }
+        NotificationSenderUtils.addAuthenticationPropertiesWithEncryption(new HashMap<>(), authentication);
     }
 
     @Test
