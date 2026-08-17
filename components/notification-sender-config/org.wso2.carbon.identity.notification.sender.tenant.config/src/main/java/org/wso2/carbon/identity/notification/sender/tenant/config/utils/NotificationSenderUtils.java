@@ -381,6 +381,10 @@ public class NotificationSenderUtils {
         try {
             return decryptCredential(SMS_PROVIDER, authType, propertyKey);
         } catch (SecretManagementException e) {
+            LOG.warn("Unable to resolve property '" + propertyKey + "' for SMS auth type '" + authType +
+                    "' from the secret manager - falling back to the stored value. This is expected for a " +
+                    "sender not yet migrated to secret-manager storage; if it persists after the sender has " +
+                    "been re-saved, it may indicate a secret-manager issue.", e);
             return value;
         }
     }
