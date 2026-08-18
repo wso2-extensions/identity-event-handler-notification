@@ -84,6 +84,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY_HEADER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.API_KEY_VALUE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.AUTH_TYPE_PREFIX;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BASIC;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.BEARER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.CHANNEL_TYPE_PROPERTY;
@@ -148,6 +149,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PUT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REPLY_TO_ADDRESS;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.RESOURCE_NOT_EXISTS_ERROR_CODE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_PORT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_SERVER_HOST;
@@ -156,9 +158,11 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.TOKEN_ENDPOINT;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSMSSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteAssociatedSecrets;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteInternalAccessTokenSecret;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteSecretsByAuthType;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.deleteSecretsBySMSAuthType;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildNotificationSenderConfigsResource;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderUtils.buildPushSenderFromResource;
@@ -405,6 +409,14 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
         if (StringUtils.equals(DEFAULT_EMAIL_PUBLISHER, senderName)) {
             try {
                 deleteAssociatedSecrets(EMAIL_PROVIDER);
+            } catch (SecretManagementException e) {
+                throw new NotificationSenderManagementClientException(ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS,
+                        e.getMessage(), e);
+            }
+        }
+        if (StringUtils.equals(DEFAULT_SMS_PUBLISHER, senderName)) {
+            try {
+                deleteAssociatedSMSSecrets(SMS_PROVIDER);
             } catch (SecretManagementException e) {
                 throw new NotificationSenderManagementClientException(ERROR_CODE_ERROR_WHILE_DELETING_CREDENTIALS,
                         e.getMessage(), e);
@@ -712,13 +724,37 @@ public class NotificationSenderManagementServiceImpl implements NotificationSend
                     smsSender.getName());
         }
 
+        String previousAuthType = resource.getAttributes().stream()
+                .filter(attribute -> AUTH_TYPE_PREFIX.equals(attribute.getKey()))
+                .map(Attribute::getValue)
+                .findFirst()
+                .orElse(null);
+
         ChannelConfigurationHandler configurationHandler = NotificationSenderTenantConfigDataHolder.getInstance()
                 .getConfigurationHandlerMap().get(channelType);
-        if (configurationHandler != null) {
-            return configurationHandler.updateSMSSender(smsSender);
-        } else {
+        if (configurationHandler == null) {
             throw new NotificationSenderManagementClientException(ERROR_CODE_CONFIGURATION_HANDLER_NOT_FOUND);
         }
+        SMSSenderDTO updatedSmsSender = configurationHandler.updateSMSSender(smsSender);
+
+        String newAuthType = smsSender.getAuthentication() != null
+                ? smsSender.getAuthentication().getType().name() : null;
+        if (StringUtils.isNotBlank(previousAuthType) && StringUtils.isNotBlank(newAuthType) &&
+                !StringUtils.equalsIgnoreCase(newAuthType, previousAuthType)) {
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Auth type changed from " + previousAuthType + " to " + newAuthType +
+                            " for SMS sender: " + smsSender.getName() + ". Hence deleting the secrets associated" +
+                            " with the previous auth type.");
+                }
+                deleteSecretsBySMSAuthType(SMS_PROVIDER, previousAuthType);
+            } catch (SecretManagementException e) {
+                log.warn("Error occurred while deleting secrets associated with the previous auth type: " +
+                        previousAuthType + " of SMS sender: " + smsSender.getName() + ". Error: "
+                        + e.getMessage(), e);
+            }
+        }
+        return updatedSmsSender;
     }
 
     @Override

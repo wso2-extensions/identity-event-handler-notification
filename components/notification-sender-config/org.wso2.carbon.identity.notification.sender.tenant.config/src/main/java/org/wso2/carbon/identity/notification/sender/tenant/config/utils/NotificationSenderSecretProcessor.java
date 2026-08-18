@@ -37,6 +37,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.INTERNAL_ACCESS_TOKEN;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.PASSWORD_CREDENTIAL;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.REFRESH_TOKEN_PROP;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET_PROPERTIES;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 
@@ -44,6 +45,14 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
  * This class is used to encrypt and decrypt the secret properties of the notification sender.
  */
 public class NotificationSenderSecretProcessor {
+
+    // SMS's own Authentication.Property.USERNAME is the literal "username" (lowercase) - distinct from the
+    // shared NotificationSenderManagementConstants.USERNAME ("userName", camelCase) that Email's schema uses.
+    private static final String SMS_USERNAME_PROPERTY = "username";
+
+    // SMS's own Authentication.Property.VALUE is the literal "value" - distinct from the shared
+    // NotificationSenderManagementConstants.API_KEY_VALUE ("apiKeyValue") that Email's schema uses.
+    private static final String SMS_API_KEY_VALUE_PROPERTY = "value";
 
     /**
      * Encrypt secret property.
@@ -107,6 +116,63 @@ public class NotificationSenderSecretProcessor {
         deleteSecretsForAuthType(notificationSender, API_KEY, API_KEY_VALUE);
         deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET, USERNAME, PASSWORD,
                 INTERNAL_ACCESS_TOKEN);
+    }
+
+    /**
+     * Delete secret property for an SMS sender. Unlike email senders, the SMS sender's cached internal
+     * access token is keyed by {@code ACCESS_TOKEN_PROP} ("accessToken"), not {@code INTERNAL_ACCESS_TOKEN}
+     * ("internalAccessToken") - so it needs its own cleanup rather than reusing {@link #deleteAssociatedSecrets}.
+     *
+     * @param notificationSender Notification Sender: SMS_PROVIDER.
+     * @throws SecretManagementException If an error occurs while deleting the secret.
+     */
+    public static void deleteAssociatedSMSSecrets(String notificationSender)
+            throws SecretManagementException {
+
+        deleteSecretsBySMSAuthType(notificationSender, BASIC);
+        deleteSecretsBySMSAuthType(notificationSender, CLIENT_CREDENTIAL);
+        deleteSecretsBySMSAuthType(notificationSender, BEARER);
+        deleteSecretsBySMSAuthType(notificationSender, API_KEY);
+        deleteSecretsBySMSAuthType(notificationSender, PASSWORD_CREDENTIAL);
+    }
+
+    /**
+     * Delete SMS secrets for a single authentication type. Used both by {@link #deleteAssociatedSMSSecrets}
+     * (sender deletion, all auth types) and by the SMS update flow (a single auth type, when the sender's
+     * auth type changes - to avoid leaving the previous auth type's secrets orphaned). Uses SMS's own key
+     * names, unlike {@link #deleteSecretsByAuthType} which is Email-keyed and must not be reused for SMS.
+     *
+     * @param notificationSender Notification Sender: SMS_PROVIDER.
+     * @param authType           Authentication Type.
+     * @throws SecretManagementException If an error occurs while deleting the secrets.
+     */
+    public static void deleteSecretsBySMSAuthType(String notificationSender, String authType)
+            throws SecretManagementException {
+
+        if (StringUtils.isBlank(authType)) {
+            return;
+        }
+        switch (authType.toUpperCase(Locale.ENGLISH)) {
+            case BASIC:
+                deleteSecretsForAuthType(notificationSender, BASIC, PASSWORD, SMS_USERNAME_PROPERTY);
+                break;
+            case CLIENT_CREDENTIAL:
+                deleteSecretsForAuthType(notificationSender, CLIENT_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                        ACCESS_TOKEN_PROP, REFRESH_TOKEN_PROP);
+                break;
+            case BEARER:
+                deleteSecretsForAuthType(notificationSender, BEARER, ACCESS_TOKEN_PROP);
+                break;
+            case API_KEY:
+                deleteSecretsForAuthType(notificationSender, API_KEY, SMS_API_KEY_VALUE_PROPERTY);
+                break;
+            case PASSWORD_CREDENTIAL:
+                deleteSecretsForAuthType(notificationSender, PASSWORD_CREDENTIAL, CLIENT_ID, CLIENT_SECRET,
+                        SMS_USERNAME_PROPERTY, PASSWORD, ACCESS_TOKEN_PROP, REFRESH_TOKEN_PROP);
+                break;
+            default:
+                break;
+        }
     }
 
     /**

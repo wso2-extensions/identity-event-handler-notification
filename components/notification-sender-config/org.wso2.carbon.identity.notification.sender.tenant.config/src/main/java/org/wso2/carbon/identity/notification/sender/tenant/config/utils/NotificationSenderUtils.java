@@ -138,6 +138,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SECRET;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SENDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_NOTIFICATION_CONFIGS;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PROVIDER;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMS_PUBLISHER_TYPE;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_AUTH_TYPE_PROPERTY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.SMTP_CLIENT_ID_PROPERTY;
@@ -159,6 +160,7 @@ import static org.wso2.carbon.identity.notification.sender.tenant.config.Notific
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.USERNAME;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_KEY;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.NotificationSenderManagementConstants.XMLNS_VALUE;
+import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.decryptCredential;
 import static org.wso2.carbon.identity.notification.sender.tenant.config.utils.NotificationSenderSecretProcessor.encryptCredential;
 
 /**
@@ -270,7 +272,10 @@ public class NotificationSenderUtils {
      *
      * @param authentication Authentication object.
      * @param mapToBeUpdated Map to be updated with authentication properties.
+     * @deprecated Does not encrypt sensitive properties before persisting them. Use
+     * {@link #addAuthenticationPropertiesWithEncryption(Map, Authentication)} instead.
      */
+    @Deprecated
     public static void addAuthenticationProperties(Map<String, String> mapToBeUpdated, Authentication authentication) {
 
         if (authentication != null) {
@@ -281,6 +286,106 @@ public class NotificationSenderUtils {
             authentication.getInternalProperties().forEach((propKey, propValue) ->
                     mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey, propValue)
             );
+        }
+    }
+
+    /**
+     * Convert AuthProperty list to a map with proper prefixes. Sensitive properties (client credentials,
+     * resource-owner credentials, and the cached internal access token) are encrypted and stored via the
+     * secret manager rather than as plain config attributes - matching how the HTTP-based Email sender
+     * already persists these same kinds of properties.
+     *
+     * @param authentication Authentication object.
+     * @param mapToBeUpdated Map to be updated with authentication properties.
+     * @throws SecretManagementException If an error occurs while encrypting a sensitive property.
+     */
+    public static void addAuthenticationPropertiesWithEncryption(Map<String, String> mapToBeUpdated,
+                                                                  Authentication authentication)
+            throws SecretManagementException {
+
+        if (authentication != null) {
+            String authType = authentication.getType().name();
+            mapToBeUpdated.put(AUTH_TYPE_PREFIX, authType);
+            for (Map.Entry<String, String> entry : authentication.getProperties().entrySet()) {
+                String propKey = entry.getKey();
+                String propValue = isSensitiveSMSAuthProperty(propKey)
+                        ? encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue())
+                        : entry.getValue();
+                mapToBeUpdated.put(AUTH_EXTERNAL_PROP_PREFIX + propKey, propValue);
+            }
+            for (Map.Entry<String, String> entry : authentication.getInternalProperties().entrySet()) {
+                String propKey = entry.getKey();
+                mapToBeUpdated.put(AUTH_INTERNAL_PROP_PREFIX + propKey,
+                        encryptCredential(SMS_PROVIDER, authType, propKey, entry.getValue()));
+            }
+        }
+    }
+
+    /**
+     * Whether the given SMS authentication property key holds a value sensitive enough to require
+     * secret-manager encryption rather than plain config-attribute storage.
+     *
+     * <p>Note: SMS's own {@link Authentication.Property#USERNAME} and {@link Authentication.Property#VALUE}
+     * are the literals "username" and "value" - distinct from the shared
+     * {@code NotificationSenderManagementConstants.USERNAME} ("userName") and {@code API_KEY_VALUE}
+     * ("apiKeyValue") that Email's schema uses. Comparing against Email's constants here would silently skip
+     * encrypting SMS's resource-owner username and API key value.
+     *
+     * @param propertyKey Authentication property key (unprefixed).
+     * @return true if the property should be encrypted before persisting.
+     */
+    private static boolean isSensitiveSMSAuthProperty(String propertyKey) {
+
+        return CLIENT_ID.equals(propertyKey) || CLIENT_SECRET.equals(propertyKey)
+                || Authentication.Property.USERNAME.getName().equals(propertyKey) || PASSWORD.equals(propertyKey)
+                || ACCESS_TOKEN_PROP.equals(propertyKey) || Authentication.Property.VALUE.getName().equals(propertyKey);
+    }
+
+    /**
+     * Decrypt an SMS *external* authentication property that is expected to be secret-manager encrypted (only
+     * the sensitive ones - not every external property is encrypted, e.g. {@code tokenEndpoint}/{@code scopes}
+     * never are). Falls back to the raw stored value if decryption fails - covering senders configured before
+     * secret-manager based storage was introduced for SMS, whose values are still plain text.
+     *
+     * @param propertyKey Authentication property key (unprefixed).
+     * @param value       Stored value (a secret reference, or a legacy plain-text value).
+     * @param authType    Authentication type the property was persisted under.
+     * @return The decrypted value, or the original value if it isn't (or is no longer) encrypted.
+     */
+    private static String decryptIfSensitiveSMSAuthProperty(String propertyKey, String value, String authType) {
+
+        if (!isSensitiveSMSAuthProperty(propertyKey)) {
+            return value;
+        }
+        return decryptSMSAuthPropertyOrFallback(propertyKey, value, authType);
+    }
+
+    /**
+     * Decrypt an SMS *internal* authentication property (the cached access token, refresh token, etc.).
+     * Unlike external properties, every internal property is unconditionally encrypted on write - so, unlike
+     * {@link #decryptIfSensitiveSMSAuthProperty}, there's no per-property sensitivity check here: decryption is
+     * always attempted, with the same plaintext fallback for legacy data.
+     *
+     * @param propertyKey Authentication internal property key (unprefixed).
+     * @param value       Stored value (a secret reference, or a legacy plain-text value).
+     * @param authType    Authentication type the property was persisted under.
+     * @return The decrypted value, or the original value if it isn't (or is no longer) encrypted.
+     */
+    private static String decryptInternalSMSAuthProperty(String propertyKey, String value, String authType) {
+
+        return decryptSMSAuthPropertyOrFallback(propertyKey, value, authType);
+    }
+
+    private static String decryptSMSAuthPropertyOrFallback(String propertyKey, String value, String authType) {
+
+        try {
+            return decryptCredential(SMS_PROVIDER, authType, propertyKey);
+        } catch (SecretManagementException e) {
+            LOG.warn("Unable to resolve property '" + propertyKey + "' for SMS auth type '" + authType +
+                    "' from the secret manager - falling back to the stored value. This is expected for a " +
+                    "sender not yet migrated to secret-manager storage; if it persists after the sender has " +
+                    "been re-saved, it may indicate a secret-manager issue.", e);
+            return value;
         }
     }
 
@@ -655,8 +760,14 @@ public class NotificationSenderUtils {
                         .filter(attribute -> !(INTERNAL_PROPERTIES.contains(attribute.getKey())))
                         .filter(attribute -> attribute.getValue() != null)
                         .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
+        // Read ahead since iteration order over attributesMap is not guaranteed, and decrypting the
+        // external/internal auth properties below needs to know the auth type to look up the secret
+        // under the matching tag.
+        String authType = attributesMap.get(AUTH_TYPE_PREFIX);
         Map<String, String> internalAuthProp = new HashMap<>();
-        attributesMap.forEach((key, value) -> {
+        for (Map.Entry<String, String> attributeEntry : attributesMap.entrySet()) {
+            String key = attributeEntry.getKey();
+            String value = attributeEntry.getValue();
             switch (key) {
                 case PROVIDER:
                     smsSenderBuilder.provider(value);
@@ -681,16 +792,18 @@ public class NotificationSenderUtils {
                     break;
                 default:
                     if (StringUtils.startsWith(key, AUTH_EXTERNAL_PROP_PREFIX)) {
-                        smsSenderBuilder.addAuthProperty(
-                                StringUtils.removeStart(key, AUTH_EXTERNAL_PROP_PREFIX), value);
+                        String propKey = StringUtils.removeStart(key, AUTH_EXTERNAL_PROP_PREFIX);
+                        smsSenderBuilder.addAuthProperty(propKey,
+                                decryptIfSensitiveSMSAuthProperty(propKey, value, authType));
                     } else if (StringUtils.startsWith(key, AUTH_INTERNAL_PROP_PREFIX)) {
-                        internalAuthProp.put(StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX), value);
+                        String propKey = StringUtils.removeStart(key, AUTH_INTERNAL_PROP_PREFIX);
+                        internalAuthProp.put(propKey, decryptInternalSMSAuthProperty(propKey, value, authType));
                     } else {
                         smsSenderBuilder.addProperty(key, value);
                     }
                     break;
             }
-        });
+        }
 
         try {
             SMSSenderDTO smsSenderDTO = smsSenderBuilder.build();
