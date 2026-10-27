@@ -719,7 +719,7 @@ public class NotificationUtil {
                     .forEach((claimMapping, value) ->
                             fedUserClaims.put(claimMapping.getLocalClaim().getClaimUri(), value));
             userClaims.putAll(fedUserClaims);
-        } else if (!REGISTRATION_FLOW.equals(flowType)) {
+        } else if (!REGISTRATION_FLOW.equalsIgnoreCase(flowType)) {
             if (StringUtils.isNotBlank(username) && userStoreManager != null) {
                 userClaims = NotificationUtil.getUserClaimValues(username, userStoreManager);
             } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(userStoreDomainName) &&
