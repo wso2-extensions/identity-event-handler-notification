@@ -219,13 +219,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <configuration>
-                    <threshold>Medium</threshold>
-                </configuration>
-            </plugin>
-            <plugin>
     <groupId>com.github.spotbugs</groupId>
     <artifactId>spotbugs-maven-plugin</artifactId>
     <configuration>
