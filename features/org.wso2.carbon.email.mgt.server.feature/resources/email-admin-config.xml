@@ -26336,7 +26336,7 @@
 </html>]]></body>
     </configuration>
     <configuration type="deviceRegistrationEmailOTP" display="DeviceRegistrationEmailOTP" locale="en_US" emailContentType="text/html">
-        <subject>Your code to register a new device</subject>
+        <subject>Confirm your new device registration</subject>
         <body><![CDATA[<!DOCTYPE html
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -26650,7 +26650,7 @@
                                                         <tr>
                                                             <td class="wso2_orange preheaderContent"
                                                                 style="text-size-adjust: 100%; color: rgb(255, 255, 255); font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif; font-size: 10px; line-height: 12.5px; text-align: center; padding: 0px; margin: 0px; overflow: hidden; float: left; display: none;"
-                                                                valign="top" align="left">Please use the received OTP to register your new device.
+                                                                valign="top" align="left">Please use the below code to register your new device.
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -26705,9 +26705,8 @@
                                                                                     </p>
                                                                                     <p
                                                                                         style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
-                                                                                        Someone is adding a new device to your account in the organization {{organization-name}}.
+                                                                                        There is a request to register a new device to your account in the organization {{organization-name}}.
                                                                                         To proceed, use the following One-Time Password (OTP).
-                                                                                        If this was not you, you can ignore this email.
                                                                                     </p>
                                                                                        <p style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;
                                                                                         font-size: 24px;
@@ -26722,6 +26721,10 @@
                                                                                         border-radius: 5px;
                                                                                         display: inline-block;">
                                                                                             <b>{{OTPCode}}</b>
+                                                                                    </p>
+                                                                                    <p
+                                                                                        style="font-family: '{{organization.font}}', Roboto, Verdana, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: normal;line-height: 24px;margin: 0;padding-bottom: 10px;text-align: left;">
+                                                                                        If this was not you, you can ignore this email.
                                                                                     </p>
                                                                                 </div>
                                                                                 <div class="v-text-align"
@@ -27315,7 +27318,7 @@
                                                                                             text-align: left;
                                                                                         "
                                                                                     >
-                                                                                        Someone is adding a new device to your account in the organization <b>{{organization-name}}</b>. If this was not you, you can ignore this email. To continue, click the following button:
+                                                                                        There is a request to register a new device to your account in the organization <b>{{organization-name}}</b>. To continue, click the button below.
                                                                                     </p>
                                                                                     <table
                                                                                         align="center"
@@ -27427,6 +27430,21 @@
                                                                                             </tr>
                                                                                         </tbody>
                                                                                     </table>
+                                                                                    <p
+                                                                                        style="
+                                                                                            font-family: {{organization.font}}, Roboto,
+                                                                                                Verdana, Helvetica, sans-serif;
+                                                                                            font-size: 14px;
+                                                                                            font-weight: normal;
+                                                                                            letter-spacing: normal;
+                                                                                            line-height: 24px;
+                                                                                            margin: 0;
+                                                                                            padding-top: 20px;
+                                                                                            text-align: left;
+                                                                                        "
+                                                                                    >
+                                                                                        If this was not you, you can ignore this email.
+                                                                                    </p>
                                                                                 </div>
                                                                                 <div
                                                                                     class="v-text-align"
