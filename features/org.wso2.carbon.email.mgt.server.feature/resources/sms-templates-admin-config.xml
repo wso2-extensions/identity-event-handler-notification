@@ -54,6 +54,9 @@
     <configuration type="SMSOTPVerification" display="SMSOTPVerification" locale="en_US">
         <body>Please use code {{confirmation-code}} to verify your mobile and continue registration with {{organization-name}}.</body>
     </configuration>
+    <configuration type="profileUpdateSMSOTP" display="profileUpdateSMSOTP" locale="en_US">
+        <body>Please use this one-time password (OTP): {{confirmation-code}} to update your profile in {{organization-name}}.</body>
+    </configuration>
     <configuration type="deviceRegistrationSMSOTP" display="deviceRegistrationSMSOTP" locale="en_US">
         <body>Please use code {{confirmation-code}} to register a new device to your account in {{organization-name}}. If this was not you, ignore this message.</body>
     </configuration>
@@ -65,6 +68,9 @@
     </configuration>
     <configuration type="askPasswordSetSuccess" display="askPasswordSetSuccess" locale="en_US">
         <body>Your account has been set up successfully.</body>
+    </configuration>
+    <configuration type="profileUpdateSuccess" display="profileUpdateSuccess" locale="en_US">
+        <body>Your profile in {{organization-name}} has been updated successfully.</body>
     </configuration>
     <configuration type="CIBASMSAuthenticationNotification" display="CIBASMSAuthenticationNotification" locale="en_US">
         <body>A request has been initiated to access your account. Ref: {{binding-message}}. Click to authorize: {{ciba-auth-url}}. This expires in {{expiry-time}}</body>
