@@ -57,6 +57,9 @@
     <configuration type="profileUpdateSMSOTP" display="profileUpdateSMSOTP" locale="en_US">
         <body>Please use this one-time password (OTP): {{confirmation-code}} to update your profile in {{organization-name}}.</body>
     </configuration>
+    <configuration type="deviceRegistrationSMSOTP" display="deviceRegistrationSMSOTP" locale="en_US">
+        <body>Please use code {{confirmation-code}} to register a new device to your account in {{organization-name}}. If this was not you, ignore this message.</body>
+    </configuration>
     <configuration type="askPasswordSMSOTP" display="askPasswordSMSOTP" locale="en_US">
         <body>Please use this one-time password (OTP): {{confirmation-code}} to signin and complete your registration.</body>
     </configuration>
